@@ -18,17 +18,35 @@
   "performers": [
     {
       "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Christian Vasquez",
+      "role": "conductor"
     }
   ],
   "composers": [
     {
-      "name": "Respighi.- Pinos de Roma"
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Ottorino Respighi"
+    },
+    {
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
-      "title": "Beethoven.- Sinfonía núm 5",
-      "composerName": "Respighi.- Pinos de Roma"
+      "title": "Don Juan, poema sinfónico",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Pinos de Roma",
+      "composerName": "Ottorino Respighi"
+    },
+    {
+      "title": "Sinfonía núm 5",
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [
@@ -44,10 +62,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-strauss-don-juan-y-sinfonia-5-beethoven",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "excelentia-strauss-don-juan-y-sinfonia-5-beethoven"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

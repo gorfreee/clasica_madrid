@@ -1,0 +1,595 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Clásica Madrid · de las fuentes a la agenda",
+    "subtitle": "GitHub mantiene el catálogo. Cloudflare construye y publica. El navegador consume la agenda.",
+    "output": "docs/architecture/architecture.html",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "repository": {
+      "url": "https://github.com/gorfreee/clasica_madrid.git",
+      "revision": "3e70647ecf5a8ec9aecea9579a07f0a02f024ded"
+    },
+    "views": [
+      {
+        "id": "system",
+        "label": "Sistema completo",
+        "focus": [
+          "sources",
+          "adapters",
+          "pipeline",
+          "transport",
+          "discovery",
+          "ai",
+          "quality",
+          "catalog",
+          "delivery",
+          "app",
+          "pages",
+          "users",
+          "analytics"
+        ],
+        "note": "Los perímetros indican dónde se ejecuta cada parte; las flechas muestran datos, publicación y rebuild."
+      },
+      {
+        "id": "ingestion",
+        "label": "Ingestión",
+        "focus": [
+          "sources",
+          "adapters",
+          "transport",
+          "discovery",
+          "pipeline",
+          "ai",
+          "quality",
+          "catalog"
+        ],
+        "note": "Harvesting extrae e hidrata; Discovery importa observaciones. Ambos comparten el pipeline."
+      },
+      {
+        "id": "automation",
+        "label": "Automatización y CI",
+        "focus": [
+          "pipeline",
+          "ai",
+          "quality",
+          "catalog",
+          "delivery"
+        ],
+        "note": "GitHub Actions ejecuta ingestión y CI; health regula PR y auto-merge. Discovery requiere revisión."
+      },
+      {
+        "id": "experience",
+        "label": "Experiencia pública",
+        "focus": [
+          "catalog",
+          "delivery",
+          "app",
+          "pages",
+          "users",
+          "analytics"
+        ],
+        "note": "Cloudflare construye y sirve; el contacto queda dentro de Pages y el rebuild vuelve al build de Astro."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "Fuentes culturales",
+      "sublabel": "APIs · JSON · feeds · HTML oficial",
+      "tag": "listings y fichas",
+      "pos": [
+        20,
+        100
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/registry.ts"
+        }
+      ]
+    },
+    {
+      "id": "adapters",
+      "type": "backend",
+      "label": "Registry + adapters",
+      "sublabel": "extract → hydrate · HTTP / Chrome",
+      "tag": "Actions · harvest programado",
+      "pos": [
+        310,
+        100
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/registry.ts"
+        },
+        {
+          "path": "src/ingestion/hydrate.ts"
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "type": "backend",
+      "label": "Pipeline de ingestión",
+      "sublabel": "normalize → knowledge → identity",
+      "tag": "classify / enrich · pool con fallback",
+      "pos": [
+        600,
+        100
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/pipeline.ts"
+        },
+        {
+          "path": "src/ingestion/classification/enrich.ts"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "type": "cloud",
+      "label": "Fetch Relay Worker",
+      "sublabel": "Proxy para fuentes inaccesibles",
+      "tag": "Cloudflare · sólo ingestión",
+      "pos": [
+        930,
+        280
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "infra/fetch-relay/worker.js"
+        },
+        {
+          "path": "src/ingestion/http.ts"
+        }
+      ]
+    },
+    {
+      "id": "discovery",
+      "type": "external",
+      "label": "Discovery externo",
+      "sublabel": "agente con web search → hechos",
+      "tag": "DiscoveryBatch · import manual",
+      "pos": [
+        20,
+        280
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/discovery.ts"
+        },
+        {
+          "path": "docs/run-discovery-agent.md"
+        },
+        {
+          "path": ".github/workflows/discovery.yml"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "type": "external",
+      "label": "Proveedores de IA",
+      "sublabel": "APIs externas · política coste cero",
+      "tag": "sólo hechos observados",
+      "pos": [
+        930,
+        100
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/classification/provider.ts"
+        },
+        {
+          "path": "src/ingestion/classification/ai-pool.ts"
+        },
+        {
+          "path": "docs/ai-providers.md"
+        }
+      ]
+    },
+    {
+      "id": "quality",
+      "type": "security",
+      "label": "Quality gates",
+      "sublabel": "reconcile · Zod · referencias · dedup",
+      "tag": "validar lote → escritura con rollback",
+      "pos": [
+        600,
+        280
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/ingestion/reconcile.ts"
+        },
+        {
+          "path": "src/ingestion/batch.ts"
+        },
+        {
+          "path": "src/ingestion/health.ts"
+        }
+      ]
+    },
+    {
+      "id": "catalog",
+      "type": "database",
+      "label": "Git · catálogo canónico",
+      "sublabel": "JSON versionado · data/**",
+      "tag": "rama propuesta → main tras CI",
+      "pos": [
+        310,
+        280
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/lib/repository/fs.ts"
+        },
+        {
+          "path": "src/lib/schemas/event.ts"
+        },
+        {
+          "path": "src/ingestion/batch.ts"
+        }
+      ]
+    },
+    {
+      "id": "delivery",
+      "type": "security",
+      "label": "PR → CI → merge",
+      "sublabel": "validate · tests · tipos · build · E2E",
+      "tag": "health → PR · Discovery: revisión",
+      "pos": [
+        310,
+        460
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": ".github/workflows/ingestion.yml"
+        },
+        {
+          "path": ".github/workflows/discovery.yml"
+        },
+        {
+          "path": ".github/workflows/ci.yml"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "frontend",
+      "label": "Astro · build estático",
+      "sublabel": "repository → domain → presentation",
+      "tag": "build en Pages · CI lo verifica",
+      "pos": [
+        310,
+        660
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/lib/repository/load.ts"
+        },
+        {
+          "path": "src/lib/presentation/site.ts"
+        },
+        {
+          "path": "astro.config.ts"
+        }
+      ]
+    },
+    {
+      "id": "pages",
+      "type": "cloud",
+      "label": "Cloudflare Pages",
+      "sublabel": "Web estática + Function de contacto",
+      "tag": "Turnstile → Email Service · sin persistencia",
+      "pos": [
+        600,
+        660
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "functions/api/contacto.ts"
+        },
+        {
+          "path": "docs/contact.md"
+        },
+        {
+          "path": "ARCHITECTURE.md"
+        }
+      ]
+    },
+    {
+      "id": "users",
+      "type": "frontend",
+      "label": "Experiencia pública",
+      "sublabel": "agenda · filtros · eventos · lugares",
+      "tag": "navegador · móvil y escritorio",
+      "pos": [
+        930,
+        660
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/pages/index.astro"
+        },
+        {
+          "path": "src/lib/presentation/agenda-client.ts"
+        }
+      ]
+    },
+    {
+      "id": "analytics",
+      "type": "external",
+      "label": "PostHog",
+      "sublabel": "pageviews y eventos de producto",
+      "tag": "cookieless · sin session replay",
+      "pos": [
+        930,
+        840
+      ],
+      "size": [
+        230,
+        88
+      ],
+      "sources": [
+        {
+          "path": "src/lib/analytics/posthog.ts"
+        },
+        {
+          "path": "src/lib/analytics/browser.ts"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "EXTERNO · fuentes y agente",
+      "wraps": [
+        "sources",
+        "discovery"
+      ],
+      "pad": 16
+    },
+    {
+      "kind": "region",
+      "label": "GITHUB · Actions + repositorio",
+      "wraps": [
+        "adapters",
+        "pipeline",
+        "quality",
+        "catalog",
+        "delivery"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "EXTERNO · proveedores IA",
+      "wraps": [
+        "ai"
+      ],
+      "pad": 16
+    },
+    {
+      "kind": "region",
+      "label": "CLOUDFLARE · Pages",
+      "wraps": [
+        "app",
+        "pages"
+      ],
+      "pad": 80
+    },
+    {
+      "kind": "region",
+      "label": "NAVEGADOR · experiencia pública",
+      "wraps": [
+        "users"
+      ],
+      "pad": 16
+    },
+    {
+      "kind": "region",
+      "label": "EXTERNO",
+      "wraps": [
+        "analytics"
+      ],
+      "pad": 16
+    },
+    {
+      "kind": "region",
+      "label": "CLOUDFLARE · Worker",
+      "wraps": [
+        "transport"
+      ],
+      "pad": 16
+    }
+  ],
+  "connections": [
+    {
+      "id": "acquire",
+      "to": "adapters",
+      "from": "sources",
+      "variant": "emphasis",
+      "label": "HTTPS"
+    },
+    {
+      "id": "access",
+      "to": "adapters",
+      "from": "transport",
+      "variant": "dashed",
+      "label": "relay opcional"
+    },
+    {
+      "id": "raw",
+      "to": "pipeline",
+      "from": "adapters",
+      "variant": "emphasis",
+      "label": "RawEvent"
+    },
+    {
+      "id": "batch",
+      "to": "pipeline",
+      "from": "discovery",
+      "variant": "dashed",
+      "label": "batch manual"
+    },
+    {
+      "id": "interpret",
+      "to": "ai",
+      "from": "pipeline",
+      "variant": "dashed",
+      "label": "IA acotada"
+    },
+    {
+      "id": "gate",
+      "to": "quality",
+      "from": "pipeline",
+      "variant": "emphasis",
+      "label": "Candidate"
+    },
+    {
+      "id": "write",
+      "to": "catalog",
+      "from": "quality",
+      "variant": "emphasis",
+      "label": "lote válido"
+    },
+    {
+      "id": "proposal",
+      "to": "delivery",
+      "from": "catalog",
+      "variant": "emphasis",
+      "label": "data PR"
+    },
+    {
+      "id": "publish",
+      "to": "app",
+      "from": "delivery",
+      "variant": "emphasis",
+      "label": "main"
+    },
+    {
+      "id": "build",
+      "to": "pages",
+      "from": "app",
+      "variant": "emphasis",
+      "label": "dist/"
+    },
+    {
+      "id": "serve",
+      "to": "users",
+      "from": "pages",
+      "variant": "emphasis",
+      "label": "HTTPS"
+    },
+    {
+      "id": "measure",
+      "to": "analytics",
+      "from": "users",
+      "variant": "dashed",
+      "label": "cliente"
+    },
+    {
+      "id": "daily",
+      "to": "app",
+      "from": "pages",
+      "variant": "dashed",
+      "label": "rebuild diario · Deploy Hook",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          715,
+          600
+        ],
+        [
+          425,
+          600
+        ]
+      ],
+      "labelAt": [
+        570,
+        600
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Determinismo primero",
+      "items": [
+        "El pool se ejecuta en Actions y llama a APIs de IA: fallback, cuotas y política de coste cero.",
+        "Reglas, identidad y reconciliación deterministas; la IA interpreta hechos, no busca ni inventa."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Git como fuente de verdad",
+      "items": [
+        "Sin base de datos productiva para servir la agenda; data/** conserva el histórico.",
+        "Escritura validada local → PR de datos → CI → merge → despliegue desde main."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cloudflare: auxiliares integrados",
+      "items": [
+        "Pages Function: contacto con Turnstile y Email Service, sin persistencia.",
+        "Rebuild diario: Cron Worker → Deploy Hook; Cron y Email Routing se configuran fuera del repo."
+      ]
+    }
+  ]
+}

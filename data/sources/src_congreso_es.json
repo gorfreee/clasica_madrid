@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "src_congreso_es",
+  "slug": "congreso-de-los-diputados",
+  "name": "Congreso de los Diputados",
+  "kind": "official",
+  "url": "https://www.congreso.es/"
+}

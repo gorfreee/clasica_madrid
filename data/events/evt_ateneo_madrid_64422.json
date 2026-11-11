@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_64422",
+  "slug": "hilos-de-fosforo-y-luna-el-piano-de-la-edad-de-plata-ciclo-el-vino-de-las-luces",
+  "title": "Hilos de fósforo y luna. El piano de la edad de plata. Ciclo «El Vino de las Luces»",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_64422_01",
+      "date": "2026-10-18",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Paula Ríos"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/hilos-de-fosforo-y-luna-el-piano-de-la-edad-de-plata-ciclo-el-vino-de-las-luces",
+      "checkedAt": "2026-10-11",
+      "externalId": "64422"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

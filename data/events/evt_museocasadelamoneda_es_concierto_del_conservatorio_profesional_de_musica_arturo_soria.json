@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museocasadelamoneda_es_concierto_del_conservatorio_profesional_de_musica_arturo_soria",
+  "slug": "concierto-del-conservatorio-profesional-de-musica-arturo-soria",
+  "title": "Concierto del Conservatorio Profesional de Música Arturo Soria",
+  "status": "scheduled",
+  "venueId": "ven_museo_casa_de_la_moneda_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museocasadelamoneda_es_concierto_del_conservatorio_profesional_de_musica_arturo_soria_01",
+      "date": "2026-11-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Conservatorio Profesional de Música Arturo Soria"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museocasadelamoneda_es",
+      "url": "https://www.museocasadelamoneda.es/documents/11610/0/programa%2Bmuseo.pdf/972f7d3b-61c6-f700-a438-b84d6c9cb09f?t=1766146911529",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_museocasadelamoneda_es",
+  "lastVerifiedAt": "2026-09-20"
+}

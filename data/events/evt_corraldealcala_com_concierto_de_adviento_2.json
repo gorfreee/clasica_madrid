@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_corraldealcala_com_concierto_de_adviento_2",
+  "slug": "concierto-de-adviento",
+  "title": "Concierto de Adviento",
+  "status": "scheduled",
+  "venueId": "ven_corral_comedias_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_corraldealcala_com_concierto_de_adviento_2_01",
+      "date": "2026-12-06",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Ciudad de Alcalá",
+      "role": "orchestra"
+    },
+    {
+      "name": "Alberto Prieto",
+      "role": "conductor"
+    },
+    {
+      "name": "Miguel Cantolla"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Ottorino Respighi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Le quattro stagioni",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Antiche danze ed arie per liuto, Suite n.º 3",
+      "composerName": "Ottorino Respighi"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_corraldealcala_com",
+      "url": "https://www.corraldealcala.com/espectaculo/concierto-de-adviento-2",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_corraldealcala_com",
+  "lastVerifiedAt": "2026-09-27"
+}

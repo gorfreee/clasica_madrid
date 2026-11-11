@@ -13,7 +13,7 @@ observed facts → deterministic rules → musical knowledge → AI → safe unc
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
 
-Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include` y `eras`/`formats` siguen sin resolver, la IA puede completar esos campos; no puede cambiar eligibility ni `access`. Si esa llamada falla, el evento sigue `include`.
+Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include`, fallbacks separados pueden interpretar composers o access aún no resueltos, pero únicamente cuando existe evidencia observada específica. Después se recalculan `eras` por knowledge a partir de compositores/obras observados (incluidos los extraídos y validados). Taxonomy puede completar `formats` unresolved o corregir heurísticas débiles, y puede completar `eras` cuando el conocimiento determinista no las resuelve. Una era determinista fuerte (p. ej. Bach → baroque) no se sobrescribe. Eligibility no pide `eras`, `kind` ni `rationale`. Si cualquier llamada falla, el evento conserva el resultado determinista y continúa.
 
 ## Separación de responsabilidades
 
@@ -24,7 +24,11 @@ detail-page hydration / observed facts
       ↓
 eligibility          ← puerta de publicación
       ↓
-formats / eras / kind / access
+composers / access (determinista → IA sólo con evidencia)
+      ↓
+eras deterministas (obras / compositores observados, incluida extracción validada)
+      ↓
+formats / eras taxonomy (IA si formats débiles o unresolved; eras si knowledge no basta)
       ↓
 Candidate
 ```
@@ -48,6 +52,16 @@ eligibility ≠ venue
 La decisión se basa principalmente en **qué repertorio se interpreta y cuál es la naturaleza musical real del evento**.
 
 La presencia de orquesta, instrumentos clásicos, sala clásica, músicos de formación clásica o arreglos sinfónicos **no convierte** un evento en música clásica.
+
+Los nombres de edificios, calles e instituciones no acreditan repertorio, incluso
+cuando aparecen dentro de `description`, `title` o `programText` (p. ej. «Auditorio
+Joaquín Rodrigo» o «Escuela Municipal de Música Joaquín Rodrigo»). Un crédito
+musical explícito posterior sí se evalúa por separado. Cuando hay obras con
+atribución estructurada, sus autores son la evidencia musical de referencia:
+los nombres mencionados dentro del título de una obra o en comentarios históricos
+no añaden autores al programa. La extracción determinista y la validación de
+candidatos de IA comparten esta separación.
+
 
 ---
 
@@ -75,23 +89,32 @@ No clasificar **solo** por palabras del título si existe ficha de detalle.
 
 Excluir cuando la identidad principal del evento sea una de estas:
 
-**Pop / rock / canción / música popular** arreglada para ensemble clásico. Orquesta, coro o cuerdas no cambian la decisión. Ejemplos: Fito Páez con cuerdas; ABBA, Queen o Beatles con orquesta; Pastora Soler; Jeanette; homenajes pop sinfónicos.
+**Pop / rock / canción / música popular** arreglada para ensemble clásico. Orquesta, coro o cuerdas no cambian la decisión. Ejemplos: Fito Páez con cuerdas; ABBA, Queen o Beatles con orquesta; Pastora Soler; Jeanette; homenajes pop sinfónicos. La mera combinación de «su repertorio» / «la obra de» con octeto, cuerdas u orquesta, sin evidencia popular explícita, **no** es `exclude` determinista: también aparece en conciertos clásicos contemporáneos. En ese caso `uncertain` (fallback de IA) es preferible a un falso negativo.
+
+La identidad explícita de **Great American Songbook, estándares americanos/de jazz,
+cancionero americano o repertorio de swing** se evalúa como repertorio popular.
+Se exige identidad del evento o una declaración de repertorio interpretado; las
+palabras aisladas «songbook»/«swing», los créditos y las cláusulas biográficas no
+bastan. Gershwin o Weill en `composers[]`, o canciones atribuidas a ellos, no
+acreditan por sí solos un bloque académico. Un bloque clásico autónomo conserva
+la política de programas mixtos; una declaración clásica contradictoria sin ese
+bloque queda `uncertain`. Una pequeña formación de jazz no acredita `chamber`.
 
 **DJ / electrónica / crossover** cuyo repertorio principal no sea clásico, o cuya identidad sea el formato DJ aunque cite una obra clásica. Ejemplos: DJ Symphonic; Red Bull Symphonic; DJ + Vivaldi como producto crossover.
 
 **Música de cine** como contenido principal: John Williams, Hans Zimmer, Morricone, Film Symphony Orchestra, galas de bandas sonoras. Aunque la música sea orquestal.
 
-**Jazz**, salvo que el evento sea realmente un programa de música clásica y el jazz sea únicamente secundario. Un concierto cuya identidad principal sea jazz → `exclude`. Incluye ciclos institucionales de jazz (p. ej. CNDM «Jazz en el Auditorio»).
+**Jazz**, salvo que el evento sea realmente un programa de música clásica y el jazz sea únicamente secundario. Un concierto cuya identidad principal sea jazz → `exclude`. Incluye ciclos institucionales de jazz (p. ej. CNDM «Jazz en el Auditorio») y la programación **Ateneo-Café Central** / Café Central. Un evento de ese ciclo puede ser `include` sólo si los hechos observados de *ese* concierto muestran un bloque clásico sustancial; si no, `exclude`. La palabra *jazz* sólo en descripción o programa, como componente estilístico de un programa mixto, no tiene el mismo peso que un título, categoría o ciclo de identidad jazz: no hay `exclude` automático; las evidencias clásicas deciden entre `include` y `uncertain`.
 
 **Flamenco**, incluidos homenajes a Paco de Lucía, jóvenes flamencos, zambombas, etc.
 
 No excluir por la palabra *flamenco* cuando el contexto es claramente musicológico / histórico (escuela **franco-flamenca**, polifonía flamenca, compositores flamencos renacentistas, Códice de Chigi). En ese uso «flamenco» significa Flemish, no el género musical español. Si hay duda entre las dos lecturas, `uncertain` es preferible a un `exclude` determinista: ese `exclude` no llega al fallback de IA.
 
-**Danza**: espectáculos de danza, incluso con repertorio clásico. Ballet, Alvin Ailey, *El Cascanueces* como representación de danza. La agenda es de eventos musicales, no de artes escénicas en general.
+**Danza**: espectáculos cuya identidad principal sea danza o ballet, incluso con repertorio clásico. Título o categoría que identifiquen explícitamente danza/ballet son evidencia principal y prevalecen: Ballet, Alvin Ailey, *El Cascanueces* o una *Gala de ballet* siguen `exclude` aunque interpreten Chaikovski o Stravinski. La agenda es de eventos musicales, no de artes escénicas en general. Una categoría mixta del tipo «música y danza» no es identidad de danza por sí sola: describe coprincipalidad. Una compañía de danza o ballet, o una bailarina, sólo es coprincipal cuando hay evidencia independiente de que la actividad principal es una interpretación musical en directo —orquesta, ensemble u otros intérpretes musicales reales, o una declaración inequívoca de concierto/recital—. Los compositores clásicos del repertorio de ballet no bastan. Una bailarina o el público bailando no convierten en espectáculo de danza un concierto cuyo programa es interpretación de repertorio clásico.
 
-**Cine / proyecciones**: películas, cine familiar, cine mudo con acompañamiento, ciclos cuya actividad principal sea ver una película. Si excepcionalmente la componente principal es una **interpretación musical clásica en directo**, no asumir exclusión automática: evaluar el detalle.
+**Cine / proyecciones**: películas, cine familiar, cine mudo con acompañamiento, ciclos cuya actividad principal sea ver una película. Una proyección con acompañamiento de órgano sigue `exclude`. Si excepcionalmente la componente principal es una **interpretación musical clásica en directo** —por ejemplo un concierto, recital o ciclo de órgano que usa la proyección como soporte—, no asumir exclusión automática: hace falta evidencia positiva de identidad concertística además del órgano (declaración de concierto/recital/ciclo, serie clásica reconocida, o improvisación presentada como actuación). Un performer con rol órgano/organista no basta. Una proyección con banda sonora o «música en vivo» genérica sigue fuera. La locución «cine experimental» como medio artístico de un concierto electroacústico o audiovisual **no** es por sí sola un ciclo de cine; sin ancla clásica/académica ese caso sigue `uncertain`, no `include`.
 
-**Talleres / actividades educativas no interpretativas**: talleres, encuentros, charlas, conferencias, actividades paralelas, actividades infantiles tipo taller. Ejemplo: `¿Te suena Manon Lescaut?`. Un concierto real con mediación (p. ej. OCNE «Descubre» con narradora y repertorio clásico) **sí** puede ser `include`: la actividad principal sigue siendo el concierto.
+**Talleres / actividades educativas no interpretativas**: la identidad principal del evento es un taller, una charla, una conferencia, un coloquio u otra actividad educativa no interpretativa. Una categoría oficial explícita de ese tipo, o un título que se identifica realmente como `Charla…`, `Conferencia…`, `Taller…`, etc., es evidencia fuerte de `exclude`. Ejemplo: `¿Te suena Manon Lescaut?`. Una mención secundaria de charla, introducción, taller o mediación en un concierto o recital real **no** basta para `exclude`: un concierto con mediación (p. ej. OCNE «Descubre» con narradora y repertorio clásico, o `Recital de Bach con charla introductoria`) **sí** puede ser `include` si la actividad principal sigue siendo el concierto. Si no se puede saber cuál de las dos es principal, `uncertain`; no inventar un `include`.
 
 **Actividades participativas sin concierto programado**: poner un instrumento a disposición del público, jam participativa, open piano u otras sesiones donde no hay una interpretación concertística anunciada. No se publican como eventos de la agenda. Un recital o concierto real del mismo festival o ciclo se evalúa aparte.
 
@@ -113,7 +136,13 @@ La ausencia de programa obra-por-obra **no** obliga siempre a `uncertain`. Un co
 - pertenece a un festival o ciclo explícitamente de música clásica; o
 - está interpretado por una formación clásica dentro de una serie cuya identidad clásica está suficientemente establecida.
 
+También es `include` cuando la ficha observa, **de este evento** y no de una biografía o mención contextual, la combinación de: una declaración real de concierto o interpretación; ensemble o intérpretes musicales que interpretan ese evento; y repertorio o tradición clásica inequívocos (obras o compositores nombrados, ópera/zarzuela interpretada, o un bloque de salón vienés —valses, mazurcas y polcas— presentado como el programa). Un concierto o recital con intérpretes vocales o instrumentales explícitos y repertorio inequívoco de ópera y/o zarzuela —arias de ópera, fragmentos de ópera, romanzas de zarzuela— entra en esa combinación. Eso no depende de que el adapter haya estructurado esos intérpretes en `performers[]` cuando la prosa ya lo dice; si la prosa sólo acompaña («acompañada al piano») y los créditos sí están estructurados, los créditos cuentan. Orquesta, cuerdas, piano, una formación de cámara o una instrumentación clásica **por sí solos** no bastan; tampoco un título evocador, un repertorio tradicional no identificado, ni un acompañamiento orquestal de pop, cine, jazz, flamenco o de un espectáculo de danza.
+
 Eso es evidencia válida sobre **ese evento**. No es una regla automática por source ni por venue. Un mismo ciclo puede contener actividades excluidas: cada evento se evalúa individualmente.
+
+Un programa con autores ausentes de la knowledge puede aportar **ancla para evaluar un `include` de IA** sin resolver por sí solo la elegibilidad. Se exige atribución explícita en `works[].composerName` y formas de obra de concierto, junto con concreción musical: al menos dos obras distintas con tonalidad o catálogo numerado; una obra así con contexto de programa de cámara o interpretación histórica; o una misa atribuida con orquesta sinfónica y coro acreditados en `programText`. Un autor desconocido, una lista de canciones, títulos como «Sonata»/«Cuarteto» sin más concreción, una formación o una sala no bastan. La estructura acredita un programa interpretable; la IA aún debe decidir su pertenencia al ámbito y citar evidencia literal válida. Sin IA, o si ésta mantiene `uncertain`, no hay publicación automática.
+
+Este umbral no se añade a las reglas de `include` determinista ni a las de **bloque clásico sustancial**. No rescata identidades excluidas ni resuelve coprincipalidad: se mantienen sus puertas actuales. Tampoco asigna `eras`; la cobertura de compositores y la taxonomía siguen siendo pasos separados.
 
 ### 1.4 Eventos mixtos
 
@@ -141,6 +170,8 @@ La knowledge base puede asociar `Bach → baroque`. No puede afirmar que Beethov
 
 CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout o devuelve algo inválido, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
 
+La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, o si un `ai-include` sobre evidencia insuficiente no tiene ancla clásica/académica observada (un quinteto, un recital o el nombre del artista no bastan), la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo). Taxonomy puede corregir formats de heurística débil y completar eras de compositores/obras observados que la knowledge no resuelve; no infiere época por venue, festival ni instrumento.
+
 ---
 
 ## 3. `formats[]`
@@ -149,18 +180,23 @@ Taxonomía: `src/lib/schemas/taxonomies.ts`. Pueden ser múltiples. Vacío es me
 
 El fallback de IA debe intentar asignar al menos un formato cuando los hechos observados permitan una inferencia musical razonable. `formats: []` queda para casos sin evidencia suficiente, no como respuesta por defecto. No rellenar con `other` sólo para evitar el vacío.
 
+Los formatos describen la formación o la naturaleza **de este concierto**, no el historial profesional de sus intérpretes. Evidencia fuerte: título, categoría explícita de la fuente, nombres/roles estructurados, formación explícita del evento. Una mención aislada a orquesta, música de cámara o trío en una biografía o en prosa editorial genérica no basta. Vacío es preferible a un formato incorrecto.
+
+No tratar alternativas exclusivas como formatos múltiples. Un texto del estilo «actuará un pianista o un grupo de cámara», «A o B», «o bien» o programación todavía no determinada no afirma que el evento sea ambas cosas. Varios formats a la vez sólo cuando la fuente declara que **este** concierto combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro). Si no hay evidencia suficiente, `formats: []` y revisión; no rellenar con `other`.
+
 Derivación preferida a partir de hechos:
 
 | Hecho | Format típico |
 |---|---|
 | orquesta sinfónica protagonista | `symphonic` |
 | solista solo (piano, violín, canto con piano, etc.) | `recital` |
-| cuarteto / octeto / ensemble de cámara | `chamber` |
+| cuarteto de cuerda / música de cámara / ciclo de cámara | `chamber` (fuerte) |
+| quinteto, trío, dúo o «quartet» sólo en el título | `chamber` débil, y **nunca** como prueba de eligibility. Un grupo de jazz/pop del mismo tamaño no se convierte en música de cámara clásica por la formación. |
 | coro protagonista | `choral` |
 | órgano | `organ` (a menudo + `recital`) |
-| ópera | `opera` |
+| ópera | `opera` — categoría oficial «Ópera», título que nombra el evento como ópera (gala, temporada, micróperas, arias de ópera, ópera en N actos) o ficha de detalle (dramma lirico, actos). La mera palabra «ópera» en un título más largo no basta ni debe congelar el format. |
 | zarzuela | `zarzuela` |
-| Lied / mélodie con canto y piano | `lied` + `recital` |
+| Lied / mélodie con canto y piano | `lied` + `recital`. Es señal fuerte cuando el título, la categoría o el ciclo anuncian el recital, ciclo o programa como lied, lieder o mélodie. Una aparición sólo en `programText`, sobre todo en el título de una obra, es como mucho un indicio débil: no congela el formato. |
 | música antigua / historicamente informada | `early-music` (combinable) |
 | coro + orquesta | `choral` + `symphonic` |
 | identidad no encaja o es híbrida no clasificable | `other` o vacío |
@@ -177,8 +213,9 @@ Orden de evidencia:
 
 1. obras identificadas;
 2. si no hay obras, compositores declarados por la fuente;
-3. si no hay arrays estructurados, `programText` (o la descripción) cuando nombra explícitamente compositores u obras conocidos;
-4. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo o del venue.
+3. si no hay arrays estructurados, `programText` cuando nombra explícitamente compositores u obras conocidos;
+4. si el programa no nombra compositores, una declaración musical explícita y no ambigua de época (p. ej. «compositores del Romanticismo»). No escanear `description` buscando compositores: una biografía o un contexto editorial no es repertorio;
+5. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional, de un título poético ni del repertorio probable de un intérprete. Si hay compositores u obras observados que la knowledge no resuelve, taxonomy puede completar `eras` con evidencia literal. Eligibility no pide ni aplica `eras`. Una era determinista fuerte no se sustituye.
 
 Ejemplo: Bach + Mozart + Mahler → `baroque` + `classical` + `romantic`.
 
@@ -231,6 +268,8 @@ Sólo `free` / `paid` / `unknown` cuando la fuente lo soporta.
 
 No asumir Auditorio = paid, iglesia = free, evento municipal = free.
 
+Si las reglas dejan `unknown` pero existe `accessText`, la IA puede interpretar redacciones variables (reserva gratuita, aportación voluntaria, acceso mediante abono, etc.). Debe devolver `free | paid | unknown` y un fragmento verificable del propio texto. Sin evidencia suficiente o si el fragmento no aparece, permanece `unknown`.
+
 ---
 
 ## 7. Cómo se mide
@@ -248,6 +287,10 @@ La implementación no debe inventar performers, composers, works, fechas, venues
 
 `eras` / `formats`: preferimos vacío a incorrecto; pueden ser múltiples; no bloquean publicación si eligibility es `include` y los datos esenciales son válidos.
 
-La IA interpreta `ObservedFacts`. No inventa hechos. El prompt versionado está en `src/ingestion/classification/ai-prompt.ts`; no es una copia literal de esta política. Valores fuera de taxonomía → inválido → `uncertain`. Ausencia o fallo de IA → `uncertain` → no publicar. CI no llama a un LLM. Tests usan fakes. Los eventos ya publicados no se borran ni se re-clasifican por esta puerta: aplica a nuevos resultados de harvesting.
+La IA interpreta `ObservedFacts` acotados por purpose. No inventa hechos. Los prompts versionados están en `src/ingestion/classification/ai-prompt.ts`; no son una copia literal de esta política. Cada purpose tiene su propio schema (`additionalProperties: false`); valores fuera de schema son inválidos y conservan el fallback seguro del campo (`uncertain`, `unknown` o vacío). CI no llama a un LLM. Tests usan fakes. Los eventos ya publicados no se borran ni pierden valores conocidos por esta puerta; el merge sigue siendo conservador.
+
+`include`/`exclude` de IA exigen extractos literales verificables (`evidence` ≠ `rationale`). Un nombre de compositor **ya observado** puede citarse con una variante ortográfica canónica de la knowledge (Händel/Haendel/Handel; Bach/Juan Sebastián Bach); eso no autoriza parafrasear el resto del extracto. Una elipsis en un extracto sólo es válida si cada fragmento restante aparece en los hechos. «correo electrónico» y otros usos administrativos de «electrónico» no son descriptores de música electrónica.
+
+Una mención secundaria de charla, conferencia o «charlas previas» / «charla sobre el concierto» en la ficha de un concierto real no convierte el evento en actividad educativa ni en coprincipalidad. El título o la categoría que identifican *esta* ficha como charla/taller sí lo hacen. Un programa que lista una obra de concierto de un compositor conocido (ópera, zarzuela, pasión, concerti, catálogo BWV/HWV/RV) es un bloque clásico sustancial aunque haya un solo compositor: no es la cita aislada de un arreglo popular.
 
 Forma de cada caso y cómo añadir uno: `tests/fixtures/ingestion/golden/README.md`.

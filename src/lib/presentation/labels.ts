@@ -21,6 +21,14 @@ export const accessLabels: Record<AccessMode, string> = {
   unknown: 'Acceso no indicado',
 };
 
+/** Visible when the agenda row has no classified format. Not an access label. */
+export const missingFormatLabel = '—';
+
+/** Optional agenda-row marker. Filters keep using `accessLabels.free`. */
+export const freeAgendaSignalLabel = 'Gratis';
+
+export const weekendAgendaShortcutLabel = 'Fin de semana';
+
 export const eraLabels: Record<Era, string> = {
   early: 'Música antigua',
   renaissance: 'Renacimiento',
@@ -62,6 +70,45 @@ export const sourceKindLabels: Record<SourceKind, string> = {
   secondary: 'Secundaria',
 };
 
+export const opensInNewTabLabel = 'Se abre en una pestaña nueva.';
+
+export const eventOfficialSourceActionLabel = 'Entradas e información oficial';
+export const eventOriginalSourceActionLabel = 'Ver fuente original';
+export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios';
+export const venueOfficialWebLabel = 'Web oficial';
+
+export const calendarActionLabel = 'Añadir al calendario';
+export const calendarGoogleLabel = 'Google Calendar';
+export const calendarIcsLabel = 'Apple, Outlook y otras apps (.ics)';
+export const calendarChooseOccurrenceLabel = 'Elige una función';
+export const calendarTimeUnconfirmedLabel = 'Hora por confirmar';
+
+export function calendarGoogleAccessibleLabel(when: string): string {
+  return `Añadir a ${calendarGoogleLabel}: ${when}. ${opensInNewTabLabel}`;
+}
+
+export function calendarIcsAccessibleLabel(when: string): string {
+  return `Añadir a ${calendarIcsLabel}: ${when}`;
+}
+
+export const shareActionLabel = 'Compartir';
+export const shareWhatsappLabel = 'WhatsApp';
+export const shareCopyLinkLabel = 'Copiar enlace';
+export const shareCopiedLabel = 'Enlace copiado';
+export const shareCopyFailedLabel = 'No se ha podido copiar. Selecciona el enlace.';
+export const shareSeveralDatesLabel = 'varias fechas';
+
+export function formatSourceCitationMeta(params: {
+  kindLabel: string;
+  isPrimary: boolean;
+  checkedAt: string;
+}): string {
+  const parts = [`Fuente ${params.kindLabel.toLowerCase()}`];
+  if (params.isPrimary) parts.push('principal');
+  parts.push(`comprobada el ${params.checkedAt}`);
+  return parts.join(' · ');
+}
+
 export const occurrenceStatusLabels: Record<OccurrenceStatus, string> = {
   scheduled: 'Programada',
   cancelled: 'Cancelada',
@@ -88,5 +135,21 @@ export function eventStatusLabel(status: 'scheduled' | 'cancelled' | 'postponed'
 }
 
 export function occurrenceCountLabel(count: number): string {
-  return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
+  return count === 1 ? '1 concierto próximo' : `${count} conciertos próximos`;
 }
+
+export function venueCountLabel(count: number): string {
+  return count === 1 ? '1 lugar' : `${count} lugares`;
+}
+
+export function venueNoResultsMessage(query: string): string {
+  return `No encontramos ningún lugar para “${query}”`;
+}
+
+export function showingOccurrenceCountLabel(shown: number, total: number): string {
+  return `Mostrando ${shown} de ${total} ${total === 1 ? 'concierto próximo' : 'conciertos próximos'}`;
+}
+
+export const showAllAgendaLabel = 'Mostrar todos';
+
+export const fullAgendaLoadErrorMessage = 'No se ha podido cargar la agenda completa';

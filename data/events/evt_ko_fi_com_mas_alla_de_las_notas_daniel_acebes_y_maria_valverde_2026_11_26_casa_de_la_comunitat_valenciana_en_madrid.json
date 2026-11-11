@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ko_fi_com_mas_alla_de_las_notas_daniel_acebes_y_maria_valverde_2026_11_26_casa_de_la_comunitat_valenciana_en_madrid",
+  "slug": "mas-alla-de-las-notas-daniel-acebes-y-maria-valverde",
+  "title": "Más Allá de las Notas — Daniel Acebes y María Valverde",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_comunitat_valenciana_en_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ko_fi_com_mas_alla_de_las_notas_daniel_acebes_y_maria_valverde_2026_11_26_casa_de_la_comunitat_valenciana_en_madrid",
+      "date": "2026-11-26",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Daniel Acebes"
+    },
+    {
+      "name": "María Valverde"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ko_fi_com",
+      "url": "https://ko-fi.com/s/3370de7ce8",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_ko_fi_com",
+  "lastVerifiedAt": "2026-10-08"
+}

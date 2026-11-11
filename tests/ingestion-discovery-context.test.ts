@@ -58,6 +58,7 @@ const SECRET_OR_OPS_PATTERNS = [
   /INGEST_FETCH_RELAY/i,
   /INGESTION_BOT/i,
   /useFetchRelay/,
+  /fetchTransport/,
   /skipDefaultSync/,
   /adapterId/,
   /Bearer /i,
@@ -205,7 +206,11 @@ describe('DiscoveryContext', () => {
     });
     expect(teatro?.aliases).toContain('teatro real de madrid');
     expect(teatro?.aliases).not.toContain('teatro real');
-    expect(JSON.stringify(context.venues)).not.toContain('sala principal');
+    expect(teatro?.aliases).not.toContain('sala principal');
+    expect(context.venues.some((venue) => venue.aliases.includes('sala principal'))).toBe(false);
+    expect(
+      context.venues.find((venue) => venue.id === 'ven_real_teatro_retiro_sala_principal')?.aliases,
+    ).toContain('sala principal real teatro de retiro');
 
     const parish = context.venues.find((venue) => venue.id === 'ven_iglesia_san_jose');
     expect(parish?.aliases).toEqual([]);
@@ -245,8 +250,21 @@ describe('DiscoveryContext', () => {
     expect(context.editorialScope.longTail).toContain('iglesias/parroquias');
     expect(context.evidenceInstructions.some((line) => line.includes('foundVia'))).toBe(true);
     expect(
+      context.evidenceInstructions.some((line) => /dirección física suficiente/i.test(line)),
+    ).toBe(true);
+    expect(context.output.notes.some((line) => /dirección física suficiente/i.test(line))).toBe(true);
+    expect(
       context.evidenceInstructions.some((line) => /programa, compositores u obras/i.test(line)),
     ).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /DiscoveryResearchManifest/i.test(line))).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /ficha de detalle/i.test(line))).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /listingReviews/i.test(line))).toBe(true);
+    expect(
+      context.evidenceInstructions.some(
+        (line) => /PDF|programas de temporada/i.test(line) && /insufficient-evidence/i.test(line),
+      ),
+    ).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /mes(?:es)? civil/i.test(line))).toBe(true);
     expect(parseDiscoveryContext(context).coveredEvents).toEqual([]);
   });
 
@@ -300,7 +318,8 @@ describe('DiscoveryContext', () => {
       expect.arrayContaining(['eligibility', 'kind', 'eras', 'formats', 'slug', 'id']),
     );
     expect(JSON.stringify(context.output.jsonSchema)).not.toContain('eligibility');
-    expect(JSON.stringify(context.output).length).toBeLessThan(12_000);
+    expect(JSON.stringify(context.output).length).toBeLessThan(20_000);
+    expect(JSON.stringify(context.output.jsonSchema)).toContain('research');
 
     const sample = parseDiscoveryBatch({
       schemaVersion: 1,

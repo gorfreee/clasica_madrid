@@ -13,7 +13,6 @@ export const ACCESS_MODES = ['free', 'paid', 'unknown'] as const;
 export type AccessMode = (typeof ACCESS_MODES)[number];
 
 export const EVENT_STATUSES = ['scheduled', 'cancelled', 'postponed'] as const;
-export type EventStatus = (typeof EVENT_STATUSES)[number];
 
 export const OCCURRENCE_STATUSES = ['scheduled', 'cancelled'] as const;
 export type OccurrenceStatus = (typeof OCCURRENCE_STATUSES)[number];

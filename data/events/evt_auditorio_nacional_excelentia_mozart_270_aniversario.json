@@ -25,21 +25,21 @@
   ],
   "composers": [
     {
-      "name": "Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Obertura de Las bodas de Fígaro",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Concierto para violín n.º 3",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sinfonía n.º 41 “Júpiter”",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [
@@ -49,15 +49,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-mozart-270-aniversario",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-11-01",
       "externalId": "excelentia-mozart-270-aniversario"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-11-01"
 }

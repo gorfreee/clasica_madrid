@@ -3,15 +3,22 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
-import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
+import { parseZarzuelaDetail, ZarzuelaStructuralSkipError } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { parseZarzuelaSchedule } from '../src/ingestion/detail/zarzuela-schedule.ts';
-import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { hydrateEvents, requiredHydrationCoverage } from '../src/ingestion/hydrate.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
+import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
+import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
+import { ZARZUELA_MAX_ATTEMPTS_PER_URL, resetZarzuelaOriginSessions, setZarzuelaClock } from '../src/ingestion/detail/zarzuela-transport.ts';
+import { matchVenue, unpublishedMatchedVenue } from '../src/ingestion/venues.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const base = 'https://teatrodelazarzuela.inaem.gob.es';
@@ -31,7 +38,12 @@ async function advance<T>(pending: Promise<T>): Promise<T> {
   await vi.runAllTimersAsync();
   return pending;
 }
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => {
+  resetZarzuelaOriginSessions();
+  setZarzuelaClock(undefined);
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe('descubrimiento K2 de Zarzuela', () => {
   it('usa el fetch relay genérico por hostname, sin proxy propio', () => {
@@ -128,9 +140,124 @@ describe('descubrimiento K2 de Zarzuela', () => {
       },
     });
     const run = await advance(ingestPending);
-    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
+  });
+
+  it('un timeout sin status en una sección reintenta, conserva eventos y suprime desapariciones', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const lirica = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3><p class="entradilla">Martes, 29 de septiembre de 2026</p></li></ul>`;
+    const attempts = new Map<string, number>();
+    const published = makeEvent({
+      id: 'evt_zarzuela_publicado',
+      slug: 'obra-zarzuela-publicada',
+      title: 'Obra ya publicada',
+      venueId: 'ven_teatro_zarzuela',
+      organizerIds: [],
+      seriesId: null,
+      primarySourceId: source.catalogSourceId,
+      citations: [{
+        sourceId: source.catalogSourceId,
+        url: `${base}/es/temporada/danza-2026-2027/obra-ausente`,
+        checkedAt: '2026-08-20',
+      }],
+    });
+    const catalog = emptyCatalog();
+    catalog.events = [published];
+    catalog.sources = [source.seedSource];
+    const before = JSON.stringify(catalog);
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-timeout-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        if (/\/temporada\/danza-2026-2027\/?$/.test(pathname)) {
+          throw new Error(`tiempo agotado al pedir ${url}`);
+        }
+        if (/\/temporada\/lirica-2026-2027\/?$/.test(pathname)) return lirica;
+        return fixture('detail-verbena');
+      },
+    }));
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(run.summary.possiblyMissing).toBe(0);
+    expect(run.possiblyMissing).toEqual([]);
+    expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
+    expect(JSON.stringify(catalog)).toBe(before);
+    expect(catalog.events.map((event) => event.id)).toEqual(['evt_zarzuela_publicado']);
+  });
+
+  it('si todas las secciones agotan el tiempo, la fuente falla', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const attempts = new Map<string, number>();
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-timeout-all-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        throw new Error(`tiempo agotado al pedir ${url}`);
+      },
+    }));
+    expect(attempts.get('/es/temporada/lirica-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(run.summary.sourcesFailed.map((failure) => failure.sourceId)).toEqual([source.id]);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/tiempo agotado/);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([]);
+    expect(run.rawEvents).toEqual([]);
+    expect(run.summary.healthReasons?.join(' ') ?? '').toMatch(/source-failed/);
+  });
+
+  it('un HTML de listado estructuralmente inesperado falla la fuente y no se degrada a parcial', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const lirica = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3><p class="entradilla">Martes, 29 de septiembre de 2026</p></li></ul>`;
+    const attempts = new Map<string, number>();
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-structural-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        if (/\/temporada\/lirica-2026-2027\/?$/.test(pathname)) return lirica;
+        if (/\/temporada\/danza-2026-2027\/?$/.test(pathname)) {
+          return '<ul class="listadoObras"><article>Obra</article></ul>';
+        }
+        return fixture('detail-verbena');
+      },
+    }));
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(1);
+    expect(run.summary.sourcesFailed.map((failure) => failure.sourceId)).toEqual([source.id]);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/no vacío/);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([]);
+    expect(run.rawEvents).toEqual([]);
+    expect(run.summary.healthReasons?.join(' ') ?? '').toMatch(/source-failed/);
   });
 });
 
@@ -143,7 +270,10 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(patch.occurrences?.some((o) => o.date === '2026-09-26')).toBe(false);
     expect(patch.composers).toEqual([{ name: 'TOMÁS BRETÓN' }]);
     expect(patch.performers).toEqual([{ name: 'CARLOS ARAGÓN', roleText: 'Dirección musical' }]);
-    expect(patch.programText).toContain('GERARDO LÓPEZ');
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('GERARDO LÓPEZ');
+    expect(patch.description).toContain('TOMÁS BRETÓN');
+    expect(patch.performers?.some((item) => item.name.includes('GERARDO'))).toBe(false);
     expect(patch.description).not.toContain('Newsletter');
     expect(patch.accessText).toBe('Comprar entradas');
     expect(patch).not.toHaveProperty('formats');
@@ -169,6 +299,25 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(patch.accessText).toBeUndefined();
   });
 
+  it('elimina el asterisco de nota al pie en nombres de la Ficha Artística', () => {
+    const patch = parseZarzuelaDetail(
+      raw('andreas-schager'),
+      zarzuelaFicha({
+        title: 'Andreas Schager',
+        intro: '<p>XXXIII Ciclo de Lied</p>',
+        artistic:
+          '<dl><dt>Tenor</dt><dd>ANDREAS SCHAGER *</dd><dt>Piano</dt><dd>GUILLERMO GARCÍA CALVO *</dd></dl><p>* Primera vez en el Ciclo de Lied</p>',
+      }),
+    );
+    expect(patch.performers).toEqual([
+      { name: 'ANDREAS SCHAGER', roleText: 'Tenor' },
+      { name: 'GUILLERMO GARCÍA CALVO', roleText: 'Piano' },
+    ]);
+    expect(patch.performers?.every((item) => !item.name.includes('*'))).toBe(true);
+    expect(patch.performers?.some((item) => /primera vez/i.test(item.name))).toBe(false);
+    expect(patch.description).toMatch(/Primera vez en el Ciclo de Lied/);
+  });
+
   it('completa días enumerados sin mes con el mes y año explícitos de la función accesible', async () => {
     const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
     expect(patch.categoryText).toBe('Lírica');
@@ -188,6 +337,14 @@ describe('fichas y horarios de Zarzuela', () => {
       '2027-06-25 19:30',
     ]);
     expect(patch.occurrences?.some((o) => o.raw.includes('FUNCIÓN'))).toBe(false);
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('FRANCISCO ASENJO BARBIERI');
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.performers).toEqual([
+      { name: 'JOSÉ MIGUEL PÉREZ-SIERRA/ JULIO CÉSAR PICOS', roleText: 'Dirección musical' },
+    ]);
+    expect(patch.performers?.some((item) => /arrieta/i.test(item.name))).toBe(false);
   });
 
   it('mantiene sesiones dobles y horarios particulares por fecha, sin mezclar escolares y familias', async () => {
@@ -205,15 +362,120 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(double.occurrences?.filter((o) => o.date === '2027-04-16')).toHaveLength(1);
   });
 
+  it('expande un rango explícito de ficha con varias horas y un día aparte', async () => {
+    const patch = parseZarzuelaDetail(
+      raw('el-duo-de-la-africana-escolares'),
+      await fixture('detail-africana-escolares'),
+    );
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-04-12 10:00', '2027-04-12 12:30',
+      '2027-04-13 10:00', '2027-04-13 12:30',
+      '2027-04-14 10:00', '2027-04-14 12:30',
+      '2027-04-15 10:00', '2027-04-15 12:30',
+      '2027-04-16 11:00',
+    ]);
+    expect(parseZarzuelaSchedule(
+      '<p>Del 12 al 15 de abril de 2027 (10:00 y 12:30 horas), 16 de abril (11:00 horas)</p>',
+    ).map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-04-12 10:00', '2027-04-12 12:30',
+      '2027-04-13 10:00', '2027-04-13 12:30',
+      '2027-04-14 10:00', '2027-04-14 12:30',
+      '2027-04-15 10:00', '2027-04-15 12:30',
+      '2027-04-16 11:00',
+    ]);
+  });
+
+  it('hidrata una única sede externa resoluble, sin atribuirla al Teatro de la Zarzuela', async () => {
+    const patch = parseZarzuelaDetail(
+      raw('andromeda-y-perseo-escolares'),
+      await fixture('detail-andromeda-escolares'),
+    );
+    expect(patch.venueText).toMatch(/auditorio de la fundaci[oó]n juan march/i);
+    expect(patch.venueText).not.toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2026-09-29 11:30', '2026-10-02 11:30', '2026-10-06 11:30',
+    ]);
+    const catalog = emptyCatalog();
+    catalog.venues = [
+      makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base }),
+      makeVenue({
+        id: 'ven_fundacion_juan_march',
+        slug: 'fundacion-juan-march',
+        name: 'Fundación Juan March',
+        url: 'https://www.march.es/es/madrid',
+      }),
+      makeVenue({
+        id: 'ven_fundacion_juan_march_auditorio',
+        slug: 'fundacion-juan-march-auditorio',
+        name: 'Fundación Juan March — Auditorio',
+        url: 'https://www.march.es/es/madrid',
+        parentVenueId: 'ven_fundacion_juan_march',
+        spaceName: 'Auditorio',
+      }),
+    ];
+    const match = matchVenue({ venueText: patch.venueText, sourceId: source.id }, catalog);
+    expect(match?.venue.id).toBe('ven_fundacion_juan_march_auditorio');
+    expect(unpublishedMatchedVenue(match, catalog)).toBeUndefined();
+  });
+
+  it('no aplasta varias sedes ni usa expand; es un skip estructural diagnosticado', async () => {
+    expect(teatroZarzuelaAdapter.expand).toBeUndefined();
+    const html = await fixture('detail-external');
+    expect(() => parseZarzuelaDetail(raw('andromeda-y-perseo'), html)).toThrow(ZarzuelaStructuralSkipError);
+    expect(() => parseZarzuelaDetail(raw('andromeda-y-perseo'), html)).toThrow(/varias sedes/);
+    vi.useFakeTimers();
+    try {
+      const event = raw('andromeda-y-perseo');
+      const pending = hydrateEvents([event], teatroZarzuelaAdapter, {
+        ...context,
+        get: async () => html,
+      });
+      await vi.runAllTimersAsync();
+      const [hydrated] = await pending;
+      expect(hydrated?.hydration).toMatchObject({
+        status: 'succeeded',
+        reason: 'structural-skip',
+      });
+      expect(hydrated?.hydration?.message).toMatch(/varias sedes/);
+      expect(hydrated?.observed.occurrences).toEqual([]);
+      expect(hydrated?.observed.venueText).toBeUndefined();
+      expect(requiredHydrationCoverage([hydrated!])).toMatchObject({
+        succeeded: 1, unavailable: 0, incomplete: false, severe: false,
+      });
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('reconoce la ficha K2 sin Fechas y Horarios y no inventa un calendario', async () => {
+    const html = await fixture('detail-missing-schedule');
+    expect(parseZarzuelaDetail(raw(), html).occurrences).toBeUndefined();
+    expect(parseZarzuelaDetail(raw(), html).description).toContain('Música');
+    expect(() => parseZarzuelaDetail(raw(), '<html>error</html>')).toThrow(/K2/);
+  });
+
+  it('lee el elenco del intro y corrige un mes contradictorio con un listing de un único día', async () => {
+    const html = await fixture('detail-don-manuel');
+    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(/d[ií]a de la semana/);
+    const patch = parseZarzuelaDetail({
+      ...raw('feliz-cumplea%C3%B1os-don-manuel'),
+      listingDateText: 'Lunes, 23 de noviembre de 2026',
+    }, html);
+    expect(patch.occurrences).toEqual([
+      expect.objectContaining({ date: '2026-11-23', time: '19:30' }),
+    ]);
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.performers).toEqual([
+      { name: 'CAROLINA ALCAIDE', roleText: 'Mezzosoprano' },
+      { name: 'RAMÓN GRAU', roleText: 'Piano' },
+      { name: 'SYLVIA TORÁN', roleText: 'Piano' },
+    ]);
+    expect(patch.performers?.some((item) => /bail/i.test(item.name) || /bail/i.test(item.roleText ?? ''))).toBe(false);
+  });
+
   it('no clasifica danza ni asigna sedes externas por ser una programación de Zarzuela', async () => {
     const patch = parseZarzuelaDetail(raw(), await fixture('detail-dance'));
     expect(patch.categoryText).toBe('Danza');
     expect(patch).not.toHaveProperty('eligibility');
-    expect(() => parseZarzuelaDetail(raw(), '<html>error</html>')).toThrow(/K2/);
-    const external = await fixture('detail-external');
-    expect(() => parseZarzuelaDetail(raw(), external)).toThrow(/sede externa/);
-    const missing = await fixture('detail-missing-schedule');
-    expect(() => parseZarzuelaDetail(raw(), missing)).toThrow(/secciones/);
   });
 
   it('hidrata funciones escolares en la sala principal, sin tratarla como sede externa', async () => {
@@ -234,13 +496,14 @@ describe('fichas y horarios de Zarzuela', () => {
   });
 
   it.each([
-    'Del 1 al 4 de octubre de 2026 19:30 horas',
     '1 de octubre 19:30 horas',
     '31 de febrero de 2027 19:30 horas',
     '1 de octubre de 2026 25:00 horas',
     '1 de octubre de 2026 19:30 horas, excepto festivos',
     'Lunes, 23 de octubre de 2026 19:30 horas',
     '1 de octubre de 2026',
+    'Del 12 al 15 de abril de 2027',
+    'Del 1 de enero al 31 de diciembre de 2027 19:30 horas',
   ])('rechaza un calendario incompleto o contradictorio: %s', (text) => {
     expect(() => parseZarzuelaSchedule(`<p>${text}</p>`)).toThrow(/teatro-zarzuela/);
   });
@@ -272,10 +535,14 @@ describe('fichas y horarios de Zarzuela', () => {
     ]);
   });
 
-  it('no toma un rango ni una lista de días sin mes y año explícitos', () => {
-    expect(() => parseZarzuelaSchedule('<p>Del 12 al 15 de abril de 2027 (10:00 y 12:30 horas)</p>')).toThrow(
-      /teatro-zarzuela/,
-    );
+  it('no usa un rango del listing para reparar un weekday contradictorio de la ficha', () => {
+    expect(() => parseZarzuelaSchedule('<p>Lunes, 23 de octubre de 2026 19:30 horas</p>', {
+      listingDateText: 'Del 23 de octubre al 25 de octubre de 2026',
+    })).toThrow(/d[ií]a de la semana/);
+  });
+
+  it('no toma un rango del listing ni una lista de días sin mes y año explícitos', () => {
+    expect(() => parseZarzuelaSchedule('<p>Del 12 al 15 de abril de 2027</p>')).toThrow(/teatro-zarzuela/);
     expect(() => parseZarzuelaSchedule('<p>9, 10, 11, 12 y 13. 19:30 horas</p>')).toThrow(/teatro-zarzuela/);
   });
 
@@ -292,6 +559,150 @@ describe('fichas y horarios de Zarzuela', () => {
   });
 });
 
+const SEASON_WINDOW = { from: '2026-09-01', to: '2027-07-31' } as const;
+
+function zarzuelaFicha(options: {
+  title?: string;
+  intro: string;
+  artistic?: string;
+  program?: string;
+  schedule?: string;
+}): string {
+  const title = options.title ?? 'El barberillo de Lavapiés';
+  const artistic = options.artistic ?? '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl>';
+  const schedule = options.schedule ?? '<p>Martes, 6 de octubre de 2026<br />19:30 horas</p>';
+  const program = options.program
+    ? `<div class="encabezado-bloque"><h3>Programa</h3></div>${options.program}`
+    : '';
+  return `<span id="startOfPageId854"></span>
+<h2 class="antetitulo first">Lírica</h2>
+<div class="descripcionWrapper fichaMod1">
+<div class="encabezado-titulo"><h3 class="titulo">${title}</h3></div>
+${options.intro}
+</div>
+<div class="encabezado-bloque"><h3>Fechas y Horarios</h3></div>
+${schedule}
+<div class="encabezado-bloque"><h3>Ficha Artística</h3></div>
+${artistic}
+${program}
+<!-- Plugins: AfterDisplayContent -->
+</div>
+<!--END CONTENT-->`;
+}
+
+function zarzuelaPublishable(patch: ReturnType<typeof parseZarzuelaDetail>, title = 'El barberillo de Lavapiés') {
+  const event = raw('el-barbarillo-de-lavapies');
+  event.observed.title = title;
+  const hydrated: RawEvent = {
+    ...event,
+    observed: { ...event.observed, ...patch, occurrences: patch.occurrences ?? [] },
+  };
+  const normalized = normalizeRawEvent(hydrated);
+  expect(normalized).toBeDefined();
+  const enriched = enrichNormalizedEvent(normalized!);
+  const classification = classify(observedFactsFromNormalized(enriched));
+  expect(isPublishableInclude(classification), classification.eligibility.ruleId).toBe(true);
+  const catalog = emptyCatalog();
+  catalog.venues = [
+    makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base }),
+    makeVenue({
+      id: 'ven_fundacion_juan_march',
+      slug: 'fundacion-juan-march',
+      name: 'Fundación Juan March',
+      url: 'https://www.march.es/es/madrid',
+    }),
+    makeVenue({
+      id: 'ven_fundacion_juan_march_auditorio',
+      slug: 'fundacion-juan-march-auditorio',
+      name: 'Fundación Juan March — Auditorio',
+      url: 'https://www.march.es/es/madrid',
+      parentVenueId: 'ven_fundacion_juan_march',
+      spaceName: 'Auditorio',
+    }),
+  ];
+  const built = toCandidate(
+    enriched,
+    source,
+    catalog,
+    TEST_NOW,
+    new Set(),
+    new Set(),
+    classification,
+    SEASON_WINDOW,
+  );
+  return { enriched, candidate: built.candidate?.event };
+}
+
+describe('Zarzuela programText y crédito de autor', () => {
+  it('El barberillo: Francisco Asenjo Barbieri from the music credit, never Emilio Arrieta from César Arrieta', async () => {
+    const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
+    const { enriched, candidate } = zarzuelaPublishable(patch);
+    expect(enriched.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(candidate?.composers).toEqual([{ name: 'Francisco Asenjo Barbieri' }]);
+    expect(enriched.programText).toBeUndefined();
+    expect(enriched.description).toContain('CÉSAR ARRIETA');
+    expect(enriched.composers.map((item) => item.name).join(' ')).not.toMatch(/Emilio Arrieta/i);
+    expect(candidate?.occurrences).toHaveLength(13);
+    expect(candidate?.occurrences[0]).toMatchObject({ date: '2027-06-09', time: '19:30' });
+    expect(candidate?.occurrences[4]).toMatchObject({ date: '2027-06-13', time: '18:00' });
+  });
+
+  it.each([
+    ['strong', '<p>Música de <strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['b', '<p>Música de <b>FRANCISCO ASENJO BARBIERI</b></p>'],
+    ['span', '<p><span>Música de </span><strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['texto plano', '<p>Música de FRANCISCO ASENJO BARBIERI</p>'],
+    ['Música:', '<p>Música: FRANCISCO ASENJO BARBIERI</p>'],
+    ['continuación tras br', '<p>Música de<br /><strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['continuación en el siguiente bloque', '<p>Música de</p><p>FRANCISCO ASENJO BARBIERI</p>'],
+    ['hasta Libreto de', '<p>Música de FRANCISCO ASENJO BARBIERI Libreto de LUIS MARIANO DE LARRA</p>'],
+  ])('lee el crédito musical con marcado %s', (_label, intro) => {
+    const patch = parseZarzuelaDetail(raw(), zarzuelaFicha({ intro }));
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(patch.programText).toBeUndefined();
+    expect(enrichNormalizedEvent(normalizeRawEvent({
+      ...raw(),
+      observed: { ...raw().observed, ...patch, occurrences: patch.occurrences ?? [] },
+    })!).composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+  });
+
+  it('un reparto con apellido de compositor, sin crédito ni repertorio, no inventa el compositor', () => {
+    const patch = parseZarzuelaDetail(
+      raw(),
+      zarzuelaFicha({
+        intro: '<p>Zarzuela en tres actos. Una de las zarzuelas más representadas del repertorio.</p>',
+        artistic:
+          '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl><dl><dt class="spacing2">Reparto</dt><dd>Don Luis de Haro <strong>CÉSAR ARRIETA</strong></dd></dl>',
+      }),
+    );
+    expect(patch.composers).toEqual([]);
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.performers?.some((item) => /arrieta/i.test(item.name))).toBe(false);
+    expect(enrichNormalizedEvent(normalizeRawEvent({
+      ...raw(),
+      observed: { ...raw().observed, title: 'Función de zarzuela', ...patch, occurrences: patch.occurrences ?? [] },
+    })!).composers).toEqual([]);
+  });
+
+  it('construye programText sólo con la sección Programa, no con la ficha artística', () => {
+    const patch = parseZarzuelaDetail(
+      raw(),
+      zarzuelaFicha({
+        intro: '<p>Música de <strong>FRANCISCO ASENJO BARBIERI</strong></p><p>Libreto de LUIS MARIANO DE LARRA</p>',
+        artistic:
+          '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl><dl><dt class="spacing2">Reparto</dt><dd>Don Luis de Haro <strong>CÉSAR ARRIETA</strong></dd></dl>',
+        program: '<p>Obras de Francisco Asenjo Barbieri. El barberillo de Lavapiés.</p>',
+      }),
+    );
+    expect(patch.programText).toBe('Obras de Francisco Asenjo Barbieri. El barberillo de Lavapiés.');
+    expect(patch.programText).not.toMatch(/CÉSAR ARRIETA/);
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.description).toContain('FRANCISCO ASENJO BARBIERI');
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+  });
+});
+
 describe('Zarzuela en el pipeline común', () => {
   it('no confunde el nombre del teatro con repertorio de zarzuela, sin ocultar la evidencia oficial', async () => {
     const patch = parseZarzuelaDetail(raw(), await fixture('detail-rosa'));
@@ -305,6 +716,7 @@ describe('Zarzuela en el pipeline común', () => {
   });
 
   it('reconcilia el URL compartido por repartos existentes sin duplicar ni borrar la función omitida en la ficha', async () => {
+    vi.useFakeTimers();
     const catalog = emptyCatalog();
     catalog.sources = [source.seedSource];
     catalog.venues = [makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base })];
@@ -326,11 +738,11 @@ describe('Zarzuela en el pipeline común', () => {
     const before = JSON.stringify(catalog);
     const home = '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
     const listing = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3></li></ul>`;
-    const run = await runIngest({
+    const run = await advance(runIngest({
       catalog, dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-test-')),
       now: TEST_NOW, dryRun: true, sourceIds: [source.id],
       get: async (url) => url === `${base}/es/` ? home : url === raw().sourceUrl ? fixture('detail-verbena') : listing,
-    });
+    }));
     expect(run.summary.sourcesFailed).toEqual([]);
     expect(run.summary.ambiguous).toBe(0);
     expect(run.summary.newEvents).toBe(0);
@@ -342,10 +754,11 @@ describe('Zarzuela en el pipeline común', () => {
   });
 
   it('una ventana ajena no publica fechas y un timeout de detalle tampoco', async () => {
+    vi.useFakeTimers();
     const home = '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
     const listing = `<ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3></li></ul>`;
     for (const failDetail of [false, true]) {
-      const run = await runIngest({
+      const run = await advance(runIngest({
         catalog: emptyCatalog(), dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-window-')),
         now: TEST_NOW, dryRun: true, sourceIds: [source.id], window: { from: '2026-12-01', to: '2026-12-31' },
         get: async (url) => {
@@ -354,7 +767,7 @@ describe('Zarzuela en el pipeline común', () => {
           if (failDetail) throw new Error('timeout');
           return fixture('detail-verbena');
         },
-      });
+      }));
       expect(run.summary.candidates).toBe(0);
       expect(run.summary.written).toEqual([]);
       expect(run.summary.detailHydrationFailed).toBe(failDetail ? 1 : 0);

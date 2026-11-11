@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_transparencia_ssreyes_org_10062090",
+  "slug": "opera-madama-butterfly",
+  "title": "Ópera: Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_municipal_adolfo_marsillach",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_transparencia_ssreyes_org_10062090_01",
+      "date": "2026-11-14",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Compañía de ópera LGAM"
+    },
+    {
+      "name": "Nicolae Dohotaru",
+      "role": "conductor"
+    },
+    {
+      "name": "Diana Rosa Cárdenas",
+      "role": "soloist"
+    },
+    {
+      "name": "Mali Corbacho",
+      "role": "soloist"
+    },
+    {
+      "name": "Héctor López",
+      "role": "soloist"
+    },
+    {
+      "name": "Sergio Escobar",
+      "role": "soloist"
+    },
+    {
+      "name": "Victor Jimenez",
+      "role": "soloist"
+    },
+    {
+      "name": "Chantal Garsons",
+      "role": "soloist"
+    },
+    {
+      "name": "Luna Seung",
+      "role": "soloist"
+    },
+    {
+      "name": "Jorge Tello",
+      "role": "soloist"
+    },
+    {
+      "name": "Pablo Rossi",
+      "role": "soloist"
+    },
+    {
+      "name": "Augusto García",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_transparencia_ssreyes_org",
+      "url": "https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/opera-madama-butterfly/10062090/vBxusUciXi0M",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_transparencia_ssreyes_org",
+  "lastVerifiedAt": "2026-09-28"
+}

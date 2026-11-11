@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_a_tempo_marina_sanchez_viso_20261101",
+  "slug": "marina-sanchez-viso-recital-de-piano",
+  "title": "Marina Sánchez Viso — Recital de piano",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_a_tempo_marina_sanchez_viso_20261101_01",
+      "date": "2026-11-01",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marina Sánchez Viso",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Frédéric Chopin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludios, Libro I, L. 117 (selección)",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "El fandango de candil, de Goyescas",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "24 Preludios, op. 28 (selección)",
+      "composerName": "Frédéric Chopin"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5619832f37fba910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50146160"
+    },
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/post/recital-de-piano-solo-marina-sánchez-viso",
+      "checkedAt": "2026-11-01"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

@@ -18,7 +18,7 @@ export function findPossiblyMissing(options: {
   sources: SourceDefinition[];
   succeededSourceIds: readonly string[];
   failedSourceIds: readonly string[];
-  /** Listing succeeded, but missing details make negative evidence unreliable. */
+  /** Listing integrity, temporal coverage or missing details make negative evidence unreliable. */
   incompleteSourceIds?: readonly string[];
   seenEventIds: ReadonlySet<string>;
 }): PossiblyMissingEvent[] {

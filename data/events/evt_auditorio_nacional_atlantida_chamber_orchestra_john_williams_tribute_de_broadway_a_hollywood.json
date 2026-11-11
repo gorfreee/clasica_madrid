@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_john_williams_tribute_de_broadway_a_hollywood",
+  "slug": "atlantida-chamber-orchestra-john-williams-tribute-de-broadway-a-hollywood",
+  "title": "Atlántida Chamber Orchestra. John Williams Tribute: de Broadway a Hollywood",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_john_williams_tribute_de_broadway_a_hollywood_01",
+      "date": "2027-04-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Mario Prisuelos"
+    },
+    {
+      "name": "Cihat Aşkın"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    },
+    {
+      "name": "Yunmao Kang"
+    }
+  ],
+  "composers": [
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Leonard Bernstein"
+    },
+    {
+      "name": "John Williams"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rhapsody in Blue",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Danzas sinfónicas de West Side Story",
+      "composerName": "Leonard Bernstein"
+    },
+    {
+      "title": "Selección sinfónica",
+      "composerName": "John Williams"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-john-williams-tribute-de-broadway-a-hollywood",
+      "checkedAt": "2026-11-01",
+      "externalId": "atlantida-chamber-orchestra-john-williams-tribute-de-broadway-a-hollywood"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

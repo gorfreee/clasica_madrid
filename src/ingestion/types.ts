@@ -1,7 +1,10 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
+import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import type { Area, Source } from '../lib/schemas/index.ts';
 import type { IngestHealth } from './health.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 import type { IngestWindow } from './dates.ts';
+import type { AiCallPurpose } from './classification/ai.ts';
 
 /**
  * Facts observed in a source, before editorial or musical interpretation.
@@ -29,7 +32,8 @@ export type HydrationMeta = {
   status: HydrationStatus;
   detailUrl?: string;
   message?: string;
-  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed';
+  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip' | 'detail-no-calendar' | 'source-conflict';
+  discrepancies?: HydrationDiscrepancy[];
   requestAttempts?: number;
   httpStatuses?: number[];
   retryDelaysMs?: number[];
@@ -38,8 +42,9 @@ export type HydrationMeta = {
 /**
  * Venue facts supplied by discovery when the place may not be in the catalog.
  * Not ObservedFacts: never sent to classification. Matching uses exact name
- * plus compatible municipality, and an explicit address only to disambiguate
- * homonyms. Ambiguous matches stay unpublished; there is no fuzzy matching.
+ * plus compatible municipality. A new root also needs a physical address;
+ * an explicit address is otherwise only used to disambiguate homonyms.
+ * Ambiguous matches stay unpublished; there is no fuzzy matching.
  */
 export type ProposedVenueFacts = {
   name: string;
@@ -56,6 +61,13 @@ export type RawEvent = {
   observed: RawObserved;
   /** Exact listing text, used only as a conservative hydration/window hint. */
   listingDateText?: string;
+  /** Escorial TEC evidence; only that adapter interprets its all-day envelope. */
+  escorialCalendar?: { allDay: boolean; start: string; end: string };
+  /**
+   * Diagnostic only: which official listing surface produced this observation.
+   * Never written to `data/**`.
+   */
+  listingSurface?: 'wp-rest' | 'html-archive';
   hydration?: HydrationMeta;
   /**
    * True when the detail page supplied a parseable date that replaced
@@ -63,6 +75,7 @@ export type RawEvent = {
    * because it falls outside the listing discovery window.
    */
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   /** Explicit schedule status from the detail page, when the ficha states one. */
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
   /**
@@ -71,6 +84,12 @@ export type RawEvent = {
    * source-aware venue resolution; never copied onto ObservedFacts.
    */
   venueFacilityId?: string;
+  /**
+   * Physical address observed on the source listing (e.g. Madrid Datos
+   * `address.area`). Used only when creating a new municipal venue;
+   * never copied onto ObservedFacts and never overwrites a published venue.
+   */
+  venueAddress?: string;
   /**
    * Discovery-only proposed venue. Harvest adapters leave this unset.
    * Matching prefers an existing catalog/known venue over creating one.
@@ -116,6 +135,72 @@ export type SourceDefinition = PipelineSource & {
    * The Worker is source-agnostic; this flag is the only switch.
    */
   useFetchRelay?: boolean;
+  /**
+   * How `getText` reaches this source's hosts. Unset means `relay` when
+   * `useFetchRelay` is set, otherwise `direct`. `direct-then-relay` tries
+   * the origin first and uses the Worker only after a recoverable block.
+   * March, Zarzuela and Auditorio stay on `relay`. CNDM uses
+   * `relay-then-direct`: one direct origin attempt after a recoverable relay failure.
+   */
+  fetchTransport?: 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct';
+};
+
+/**
+ * Diagnostic report that an adapter recognized a candidate event and then
+ * discarded it. Not an editorial decision. Avoid HTML bodies or large payloads.
+ */
+export type AdapterDiscardReport = {
+  /** Stable machine-readable code, e.g. `missing-date`, `recurrence-unsupported`. */
+  reason: string;
+  title?: string;
+  sourceUrl?: string;
+  externalId?: string;
+};
+
+export type AdapterDiscard = AdapterDiscardReport & {
+  sourceId: string;
+};
+
+export type AdapterDiscardCounts = {
+  total: number;
+  bySource: Record<string, number>;
+  byReason: Record<string, number>;
+};
+
+export function emptyAdapterDiscardCounts(): AdapterDiscardCounts {
+  return { total: 0, bySource: {}, byReason: {} };
+}
+
+export function tallyAdapterDiscards(discards: readonly AdapterDiscard[]): AdapterDiscardCounts {
+  const bySource: Record<string, number> = {};
+  const byReason: Record<string, number> = {};
+  for (const item of discards) {
+    bySource[item.sourceId] = (bySource[item.sourceId] ?? 0) + 1;
+    byReason[item.reason] = (byReason[item.reason] ?? 0) + 1;
+  }
+  return { total: discards.length, bySource, byReason };
+}
+
+/** Temporal evidence is independent of technical listing and detail success. */
+export type SourceTemporalCoverage =
+  | { status: 'complete' | 'partial' | 'stale'; interval: IngestWindow; evidence: string }
+  | { status: 'unknown'; evidence: string };
+
+/** Shared counters for report.json and run.json; never persisted to the catalog. */
+export type SourceIngestResult = {
+  extraction: { status: 'succeeded' | 'incomplete' | 'failed'; message?: string };
+  /** Absent for legacy adapters: retain their existing listing guarantees. */
+  temporalCoverage?: SourceTemporalCoverage;
+  extractedEvents: number;
+  hydratedEvents: number;
+  hydrationAttempted: number;
+  hydrationSucceeded: number;
+  hydrationFailed: number;
+  hydrationRequired: number;
+  hydrationIncomplete: boolean;
+  hydrationSevere: boolean;
+  disappearanceEligible: boolean;
+  usable: boolean;
 };
 
 export type AdapterContext = {
@@ -123,19 +208,44 @@ export type AdapterContext = {
   now: Date;
   window: IngestWindow;
   get: (url: string) => Promise<string>;
+  /**
+   * Optional diagnostic callback. The pipeline supplies it; adapters must not
+   * import observability. Only call it for a candidate already identified as
+   * in-scope that is then dropped.
+   */
+  reportDiscard?: (discard: AdapterDiscardReport) => void;
+  /** Declare only after validating the entire listing. No event-date inference. */
+  reportTemporalCoverage?: (coverage: SourceTemporalCoverage) => void;
 };
+
+export function reportAdapterDiscard(ctx: AdapterContext, discard: AdapterDiscardReport): void {
+  ctx.reportDiscard?.(discard);
+}
 
 export type SourceAdapter = {
   id: string;
   /** Listing cannot supply a complete schedule; incomplete hydration suppresses disappearances. */
   requiresDetailSchedule?: boolean;
+  /** Only these observations depend on detail for usable calendar coverage. */
+  requiresScheduleHydration?(event: RawEvent): boolean;
   /** URLs to fetch for this source given the current clock and ingest window. */
   resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**
-   * Optional source-specific listing transport. Adapters use this only when
-   * the listing itself needs the same retry/pacing policy as its child pages.
+   * Optional source-specific listing transport. Adapters use this when the
+   * listing itself needs a retry/pacing policy, or when a syntactic seed URL
+   * must not hit the network (CNDM homepage).
    */
   fetchListing?(url: string, ctx: AdapterContext): Promise<string>;
+  /**
+   * Optional source-specific detail transport. Default is `ctx.get(event.sourceUrl)`.
+   * Use this for origin-specific fallbacks (HTTP then a shared browser session).
+   * Do not fetch inside `hydrate`.
+   */
+  fetchDetail?(url: string, ctx: AdapterContext): Promise<string>;
+  /**
+   * Optional cleanup after the hydration loop (close a shared detail session).
+   */
+  endHydration?(): Promise<void> | void;
   /**
    * Parse one fetched listing/feed body. May be sync or async.
    * Throw if the document is not the expected structure. Skip individual
@@ -145,7 +255,8 @@ export type SourceAdapter = {
   extract(body: string, url: string, ctx: AdapterContext): Promise<RawEvent[]> | RawEvent[];
   /**
    * Source-specific detail parser. The pipeline fetches `event.sourceUrl`
-   * and calls this; do not fetch inside `hydrate`.
+   * (`fetchDetail` when present, otherwise `ctx.get`) and calls this; do
+   * not fetch inside `hydrate`.
    *
    * Throw if the document is not the expected structure. The pipeline treats
    * that as an event-local hydration failure and keeps the listing facts.
@@ -159,7 +270,14 @@ export type SourceAdapter = {
   expand?(event: RawEvent, body: string): RawEvent[] | undefined;
 };
 
-/** Listing produced usable events, but coverage of that source is incomplete. */
+/**
+ * Listing coverage is incomplete. `events` may be empty when the source shell
+ * is recognizable but does not prove a completely empty agenda. The pipeline
+ * keeps these observations and suppresses disappearances for that source.
+ * This remains a technical failure requiring review, even with recovered events.
+ * Temporal-only gaps use AdapterContext.reportTemporalCoverage after validation.
+ * A structural failure must remain a normal Error so the source fails visibly.
+ */
 export class IncompleteListingError extends Error {
   constructor(
     message: string,
@@ -176,9 +294,21 @@ export type SourceFailure = {
   stage?: 'hydration';
 };
 
-export type ProposedChange = {
-  relativePath: string;
-  action: 'create' | 'update' | 'unchanged';
+export type IngestAiRouteSummary = {
+  routeId: string;
+  provider: string;
+  model: string;
+  httpRequests: number;
+  valid: number;
+  failures: number;
+  failuresByKind: Record<string, number>;
+  rateLimits: number;
+  quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Record<string, number>;
+  circuitOpen: boolean;
+  circuitReason?: string;
+  consecutiveFailures: number;
 };
 
 export type IngestAiSummary = {
@@ -199,13 +329,49 @@ export type IngestAiSummary = {
   httpRequests: number;
   retries: number;
   modelFallbacks: number;
+  logicalCalls: number;
+  sameRouteRetries: number;
+  httpFallbacks: number;
+  fallbackCalls: number;
+  circuitOpenRoutes: number;
   requestsByModel: Record<string, number>;
   classificationsByModel: Record<string, number>;
+  requestsByRoute: Record<string, number>;
+  classificationsByRoute: Record<string, number>;
+  requestsByProvider: Record<string, number>;
+  classificationsByProvider: Record<string, number>;
+  requestsByPurpose: Partial<Record<AiCallPurpose, number>>;
+  failuresByKind: Record<string, number>;
+  rateLimits: number;
+  quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Record<string, number>;
+  concurrencyPressureByRoute: Record<string, number>;
+  concurrencyPressureByProvider: Record<string, number>;
+  rateLimitsByRoute: Record<string, number>;
+  rateLimitsByProvider: Record<string, number>;
+  routes: IngestAiRouteSummary[];
   cacheHits: number;
   deferred: number;
   inputTokensByModel: Record<string, number>;
   dailyRequestsByModel: Record<string, number>;
+  inputTokensByRoute: Record<string, number>;
+  outputTokensByRoute: Record<string, number>;
+  thoughtTokensByRoute: Record<string, number>;
+  dailyRequestsByRoute: Record<string, number>;
+  byPurpose: Record<AiCallPurpose, IngestAiPurposeSummary>;
 };
+
+export type IngestAiPurposeSummary = {
+  attempted: number;
+  resolved: number;
+  unresolved: number;
+  errors: number;
+};
+
+function emptyAiPurposeSummary(): IngestAiPurposeSummary {
+  return { attempted: 0, resolved: 0, unresolved: 0, errors: 0 };
+}
 
 export function emptyIngestAiSummary(): IngestAiSummary {
   return {
@@ -226,12 +392,70 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     httpRequests: 0,
     retries: 0,
     modelFallbacks: 0,
+    logicalCalls: 0,
+    sameRouteRetries: 0,
+    httpFallbacks: 0,
+    fallbackCalls: 0,
+    circuitOpenRoutes: 0,
     requestsByModel: {},
     classificationsByModel: {},
+    requestsByRoute: {},
+    classificationsByRoute: {},
+    requestsByProvider: {},
+    classificationsByProvider: {},
+    requestsByPurpose: {},
+    failuresByKind: {},
+    rateLimits: 0,
+    quotaExhausted: 0,
+    concurrencyPressure: 0,
+    pressureByKind: {},
+    concurrencyPressureByRoute: {},
+    concurrencyPressureByProvider: {},
+    rateLimitsByRoute: {},
+    rateLimitsByProvider: {},
+    routes: [],
     cacheHits: 0,
     deferred: 0,
     inputTokensByModel: {},
     dailyRequestsByModel: {},
+    inputTokensByRoute: {},
+    outputTokensByRoute: {},
+    thoughtTokensByRoute: {},
+    dailyRequestsByRoute: {},
+    byPurpose: {
+      eligibility: emptyAiPurposeSummary(),
+      'composer-extraction': emptyAiPurposeSummary(),
+      'access-classification': emptyAiPurposeSummary(),
+      taxonomy: emptyAiPurposeSummary(),
+    },
+  };
+}
+
+export type IngestQualitySummary = {
+  composers: { populated: number; unresolved: number; unresolvedNoProgramEvidence: number };
+  eras: { populated: number; unresolved: number };
+  formats: { populated: number; unresolved: number };
+  access: {
+    free: number;
+    paid: number;
+    unresolved: number;
+    unresolvedNoEvidence: number;
+    unresolvedWithEvidence: number;
+  };
+};
+
+export function emptyIngestQualitySummary(): IngestQualitySummary {
+  return {
+    composers: { populated: 0, unresolved: 0, unresolvedNoProgramEvidence: 0 },
+    eras: { populated: 0, unresolved: 0 },
+    formats: { populated: 0, unresolved: 0 },
+    access: {
+      free: 0,
+      paid: 0,
+      unresolved: 0,
+      unresolvedNoEvidence: 0,
+      unresolvedWithEvidence: 0,
+    },
   };
 }
 
@@ -243,6 +467,8 @@ export type IngestRunSummary = {
   sourcesAttempted: string[];
   sourcesSucceeded: string[];
   sourcesFailed: SourceFailure[];
+  /** Additive contract; older reports/discovery may omit harvest results. */
+  sourceResults?: Record<string, SourceIngestResult>;
   rawEvents: number;
   skippedUnusable: number;
   eligibility: {
@@ -251,6 +477,8 @@ export type IngestRunSummary = {
     uncertain: number;
   };
   ai: IngestAiSummary;
+  /** Final candidate snapshots produced/reverified by this run. */
+  quality?: IngestQualitySummary;
   candidates: number;
   newEvents: number;
   updatedEvents: number;
@@ -258,6 +486,7 @@ export type IngestRunSummary = {
   ambiguous: number;
   possiblyMissing: number;
   batchDuplicates: number;
+  crossSourceCorroborations: number;
   written: string[];
   dryRun: boolean;
   detailHydrationAttempted: number;
@@ -266,4 +495,9 @@ export type IngestRunSummary = {
   detailHydrationSkippedOutsideWindow?: number;
   detailHydrationSkippedCircuitOpen?: number;
   disappearanceSuppressedSources?: string[];
+  /**
+   * Diagnostic: in-scope candidates an adapter recognized and then dropped.
+   * Does not affect health, eligibility or publication.
+   */
+  adapterDiscards?: AdapterDiscardCounts;
 };

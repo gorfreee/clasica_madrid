@@ -1,0 +1,16 @@
+---
+type Props = {
+  label: string;
+  href?: string;
+};
+
+const { label, href } = Astro.props;
+---
+
+{
+  href ? (
+    <a class="eyebrow" href={href}><span class="eyebrow__arrow">←</span>{label}</a>
+  ) : (
+    <p class="eyebrow">{label}</p>
+  )
+}

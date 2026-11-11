@@ -17,42 +17,42 @@
   ],
   "performers": [
     {
-      "name": "VESPRES D’ARNADÍ"
+      "name": "Vespres D’Arnadí"
     },
     {
-      "name": "DANI ESPASA"
+      "name": "Dani Espasa"
     },
     {
-      "name": "XAVIER SABATA"
+      "name": "Xavier Sabata"
     },
     {
-      "name": "EMŐKE BARÁTH"
+      "name": "Emőke Baráth"
     },
     {
-      "name": "ANNA DEVIN"
+      "name": "Anna Devin"
     },
     {
-      "name": "GABRIEL DÍAZ"
+      "name": "Gabriel Díaz"
     },
     {
-      "name": "JOSEP-RAMON OLIVÉ"
+      "name": "Josep-Ramon Olivé"
     },
     {
-      "name": "FERRAN MITJANS"
+      "name": "Ferran Mitjans"
     },
     {
-      "name": "ALBERT GUIÑÓN"
+      "name": "Albert Guiñón"
     }
   ],
   "composers": [
     {
-      "name": "George Frideric Haendel (1685-1759)"
+      "name": "Georg Friedrich Händel"
     }
   ],
   "works": [
     {
       "title": "Alessandro, HWV 21 (1726)",
-      "composerName": "George Frideric Haendel (1685-1759)"
+      "composerName": "Georg Friedrich Händel"
     }
   ],
   "eras": [
@@ -68,7 +68,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-vespres-d2019arnadi-6",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-vespres-d2019arnadi-6"
     },
     {
@@ -79,5 +79,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

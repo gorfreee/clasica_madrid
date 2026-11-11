@@ -1,0 +1,56 @@
+[
+  {
+    "purpose": "eligibility",
+    "expected": {
+      "eligibility": "include",
+      "formats": ["chamber"]
+    },
+    "observed": {
+      "title": "Concierto de música de cámara: Trío con piano",
+      "description": "Trío con piano interpreta obras de Beethoven y Schubert.",
+      "performers": [{ "name": "Ensemble de Cámara de Madrid" }],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "composer-extraction",
+    "expected": {
+      "composers": ["Johann Sebastian Bach"]
+    },
+    "observed": {
+      "title": "Música para tecla",
+      "programText": "Johann Sebastian Bach: Variaciones Goldberg, BWV 988",
+      "performers": [{ "name": "Ana López", "roleText": "piano" }],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "access-classification",
+    "expected": {
+      "classification": "free"
+    },
+    "observed": {
+      "title": "Concierto de otoño",
+      "accessText": "Entrada libre hasta completar aforo.",
+      "performers": [],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "taxonomy",
+    "requireFormats": true,
+    "expected": {
+      "formats": ["chamber"]
+    },
+    "observed": {
+      "title": "Cuarteto de cuerda",
+      "programText": "Ludwig van Beethoven: Cuarteto de cuerda op. 59 n.º 1",
+      "performers": [{ "name": "Cuarteto Ejemplo" }],
+      "composers": [{ "name": "Ludwig van Beethoven" }],
+      "works": [{ "title": "Cuarteto de cuerda op. 59 n.º 1", "composerName": "Ludwig van Beethoven" }]
+    }
+  }
+]

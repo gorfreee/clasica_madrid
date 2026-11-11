@@ -95,16 +95,135 @@ export const discoveryObservationSchema = z
   })
   .strict();
 
+export const DISCOVERY_EXCLUSION_REASONS = [
+  'already-covered',
+  'harvested-source',
+  'out-of-window',
+  'out-of-geographic-scope',
+  'non-classical',
+  'insufficient-evidence',
+  'duplicate-lead',
+  'other',
+] as const;
+
+export const DISCOVERY_SEARCH_PASS_KINDS = [
+  'high-recall',
+  'long-tail',
+  'music-vocabulary',
+  'recovery',
+] as const;
+
+const discoveryLeadSchema = z
+  .object({
+    query: z.string().trim().min(1).max(400),
+    kind: z.enum(['search', 'lead']).optional(),
+  })
+  .strict();
+
+const discoveryExclusionSchema = z
+  .object({
+    reason: z.enum(DISCOVERY_EXCLUSION_REASONS),
+    count: z.number().int().min(0).max(10_000),
+    examples: z.array(z.string().trim().min(1).max(200)).max(5).optional(),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict();
+
+/**
+ * Compact evidence of a deliberately different research pass. Approaches are
+ * surfaces, ecosystems or vocabulary groups, not a URL-by-URL crawl log.
+ */
+const discoverySearchPassSchema = z
+  .object({
+    kind: z.enum(DISCOVERY_SEARCH_PASS_KINDS),
+    approaches: z.array(z.string().trim().min(1).max(120)).min(1).max(12),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict();
+
+const yearMonthSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'debe ser YYYY-MM');
+
+/**
+ * Completeness audit of one collection/listing page with several in-window
+ * candidates. Not a crawl log: omit homepages and single-event fichas.
+ */
+const discoveryListingReviewSchema = z
+  .object({
+    url: httpUrlSchema,
+    inWindowCandidatesSeen: z.number().int().min(2).max(10_000),
+    submitted: z.number().int().min(0).max(10_000),
+    alreadyCovered: z.number().int().min(0).max(10_000),
+    excluded: z.number().int().min(0).max(10_000),
+    unresolved: z.number().int().min(0).max(10_000),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    const accounted = value.submitted + value.alreadyCovered + value.excluded + value.unresolved;
+    if (accounted !== value.inWindowCandidatesSeen) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `los outcomes (${accounted}) no coinciden con inWindowCandidatesSeen (${value.inWindowCandidatesSeen})`,
+      });
+    }
+  });
+
+/**
+ * Diagnostic coverage of the agent's pre-batch investigation.
+ * Not catalog data: ignored by eligibility, identity and publication.
+ */
+export const discoveryResearchManifestSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    investigatedCategories: z.array(z.string().trim().min(1).max(80)).max(30),
+    leads: z.array(discoveryLeadSchema).max(40),
+    candidatesReviewedApprox: z.number().int().min(0).max(10_000),
+    submittedToBatch: z.number().int().min(0).max(10_000),
+    exclusions: z.array(discoveryExclusionSchema).max(20),
+    officialDetailReviewed: z.enum(['all', 'some', 'none', 'not-applicable']),
+    searchPasses: z.array(discoverySearchPassSchema).max(4).optional(),
+    listingReviews: z.array(discoveryListingReviewSchema).max(40).optional(),
+    windowMonthsSearched: z.array(yearMonthSchema).max(24).optional(),
+    notes: z.string().trim().min(1).max(1000).optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    const passKinds = value.searchPasses?.map((pass) => pass.kind) ?? [];
+    if (new Set(passKinds).size !== passKinds.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'searchPasses no debe repetir tipos de pasada',
+        path: ['searchPasses'],
+      });
+    }
+    const months = value.windowMonthsSearched;
+    if (!months) return;
+    if (new Set(months).size !== months.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'windowMonthsSearched no debe repetir meses',
+        path: ['windowMonthsSearched'],
+      });
+    }
+  });
+
 export const discoveryBatchSchema = z
   .object({
     schemaVersion: z.literal(1),
     observations: z.array(discoveryObservationSchema),
+    research: discoveryResearchManifestSchema.optional(),
   })
   .strict();
 
 export type DiscoveryVenue = z.infer<typeof discoveryVenueSchema>;
 export type DiscoveryObservation = z.infer<typeof discoveryObservationSchema>;
+export type DiscoveryListingReview = z.infer<typeof discoveryListingReviewSchema>;
+export type DiscoverySearchPass = z.infer<typeof discoverySearchPassSchema>;
+export type DiscoveryResearchManifest = z.infer<typeof discoveryResearchManifestSchema>;
 export type DiscoveryBatch = z.infer<typeof discoveryBatchSchema>;
+export type DiscoveryExclusionReason = (typeof DISCOVERY_EXCLUSION_REASONS)[number];
 
 export class DiscoveryBatchError extends Error {
   constructor(message: string) {

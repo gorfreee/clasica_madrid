@@ -17,10 +17,23 @@
   ],
   "performers": [
     {
-      "name": "JEAN RONDEAU"
+      "name": "Jean Rondeau"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "name": "György Ligeti"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque",
@@ -37,7 +50,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-jean-rondeau",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-jean-rondeau"
     },
     {
@@ -48,5 +61,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

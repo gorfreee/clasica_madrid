@@ -13,6 +13,8 @@ import {
   type DiscoveryObservation,
 } from '../src/ingestion/discovery.ts';
 import { runDiscoveryIngest, runIngest } from '../src/ingestion/pipeline.ts';
+import { findAdapterCoverageGaps } from '../src/ingestion/discovery-automation.ts';
+import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
 import { SOURCE_REGISTRY, getSourceDefinition } from '../src/ingestion/registry.ts';
 import { eventIdFor } from '../src/ingestion/ids.ts';
 import { eventIdSourceKey } from '../src/ingestion/to-candidate.ts';
@@ -213,6 +215,29 @@ describe('discovery: venue ya existente', () => {
     expect(candidate.sources?.[0]?.id).toBeTruthy();
     expect(candidate.sources?.[0]?.id).not.toBe('src_auditorio_nacional');
   });
+
+  it('resuelve un venue ya publicado por nombre aunque la observación no aporte dirección', async () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(
+      makeVenue({
+        id: 'ven_iglesia_san_jose',
+        slug: 'iglesia-de-san-jose',
+        name: 'Iglesia de San José',
+        address: 'Calle de Alcalá, 43, Madrid',
+      }),
+    );
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: { name: 'Iglesia de San José', municipality: 'Madrid', area: 'madrid' },
+        }),
+      ),
+      catalog,
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.event.venueId).toBe('ven_iglesia_san_jose');
+    expect(run.candidates[0]?.venue).toBeUndefined();
+  });
 });
 
 describe('discovery: coincidencia con evento publicado', () => {
@@ -355,6 +380,49 @@ describe('discovery: venue insuficiente', () => {
     expect(run.candidates).toEqual([]);
     expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar nuevo con datos insuficientes');
     expect(run.summary.skippedUnusable).toBe(1);
+  });
+
+  it('no publica un venue raíz nuevo sin dirección suficiente', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: { name: 'Iglesia de Santa Rita', municipality: 'Madrid', area: 'madrid' },
+          event: {
+            title: 'Misa en Si menor',
+            venueText: 'Iglesia de Santa Rita',
+            occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
+            composers: [{ name: 'Johann Sebastian Bach' }],
+            works: [{ title: 'Misa en Si menor', composerName: 'Johann Sebastian Bach' }],
+            performers: [],
+          },
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toEqual([]);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar nuevo con datos insuficientes');
+    expect(run.summary.skippedUnusable).toBe(1);
+  });
+
+  it('publica un venue nuevo cuando hay dirección suficiente', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: {
+            name: 'Iglesia de Santa Rita',
+            municipality: 'Madrid',
+            area: 'madrid',
+            address: 'Calle de Santa Rita, 12, Madrid',
+            url: 'https://www.parroquia.example/',
+          },
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.venue?.name).toBe('Iglesia de Santa Rita');
+    expect(run.candidates[0]?.venue?.address).toBe('Calle de Santa Rita, 12, Madrid');
+    expect(run.candidates[0]?.venue?.url).toBe('https://www.parroquia.example/');
   });
 });
 
@@ -762,5 +830,77 @@ describe('harvesting no cambia de comportamiento', () => {
     expect(eventIdFor('auditorio-nacional', 'ocne-sinfonico-01-1')).toBe(
       'evt_auditorio_nacional_ocne_sinfonico_01_1',
     );
+  });
+});
+
+describe('discovery: classifier inyectado y decisiones canónicas', () => {
+  it('usa el AiClassifier inyectado y no lee eligibility/formats del batch', async () => {
+    const purposes: string[] = [];
+    const ai: AiClassifier = {
+      async classify(observed, context) {
+        purposes.push(context?.purpose ?? 'eligibility');
+        if ((context?.purpose ?? 'eligibility') === 'eligibility') {
+          return { eligibility: 'include', formats: ['other'], evidence: [observed.title] };
+        }
+        if (context?.purpose === 'taxonomy') {
+          return { formats: ['recital'], eras: ['baroque'], evidence: [observed.title] };
+        }
+        throw new Error(`purpose inesperado: ${context?.purpose}`);
+      },
+    };
+    const dir = await mkdtemp(path.join(os.tmpdir(), 'clasica-discovery-ai-'));
+    const catalog = emptyCatalog();
+    await writeCatalog(dir, catalog);
+    const batch = batchOf(
+      observation({
+        venue: churchVenue(),
+        event: {
+          title: 'Concierto extraordinario',
+          description: 'Programa en la tradición concertística.',
+          venueText: 'Iglesia de San José',
+          occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
+          composers: [],
+          works: [],
+          performers: [],
+        },
+      }),
+    );
+    const run = await runDiscoveryIngest({
+      dataDir: dir,
+      catalog,
+      now: TEST_NOW,
+      dryRun: true,
+      batch,
+      ai,
+    });
+    expect(purposes).toContain('eligibility');
+    expect(run.summary.eligibility.include).toBe(1);
+    expect(run.candidates[0]?.event.kind).toBe('alternative');
+    expect(run.candidates[0]?.event.formats.length).toBeGreaterThan(0);
+    expect(() =>
+      parseDiscoveryBatch({
+        schemaVersion: 1,
+        observations: [{ ...batch.observations[0], eligibility: 'include', formats: ['organ'], kind: 'alternative' }],
+      }),
+    ).toThrow(/DiscoveryBatch inválido/);
+  });
+
+  it('una observación de source ya adaptada sigue el pipeline común y se reporta como coverage gap', async () => {
+    const batch = batchOf(
+      observation({
+        source: {
+          url: 'https://ateneodemadrid.com/evento/misa-en-si-menor',
+          name: 'Ateneo de Madrid',
+          homepage: 'https://ateneodemadrid.com/',
+          kind: 'official',
+        },
+        venue: churchVenue(),
+      }),
+    );
+    const { run } = await runDiscovery(batch, emptyCatalog());
+    expect(run.summary.sourcesAttempted).toContain('ateneo-madrid');
+    expect(run.possiblyMissing).toEqual([]);
+    expect(findAdapterCoverageGaps(batch, emptyCatalog()).map((gap) => gap.registryId)).toEqual(['ateneo-madrid']);
+    expect(run.summary).not.toHaveProperty('adapterCoverageGaps');
   });
 });

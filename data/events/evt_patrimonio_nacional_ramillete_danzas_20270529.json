@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_ramillete_danzas_20270529",
+  "slug": "ramillete-de-danzas-para-un-principe",
+  "title": "Ramillete de danzas para un Príncipe",
+  "status": "scheduled",
+  "venueId": "ven_real_monasterio_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_ramillete_danzas_20270529_01",
+      "date": "2027-05-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jota Martínez Ensemble",
+      "role": "ensemble"
+    },
+    {
+      "name": "Ministriles de la Reyna",
+      "role": "ensemble"
+    },
+    {
+      "name": "Armonía Danza",
+      "role": "other"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Francisco de la Torre"
+    },
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Tielman Susato"
+    },
+    {
+      "name": "Pierre Attaingnant"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Alonso Mudarra"
+    },
+    {
+      "name": "Antonio Valente"
+    },
+    {
+      "name": "Mateo Flecha"
+    },
+    {
+      "name": "Fabritio Caroso"
+    },
+    {
+      "name": "Cesare Negri"
+    },
+    {
+      "name": "Luis de Briceño"
+    }
+  ],
+  "works": [
+    {
+      "title": "Recercada I sobre La Spagna",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Danza alta sobre La Spagna",
+      "composerName": "Francisco de la Torre"
+    },
+    {
+      "title": "Daca, bailaremos, carillo",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Pavane - Gaillarde, La Donne",
+      "composerName": "Tielman Susato"
+    },
+    {
+      "title": "Basse danse La Magdalena",
+      "composerName": "Pierre Attaingnant"
+    },
+    {
+      "title": "Discante sobre la pavana italiana",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Bésame y abrázame"
+    },
+    {
+      "title": "Romanesca",
+      "composerName": "Alonso Mudarra"
+    },
+    {
+      "title": "Ronde - Saltarelle",
+      "composerName": "Tielman Susato"
+    },
+    {
+      "title": "Lo ballo dell’intorcia",
+      "composerName": "Antonio Valente"
+    },
+    {
+      "title": "La girigonça",
+      "composerName": "Mateo Flecha"
+    },
+    {
+      "title": "Spagnoletta",
+      "composerName": "Fabritio Caroso"
+    },
+    {
+      "title": "Reihentanze",
+      "composerName": "Tielman Susato"
+    },
+    {
+      "title": "Canarios",
+      "composerName": "Cesare Negri"
+    },
+    {
+      "title": "Pedro, i bien te quiero",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Cuatro diferencias de Folía"
+    },
+    {
+      "title": "Yo me soy la morenica"
+    },
+    {
+      "title": "Villanos",
+      "composerName": "Luis de Briceño"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/ramillete-de-danzas-para-un-principe-2027-05-29",
+      "checkedAt": "2026-10-21",
+      "externalId": "5a174d49-170d-44e5-b22b-23fe290464a2"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

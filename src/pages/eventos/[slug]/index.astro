@@ -1,0 +1,256 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AgendaItem from '../../../components/AgendaItem.astro';
+import CalendarAction from '../../../components/CalendarAction.astro';
+import ExternalAction from '../../../components/ExternalAction.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import PlaceAddress from '../../../components/PlaceAddress.astro';
+import ShareAction from '../../../components/ShareAction.astro';
+import { daysUntilEvent, isFreeAccess } from '../../../lib/analytics/page.ts';
+import { formatSourceCitationMeta } from '../../../lib/presentation/labels.ts';
+import { buildEventShare } from '../../../lib/presentation/share.ts';
+import { loadEventPage, loadEventStaticPaths } from '../../../lib/presentation/site.ts';
+import { AGENDA_PATH, eventFeedbackPath, eventPath } from '../../../lib/presentation/urls.ts';
+
+export async function getStaticPaths() {
+  const paths = await loadEventStaticPaths();
+  return paths.map((item) =>
+    item.redirectTo
+      ? { params: { slug: item.slug }, redirect: eventPath(item.redirectTo) }
+      : { params: { slug: item.slug } },
+  );
+}
+
+const { slug } = Astro.params;
+if (!slug) {
+  throw new Error('Falta el slug del evento');
+}
+const model = await loadEventPage(slug);
+if (!model) {
+  throw new Error(`Evento no encontrado: ${slug}`);
+}
+if (model.slug !== slug) {
+  return Astro.redirect(model.canonicalPath, 301);
+}
+const featured = model.featuredOccurrence;
+const analytics = {
+  page_type: 'event' as const,
+  event_id: model.id,
+  event_title: model.title,
+  venue_id: model.venueId,
+  venue_name: model.venueName,
+  access: model.access.id,
+  is_free: isFreeAccess(model.access.id),
+  format: model.formats[0]?.id,
+  era: model.eras[0]?.id,
+  days_until_event: daysUntilEvent(model.featuredOccurrence?.date),
+};
+const share = buildEventShare({
+  title: model.title,
+  venueName: model.venueName,
+  path: model.canonicalPath,
+  occurrences: model.occurrences,
+});
+---
+
+<Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd} analytics={analytics}>
+  <article class="detail event-detail">
+    <header class="page-hero page-hero--detail">
+      <Eyebrow label="Agenda" href={AGENDA_PATH} />
+      {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
+      <h1>{model.title}</h1>
+      {model.seriesName && <p class="page-hero__series">{model.seriesKind} / {model.seriesName}</p>}
+    </header>
+
+    <dl class="event-facts fact-list">
+      <div class="event-facts__when">
+        <dt>{model.isPast ? 'Tuvo lugar' : 'Próxima función'}</dt>
+        <dd>{featured ? <><time datetime={featured.startIso}>{featured.dateLabel}</time><strong>{featured.time ?? 'Hora por confirmar'}</strong></> : 'Fecha por confirmar'}</dd>
+      </div>
+      <div class="event-facts__venue">
+        <dt>Lugar</dt>
+        <dd><a href={model.venueHref}>{model.venueName}</a>{model.showMunicipality && <span> / {model.municipality}</span>}</dd>
+        {model.spaceName && (
+          <>
+            <dt>Sala</dt>
+            <dd class="event-facts__space">{model.spaceName}</dd>
+          </>
+        )}
+        {model.placeAddress && (
+          <>
+            <dt class="visually-hidden">Dirección</dt>
+            <dd class="event-facts__address">
+              <PlaceAddress address={model.placeAddress} />
+            </dd>
+          </>
+        )}
+      </div>
+    </dl>
+
+    <div class="event-actions">
+      {
+        model.sourceAction && (
+          <ExternalAction
+            grouped
+            variant="cta"
+            href={model.sourceAction.href}
+            label={model.sourceAction.label}
+            description={model.sourceAction.description}
+            accessibleLabel={model.sourceAction.accessibleLabel}
+            outbound={model.sourceAction.isOfficial ? 'tickets' : 'source'}
+          />
+        )
+      }
+      {
+        model.calendar && (
+          <CalendarAction
+            action={model.calendar}
+            align={model.sourceAction ? 'beside-cta' : 'utility'}
+          />
+        )
+      }
+      <ShareAction
+        title={share.title}
+        text={share.text}
+        path={share.path}
+        contentType="event"
+        eventId={model.id}
+        align={model.sourceAction ? 'beside-cta' : 'utility'}
+      />
+    </div>
+
+    <section class="detail-section" aria-labelledby="fechas-titulo">
+      <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2></div>
+      <ol class="occurrence-list">
+        {
+          model.occurrences.map((occurrence) => (
+            <li class:list={[{ 'is-cancelled': occurrence.isCancelled }]}>
+              <time datetime={occurrence.startIso}>{occurrence.dateLabel}</time>
+              <strong>{occurrence.time ?? 'Hora por confirmar'}</strong>
+              {occurrence.isCancelled && <span>{occurrence.status}</span>}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    {
+      model.concertProfile.length > 0 && (
+        <section class="detail-section" aria-labelledby="datos-titulo">
+          <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
+          <dl class="concert-profile">
+            {model.concertProfile.map((item) => (
+              <div class="concert-profile__row">
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    {
+      model.composers.length > 0 && (
+        <section class="detail-section" aria-labelledby="compositores-titulo">
+          <div class="section-heading"><h2 id="compositores-titulo">Compositores</h2></div>
+          <ul class="editorial-list">
+            {model.composers.map((composer) => (
+              <li>{composer}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      model.performers.length > 0 && (
+        <section class="detail-section" aria-labelledby="interpretes-titulo">
+          <div class="section-heading"><h2 id="interpretes-titulo">Intérpretes</h2></div>
+          <ul class="editorial-list editorial-list--supporting">
+            {model.performers.map((performer) => (
+              <li>
+                <span>{performer.name}</span>
+                {performer.role && <small>{performer.role}</small>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      model.works.length > 0 && (
+        <section class="detail-section programme" aria-labelledby="obras-titulo">
+          <div class="section-heading"><h2 id="obras-titulo">Programa</h2></div>
+          <ol class="programme-list programme-list--supporting">
+            {model.works.map((work) => (
+              <li>
+                <span>{work.title}</span>
+                {work.composerName && <small>{work.composerName}</small>}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    <section class="detail-section sources" aria-labelledby="fuentes-titulo">
+      <div class="section-heading"><h2 id="fuentes-titulo">Fuentes</h2></div>
+      <ul class="source-list">
+        {
+          model.sources.map((source) => (
+            <li>
+              <a
+                href={source.url}
+                rel="noopener noreferrer"
+                data-outbound={source.kindId === 'official' ? 'official_site' : 'source'}
+              >
+                {source.name}
+              </a>
+              <span>
+                {formatSourceCitationMeta({
+                  kindLabel: source.kindLabel,
+                  isPrimary: source.isPrimary,
+                  checkedAt: source.checkedAt,
+                })}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="verified">Última verificación: {model.lastVerifiedAt}</p>
+      <p class="verified source-feedback">
+        ¿Ves algún error o cambio? <a href={eventFeedbackPath(model.id, model.slug)} data-event-feedback="after_sources">Avísanos</a>
+      </p>
+    </section>
+    {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
+    {
+      model.relatedConcerts.length > 0 && (
+        <section class="detail-section related-concerts" aria-labelledby="relacionados-titulo">
+          <div class="section-heading"><h2 id="relacionados-titulo">Más conciertos en {model.venueName}</h2></div>
+          <div class="related-concerts__list">
+            {model.relatedConcerts.map((item) => <AgendaItem item={item} />)}
+          </div>
+        </section>
+      )
+    }
+  </article>
+  <script>
+    import { initEventAnalytics } from '../../../lib/analytics/browser.ts';
+    initEventAnalytics();
+  </script>
+</Layout>
+
+<style>
+  .related-concerts__list { border-top: 1px solid var(--color-text); }
+  .related-concerts :global(.agenda-item) {
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    grid-template-areas: 'when main' '. venue' '. signal';
+    min-height: 0;
+  }
+  .related-concerts :global(.agenda-item__venue),
+  .related-concerts :global(.agenda-item__signal) {
+    border-top: 1px solid var(--color-border);
+  }
+</style>

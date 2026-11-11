@@ -1,0 +1,970 @@
+import path from 'node:path';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { describe, expect, it } from 'vitest';
+import { AI_CALL_PURPOSES, AiUnusableOutputError, excerptAiOutput, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
+import { maxOutputTokensForPurpose } from '../src/ingestion/classification/ai-request.ts';
+import {
+  AiTransportError,
+  makeRoute,
+  type AiRoute,
+  type AiTransport,
+  type AiTransportCall,
+  type AiTransportResult,
+} from '../src/ingestion/classification/ai-transport.ts';
+import {
+  AI_FREE_PROVIDERS,
+  CLOUDFLARE_ZERO_COST_MODELS,
+  GROQ_DEFAULT_MODELS,
+  inspectFreePoolFromEnv,
+  MISTRAL_DEFAULT_MODELS,
+  KILO_QUARANTINED_MODELS,
+  KILO_ZERO_COST_MODELS,
+  OPENROUTER_QUARANTINED_MODELS,
+  OPENROUTER_ZERO_COST_MODELS,
+  VERCEL_ZERO_COST_MODELS,
+  ZAI_ZERO_COST_MODELS,
+  type AiEnv,
+} from '../src/ingestion/classification/provider.ts';
+import { GEMINI_DEFAULT_MODELS } from '../src/ingestion/classification/gemini-config.ts';
+import {
+  AI_SMOKE_SLOW_THRESHOLD_MS,
+  AI_SMOKE_TIMEOUT_MS,
+  AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+  discoverAiSmokeTargets,
+  discoveryFromInspection,
+  extractProviderErrorCode,
+  loadAiSmokeFixtures,
+  parseAiSmokeArgs,
+  parseAiSmokeOutputArgs,
+  purposesToSmoke,
+  runAiRouteSmoke,
+  runAiSmoke,
+  smokeHealth,
+  smokePaceIntervalMs,
+  smokeProviderConcurrency,
+  summarizeProviders,
+  type AiSmokeDiscovery,
+  type AiSmokeFixture,
+  type AiSmokeProviderStatus,
+} from '../src/cli/ai-smoke.ts';
+import { writeAiSmokeArtifacts } from '../src/cli/ai-smoke-report.ts';
+
+const ROOT = path.join(import.meta.dirname, '..');
+const ALL_FREE_ENV: AiEnv = {
+  AI_ZERO_COST_ONLY: 'true',
+  GEMINI_API_KEY: 'gemini-live-secret-key',
+  GROQ_API_KEY: 'groq-live-secret-key',
+  GROQ_FREE_TIER_CONFIRMED: 'true',
+  MISTRAL_API_KEY: 'mistral-live-secret-key',
+  MISTRAL_FREE_MODE_CONFIRMED: 'true',
+  ZAI_API_KEY: 'zai-live-secret-key',
+  CLOUDFLARE_API_TOKEN: 'cloudflare-live-secret-token',
+  CLOUDFLARE_ACCOUNT_ID: 'cloudflare-account-id-1',
+  CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+  VERCEL_AI_GATEWAY_API_KEY: 'vercel-live-secret-key',
+  VERCEL_FREE_TIER_CONFIRMED: 'true',
+  KILO_API_KEY: 'kilo-live-secret-key',
+  KILO_FREE_TIER_CONFIRMED: 'true',
+  OPENROUTER_API_KEY: 'openrouter-live-secret-key',
+  OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+};
+
+const fixtures = await loadAiSmokeFixtures(ROOT);
+
+describe('excerptAiOutput', () => {
+  it('reutiliza la sanitización existente y omite contenido vacío', () => {
+    expect(excerptAiOutput({ eligibility: 'eligible' })).toBe('{"eligibility":"eligible"}');
+    expect(excerptAiOutput('sk-abcdefghijklmnopqrstuvwxyz')).toBe('[redacted]');
+    expect(excerptAiOutput(undefined)).toBeUndefined();
+    expect(excerptAiOutput(null)).toBeUndefined();
+    expect(excerptAiOutput('  a\n\nb  ')).toBe('a b');
+  });
+});
+
+describe('CLI, fixtures y descubrimiento', () => {
+  it('mantiene los modos básicos y all-purposes', () => {
+    expect(parseAiSmokeArgs([])).toBeUndefined();
+    expect(parseAiSmokeArgs(['--all-routes'])).toEqual({
+      allRoutes: true, allPurposes: false, purposes: ['eligibility'],
+    });
+    expect(parseAiSmokeArgs(['--route', 'groq:openai/gpt-oss-120b', '--all-purposes'])).toEqual({
+      allRoutes: false,
+      allPurposes: true,
+      route: 'groq:openai/gpt-oss-120b',
+      purposes: [...AI_CALL_PURPOSES],
+    });
+    expect(parseAiSmokeArgs(['--route', 'x:y', '--purpose', 'taxonomy', '--all-purposes'])).toBeUndefined();
+    expect(purposesToSmoke({ allRoutes: true, allPurposes: false })).toEqual(['eligibility']);
+    expect(purposesToSmoke({ allRoutes: true, allPurposes: true })).toEqual([...AI_CALL_PURPOSES]);
+  });
+
+  it('cada fixture declara una expectativa semántica inequívoca', () => {
+    expect(fixtures.map((fixture) => fixture.purpose)).toEqual([...AI_CALL_PURPOSES]);
+    expect(fixture('eligibility').expected).toEqual({ eligibility: 'include', formats: ['chamber'] });
+    expect(fixture('composer-extraction').expected).toEqual({ composers: ['Johann Sebastian Bach'] });
+    expect(fixture('access-classification').expected).toEqual({ classification: 'free' });
+    expect(fixture('taxonomy').expected).toEqual({ formats: ['chamber'] });
+  });
+
+  it('descubre exactamente las routes y conserva transports/límites de producción', () => {
+    const productionInspection = inspectFreePoolFromEnv(ALL_FREE_ENV);
+    const discovered = discoveryFromInspection(productionInspection);
+    const production = productionInspection.routes;
+    expect(discovered.routes.map((route) => route.routeId)).toEqual(production.map((route) => route.routeId));
+    expect(discovered.routes.map((route) => route.routeId)).toEqual([
+      ...GEMINI_DEFAULT_MODELS.map((model) => `gemini:${model}`),
+      ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
+      ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
+      ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
+      ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
+      ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
+      ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
+      ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
+    ]);
+    expect(discovered.routes.every((route, index) => route.transport === production[index]!.transport)).toBe(true);
+    expect(discovered.providers.map((item) => item.provider)).toEqual([...AI_FREE_PROVIDERS]);
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('kilo:dots-studio/dots-3-note-preview:free');
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b:free');
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b');
+    expect(KILO_QUARANTINED_MODELS).toEqual([]);
+    expect(OPENROUTER_QUARANTINED_MODELS).toEqual([
+      'openai/gpt-oss-20b:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+    ]);
+  });
+
+  it('informa proveedores esperados sin credenciales en vez de ocultarlos', () => {
+    const discovered = discoverAiSmokeTargets({
+      AI_ZERO_COST_ONLY: 'true',
+      GEMINI_API_KEY: 'gemini-live-secret-key',
+    });
+    const byProvider = Object.fromEntries(discovered.providers.map((item) => [item.provider, item]));
+    expect(byProvider.gemini?.status).toBe('ready');
+    expect(byProvider.groq).toMatchObject({ status: 'unconfigured', reason: 'falta GROQ_API_KEY' });
+    expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
+    expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
+    expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
+    expect(byProvider.vercel).toMatchObject({ status: 'disabled', reason: 'provider sin routes activas por política zero-cost' });
+    expect(byProvider.kilo).toMatchObject({ status: 'disabled', reason: 'provider sin routes activas por política zero-cost' });
+    expect(byProvider.openrouter).toMatchObject({ status: 'unconfigured', reason: 'falta OPENROUTER_API_KEY' });
+  });
+});
+
+describe('runner directo one-shot', () => {
+  it('hace exactamente un transport request por route/purpose con el request real', async () => {
+    const calls: AiTransportCall[] = [];
+    const routes = [fakeRoute('groq:one', async (call) => {
+      calls.push(call);
+      return { value: validOutput(call.request.purpose), status: 'completed' };
+    })];
+    const result = await runAllPurposes(routes);
+
+    expect(calls).toHaveLength(AI_CALL_PURPOSES.length);
+    expect(calls.map((call) => call.request.purpose)).toEqual([...AI_CALL_PURPOSES]);
+    expect(calls.every((call) => call.model === 'one' && call.timeoutMs === 30_000)).toBe(true);
+    expect(calls.every((call) => call.request.contractVersion > 0 && call.request.system && call.request.user)).toBe(true);
+    expect(result.requests).toBe(4);
+    expect(result.routes[0]?.result).toBe('PASS');
+  });
+
+  it('reintenta una vez sólo errores transitorios; schema/auth/404/400 no reintentan', async () => {
+    const counts = new Map<string, number>();
+    const routes = [
+      fakeRoute('groq:timeout', async () => {
+        bump(counts, 'timeout');
+        throw new AiTransportError('timeout', { kind: 'timeout' });
+      }),
+      fakeRoute('mistral:rate', async () => {
+        bump(counts, 'rate');
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }),
+      fakeRoute('zai:fivexx', async () => {
+        bump(counts, 'fivexx');
+        throw new AiTransportError('HTTP 503', { kind: 'transport', status: 503, retryable: true });
+      }),
+      fakeRoute('gemini:schema', async () => {
+        bump(counts, 'schema');
+        return { value: { eligibility: 'wrong' } };
+      }),
+      fakeRoute('groq:auth', async () => {
+        bump(counts, 'auth');
+        throw new AiTransportError('HTTP 401', { kind: 'auth', status: 401 });
+      }),
+      fakeRoute('openrouter:missing', async () => {
+        bump(counts, 'missing');
+        throw new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 });
+      }),
+      fakeRoute('kilo:bad-request', async () => {
+        bump(counts, 'bad');
+        throw new AiTransportError('HTTP 400', { kind: 'bad-request', status: 400 });
+      }),
+    ];
+    const sleeps: number[] = [];
+    const result = await runBasic(routes, { sleep: async (ms) => { sleeps.push(ms); } });
+
+    expect(Object.fromEntries(counts)).toEqual({
+      timeout: 2, rate: 2, fivexx: 2, schema: 1, auth: 1, missing: 1, bad: 1,
+    });
+    expect(sleeps).toEqual([
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+    ]);
+    expect(result.requests).toBe(10);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'TIMEOUT', 'RATE_LIMIT', 'TRANSPORT_ERROR', 'SCHEMA_FAIL', 'AUTH', 'MODEL_UNAVAILABLE', 'REQUEST_ERROR',
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.attempts)).toEqual([2, 2, 2, 1, 1, 1, 1]);
+    expect(result.routes.map((route) => route.health)).toEqual([
+      'DEGRADED', 'DEGRADED', 'DEGRADED', 'FAIL', 'FAIL', 'FAIL', 'FAIL',
+    ]);
+  });
+
+  it('provider-busy con espera larga difiere el retry y no oculta otras routes', async () => {
+    const counts = new Map<string, number>();
+    const routes = [
+      fakeRoute('zai:busy', async () => {
+        bump(counts, 'busy');
+        throw new AiTransportError('zai HTTP 429 code 1305', {
+          kind: 'rate-limit', status: 429, code: '1305', pressure: 'capacity',
+          retryAfterMs: 60_000,
+          rateLimit: { providerCode: '1305', dimensions: ['capacity'] },
+        });
+      }),
+      fakeRoute('groq:ok', async (call) => {
+        bump(counts, 'ok');
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ];
+    const result = await runBasic(routes, { sleep: async () => {} });
+    expect(Object.fromEntries(counts)).toEqual({ busy: 1, ok: 1 });
+    expect(result.requests).toBe(2);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'PROVIDER_BUSY', 'PASS',
+    ]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ httpStatus: 429, attempts: 1, retryDeferredMs: 60_000 });
+    expect(result.routes[0]?.health).toBe('DEGRADED');
+    expect(result.routes[1]?.health).toBe('HEALTHY');
+  });
+
+  it('un fallo funcional de eligibility no oculta composer, access ni taxonomy', async () => {
+    const seen: AiCallPurpose[] = [];
+    const route = fakeRoute('groq:semantic', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        return { value: { eligibility: 'exclude', formats: ['chamber'], eras: [], evidence: ['x'] } };
+      }
+      return { value: validOutput(call.request.purpose) };
+    });
+    const result = await runAllPurposes([route]);
+
+    expect(seen).toEqual([...AI_CALL_PURPOSES]);
+    expect(result.routes[0]?.purposes).toMatchObject({
+      eligibility: 'SEMANTIC_FAIL',
+      'composer-extraction': 'PASS',
+      'access-classification': 'PASS',
+      taxonomy: 'PASS',
+    });
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ schemaValid: true, semanticValid: false });
+    expect(result.routes[0]?.result).toBe('PARTIAL');
+    expect(result.exitCode).toBe(1);
+  });
+
+  it.each([
+    ['AUTH', new AiTransportError('HTTP 401', { kind: 'auth', status: 401 })],
+    ['MODEL_UNAVAILABLE', new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 })],
+    ['DAILY_QUOTA', new AiTransportError('HTTP 429 daily quota', {
+      kind: 'rate-limit', status: 429, quotaExhausted: true,
+    })],
+  ] as const)('%s bloquea los purposes restantes de esa route sin gastar cuota', async (status, error) => {
+    let requests = 0;
+    const result = await runAllPurposes([fakeRoute(`zai:${status}`, async () => {
+      requests += 1;
+      throw error;
+    })]);
+
+    expect(requests).toBe(1);
+    expect(result.requests).toBe(1);
+    expect(result.routes[0]?.purposeResults.map((item) => item.outcome)).toEqual([
+      status, 'BLOCKED', 'BLOCKED', 'BLOCKED',
+    ]);
+    expect(result.routes[0]?.purposeResults[1]).toMatchObject({ requestMade: false, blockedBy: status });
+  });
+
+  it('un JSON válido con enum inválido es SCHEMA_FAIL y guarda un outputExcerpt sanitizado', async () => {
+    const payload = {
+      eligibility: 'eligible',
+      formats: ['recital'],
+      evidence: ['piano de Bach', ALL_FREE_ENV.GROQ_API_KEY],
+    };
+    const result = await runBasic([fakeRoute('zai:enum', async () => ({ value: payload }))]);
+    const cell = result.routes[0]?.purposeResults[0];
+
+    expect(cell?.outcome).toBe('SCHEMA_FAIL');
+    expect(cell?.message).toMatch(/include.*exclude.*uncertain/i);
+    expect(cell?.outputExcerpt).toContain('"eligibility":"eligible"');
+    expect(cell?.outputExcerpt).toContain('"formats":["recital"]');
+    expect(cell?.outputExcerpt).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(cell?.outputExcerpt).toContain('[GROQ_API_KEY]');
+    expect(result.json.routes[0]?.purposeResults[0]?.outputExcerpt).toBe(cell?.outputExcerpt);
+    expect(result.markdown).toContain('output `');
+    expect(result.markdown).toContain('"eligibility":"eligible"');
+    expect(result.markdown).not.toContain(ALL_FREE_ENV.GROQ_API_KEY!);
+    expect(result.report).toContain('"eligibility":"eligible"');
+  });
+
+  it('INVALID_OUTPUT, OUTPUT_LIMIT y SEMANTIC_FAIL también pueden mostrar excerpt', async () => {
+    const result = await runBasic([
+      fakeRoute('groq:invalid', async () => {
+        throw new AiUnusableOutputError('JSON inválido', {
+          kind: 'malformed',
+          excerpt: `not-json sk-live-secret-zzzz ${ALL_FREE_ENV.GROQ_API_KEY}`,
+        });
+      }),
+      fakeRoute('gemini:capped', async () => {
+        throw new AiUnusableOutputError('incompleta', {
+          kind: 'incomplete',
+          finishReason: 'max_tokens',
+          tokens: { output: maxOutputTokensForPurpose('eligibility') },
+          excerpt: '{"eligibility":"include","formats":["chamber"]',
+        });
+      }),
+      fakeRoute('mistral:semantic', async () => ({
+        value: { eligibility: 'exclude', formats: ['chamber'], evidence: ['x'] },
+      })),
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'INVALID_OUTPUT', 'OUTPUT_LIMIT', 'SEMANTIC_FAIL',
+    ]);
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toContain('not-json');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toContain('[redacted]');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).not.toContain('sk-live-secret-zzzz');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(result.routes[1]?.purposeResults[0]?.outputExcerpt).toContain('"eligibility":"include"');
+    expect(result.routes[2]?.purposeResults[0]?.outputExcerpt).toContain('"eligibility":"exclude"');
+    expect(result.markdown).toContain('output `{"eligibility":"exclude"');
+  });
+
+  it('omite outputExcerpt cuando no hay contenido del modelo', async () => {
+    const result = await runBasic([
+      fakeRoute('groq:empty', async () => {
+        throw new AiUnusableOutputError('JSON inválido', { kind: 'malformed' });
+      }),
+      fakeRoute('groq:auth', async () => {
+        throw new AiTransportError('HTTP 401', { kind: 'auth', status: 401 });
+      }),
+    ]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ outcome: 'INVALID_OUTPUT' });
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
+    expect(result.routes[1]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
+    expect(result.markdown).not.toContain('output `');
+  });
+
+  it('distingue output inválido, schema fail, semantic fail y PASS', async () => {
+    const routes = [
+      fakeRoute('groq:invalid', async () => {
+        throw new AiUnusableOutputError('JSON inválido', { kind: 'malformed' });
+      }),
+      fakeRoute('groq:schema', async () => ({ value: { eligibility: 'include', formats: ['invented'] } })),
+      fakeRoute('groq:wrong', async () => ({
+        value: { eligibility: 'include', formats: ['recital'], eras: [], evidence: ['x'] },
+      })),
+      fakeRoute('groq:pass', async () => ({ value: validOutput('eligibility') })),
+    ];
+    const result = await runBasic(routes);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'INVALID_OUTPUT', 'SCHEMA_FAIL', 'SEMANTIC_FAIL', 'PASS',
+    ]);
+    expect(result.routes[3]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
+  });
+
+  it('un 429 transitorio tampoco bloquea los purposes posteriores', async () => {
+    const seen: AiCallPurpose[] = [];
+    const result = await runAllPurposes([fakeRoute('groq:transient-429', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }
+      return { value: validOutput(call.request.purpose) };
+    })], { sleep: async () => {} });
+    expect(seen).toEqual(['eligibility', 'eligibility', ...AI_CALL_PURPOSES.slice(1)]);
+    expect(result.requests).toBe(5);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'RATE_LIMIT', attempts: 2, health: 'DEGRADED',
+    });
+    expect(result.routes[0]?.purposes['composer-extraction']).toBe('PASS');
+  });
+
+  it('un 400 de compatibilidad conserva código/mensaje y tampoco bloquea otros purposes', async () => {
+    const seen: AiCallPurpose[] = [];
+    const result = await runAllPurposes([fakeRoute('groq:request-error', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        throw new AiTransportError('HTTP 400: {"code":"json_validate_failed"}', {
+          kind: 'unavailable', status: 400,
+        });
+      }
+      return { value: validOutput(call.request.purpose) };
+    })]);
+    expect(seen).toEqual([...AI_CALL_PURPOSES]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'REQUEST_ERROR', httpStatus: 400, providerErrorCode: 'json_validate_failed',
+    });
+    expect(result.requests).toBe(4);
+  });
+
+  it('no toca cacheIdentity ni estado persistente del pool', async () => {
+    const transport: AiTransport = {
+      provider: 'groq',
+      cacheIdentity: () => { throw new Error('el smoke no debe consultar cache'); },
+      request: async (call) => ({ value: validOutput(call.request.purpose) }),
+    };
+    const route = makeRoute({ provider: 'groq', model: 'stateless', transport });
+    const result = await runBasic([route], { env: { ...ALL_FREE_ENV, AI_STATE_DIR: '/should/not/be/touched' } });
+    expect(result.overall).toBe('PASS');
+  });
+});
+
+describe('concurrencia, pacing y diagnóstico', () => {
+  it('los providers avanzan independientemente y respeta providerMaxConcurrent=1', async () => {
+    const firstZaiStarted = deferred<void>();
+    const releaseFirstZai = deferred<void>();
+    const groqStarted = deferred<void>();
+    let zaiActive = 0;
+    let maxZaiActive = 0;
+    let zaiCalls = 0;
+    const zaiRequest = async (call: AiTransportCall): Promise<AiTransportResult> => {
+      zaiCalls += 1;
+      zaiActive += 1;
+      maxZaiActive = Math.max(maxZaiActive, zaiActive);
+      if (zaiCalls === 1) {
+        firstZaiStarted.resolve();
+        await releaseFirstZai.promise;
+      }
+      zaiActive -= 1;
+      return { value: validOutput(call.request.purpose) };
+    };
+    const routes = [
+      fakeRoute('zai:one', zaiRequest, { providerMaxConcurrent: 1 }),
+      fakeRoute('zai:two', zaiRequest, { providerMaxConcurrent: 1 }),
+      fakeRoute('groq:one', async (call) => {
+        groqStarted.resolve();
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ];
+
+    const running = runBasic(routes);
+    await firstZaiStarted.promise;
+    await groqStarted.promise;
+    expect(zaiCalls).toBe(1);
+    releaseFirstZai.resolve();
+    const result = await running;
+
+    expect(result.overall).toBe('PASS');
+    expect(zaiCalls).toBe(2);
+    expect(maxZaiActive).toBe(1);
+    expect(smokeProviderConcurrency(routes.filter((route) => route.provider === 'zai'))).toBe(1);
+  });
+
+  it('aplica el pacing real entre purposes de una route sin retries ocultos', async () => {
+    let now = 1_000;
+    const sleeps: number[] = [];
+    let calls = 0;
+    const route = fakeRoute('groq:paced', async (call) => {
+      calls += 1;
+      return { value: validOutput(call.request.purpose) };
+    }, { rpm: 30 });
+    const result = await runAllPurposes([route], {
+      now: () => now,
+      sleep: async (ms) => { sleeps.push(ms); now += ms; },
+    });
+
+    expect(calls).toBe(4);
+    expect(sleeps).toEqual([2_000, 2_000, 2_000]);
+    expect(smokePaceIntervalMs({ rpm: 30 })).toBe(2_000);
+    expect(result.requests).toBe(4);
+  });
+
+  it('la matriz y el resumen representan estados mixtos, requests y duración', async () => {
+    let now = 0;
+    const result = await runAllPurposes([
+      fakeRoute('groq:mixed', async (call) => {
+        now += 25;
+        if (call.request.purpose === 'access-classification') {
+          return { value: { classification: 'paid', evidence: 'Entrada' }, status: 'completed' };
+        }
+        return { value: validOutput(call.request.purpose), status: 'completed' };
+      }),
+      fakeRoute('mistral:pass', async (call) => {
+        now += 25;
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ], { now: () => now });
+
+    expect(result.routes.map((route) => route.result)).toEqual(['PARTIAL', 'PASS']);
+    expect(result.requests).toBe(8);
+    expect(result.report).toContain('SEMANTIC_FAIL');
+    expect(result.report).toContain('**1 PASS**');
+    expect(result.report).toContain('**1 PARTIAL**');
+    expect(result.report).toContain('HTTP requests: **8**');
+    expect(result.report).toContain('Resultado global: **FAIL**');
+    expect(result.markdown).toContain('| Provider | Model |');
+    expect(result.markdown).toContain('| Health |');
+    expect(result.json.overall).toBe('FAIL');
+    expect(result.json.requests).toBe(8);
+    expect(result.json.schemaVersion).toBe(3);
+  });
+
+  it('conserva HTTP status, provider code y mensaje útil sin secretos', async () => {
+    const lines: string[] = [];
+    const route = fakeRoute('groq:diagnostic', async () => {
+      throw new AiTransportError(
+        `groq HTTP 400: {"code":"json_validate_failed","key":"${ALL_FREE_ENV.GROQ_API_KEY}"}`,
+        { kind: 'unavailable', status: 400 },
+      );
+    }, undefined, (message) => message.replaceAll(ALL_FREE_ENV.GROQ_API_KEY!, '[redacted]'));
+    const result = await runBasic([route], { log: (line) => lines.push(line) });
+    const cell = result.routes[0]?.purposeResults[0];
+
+    expect(cell).toMatchObject({
+      outcome: 'REQUEST_ERROR',
+      httpStatus: 400,
+      providerErrorCode: 'json_validate_failed',
+    });
+    expect(result.report).toContain('HTTP 400');
+    expect(result.report).toContain('code json_validate_failed');
+    expect(lines.join('\n')).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(extractProviderErrorCode('error type: json_validate_failed')).toBe('json_validate_failed');
+  });
+});
+
+function fixture<P extends AiCallPurpose>(purpose: P): Extract<AiSmokeFixture, { purpose: P }> {
+  return fixtures.find((item): item is Extract<AiSmokeFixture, { purpose: P }> => item.purpose === purpose)!;
+}
+
+function validOutput(purpose: AiCallPurpose): unknown {
+  if (purpose === 'composer-extraction') {
+    return { candidates: [{ name: 'Johann Sebastian Bach', evidence: 'Johann Sebastian Bach' }] };
+  }
+  if (purpose === 'access-classification') {
+    return { classification: 'free', evidence: 'Entrada libre hasta completar aforo.' };
+  }
+  return { eligibility: 'include', formats: ['chamber'], eras: [], evidence: ['música de cámara'] };
+}
+
+function fakeRoute(
+  routeId: string,
+  request: (call: AiTransportCall) => Promise<AiTransportResult>,
+  limits?: AiRoute['limits'],
+  redact?: (message: string) => string,
+): AiRoute {
+  const separator = routeId.indexOf(':');
+  const provider = routeId.slice(0, separator);
+  const model = routeId.slice(separator + 1);
+  return makeRoute({
+    provider,
+    model,
+    transport: { provider, request, cacheIdentity: () => ({ routeId }), ...(redact ? { redact } : {}) },
+    ...(limits ? { limits } : {}),
+  });
+}
+
+function discovery(routes: AiRoute[]): AiSmokeDiscovery {
+  return { routes, providers: allReady(routes) };
+}
+
+function allReady(routes: AiRoute[]): AiSmokeProviderStatus[] {
+  return AI_FREE_PROVIDERS.map((provider) => ({
+    provider,
+    status: 'ready' as const,
+    routeIds: routes.filter((route) => route.provider === provider).map((route) => route.routeId),
+  }));
+}
+
+function runBasic(
+  routes: AiRoute[],
+  overrides: Partial<Parameters<typeof runAiSmoke>[0]> = {},
+) {
+  return runAiSmoke({
+    env: ALL_FREE_ENV,
+    fixtures,
+    allRoutes: true,
+    allPurposes: false,
+    purposes: ['eligibility'],
+    discover: () => discovery(routes),
+    ...overrides,
+  });
+}
+
+function runAllPurposes(
+  routes: AiRoute[],
+  overrides: Partial<Parameters<typeof runAiSmoke>[0]> = {},
+) {
+  return runAiSmoke({
+    env: ALL_FREE_ENV,
+    fixtures,
+    allRoutes: true,
+    allPurposes: true,
+    purposes: [...AI_CALL_PURPOSES],
+    discover: () => discovery(routes),
+    ...overrides,
+  });
+}
+
+function bump(counts: Map<string, number>, key: string): void {
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+describe('runAiRouteSmoke', () => {
+  it('usa directamente la route recibida', async () => {
+    let calls = 0;
+    const rows = await runAiRouteSmoke({
+      route: fakeRoute('mistral:one', async (call) => {
+        calls += 1;
+        return { value: validOutput(call.request.purpose) };
+      }),
+      purposes: ['eligibility'],
+      fixtures,
+    });
+    expect(calls).toBe(1);
+    expect(rows[0]?.outcome).toBe('PASS');
+  });
+});
+
+describe('timeout SLOW, output limit y reportes', () => {
+  it('usa 30 s de hard timeout y marca 15 s como SLOW, no TIMEOUT', async () => {
+    const timeouts: number[] = [];
+    let now = 0;
+    const result = await runBasic([fakeRoute('groq:slow', async (call) => {
+      timeouts.push(call.timeoutMs);
+      now += 18_000;
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now });
+
+    expect(timeouts).toEqual([AI_SMOKE_TIMEOUT_MS]);
+    expect(AI_SMOKE_TIMEOUT_MS).toBe(30_000);
+    expect(AI_SMOKE_SLOW_THRESHOLD_MS).toBe(15_000);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'SLOW', success: true, slow: true, latencyMs: 18_000,
+    });
+    expect(result.routes[0]?.result).toBe('PASS');
+    expect(result.routes[0]?.health).toBe('HEALTHY');
+    expect(result.overall).toBe('PASS');
+    expect(result.exitCode).toBe(0);
+    expect(result.report).toContain('SLOW');
+    expect(result.report).toContain('### Slow');
+  });
+
+  it('15 s exactos son SLOW y un corte a 30 s es TIMEOUT', async () => {
+    let now = 0;
+    const slow = await runBasic([fakeRoute('groq:edge', async (call) => {
+      now += 15_000;
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now });
+    expect(slow.routes[0]?.purposeResults[0]?.outcome).toBe('SLOW');
+
+    now = 0;
+    const timedOut = await runBasic([fakeRoute('groq:timeout', async () => {
+      now += 30_000;
+      throw new AiTransportError('timeout after 30000ms', { kind: 'timeout' });
+    })], { now: () => now, sleep: async () => {} });
+    expect(timedOut.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'TIMEOUT', success: false, latencyMs: 60_000, lastAttemptLatencyMs: 30_000, totalElapsedMs: 60_000, attempts: 2, health: 'DEGRADED',
+    });
+  });
+
+  it('incomplete por tope de tokens es OUTPUT_LIMIT, no INVALID_OUTPUT', async () => {
+    const max = maxOutputTokensForPurpose('eligibility');
+    const result = await runBasic([fakeRoute('gemini:capped', async () => {
+      throw new AiUnusableOutputError('Gemini devolvió una interacción incompleta', {
+        kind: 'incomplete',
+        status: 'incomplete',
+        finishReason: 'max_tokens',
+        tokens: { input: 1002, output: max - 10, thought: 0 },
+      });
+    })]);
+    const cell = result.routes[0]?.purposeResults[0];
+    expect(cell).toMatchObject({
+      outcome: 'OUTPUT_LIMIT',
+      outputReachedLimit: true,
+      requestedMaxOutputTokens: max,
+      finishReason: 'max_tokens',
+    });
+    expect(cell?.message).toContain(`outputTokens ${max - 10} / requestedMaxOutputTokens ${max}`);
+    expect(result.report).toContain('OUTPUT_LIMIT');
+    expect(result.report).toContain('### Output truncated');
+    expect(result.json.routes[0]?.purposeResults[0]?.outcome).toBe('OUTPUT_LIMIT');
+  });
+
+  it('JSON realmente malformado sin señal de recorte sigue INVALID_OUTPUT', async () => {
+    const result = await runBasic([fakeRoute('gemini:junk', async () => {
+      throw new AiUnusableOutputError('Gemini devolvió JSON inválido', {
+        kind: 'malformed',
+        status: 'completed',
+        tokens: { input: 100, output: 20 },
+      });
+    })]);
+    expect(result.routes[0]?.purposeResults[0]?.outcome).toBe('INVALID_OUTPUT');
+    expect(result.report).toContain('### Malformed JSON');
+  });
+
+  it('clasifica cuota diaria, RPM, OTPM, concurrency y overload de Z.AI', async () => {
+    const sleeps: number[] = [];
+    const result = await runBasic([
+      fakeRoute('gemini:daily', async () => {
+        throw new AiTransportError('Gemini HTTP 429', {
+          kind: 'rate-limit', status: 429, quotaExhausted: true, pressure: 'daily',
+          rateLimit: { quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', dailyQuota: true, dimensions: ['daily'] },
+        });
+      }),
+      fakeRoute('groq:rpm', async () => {
+        throw new AiTransportError('groq HTTP 429', {
+          kind: 'rate-limit', status: 429, pressure: 'request-frequency',
+          rateLimit: { remainingRequests: 0, dimensions: ['request-frequency'] },
+        });
+      }),
+      fakeRoute('gemini:otpm', async () => {
+        throw new AiTransportError('Gemini HTTP 429', {
+          kind: 'rate-limit', status: 429, pressure: 'otpm',
+          rateLimit: { quotaMetric: 'generate_content_free_tier_output_tokens', dimensions: ['otpm'] },
+        });
+      }),
+      fakeRoute('zai:busy', async () => {
+        throw new AiTransportError('zai HTTP 503', {
+          kind: 'rate-limit', status: 503, code: '1305', pressure: 'capacity',
+          rateLimit: { providerCode: '1305', dimensions: ['capacity'] },
+        });
+      }),
+      fakeRoute('zai:conc', async () => {
+        throw new AiTransportError('zai HTTP 429', {
+          kind: 'rate-limit', status: 429, code: '1302', pressure: 'concurrency',
+          rateLimit: { providerCode: '1302', dimensions: ['concurrency'] },
+        });
+      }),
+    ], { sleep: async (ms) => { sleeps.push(ms); } });
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'DAILY_QUOTA', 'RPM', 'OTPM', 'PROVIDER_BUSY', 'CONCURRENCY',
+    ]);
+    expect(result.routes.map((route) => route.health)).toEqual([
+      'FAIL', 'DEGRADED', 'DEGRADED', 'DEGRADED', 'DEGRADED',
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.attempts)).toEqual([1, 2, 2, 2, 2]);
+    expect(result.requests).toBe(9);
+    expect(sleeps).toEqual(Array(4).fill(AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS));
+    expect(result.report).toContain('### Daily quota');
+    expect(result.report).toContain('### Request/minute');
+    expect(result.report).toContain('### Output-tokens/minute');
+    expect(result.report).toContain('### Provider overloaded');
+    expect(result.report).toContain('### Concurrency');
+  });
+
+  it('publica Job Summary y artifacts en PASS y FAIL, sin secretos', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'ai-smoke-report-'));
+    try {
+      const fail = await runBasic([fakeRoute('groq:fail', async () => {
+        throw new AiTransportError(
+          `groq HTTP 401 key=${ALL_FREE_ENV.GROQ_API_KEY}`,
+          { kind: 'auth', status: 401, requestId: 'req_fail_1' },
+        );
+      })], { commitSha: 'abc1234', timestamp: '2026-09-12T08:00:00.000Z' });
+      const pass = await runBasic([fakeRoute('groq:ok', async (call) => ({
+        value: validOutput(call.request.purpose), requestId: 'req_ok_1',
+      }))], { commitSha: 'abc1234', timestamp: '2026-09-12T08:00:00.000Z' });
+
+      const failSummary = path.join(dir, 'fail-summary.md');
+      const passSummary = path.join(dir, 'pass-summary.md');
+      await writeAiSmokeArtifacts({
+        result: fail, reportDir: path.join(dir, 'fail'), summaryPath: failSummary, env: ALL_FREE_ENV as NodeJS.ProcessEnv,
+      });
+      await writeAiSmokeArtifacts({
+        result: pass, reportDir: path.join(dir, 'pass'), summaryPath: passSummary, env: ALL_FREE_ENV as NodeJS.ProcessEnv,
+      });
+
+      const failMd = await readFile(path.join(dir, 'fail', 'ai-smoke-report.md'), 'utf8');
+      const failJson = JSON.parse(await readFile(path.join(dir, 'fail', 'ai-smoke-report.json'), 'utf8')) as typeof fail.json;
+      const failSum = await readFile(failSummary, 'utf8');
+      const passMd = await readFile(path.join(dir, 'pass', 'ai-smoke-report.md'), 'utf8');
+      const passJson = JSON.parse(await readFile(path.join(dir, 'pass', 'ai-smoke-report.json'), 'utf8')) as typeof pass.json;
+
+      expect(fail.exitCode).toBe(1);
+      expect(pass.exitCode).toBe(0);
+      expect(failMd).toBe(failSum);
+      expect(failMd).toContain('Resultado global: **FAIL**');
+      expect(passMd).toContain('Resultado global: **PASS**');
+      expect(failJson).toMatchObject({
+        schemaVersion: 3, commitSha: 'abc1234', overall: 'FAIL',
+      });
+      expect(failJson.providerSummaries).toEqual([
+        { provider: 'groq', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 0 },
+      ]);
+      expect(failMd).toContain('## Provider health');
+      expect(failMd).toContain('Groq');
+      expect(failMd).toContain('HEALTHY: 0');
+      expect(failMd).toContain('FAIL: 1');
+      expect(failMd).toContain('## Route diagnostics');
+      expect(failMd).toContain('| Health | Result |');
+      expect(failMd).toContain('| Attempts |');
+      expect(failJson.routes[0]?.purposeResults[0]).toMatchObject({
+        outcome: 'AUTH', providerRequestId: 'req_fail_1', httpStatus: 401,
+      });
+      expect(passJson.routes[0]?.purposeResults[0]?.providerRequestId).toBe('req_ok_1');
+      expect(`${failMd}\n${JSON.stringify(failJson)}`).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('parsea overrides de timeout y report-dir', () => {
+    expect(parseAiSmokeOutputArgs([
+      '--all-routes', '--report-dir', '/tmp/out', '--timeout-ms', '45000', '--slow-threshold-ms', '20000',
+    ], {})).toEqual({
+      reportDir: '/tmp/out',
+      summaryPath: undefined,
+      timeoutMs: 45_000,
+      slowThresholdMs: 20_000,
+    });
+    expect(parseAiSmokeOutputArgs([], { GITHUB_STEP_SUMMARY: '/tmp/summary.md' }).summaryPath).toBe('/tmp/summary.md');
+  });
+});
+
+describe('salud HEALTHY/DEGRADED/FAIL y resumen por provider', () => {
+  it('resume PASS/SLOW como HEALTHY, transitorios como DEGRADED y el resto como FAIL', () => {
+    expect(smokeHealth('PASS')).toBe('HEALTHY');
+    expect(smokeHealth('SLOW')).toBe('HEALTHY');
+    expect(smokeHealth('TIMEOUT')).toBe('DEGRADED');
+    expect(smokeHealth('RATE_LIMIT')).toBe('DEGRADED');
+    expect(smokeHealth('RPM')).toBe('DEGRADED');
+    expect(smokeHealth('PROVIDER_BUSY')).toBe('DEGRADED');
+    expect(smokeHealth('AUTH')).toBe('FAIL');
+    expect(smokeHealth('MODEL_UNAVAILABLE')).toBe('FAIL');
+    expect(smokeHealth('REQUEST_ERROR')).toBe('FAIL');
+    expect(smokeHealth('SCHEMA_FAIL')).toBe('FAIL');
+    expect(smokeHealth('DAILY_QUOTA')).toBe('FAIL');
+    expect(smokeHealth('OUTPUT_LIMIT')).toBe('FAIL');
+  });
+
+  it('el resumen por provider cuenta salud observada y modelos quarantined del catálogo', async () => {
+    const result = await runBasic([
+      fakeRoute('vercel:inclusionai/ling-3.0-flash-vl-free', async (call) => ({
+        value: validOutput(call.request.purpose),
+      })),
+      fakeRoute('kilo:nex-agi/nex-n2.5-mini:free', async () => {
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }),
+      fakeRoute('openrouter:google/gemma-4-26b-a4b-it:free', async () => {
+        throw new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 });
+      }),
+    ], { sleep: async () => {} });
+
+    expect(summarizeProviders(result.routes)).toEqual([
+      { provider: 'vercel', HEALTHY: 1, DEGRADED: 0, FAIL: 0, quarantined: 0 },
+      { provider: 'kilo', HEALTHY: 0, DEGRADED: 1, FAIL: 0, quarantined: 0 },
+      { provider: 'openrouter', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 2 },
+    ]);
+    expect(result.markdown).toContain('## Provider health');
+    expect(result.markdown).toContain('Vercel\n  HEALTHY: 1\n  DEGRADED: 0\n  FAIL: 0');
+    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n\nOpenRouter');
+    expect(result.markdown).toContain('OpenRouter\n  HEALTHY: 0\n  DEGRADED: 0\n  FAIL: 1\n  QUARANTINED: 2');
+    expect(result.markdown).toContain('## Route diagnostics');
+    expect(result.json.routes[0]?.purposeResults[0]?.attempts).toBe(1);
+    expect(result.json.routes[1]?.purposeResults[0]?.attempts).toBe(2);
+    expect(result.report).toContain('attempts 2');
+  });
+});
+
+describe('auditoría smoke: tiempos y política de providers', () => {
+  it.each([429, 503])('respeta guía HTTP %s y mide todos los intentos más espera', async (status) => {
+    let now = 0;
+    let calls = 0;
+    const waits: number[] = [];
+    const result = await runBasic([fakeRoute('groq:retry', async (call) => {
+      calls += 1;
+      now += calls === 1 ? 200 : 300;
+      if (calls === 1) throw new AiTransportError('temporary overload', {
+        kind: status === 429 ? 'rate-limit' : 'transport', status, retryable: true,
+        rateLimit: { retryAfterMs: 30_000 },
+      });
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now, sleep: async (ms) => { waits.push(ms); now += ms; } });
+    expect(waits).toEqual([30_000]);
+    expect(calls).toBe(2);
+    expect(result.requests).toBe(2);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      attempts: 2, lastAttemptLatencyMs: 300, totalElapsedMs: 30_500, latencyMs: 30_500,
+      outcome: 'SLOW', success: true,
+    });
+    expect(result.routes[0]?.latencyMs).toBe(30_500);
+    expect(result.json.routes[0]?.purposeResults[0]?.totalElapsedMs).toBe(30_500);
+    expect(result.markdown).toContain('Last attempt');
+    expect(result.markdown).toContain('30.5 s');
+  });
+
+  it('mantiene el retry y la latencia legacy de Gemini con guía de 30 segundos', async () => {
+    let now = 0;
+    let calls = 0;
+    const waits: number[] = [];
+    const result = await runBasic([fakeRoute('gemini:unchanged', async (call) => {
+      now += 200;
+      if (++calls === 1) throw new AiTransportError('busy', {
+        kind: 'transport', status: 503, retryable: true, retryAfterMs: 30_000,
+      });
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now, sleep: async (ms) => { waits.push(ms); now += ms; } });
+    expect(waits).toEqual([1500]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      attempts: 2, latencyMs: 200, lastAttemptLatencyMs: 200, totalElapsedMs: 1900,
+    });
+  });
+
+  it('sin guía usa el backoff mínimo y mantiene el pacing tras el retry', async () => {
+    let now = 0;
+    let calls = 0;
+    const starts: number[] = [];
+    const route = fakeRoute('openrouter:retry', async (call) => {
+      starts.push(now);
+      now += 100;
+      if (++calls === 1) throw new AiTransportError('temporary', { kind: 'transport', status: 503 });
+      return { value: validOutput(call.request.purpose) };
+    }, { providerMinIntervalMs: 3200 });
+    const result = await runAllPurposes([route], { now: () => now, sleep: async (ms) => { now += ms; } });
+    expect(starts.slice(0, 3)).toEqual([0, 3200, 6400]);
+    expect(result.requests).toBe(5);
+  });
+
+  it('una espera diferida también evita peticiones prematuras de otros purposes', async () => {
+    let calls = 0;
+    const result = await runAllPurposes([fakeRoute('groq:deferred', async () => {
+      calls++;
+      throw new AiTransportError('busy', { kind: 'rate-limit', retryAfterMs: 60_000 });
+    })], { sleep: async () => { throw new Error('must not wait beyond the retry budget'); } });
+    expect(calls).toBe(1);
+    expect(result.requests).toBe(1);
+    expect(result.routes[0]?.health).toBe('DEGRADED');
+    expect(result.routes[0]?.purposeResults.map((r) => [r.outcome, r.attempts])).toEqual([
+      ['RATE_LIMIT', 1], ['BLOCKED', 0], ['BLOCKED', 0], ['BLOCKED', 0],
+    ]);
+  });
+
+  it('all-routes muestra providers suspendidos sin FAIL artificial ni HTTP a ellos', async () => {
+    const result = await runAiSmoke({
+      env: { ...ALL_FREE_ENV }, fixtures, allRoutes: true,
+      discover: () => ({ routes: [fakeRoute('groq:ok', async (call) => ({ value: validOutput(call.request.purpose) }))],
+        providers: [{ provider: 'kilo', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] },
+          { provider: 'vercel', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] }] }),
+    });
+    expect(result.overall).toBe('PASS');
+    expect(result.missing).toBe(0);
+    expect(result.requests).toBe(1);
+    expect(result.json.disabledProviders).toHaveLength(2);
+    expect(result.markdown).toContain('## Disabled providers');
+    expect(result.markdown).toContain('sin modelos aprobados');
+  });
+});

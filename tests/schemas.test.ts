@@ -102,6 +102,13 @@ describe('schemas', () => {
     expect(parsed.citations[0]?.externalId).toBe('matinees-2026');
   });
 
+  it('acepta slugAliases históricos y rechaza una lista vacía', () => {
+    expect(eventSchema.parse(makeEvent({ slugAliases: ['matinees-antigua'] })).slugAliases).toEqual([
+      'matinees-antigua',
+    ]);
+    expect(eventSchema.safeParse(makeEvent({ slugAliases: [] })).success).toBe(false);
+  });
+
   it('rechaza un externalId vacío', () => {
     const result = eventSchema.safeParse(
       makeEvent({
@@ -134,6 +141,20 @@ describe('referencias y estructura', () => {
     });
     const issues = findReferenceIssues(catalog);
     expect(issues.some((issue) => issue.code === 'duplicate-id')).toBe(true);
+  });
+
+  it('detecta un slugAliases que colisiona con el slug de otro evento', () => {
+    const catalog = makeCatalog({
+      events: [
+        makeEvent(),
+        makeEvent({
+          id: 'evt_otro',
+          slug: 'otro',
+          slugAliases: ['matinees-de-otono'],
+        }),
+      ],
+    });
+    expect(findReferenceIssues(catalog).some((issue) => issue.code === 'duplicate-slug')).toBe(true);
   });
 
   it('detecta desajuste Madrid / area', () => {

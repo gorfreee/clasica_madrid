@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "slug": "escuela-superior-musica-reina-sofia-auditorio-sony",
+  "name": "Escuela Superior de Música Reina Sofía — Auditorio Sony",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Requena, 1, 28013 Madrid",
+  "url": "https://www.escuelasuperiordemusicareinasofia.es/auditorio-sony/",
+  "lastVerifiedAt": "2026-09-15",
+  "parentVenueId": "ven_escuela_superior_musica_reina_sofia",
+  "spaceName": "Auditorio Sony"
+}

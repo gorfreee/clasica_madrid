@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_ayto_torrejon_es_la_tabernera_del_puerto",
+  "slug": "la-tabernera-del-puerto-2",
+  "title": "La tabernera del puerto",
+  "status": "scheduled",
+  "venueId": "ven_teatro_municipal_jose_maria_rodero",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_ayto_torrejon_es_la_tabernera_del_puerto_01",
+      "date": "2026-12-05",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Margarita Marbán"
+    },
+    {
+      "name": "Eduardo Pomares"
+    },
+    {
+      "name": "Alberto Arrabal"
+    },
+    {
+      "name": "Tony Alonso"
+    },
+    {
+      "name": "Fran García"
+    },
+    {
+      "name": "David López / Dani Escrig"
+    },
+    {
+      "name": "Pedro Javier"
+    },
+    {
+      "name": "Paloma Porcel"
+    },
+    {
+      "name": "Imanol Heras"
+    },
+    {
+      "name": "Óscar López"
+    },
+    {
+      "name": "Coro de la compañía",
+      "role": "choir"
+    },
+    {
+      "name": "Orquesta de la compañía",
+      "role": "orchestra"
+    },
+    {
+      "name": "Enrique García Requena",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Pablo Sorozábal"
+    }
+  ],
+  "works": [
+    {
+      "title": "La tabernera del puerto",
+      "composerName": "Pablo Sorozábal"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_ayto_torrejon_es",
+      "url": "https://teatro.ayto-torrejon.es/eventos/teatro/la-tabernera-del-puerto",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_teatro_ayto_torrejon_es",
+  "lastVerifiedAt": "2026-10-17"
+}

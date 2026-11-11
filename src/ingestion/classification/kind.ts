@@ -26,6 +26,8 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_teatro_la_latina',
   'ven_gran_teatro_principe_pio',
   'ven_real_teatro_retiro',
+  'ven_real_teatro_retiro_sala_principal',
+  'ven_real_teatro_retiro_sala_pacifico',
   'ven_auditorio_nacional',
   'ven_auditorio_nacional_sala_sinfonica',
   'ven_auditorio_nacional_sala_camara',
@@ -43,6 +45,7 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_circulo_bellas_artes_sala_columnas',
   'ven_condeduque',
   'ven_condeduque_auditorio',
+  'ven_condeduque_teatro',
   'ven_museo_reina_sofia',
   'ven_museo_reina_sofia_auditorio_400',
   'ven_museo_prado',
@@ -52,6 +55,11 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_casa_de_america',
   'ven_casa_de_america_auditorio_gabriela_mistral',
   'ven_sala_manuel_falla_sgae',
+  'ven_real_coliseo_carlos_iii',
+  'ven_teatro_auditorio_escorial',
+  // Teatro público de Alcalá, programado por la Fundación Teatro de La Abadía.
+  // El nombre no contiene «teatro» ni «auditorio»; no generalizar a cualquier corral.
+  'ven_corral_comedias_alcala',
 ]);
 
 /**
@@ -75,8 +83,14 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_hotel_wellington',
   'ven_four_seasons_madrid',
   'ven_goethe_institut_madrid',
+  'ven_real_monasterio_santa_isabel',
+  'ven_palacio_real_el_pardo',
+  'ven_palacio_real_madrid',
+  'ven_palacio_real_madrid_capilla_real',
+  'ven_palacio_real_madrid_salon_columnas',
   'ven_hinves_pianos',
   'ven_shigeru_kawai_center',
+  'ven_basilica_monasterio_san_lorenzo_escorial',
 ]);
 
 /**

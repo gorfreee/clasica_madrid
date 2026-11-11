@@ -16,7 +16,7 @@ import {
 } from '../src/lib/domain/filters.ts';
 import { findEventBySlug, listCanonicalEvents, listUpcomingOccurrences } from '../src/lib/domain/queries.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
-import { buildEventPageModel, listEventPageSlugs } from '../src/lib/presentation/event.ts';
+import { buildEventPageModel, listEventPageSlugs, listEventStaticPaths } from '../src/lib/presentation/event.ts';
 import { buildVenuePageModel, buildVenuesIndexModel, listVenuePageSlugs } from '../src/lib/presentation/venue.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { makeCatalog, makeEvent, makeVenue, richCatalog, testClock } from './helpers.ts';
@@ -102,6 +102,34 @@ describe('consultas de agenda', () => {
     expect(findEventBySlug(richCatalog(), 'concierto-de-verano')?.event.slug).toBe('concierto-de-verano');
   });
 
+  it('resuelve un slugAlias histórico al evento canónico sin duplicar la agenda', () => {
+    const catalog = makeCatalog({
+      events: [
+        makeEvent({
+          id: 'evt_auditorio_nacional_cndm_lucie_zakova',
+          slug: 'cndm-lucie-zakova',
+          slugAliases: ['lucie-zakova'],
+          title: 'CNDM. Lucie Žáková',
+          occurrences: [{ id: 'occ_zakova_01', date: '2027-02-20', time: '12:00', status: 'scheduled' }],
+        }),
+      ],
+    });
+    expect(findEventBySlug(catalog, 'lucie-zakova')?.event.id).toBe('evt_auditorio_nacional_cndm_lucie_zakova');
+    expect(findEventBySlug(catalog, 'cndm-lucie-zakova')?.event.id).toBe(
+      'evt_auditorio_nacional_cndm_lucie_zakova',
+    );
+    const page = buildEventPageModel(catalog, 'lucie-zakova', testClock);
+    expect(page?.slug).toBe('cndm-lucie-zakova');
+    expect(page?.canonicalPath).toBe('/eventos/cndm-lucie-zakova/');
+    expect(listEventPageSlugs(catalog).sort()).toEqual(['cndm-lucie-zakova', 'lucie-zakova']);
+    expect(listEventStaticPaths(catalog)).toEqual([
+      { slug: 'cndm-lucie-zakova' },
+      { slug: 'lucie-zakova', redirectTo: 'cndm-lucie-zakova' },
+    ]);
+    const upcoming = listUpcomingOccurrences(catalog, testClock);
+    expect(upcoming.map((item) => item.resolved.event.slug)).toEqual(['cndm-lucie-zakova']);
+  });
+
   it('elige la próxima representación futura, no la primera scheduled', () => {
     const mixed = makeEvent({
       occurrences: [
@@ -177,8 +205,11 @@ describe('modelos de presentación', () => {
   it('etiqueta established como Circuito habitual en los filtros', () => {
     const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     const kindField = model.selectFilters.find((field) => field.name === 'kind');
+    const areaField = model.selectFilters.find((field) => field.name === 'area');
+    expect(kindField?.label).toBe('Programación');
+    expect(areaField?.label).toBe('Zona');
     expect(kindField?.options.map((option) => option.label)).toEqual([
-      'Cualquier contexto',
+      'Cualquier programación',
       'Circuito habitual',
       'Alternativo',
     ]);
@@ -193,17 +224,33 @@ describe('modelos de presentación', () => {
       items: [],
     });
     expect(model.shortcuts.map((shortcut) => shortcut.label)).toEqual([
-      'Hoy',
-      'Mañana',
       'Fin de semana',
       'Gratis',
     ]);
     expect(model.shortcuts.map((shortcut) => shortcut.href)).toEqual([
-      '/?from=2026-09-01&to=2026-09-01',
-      '/?from=2026-09-02&to=2026-09-02',
-      '/?from=2026-09-05&to=2026-09-06',
+      '/?from=2026-09-04&to=2026-09-06',
       '/?access=free',
     ]);
+    expect(model.shortcuts.every((shortcut) => !shortcut.href.includes('/agenda/'))).toBe(true);
+    expect(model.shortcuts.map((shortcut) => shortcut.active)).toEqual([false, false]);
+  });
+
+  it('los atajos de agenda preservan los filtros de la URL en el href de fallback', () => {
+    const model = buildAgendaPageModel(
+      richCatalog(),
+      new URL('https://clasicamadrid.com/?q=bach&access=free'),
+      testClock,
+    );
+    expect(model.shortcuts[0]).toMatchObject({
+      id: 'weekend',
+      active: false,
+      href: '/?q=bach&from=2026-09-04&to=2026-09-06&access=free',
+    });
+    expect(model.shortcuts[1]).toMatchObject({
+      id: 'free',
+      active: true,
+      href: '/?q=bach',
+    });
   });
 
   it('distingue catálogo vacío de filtros sin resultados', () => {
@@ -259,7 +306,7 @@ describe('modelos de presentación', () => {
     expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional/');
   });
 
-  it('el índice de lugares solo lista espacios con próximos conciertos', () => {
+  it('el índice reúne en una sola lista los lugares con y sin conciertos próximos', () => {
     const historicalVenue = makeVenue({
       id: 'ven_teatro_historico',
       slug: 'teatro-historico',
@@ -278,8 +325,9 @@ describe('modelos de presentación', () => {
       ],
     });
     const index = buildVenuesIndexModel(catalog, testClock);
-    expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
-    expect(index.inactiveVenues.map((venue) => venue.slug)).toEqual(['teatro-historico']);
+    expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional', 'teatro-historico']);
+    expect(index.venues.map((venue) => venue.upcomingCount)).toEqual([1, 0]);
+    expect(index.isEmpty).toBe(false);
     expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
     expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
   });

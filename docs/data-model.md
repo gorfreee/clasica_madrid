@@ -18,7 +18,7 @@ Intérpretes, compositores y obras **no** son entidades propias en v1: van embeb
 
 - IDs estables, ASCII, con prefijo: `evt_carmen_2026`.
 - El nombre del fichero debe coincidir con el ID: `evt_carmen_2026.json`.
-- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No hay aliases ni redirects históricos: no se renombra un slug ya publicado.
+- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No se renombra un slug ya publicado. `slugAliases` es opcional y limitado a **eventos**: slugs históricos retirados al consolidar un duplicado, que siguen resolviendo a la ficha canónica. Cada alias es único en la colección y no sustituye a `slug`. Venue no tiene `slugAliases`; los slugs públicos ya publicados, incluidos los de Madrid Datos con facility id (`centrocentro-6013703`, etc.), se conservan. Un alta nueva de Madrid Datos usa slug derivado del nombre y sólo añade el facility id si hay colisión.
 
 ## Evento
 
@@ -26,6 +26,7 @@ Campos principales:
 
 - `schemaVersion`: `1`
 - `id`, `slug`, `title`
+- `slugAliases` (opcional): slugs históricos que siguen resolviendo a este evento
 - `status`: `scheduled` | `cancelled` | `postponed`
 - `venueId` (obligatorio)
 - `organizerIds` (puede ser `[]`)
@@ -48,13 +49,18 @@ Un evento no puede publicarse sin procedencia. Si está `cancelled`, todas las r
 
 En JSON-LD (`MusicEvent` por representación, alineado con Schema.org y Google Events): `scheduled` → `EventScheduled`, `cancelled` → `EventCancelled`, `postponed` → `EventPostponed`. Las representaciones canceladas se incluyen para expresar `EventCancelled`; no se omiten. Un evento aplazado conserva las fechas originales. No hay `EventRescheduled` todavía.
 
+`citations[].url` acredita la procedencia, pero no distingue una ficha informativa de una página para obtener entradas. Por eso `buildMusicEventJsonLd()` omite `offers`: ni una fuente oficial, ni el dominio o la ruta de su URL, ni `access: paid` acreditan ticketing. Se mantiene `isAccessibleForFree: true` para `free`, `false` para `paid` y se omite para `unknown`. Una futura oferta requerirá una URL de entradas explícita y verificada en el modelo, conforme a los [requisitos de `offers.url` de Google](https://developers.google.com/search/docs/appearance/structured-data/event#offers-url).
+
+La existencia de una ficha, su indexación y su elegibilidad para la experiencia Event de Google son decisiones distintas. El modelo actual no recoge restricciones explícitas de invitación o membresía, ni si participantes y público son principalmente menores en un recinto escolar. `kind`, el nombre del lugar y el tipo de fuente no bastan para decidirlo. La exclusión del marcado para esos casos queda pendiente de una señal fiable; esta limitación no modifica las páginas públicas ni su indexación. Véanse las [directrices de contenido de Google Event](https://developers.google.com/search/docs/appearance/structured-data/event#content-guidelines).
+
 Una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Cuando lugar, programa, reparto relevante o condiciones cambian sustancialmente, se consideran eventos separados. `Occurrence` permanece simple (`id`, `date`, `time`, `status`): no hay overrides por función. Varias funciones de una ópera o un programa repetido en las mismas condiciones son **un** evento. La agenda aplana esas representaciones en filas cronológicas.
 
 ## Lugar
 
 - `municipality`: texto libre (p. ej. `Madrid`, `Alcobendas`)
 - `area`: `madrid` (municipio de Madrid) o `nearby` (municipio próximo integrado en la experiencia)
-- `address` y `url` opcionales
+- `address` opcional en el schema (una sala hija puede heredarla del padre). Todo venue publicado debe tener **dirección efectiva**: la del lugar principal, o la propia si el padre no la declara. Sin ella, la validación del catálogo falla (`missing-venue-address`).
+- `url` opcional
 - `parentVenueId` y `spaceName` opcionales: relacionan una **sala o espacio interno** con su **lugar principal** (edificio o institución física)
 
 ### Lugar principal y sala
@@ -74,7 +80,7 @@ La presentación pública agrupa por el lugar principal:
 
 - la **agenda** muestra sólo el nombre del padre y enlaza a su página
 - el filtro **Lugar** ofrece una opción por padre; filtrar incluye eventos del padre y de todas sus salas
-- `/lugares` lista una entrada por padre, con `upcomingCount` y `nextDate` agregados
+- `/lugares` lista una entrada por padre; la programación futura se agrega a ese padre
 - la página del padre reúne los conciertos propios y de sus salas
 - la **ficha del evento** muestra el lugar principal y, aparte, la sala cuando existe; si el evento apunta a un venue sin sala, no hay campo «Sala»
 
@@ -109,7 +115,7 @@ Un coro parroquial o un concierto ocasional en una iglesia es `alternative` aunq
 2. Añade `data/events/{id}.json` con al menos una representación y una citación.
 3. Ejecuta `npm run validate`.
 
-Harvesting: [`docs/ingestion.md`](ingestion.md). Arquitectura objetivo: [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). Elegibilidad y enrichment: [`docs/classification-policy.md`](classification-policy.md) (no es un campo del schema `Event`).
+Harvesting: [`docs/ingestion.md`](ingestion.md). Evolución restante: [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). Elegibilidad y enrichment: [`docs/classification-policy.md`](classification-policy.md) (no es un campo del schema `Event`).
 
 No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no en `data/`.
 
@@ -117,4 +123,4 @@ No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no
 
 Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado.
 
-Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` lista sólo espacios con próximos conciertos.
+Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` incluye los lugares principales publicados, tengan o no programación próxima; los que tienen conciertos futuros aparecen primero. Las salas hijas conservan ficha propia y no se promocionan en el índice.

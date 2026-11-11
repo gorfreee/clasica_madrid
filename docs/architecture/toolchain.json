@@ -1,0 +1,19 @@
+{
+  "archify": {
+    "version": "2.17.0-dev.1",
+    "repository": "https://github.com/tt-a1i/archify.git",
+    "revision": "629155a47cd5b487cb5a6e322b2ca71998698aaf"
+  },
+  "gif": {
+    "width": 1280,
+    "fps": 10,
+    "seconds": 12,
+    "loop": "infinite"
+  },
+  "svgTypography": {
+    "label": 14,
+    "context": 10,
+    "fine": 8,
+    "boundary": 13
+  }
+}

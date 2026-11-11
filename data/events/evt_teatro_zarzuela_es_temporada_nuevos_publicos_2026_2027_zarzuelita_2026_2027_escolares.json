@@ -41,21 +41,24 @@
   ],
   "performers": [
     {
-      "name": "LUCÍA BELTRÁN"
+      "name": "Lucía Beltrán"
     },
     {
-      "name": "ADRIÁN QUIÑONES"
+      "name": "Adrián Quiñones"
     },
     {
-      "name": "ANGELO CHIU LEE"
+      "name": "Angelo Chiu Lee"
     },
     {
-      "name": "RAMÓN GRAU"
+      "name": "Ramón Grau"
     }
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "zarzuela",
     "chamber"
@@ -66,10 +69,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

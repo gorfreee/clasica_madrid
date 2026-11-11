@@ -17,44 +17,41 @@
   ],
   "performers": [
     {
-      "name": "ANTOINE TAMESTIT"
+      "name": "Antoine Tamestit"
     },
     {
-      "name": "JAMES EHNES"
+      "name": "James Ehnes"
     },
     {
-      "name": "ALEXANDRA PREUCIL"
+      "name": "Alexandra Preucil"
     },
     {
-      "name": "SÀO SOULEZ LARIVIÈRE"
+      "name": "Sào Soulez Larivière"
     },
     {
-      "name": "CHRISTIAN POLTÉRA"
+      "name": "Christian Poltéra"
     }
   ],
   "composers": [
     {
-      "name": "Johannes Brahms (1833-1897)"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "George Benjamin (1960)"
-    },
-    {
-      "name": "J. Brahms"
+      "name": "George Benjamin"
     }
   ],
   "works": [
     {
       "title": "Quinteto de cuerda n.º 1 en fa mayor, op. 88 (1882)",
-      "composerName": "Johannes Brahms (1833-1897)"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Viola, viola (1997)",
-      "composerName": "George Benjamin (1960)"
+      "composerName": "George Benjamin"
     },
     {
       "title": "Quinteto de cuerda n.º 2 en sol mayor, op. 111 (1890)",
-      "composerName": "J. Brahms"
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [
@@ -69,7 +66,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-antoine-tamestit-friends",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-antoine-tamestit-friends"
     },
     {
@@ -80,5 +77,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

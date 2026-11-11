@@ -20,10 +20,6 @@ export function isChildVenue(venue: Venue): boolean {
   return Boolean(venue.parentVenueId);
 }
 
-export function isPrincipalVenue(venue: Venue): boolean {
-  return !venue.parentVenueId;
-}
-
 export function childVenues(venue: Venue, catalog: Catalog): Venue[] {
   return catalog.venues.filter((item) => item.parentVenueId === venue.id);
 }

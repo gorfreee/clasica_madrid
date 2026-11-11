@@ -1,4 +1,5 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
+import { explicitAccessText } from './access-evidence.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, normalizeWorkList, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
@@ -10,6 +11,7 @@ import type { RawEvent, RawOccurrence } from '../types.ts';
 const FIELDS = {
   venue: '5f3fcfb', room: '22f4028', date: '871b27b', time: 'fe5230b',
   ensembles: 'dbd05b3', soloists: '80cb47e', conductor: 'e38a1b0', program: '102ff6f',
+  tickets: 'd9fd9af',
 } as const;
 
 export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPatch {
@@ -51,11 +53,13 @@ export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPat
     }),
   );
   const description = orcamDiv(detail, /<div\b[^>]*data-widget_type=["']theme-post-content\.default["'][^>]*>/i);
+  const accessText = explicitAccessText(stripTags(field('tickets') ?? ''));
   return {
     occurrences: [occurrence],
     venueText: `${venue} ${room}`,
     description: description ? stripTags(description) || undefined : undefined,
     programText: program ? stripTags(program) || undefined : undefined,
+    ...(accessText ? { accessText } : {}),
     performers: normalizePersonList(performers),
     composers: normalizeComposerList(composers),
     works: normalizeWorkList(works),

@@ -1,0 +1,183 @@
+[
+  {
+    "sourceUrl": "https://www.march.es/es/madrid/concierto/enescu-raices-mestizaje-ii-arquitecturas-mestizaje",
+    "observed": {
+      "title": "Enescu: raíces y mestizaje (II): Arquitecturas del mestizaje",
+      "performers": [
+        {
+          "name": "Cuarteto Gerhard"
+        },
+        {
+          "name": "Lluís Castám"
+        },
+        {
+          "name": "Judit Bardolet"
+        },
+        {
+          "name": "Miquel Jordá"
+        },
+        {
+          "name": "Jesús Miralles"
+        },
+        {
+          "name": "Josu de Solaun"
+        }
+      ],
+      "composers": [
+        {
+          "name": "George Enescu"
+        }
+      ],
+      "works": [
+        {
+          "title": "Nocturno para piano en Re bemol mayor",
+          "composerName": "George Enescu"
+        },
+        {
+          "title": "Cuarteto con piano nº 1 en Re mayor, op. 16",
+          "composerName": "George Enescu"
+        },
+        {
+          "title": "Quinteto con piano nº 2 en La menor, op. 29",
+          "composerName": "George Enescu"
+        }
+      ],
+      "description": "Este programa explora la relación de Enescu con las grandes formas de música de cámara a través de dos obras separadas por más de tres décadas. El Cuarteto con piano nº 1, heredero de los procedimientos formales alemanes y la tradición brahmsiana, asimila con naturalidad la modernidad armónica francesa. El Quinteto con piano nº 2, nacido en plena madurez, condensa un lenguaje más abstracto, donde un sustrato rumano convive con una escritura densa y concentrada.",
+      "categoryText": "Concierto",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "I\nGeorge Enescu (1881-1955)\nNocturno para piano en Re bemol mayor\nCuarteto con piano nº 1 en Re mayor, op. 16\nII\nGeorge Enescu\nQuinteto con piano nº 2 en La menor, op. 29"
+    }
+  },
+  {
+    "sourceUrl": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-ii-nostalgia-laud",
+    "observed": {
+      "title": "Música pintada: oído y vista en el Barroco (II): La nostalgia del laúd",
+      "performers": [
+        {
+          "name": "Jakob Lindberg"
+        }
+      ],
+      "composers": [
+        {
+          "name": "David Kellner"
+        },
+        {
+          "name": "Silvius Leopold Weiss"
+        }
+      ],
+      "works": [
+        {
+          "title": "Fantasía nº 5 en Do mayor",
+          "composerName": "David Kellner"
+        },
+        {
+          "title": "Fantasía nº 3 en Fa mayor",
+          "composerName": "David Kellner"
+        },
+        {
+          "title": "Fantasia nº 1 en La menor, IDK 7",
+          "composerName": "David Kellner"
+        },
+        {
+          "title": "Sonata nº 34 en Re menor, ISW 6",
+          "composerName": "Silvius Leopold Weiss"
+        },
+        {
+          "title": "Melodías escocesas del Manuscrito Balcarres (c. 1690)"
+        },
+        {
+          "title": "Sonata nº 29 en La menor, \"L'infidèle\"",
+          "composerName": "Silvius Leopold Weiss"
+        }
+      ],
+      "description": "Durante los siglos XVII y XVIII, el laúd fue el instrumento por excelencia de la intimidad, la soledad y la memoria. Asociado a la melancolía, al amor ausente y al paso del tiempo, su sonido encarnó una forma de nostalgia serena y reflexiva. Este recital recorre ese universo afectivo a través de fantasías, sonatas y danzas, que dialogan en silencio con cuadros barrocos en los que el laúd parece dar voz a aquello que es imposible verbalizar con palabras.",
+      "categoryText": "Concierto",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "David Kellner (1670-1748)\nFantasía nº 5 en Do mayor\nFantasía nº 3 en Fa mayor\nFantasia nº 1 en La menor, IDK 7\nSilvius Leopold Weiss (1687-1750)\nSonata nº 34 en Re menor, ISW 6\nAnónimo\nMelodías escocesas del Manuscrito Balcarres (c. 1690)\nSilvius Leopold Weiss\nSonata nº 29 en La menor, \"L'infidèle\""
+    }
+  },
+  {
+    "sourceUrl": "https://www.march.es/es/madrid/concierto/oro-edad-plata-iii",
+    "observed": {
+      "title": "Oro en la Edad de Plata (III)",
+      "performers": [
+        {
+          "name": "Cuarteto Seikilos"
+        },
+        {
+          "name": "Iván Görnemann"
+        },
+        {
+          "name": "Pablo Quintanilla"
+        },
+        {
+          "name": "Adrián Vázquez"
+        },
+        {
+          "name": "Lorenzo Meseguer"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Bartolomé Pérez Casas"
+        },
+        {
+          "name": "Emilio Serrano"
+        },
+        {
+          "name": "Francisco Esbrí"
+        }
+      ],
+      "works": [
+        {
+          "title": "Fuga real a tres motivos",
+          "composerName": "Bartolomé Pérez Casas"
+        },
+        {
+          "title": "Cuarteto en Re menor",
+          "composerName": "Emilio Serrano"
+        },
+        {
+          "title": "Cuarteto en Si bemol mayor",
+          "composerName": "Francisco Esbrí"
+        }
+      ],
+      "description": "Este concierto explora territorios musicales inexplorados de la Edad de Plata. El Cuarteto en Si bemol mayor de Francisco Esbrí, que hoy verá probablemente su estreno absoluto, revela la singular personalidad de un compositor completamente desconocido. Lo acompañan una pieza breve igualmente inédita de Bartolomé Pérez Casas —cuyo Cuarteto con piano se recuperó en esta misma sala hace dos años— y el infrecuente Cuarteto en Re menor de Emilio Serrano.",
+      "categoryText": "Concierto",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "I\nBartolomé Pérez Casas (1873-1956)\nFuga real a tres motivos\nEmilio Serrano (1850-1939)\nCuarteto en Re menor\nII\nFrancisco Esbrí (1888-1972)\nCuarteto en Si bemol mayor"
+    }
+  },
+  {
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+    "observed": {
+      "title": "Orquesta Juvenil Europea de Madrid. The Armed Man: A Mass For Peace",
+      "performers": [
+        {
+          "name": "Adriana Tanus",
+          "roleText": "director"
+        }
+      ],
+      "composers": [
+        {
+          "name": "K. Jenkins"
+        }
+      ],
+      "works": [
+        {
+          "title": "\"The armed man: una misa para la paz\"",
+          "composerName": "K. Jenkins"
+        }
+      ],
+      "venueText": "Sala Sinfónica",
+      "accessText": "24, 21, 17, 12 y 9 €",
+      "programText": "Orquestas Sinfónica OJEM y Junior LFM\nEscuela Coral OJEM y coros infantil y juvenil OJEM/LFM\nK. Jenkins\n\"The armed man: una misa para la paz\""
+    }
+  }
+]

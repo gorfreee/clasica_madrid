@@ -28,10 +28,13 @@
       "name": "Antonín Dvořák"
     },
     {
-      "name": "Piotr I. Tchaikovsky"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
       "name": "Maurice Ravel"
+    },
+    {
+      "name": "Claude Debussy"
     }
   ],
   "works": [
@@ -41,11 +44,19 @@
     },
     {
       "title": "Romeo y Julieta:",
-      "composerName": "Piotr I. Tchaikovsky"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Daphnis y Chloe, Suite n.° 2",
       "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Obertura-Fantasía",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Jeux",
+      "composerName": "Claude Debussy"
     }
   ],
   "eras": [
@@ -61,10 +72,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-elim-chan",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "orquesta-sinfonica-de-madrid-elim-chan"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

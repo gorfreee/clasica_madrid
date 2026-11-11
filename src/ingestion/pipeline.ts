@@ -1,11 +1,14 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
-import type { AiClassifier, AiCallDiagnostics } from './classification/ai.ts';
+import type { AiClassifier, AiCallDiagnostics, AiCallPurpose } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
-import type { ClassificationResult } from './classification/types.ts';
+import { isTechnicalClassificationFailure, type ClassificationResult } from './classification/types.ts';
+import { isEditorialAiUncertain } from './classification/eligibility-grounding.ts';
 import { collapseWhitespace } from './html.ts';
 import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
-import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
+import { getAdapter } from './registry.ts';
+import { resolveIngestSources } from './select-sources.ts';
+import { enrichNormalizedEvent } from './enrich-normalized.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { findPossiblyMissing, type PossiblyMissingEvent } from './disappear.ts';
@@ -19,10 +22,13 @@ import {
   type HarvestObservation,
 } from './reconcile.ts';
 import { attachFailureContext, type IngestObservability } from './observability.ts';
+import { decisionHasUnresolvedComposers } from './outcome.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import { matchVenue } from './venues.ts';
 import type {
   AdapterContext,
+  AdapterDiscard,
+  AdapterDiscardReport,
   IngestAiSummary,
   IngestRunSummary,
   PipelineSource,
@@ -30,10 +36,19 @@ import type {
   RawEvent,
   SourceDefinition,
   SourceFailure,
+  SourceTemporalCoverage,
+  SourceIngestResult,
 } from './types.ts';
-import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
-import { getText, HttpError, resolveFetchRelay } from './http.ts';
-import { normalizeUrl } from './urls.ts';
+import {
+  emptyAdapterDiscardCounts,
+  emptyIngestAiSummary,
+  emptyIngestQualitySummary,
+  IncompleteListingError,
+  tallyAdapterDiscards,
+} from './types.ts';
+import { takeBrowserFetchAttempts } from './browser-fetch.ts';
+import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
+import { normalizeUrl, urlIdentifiesSingleEvent } from './urls.ts';
 
 export type IngestOptions = {
   dataDir: string;
@@ -41,6 +56,7 @@ export type IngestOptions = {
   now: Date;
   dryRun: boolean;
   sourceIds?: string[];
+  excludeSourceIds?: string[];
   window?: IngestWindow;
   get?: (url: string) => Promise<string>;
   /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
@@ -59,6 +75,7 @@ export type IngestRun = {
   candidates: Candidate[];
   decisions: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
+  adapterDiscards: AdapterDiscard[];
 };
 
 export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & {
@@ -67,20 +84,32 @@ export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & 
 
 export const SOURCE_INGEST_CONCURRENCY = 4;
 
+function prepareNormalizedEvent(raw: RawEvent) {
+  const event = normalizeRawEvent(raw);
+  return event ? enrichNormalizedEvent(event) : undefined;
+}
+
 type HarvestSourceResult = {
   source: SourceDefinition;
   extracted: RawEvent[];
   hydrated: RawEvent[];
   listingIncomplete: boolean;
+  listingFailure?: SourceFailure;
+  temporalCoverage?: SourceTemporalCoverage;
   coverage?: ReturnType<typeof requiredHydrationCoverage>;
   failure?: SourceFailure;
+  adapterDiscards: AdapterDiscard[];
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const window = options.window ?? defaultIngestWindow(options.now);
-  const sources = selectSources(options.sourceIds);
+  const sources = resolveIngestSources({
+    sourceIds: options.sourceIds,
+    excludeSourceIds: options.excludeSourceIds,
+  });
   const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
+  const sourceResults: Record<string, SourceIngestResult> = {};
   const succeeded: string[] = [];
   const disappearanceSuppressedSources: string[] = [];
   const rawEvents: RawEvent[] = [];
@@ -94,22 +123,38 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   );
   const harvestedSources = await mapConcurrent(sources, sourceConcurrency, async (source): Promise<HarvestSourceResult> => {
     const sourceGet = instrumentSourceGet(get, source.id, obs);
+    const adapterDiscards: AdapterDiscard[] = [];
+    const reportDiscard = (discard: AdapterDiscardReport) => {
+      adapterDiscards.push({ sourceId: source.id, ...discard });
+    };
+    let temporalCoverage: SourceTemporalCoverage | undefined;
+    const reportTemporalCoverage = (coverage: SourceTemporalCoverage) => {
+      // The contract is source-wide. Combining independently bounded listings
+      // needs an adapter-level completeness proof, not a union of dates here.
+      if (temporalCoverage) throw new Error('Temporal coverage must be declared once per source');
+      temporalCoverage = coverage;
+    };
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
+      let listingFailure: SourceFailure | undefined;
       try {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
-          extractSource(source, options.now, window, sourceGet));
+          extractSource(source, options.now, window, sourceGet, reportDiscard, reportTemporalCoverage));
       } catch (error) {
-        if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
+        if (!(error instanceof IncompleteListingError)) throw error;
         extracted = error.events;
         listingIncomplete = true;
+        listingFailure = { sourceId: source.id, message: error.message };
+      } finally {
+        flushBrowserFetchAttempts(source.id, obs);
       }
       const adapter = getAdapter(source.adapterId);
       const ctx: AdapterContext = { source, now: options.now, window, get: sourceGet };
       const hydrated = await measureSourcePhase(obs, source.id, 'hydration', () =>
         hydrateEvents(extracted, adapter, ctx));
-      const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
+      flushBrowserFetchAttempts(source.id, obs);
+      const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(adapter.requiresScheduleHydration ? hydrated.filter(adapter.requiresScheduleHydration) : hydrated) : undefined;
       const failure = coverage?.severe
         ? {
             sourceId: source.id,
@@ -117,34 +162,72 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
             message: `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`,
           }
         : undefined;
-      return { source, extracted, hydrated, listingIncomplete, coverage, failure };
+      return { source, extracted, hydrated, listingIncomplete, listingFailure, temporalCoverage, coverage, failure: failure ?? listingFailure, adapterDiscards };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message } };
+      flushBrowserFetchAttempts(source.id, obs);
+      return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message }, adapterDiscards };
     }
   });
 
   // mapConcurrent preserves input positions. Consolidating only after every
   // source finishes keeps summaries, observations and downstream ID allocation
   // independent of source completion order.
+  const adapterDiscards: AdapterDiscard[] = [];
   for (const result of harvestedSources) {
-    const { source, extracted, hydrated, listingIncomplete, coverage, failure } = result;
+    const { source, extracted, hydrated, listingIncomplete, temporalCoverage, coverage, failure } = result;
+    adapterDiscards.push(...result.adapterDiscards);
+    for (const discard of result.adapterDiscards) obs?.recordAdapterDiscard(discard);
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
-    const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
-    obs?.recordSourceStats({
-      sourceId: source.id,
+    const extractionFailure = result.listingFailure ?? (failure?.stage !== 'hydration' ? failure : undefined);
+    const listingError = extractionFailure?.message;
+    const listingFallback = extracted.some((raw) => raw.listingSurface === 'wp-rest')
+      ? 'wp-rest' as const
+      : undefined;
+    const hydrationRecoveries = hydrated.filter((raw) =>
+      raw.hydration?.status === 'succeeded' && (raw.hydration.httpStatuses?.length ?? 0) > 0
+    ).length;
+    const temporalComplete = !temporalCoverage || temporalCoverage.status === 'complete';
+    const conflicted = hydrated.some(raw => raw.hydration?.reason === 'source-conflict');
+    const hasCurrentObservation = hydrated.some(raw => raw.observed.occurrences.some(
+      occurrence => occurrence.date && occurrence.date >= window.from && occurrence.date <= window.to,
+    ));
+    const usableCoverage = !temporalCoverage || temporalCoverage.status === 'complete'
+      || (temporalCoverage.status === 'partial'
+        && temporalCoverage.interval.from <= window.to && temporalCoverage.interval.to >= window.from)
+      || (temporalCoverage.status === 'unknown' && hasCurrentObservation);
+    const sourceResult: SourceIngestResult = {
+      extraction: {
+        status: listingIncomplete ? 'incomplete' : extractionFailure ? 'failed' : 'succeeded',
+        ...(extractionFailure ? { message: extractionFailure.message } : {}),
+      },
+      ...(temporalCoverage ? { temporalCoverage } : {}),
       extractedEvents: extracted.length,
       hydratedEvents: hydrated.length,
       hydrationAttempted: sourceHydration.attempted,
       hydrationSucceeded: sourceHydration.succeeded,
       hydrationFailed: sourceHydration.failed,
+      hydrationRequired: coverage?.required ?? 0,
+      hydrationIncomplete: coverage?.incomplete ?? false,
+      hydrationSevere: coverage?.severe ?? false,
+      disappearanceEligible: !failure && !listingIncomplete && !coverage?.incomplete && !conflicted && temporalComplete,
+      usable: !failure && usableCoverage,
+    };
+    sourceResults[source.id] = sourceResult;
+    obs?.recordSourceStats({
+      ...sourceResult,
+      sourceId: source.id,
       hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
       hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
+      hydrationRecoveries,
       status: failure ? 'failed' : 'ok',
       usesHydration: Boolean(adapter.hydrate),
-      hydrationReached: !listingError,
+      hydrationReached: hydrated.length > 0 || !extractionFailure,
       listingError,
+      listingFallback,
+      adapterDiscards: result.adapterDiscards.length,
+      adapterDiscardsByReason: tallyAdapterDiscards(result.adapterDiscards).byReason,
     });
     const listingByUrl = new Map<string, RawEvent>();
     for (const listing of extracted) {
@@ -153,10 +236,12 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     for (const raw of hydrated) {
       const listing = listingByUrl.get(normalizeUrl(raw.sourceUrl));
       if (listing) listingByRaw.set(raw, listing);
-      obs?.recordObservation({ raw, listing: listing ?? raw, normalized: normalizeRawEvent(raw) });
+      obs?.recordObservation({ raw, listing: listing ?? raw, normalized: prepareNormalizedEvent(raw) });
     }
     rawEvents.push(...hydrated);
-    if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
+    // Full failures are already excluded through sourcesFailed; preserve the
+    // existing incomplete-source projection for report consumers.
+    if (listingIncomplete || coverage?.incomplete || conflicted || !temporalComplete) disappearanceSuppressedSources.push(source.id);
     if (failure) {
       failures.push(failure);
       obs?.recordSourceFailure(source.id, failure.message);
@@ -175,7 +260,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       attempted: sources,
       succeeded,
       failed: failures,
+      sourceResults,
       disappearanceSuppressedSources,
+      adapterDiscards,
     },
   });
 }
@@ -191,7 +278,7 @@ export async function runDiscoveryIngest(options: DiscoveryIngestOptions): Promi
   const listingByRaw = new Map<RawEvent, RawEvent>();
   const obs = options.observability;
   for (const raw of rawEvents) {
-    obs?.recordObservation({ raw, listing: raw, normalized: normalizeRawEvent(raw) });
+    obs?.recordObservation({ raw, listing: raw, normalized: prepareNormalizedEvent(raw) });
   }
   return ingestPreparedEvents({
     ...options,
@@ -212,7 +299,9 @@ async function ingestPreparedEvents(
       attempted: SourceDefinition[];
       succeeded: string[];
       failed: SourceFailure[];
+      sourceResults: Record<string, SourceIngestResult>;
       disappearanceSuppressedSources: string[];
+      adapterDiscards: AdapterDiscard[];
     };
   },
 ): Promise<IngestRun> {
@@ -225,6 +314,7 @@ async function ingestPreparedEvents(
   const succeeded = harvest?.succeeded ?? sources.map((source) => source.id);
   const failures = harvest?.failed ?? [];
   const disappearanceSuppressedSources = harvest?.disappearanceSuppressedSources ?? [];
+  const adapterDiscards = harvest?.adapterDiscards ?? [];
 
   rawEvents.sort((left, right) => {
     if (left.sourceId !== right.sourceId) return left.sourceId.localeCompare(right.sourceId);
@@ -243,7 +333,7 @@ async function ingestPreparedEvents(
   // Identity is resolved before the publication gate. Classification stays
   // concurrent; candidate construction and ID allocation stay in source order.
   const prepared = rawEvents.map((raw) => {
-    const event = normalizeRawEvent(raw);
+    const event = prepareNormalizedEvent(raw);
     const source = event ? bySource.get(event.sourceId) : undefined;
     const venueMatch = event ? matchVenue(venueHint(event), options.catalog) : undefined;
     const venueId = venueMatch?.venue.id;
@@ -266,11 +356,19 @@ async function ingestPreparedEvents(
     try {
       let aiAttempted = false;
       let aiCall: AiCallDiagnostics | undefined;
+      const attemptedPurposes = new Set<AiCallPurpose>();
+      const failedPurposes = new Set<AiCallPurpose>();
       const eventAi: AiClassifier | undefined = ai ? {
         classifyBudgetMs: ai.classifyBudgetMs,
         async classify(observed, context) {
           aiAttempted = true;
+          const purpose = context?.purpose ?? 'eligibility';
+          attemptedPurposes.add(purpose);
           try { return await ai.classify(observed, context); }
+          catch (error) {
+            failedPurposes.add(purpose);
+            throw error;
+          }
           finally {
             // Legacy/fake providers are sequential by default. Concurrent providers
             // must emit diagnostics through the per-call context, never shared state.
@@ -285,7 +383,17 @@ async function ingestPreparedEvents(
           ? { id: venueMatch.venue.id, name: venueMatch.venue.name }
           : undefined,
       });
-      return { classification, aiAttempted, aiCall };
+      const enrichedEvent = classification.composers?.value.length
+        ? { ...event, composers: classification.composers.value }
+        : event;
+      return {
+        classification,
+        event: enrichedEvent,
+        aiAttempted,
+        aiCall,
+        attemptedPurposes: [...attemptedPurposes],
+        failedPurposes: [...failedPurposes],
+      };
     } catch (error) {
       attachFailureContext(error, {
         stage: 'classification',
@@ -302,12 +410,18 @@ async function ingestPreparedEvents(
       eligibility[classifiedAt.classification.eligibility.value] += 1;
       recordAiOutcome(aiUsage, classifiedAt.classification);
       recordTaxonomyOutcome(aiUsage, classifiedAt.classification, classifiedAt.aiCall);
+      recordAiPurposeOutcomes(
+        aiUsage,
+        classifiedAt.classification,
+        classifiedAt.attemptedPurposes,
+        classifiedAt.failedPurposes,
+      );
     }
     if (!event || !source) continue;
     observations.push({
       index,
       raw,
-      event,
+      event: classifiedAt?.event ?? event,
       source,
       classification: classifiedAt?.classification,
       aiAttempted: classifiedAt?.aiAttempted ?? false,
@@ -325,6 +439,7 @@ async function ingestPreparedEvents(
   });
 
   for (const [index, { raw, event, source }] of prepared.entries()) {
+    const finalEvent = classified[index]?.event ?? event;
     if (!event) {
       skippedUnusable += 1;
       decisions.push(
@@ -345,13 +460,13 @@ async function ingestPreparedEvents(
       decisions.push(
         buildEventDecision({
           raw,
-          title: event.title,
+          title: finalEvent!.title,
           structuralSkip: 'fuente desconocida',
           aiAttempted: false,
           publishable: false,
           candidateGenerated: false,
           listing: listingByRaw.get(raw),
-          normalizedEvent: event,
+          normalizedEvent: finalEvent,
         }),
       );
       continue;
@@ -371,7 +486,7 @@ async function ingestPreparedEvents(
     decisions.push(
       buildEventDecision({
         raw,
-        title: event.title,
+        title: finalEvent!.title,
         structuralSkip: result?.skippedReason,
         classification: classified[index]?.classification,
         aiAttempted: classified[index]?.aiAttempted ?? false,
@@ -385,7 +500,7 @@ async function ingestPreparedEvents(
         batchDuplicate: result?.batchDuplicate,
         mergeDiagnostics: result?.mergeDiagnostics,
         listing: listingByRaw.get(raw),
-        normalizedEvent: event,
+        normalizedEvent: finalEvent,
         candidate: result?.candidate,
       }),
     );
@@ -398,12 +513,14 @@ async function ingestPreparedEvents(
   obs?.setStage('apply');
   const apply = await applyCandidateBatch(options.catalog, reconciled.candidates, options.dataDir, {
     dryRun: options.dryRun,
+    publicationPlan: reconciled.publicationPlan,
   }).catch((error: unknown) => attachFailureContext(error, { stage: 'apply' }));
 
   // Listings with detail-only schedules still prove presence when a ficha fails
   // or is not requested. This must not apply a partial calendar to the event.
   const seenEventIds = new Set(reconciled.seenEventIds);
   const harvestSources = harvest?.attempted ?? [];
+  markDiscardedCatalogEventsSeen(options.catalog, harvestSources, adapterDiscards, seenEventIds);
   for (const source of harvestSources.filter((source) => getAdapter(source.adapterId).requiresDetailSchedule)) {
     const urls = new Set(rawEvents.filter((raw) => raw.sourceId === source.id).map((raw) => normalizeUrl(raw.sourceUrl)));
     for (const event of options.catalog.events) {
@@ -434,17 +551,22 @@ async function ingestPreparedEvents(
         (snapshot.eras.length === 0 || snapshot.formats.length === 0),
     );
   }).length;
+  const unresolvedComposers = decisions.filter((item) => decisionHasUnresolvedComposers(item)).length;
   const sourcesAttempted = harvest ? harvest.attempted.map((source) => source.id) : sources.map((source) => source.id);
   const health = evaluateIngestHealth({
     batchOk: apply.report.ok,
+    fatalReasons: apply.report.issues.some(issue => issue.code === 'publication-integrity') ? ['publication-integrity'] : [],
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
+    sourceResults: harvest?.sourceResults,
     ambiguous: reconciled.stats.ambiguous,
     classificationDrift,
     batchDuplicates: reconciled.stats.batchDuplicates,
     possiblyMissing: possiblyMissing.length,
     hydrationFailed: hydration.failed,
+    sourceConflicts: rawEvents.filter(raw => raw.hydration?.reason === 'source-conflict').length,
     unresolvedTaxonomy,
+    unresolvedComposers,
     ai: aiUsage,
     requireSourcesSucceeded: harvest ? true : sources.length > 0,
   });
@@ -456,10 +578,12 @@ async function ingestPreparedEvents(
     sourcesAttempted,
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
+    sourceResults: harvest?.sourceResults,
     rawEvents: rawEvents.length,
     skippedUnusable,
     eligibility,
     ai: aiUsage,
+    quality: summarizeQuality(decisions),
     candidates: reconciled.candidates.length,
     newEvents: apply.newEvents,
     updatedEvents: apply.updatedEvents,
@@ -467,6 +591,7 @@ async function ingestPreparedEvents(
     ambiguous: reconciled.stats.ambiguous,
     possiblyMissing: possiblyMissing.length,
     batchDuplicates: reconciled.stats.batchDuplicates,
+    crossSourceCorroborations: reconciled.stats.crossSourceCorroborations,
     written: apply.written,
     dryRun: options.dryRun,
     detailHydrationAttempted: hydration.attempted,
@@ -475,21 +600,55 @@ async function ingestPreparedEvents(
     detailHydrationSkippedOutsideWindow: rawEvents.filter((raw) => raw.hydration?.reason === 'outside-window').length,
     detailHydrationSkippedCircuitOpen: rawEvents.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
     disappearanceSuppressedSources,
+    adapterDiscards: adapterDiscards.length > 0 ? tallyAdapterDiscards(adapterDiscards) : emptyAdapterDiscardCounts(),
   };
 
-  return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };
+  return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing, adapterDiscards };
+}
+
+/**
+ * A recognized adapter discard is still positive listing evidence for an
+ * already-published event. Exact, source-scoped identities prevent a discarded
+ * placeholder from suppressing a genuinely absent neighbour.
+ */
+function markDiscardedCatalogEventsSeen(
+  catalog: Catalog,
+  sources: readonly SourceDefinition[],
+  discards: readonly AdapterDiscard[],
+  seenEventIds: Set<string>,
+): void {
+  const byId = new Map(sources.map((source) => [source.id, source]));
+  for (const discard of discards) {
+    const source = byId.get(discard.sourceId);
+    if (!source) continue;
+    for (const event of catalog.events) {
+      const seen = event.citations.some((citation) => {
+        if (citation.sourceId !== source.catalogSourceId) return false;
+        if (discard.externalId && citation.externalId === discard.externalId) return true;
+        return Boolean(
+          discard.sourceUrl &&
+            urlIdentifiesSingleEvent(discard.sourceUrl) &&
+            urlIdentifiesSingleEvent(citation.url) &&
+            normalizeUrl(citation.url) === normalizeUrl(discard.sourceUrl),
+        );
+      });
+      if (seen) seenEventIds.add(event.id);
+    }
+  }
 }
 
 function venueHint(event: {
   venueText?: string;
   sourceId: string;
   venueFacilityId?: string;
+  venueAddress?: string;
   proposedVenue?: ProposedVenueFacts;
 }) {
   return {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    address: event.venueAddress,
     proposed: event.proposedVenue,
   };
 }
@@ -499,10 +658,14 @@ export async function extractSource(
   now: Date,
   window: IngestWindow,
   get: (url: string) => Promise<string>,
+  reportDiscard?: (discard: AdapterDiscardReport) => void,
+  reportTemporalCoverage?: (coverage: SourceTemporalCoverage) => void,
 ): Promise<RawEvent[]> {
   const adapter = getAdapter(source.adapterId);
   const urls = adapter.resolveFetchUrls(source, now, window);
   const ctx: AdapterContext = { source, now, window, get };
+  if (reportDiscard) ctx.reportDiscard = reportDiscard;
+  if (reportTemporalCoverage) ctx.reportTemporalCoverage = reportTemporalCoverage;
   const events: RawEvent[] = [];
   for (const url of urls) {
     const body = adapter.fetchListing
@@ -521,7 +684,9 @@ function wrapAi(inner: AiClassifier | undefined, usage: IngestAiSummary): AiClas
     snapshotStats: inner.snapshotStats?.bind(inner),
     async classify(observed, context) {
       usage.attempted += 1;
-      if (context?.purpose === 'taxonomy') usage.taxonomyAttempted += 1;
+      const purpose = context?.purpose ?? 'eligibility';
+      usage.byPurpose[purpose].attempted += 1;
+      if (purpose === 'taxonomy') usage.taxonomyAttempted += 1;
       return inner.classify(observed, context);
     },
   };
@@ -539,9 +704,6 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
     case 'ai-exclude':
       usage.exclude += 1;
       break;
-    case 'ai-uncertain':
-      usage.uncertain += 1;
-      break;
     case 'ai-invalid-output':
       usage.invalidOutput += 1;
       break;
@@ -558,6 +720,10 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
       usage.timeout += 1;
       break;
     default:
+      if (isEditorialAiUncertain(classification.eligibility.ruleId)) {
+        usage.uncertain += 1;
+        break;
+      }
       usage.error += 1;
   }
 }
@@ -579,25 +745,112 @@ function recordTaxonomyOutcome(
   if (filled) usage.taxonomyFilled += 1;
 }
 
+function recordAiPurposeOutcomes(
+  usage: IngestAiSummary,
+  classification: ClassificationResult,
+  attemptedPurposes: readonly AiCallPurpose[],
+  failedPurposes: readonly AiCallPurpose[],
+): void {
+  const failed = new Set(failedPurposes);
+  for (const purpose of attemptedPurposes) {
+    const bucket = usage.byPurpose[purpose];
+    const resolution = purpose === 'eligibility'
+      ? classification.eligibility
+      : purpose === 'composer-extraction'
+        ? classification.composers
+        : purpose === 'access-classification'
+          ? classification.access
+          : undefined;
+    const resolved = purpose === 'eligibility'
+      ? classification.eligibility.method === 'ai' && classification.eligibility.value !== 'uncertain'
+      : purpose === 'composer-extraction'
+        ? classification.composers?.method === 'ai'
+          && /^ai-composers-(?:completed|validated)$/.test(classification.composers.ruleId)
+        : purpose === 'access-classification'
+          ? classification.access?.value !== 'unknown'
+          : Boolean(
+              (classification.formats?.method === 'ai' && classification.formats.value.length > 0) ||
+              (classification.eras?.method === 'ai' && classification.eras.value.length > 0),
+            );
+    if (resolved) bucket.resolved += 1;
+    else bucket.unresolved += 1;
+    if (
+      failed.has(purpose) ||
+      (resolution && isTechnicalClassificationFailure(resolution.ruleId))
+    ) {
+      bucket.errors += 1;
+    }
+  }
+}
+
+function summarizeQuality(decisions: readonly IngestEventDecision[]) {
+  const quality = emptyIngestQualitySummary();
+  for (const decision of decisions) {
+    const candidate = decision.publishable && decision.candidateGenerated ? decision.candidate : undefined;
+    if (!candidate) continue;
+
+    if (candidate.composers.length > 0) quality.composers.populated += 1;
+    else {
+      quality.composers.unresolved += 1;
+      const hasProgrammeEvidence = Boolean(
+        decision.normalized?.programText ||
+        decision.normalized?.works.some((work) => Boolean(work.composerName)),
+      );
+      if (!hasProgrammeEvidence) quality.composers.unresolvedNoProgramEvidence += 1;
+    }
+
+    if (candidate.eras.length > 0) quality.eras.populated += 1;
+    else quality.eras.unresolved += 1;
+    if (candidate.formats.length > 0) quality.formats.populated += 1;
+    else quality.formats.unresolved += 1;
+
+    if (candidate.access === 'free') quality.access.free += 1;
+    else if (candidate.access === 'paid') quality.access.paid += 1;
+    else {
+      quality.access.unresolved += 1;
+      if (decision.normalized?.accessText) quality.access.unresolvedWithEvidence += 1;
+      else quality.access.unresolvedNoEvidence += 1;
+    }
+  }
+  return quality;
+}
+
 function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined): void {
   const stats = ai?.snapshotStats?.();
   if (!stats) return;
   usage.httpRequests = stats.httpRequests;
   usage.retries = stats.retries;
-  usage.modelFallbacks = stats.modelFallbacks;
-  usage.requestsByModel = stats.requestsByModel;
-  usage.classificationsByModel = stats.classificationsByModel;
+  usage.modelFallbacks = stats.httpFallbacks ?? stats.modelFallbacks;
+  usage.logicalCalls = stats.logicalCalls ?? 0;
+  usage.sameRouteRetries = stats.sameRouteRetries ?? 0;
+  usage.httpFallbacks = stats.httpFallbacks ?? 0;
+  usage.fallbackCalls = stats.fallbackCalls ?? 0;
+  usage.circuitOpenRoutes = stats.circuitOpenRoutes ?? 0;
+  usage.requestsByRoute = stats.requestsByRoute;
+  usage.classificationsByRoute = stats.classificationsByRoute;
+  usage.requestsByProvider = stats.requestsByProvider ?? {};
+  usage.classificationsByProvider = stats.classificationsByProvider ?? {};
+  usage.requestsByPurpose = stats.requestsByPurpose ?? {};
+  usage.failuresByKind = stats.failuresByKind ?? {};
+  usage.rateLimits = stats.rateLimits ?? 0;
+  usage.quotaExhausted = stats.quotaExhausted ?? 0;
+  usage.concurrencyPressure = stats.concurrencyPressure ?? 0;
+  usage.pressureByKind = stats.pressureByKind ?? {};
+  usage.concurrencyPressureByRoute = stats.concurrencyPressureByRoute ?? {};
+  usage.concurrencyPressureByProvider = stats.concurrencyPressureByProvider ?? {};
+  usage.rateLimitsByRoute = stats.rateLimitsByRoute ?? {};
+  usage.rateLimitsByProvider = stats.rateLimitsByProvider ?? {};
+  usage.routes = stats.routes ?? [];
+  usage.requestsByModel = stats.requestsByModel ?? stats.requestsByRoute;
+  usage.classificationsByModel = stats.classificationsByModel ?? stats.classificationsByRoute;
   usage.cacheHits = stats.cacheHits ?? 0;
   usage.deferred = stats.deferred ?? 0;
   usage.inputTokensByModel = stats.inputTokensByModel ?? {};
   usage.dailyRequestsByModel = stats.dailyRequestsByModel ?? {};
-}
-
-function selectSources(ids: string[] | undefined): SourceDefinition[] {
-  if (!ids || ids.length === 0) {
-    return listSourceDefinitions().filter((source) => !source.skipDefaultSync);
-  }
-  return ids.map((id) => getSourceDefinition(id));
+  usage.inputTokensByRoute = stats.inputTokensByRoute ?? stats.inputTokensByModel ?? {};
+  usage.outputTokensByRoute = stats.outputTokensByRoute ?? {};
+  usage.thoughtTokensByRoute = stats.thoughtTokensByRoute ?? {};
+  usage.dailyRequestsByRoute = stats.dailyRequestsByRoute ?? stats.dailyRequestsByModel ?? {};
 }
 
 function measureSourcePhase<T>(
@@ -607,6 +860,26 @@ function measureSourcePhase<T>(
   task: () => Promise<T>,
 ): Promise<T> {
   return observability ? observability.measureSourcePhase(sourceId, phase, task) : task();
+}
+
+function flushBrowserFetchAttempts(
+  sourceId: string,
+  observability: IngestObservability | undefined,
+): void {
+  const attempts = takeBrowserFetchAttempts(sourceId);
+  if (!observability) return;
+  for (const attempt of attempts) {
+    observability.recordHttp({
+      sourceId,
+      transport: 'browser',
+      durationMs: attempt.durationMs,
+      retry: attempt.retry,
+      ...(attempt.browserFallback ? { browserFallback: true } : {}),
+      ...(attempt.status !== undefined ? { status: attempt.status } : {}),
+      ...(attempt.timeout ? { timeout: true } : {}),
+      ...(attempt.challenge ? { challenge: true } : {}),
+    });
+  }
 }
 
 function instrumentSourceGet(
@@ -627,26 +900,38 @@ function instrumentSourceGet(
     }
     try {
       const body = await get(url);
-      observability.recordHttp({
-        sourceId,
-        transport,
-        durationMs: performance.now() - startedAtMs,
-        retry,
-        status: 200,
-      });
+      recordInstrumentedHttp(observability, sourceId, url, transport, startedAtMs, retry);
       return body;
     } catch (error) {
       failedUrls.add(normalizeUrl(url));
-      observability.recordHttp({
-        sourceId,
-        transport,
-        durationMs: performance.now() - startedAtMs,
-        retry,
-        ...classifyHttpFailure(error),
-      });
+      recordInstrumentedHttp(observability, sourceId, url, transport, startedAtMs, retry, error);
       throw error;
     }
   };
+}
+
+function recordInstrumentedHttp(
+  observability: IngestObservability,
+  sourceId: string,
+  url: string,
+  transport: 'direct' | 'relay',
+  startedAtMs: number,
+  retry: boolean,
+  error?: unknown,
+): void {
+  const recorded = takeRecordedHttpAttempts(url);
+  if (recorded.length > 0) {
+    for (const attempt of recorded) observability.recordHttp({ sourceId, ...attempt });
+    return;
+  }
+  if (error) takeRelayRecoveries(url);
+  observability.recordHttp({
+    sourceId,
+    transport,
+    durationMs: performance.now() - startedAtMs,
+    retry,
+    ...(error ? classifyHttpFailure(error) : { status: 200, recoveries: takeRelayRecoveries(url) }),
+  });
 }
 
 function classifyHttpFailure(error: unknown): {
@@ -656,7 +941,11 @@ function classifyHttpFailure(error: unknown): {
   challenge?: boolean;
 } {
   const message = error instanceof Error ? error.message : String(error);
-  const status = error instanceof HttpError ? error.status : undefined;
+  const status = error instanceof HttpError
+    ? error.status
+    : (error && typeof error === 'object' && 'status' in error && typeof error.status === 'number'
+      ? error.status
+      : undefined);
   const timeout = (error instanceof Error && error.name === 'AbortError') || /tiempo agotado/i.test(message);
   const fetchFailed = /fetch failed/i.test(message);
   const challenge = status === 202 || /sgcaptcha|SiteGround \(captcha\)|HTML de desafío/i.test(message);

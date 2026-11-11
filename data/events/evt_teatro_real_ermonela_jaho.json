@@ -15,8 +15,39 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Ermonela Jaho"
+    },
+    {
+      "name": "Léo Vermot Desroches"
+    },
+    {
+      "name": "Francesco Cilluffo",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jules Massenet"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Pietro Mascagni"
+    },
+    {
+      "name": "Ruggero Leoncavallo"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -27,15 +58,15 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/ermonela-jaho",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "ermonela-jaho"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

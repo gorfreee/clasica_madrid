@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50457819",
+  "slug": "la-magia-de-la-zarzuela",
+  "title": "La magia de la Zarzuela",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_juan_genoves",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50457819_01",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marta Toba",
+      "role": "soloist"
+    },
+    {
+      "name": "Alberto Joya",
+      "role": "soloist"
+    },
+    {
+      "name": "Gema Barón",
+      "role": "other"
+    },
+    {
+      "name": "Carlos Huedo",
+      "role": "other"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "La romanza de Los claveles"
+    },
+    {
+      "title": "El barberillo de Lavapiés"
+    },
+    {
+      "title": "Habanera de Carmen"
+    },
+    {
+      "title": "El café de Chinitas"
+    }
+  ],
+  "eras": [],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa936fe10f761a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50457819"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

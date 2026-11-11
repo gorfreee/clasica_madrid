@@ -200,10 +200,13 @@ describe('selección de sources', () => {
           return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
         }
         if (url.includes('madrid.es')) return '<article><h1>Ficha</h1></article>';
+        if (url === 'https://www.tala-producciones.es/salon-del-ateneo/') {
+          return readFile(path.join(fixtures, 'tala-producciones/listing-empty.html'), 'utf8');
+        }
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
-    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-eutherpe']);
+    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas', 'fundacion-eutherpe']);
 
     const subset = await runIngest({
       dataDir: dir,
@@ -224,5 +227,46 @@ describe('selección de sources', () => {
     });
     expect(subset.summary.sourcesAttempted).toEqual(['madrid-datos', 'teatro-real']);
     expect(subset.rawEvents.every((event) => event.sourceId === 'madrid-datos')).toBe(true);
+  });
+
+  it('resta excludeSourceIds de una selección explícita', async () => {
+    const dir = await emptyDataDir();
+    const run = await runIngest({
+      dataDir: dir,
+      catalog: emptyCatalog(),
+      now: TEST_NOW,
+      dryRun: true,
+      sourceIds: ['madrid-datos', 'teatro-real'],
+      excludeSourceIds: ['teatro-real'],
+      get: async (url) => {
+        if (url.includes('agenda-eventos-culturales-100')) {
+          return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+        }
+        if (url.includes('madrid.es')) return '<article><h1>Ficha</h1></article>';
+        throw new Error(`no debía pedirse ${url}`);
+      },
+    });
+    expect(run.summary.sourcesAttempted).toEqual(['madrid-datos']);
+    expect(run.rawEvents.every((event) => event.sourceId === 'madrid-datos')).toBe(true);
+  });
+
+  it('propaga exclusiones desconocidas o un conjunto vacío como error', async () => {
+    const dir = await emptyDataDir();
+    const options = {
+      dataDir: dir,
+      catalog: emptyCatalog(),
+      now: TEST_NOW,
+      dryRun: true,
+      get: async () => {
+        throw new Error('no debía pedirse ninguna URL');
+      },
+    };
+
+    await expect(runIngest({ ...options, excludeSourceIds: ['fuente-inexistente'] })).rejects.toThrow(
+      /fuente desconocida: fuente-inexistente/,
+    );
+    await expect(
+      runIngest({ ...options, sourceIds: ['teatro-real'], excludeSourceIds: ['teatro-real'] }),
+    ).rejects.toThrow(/tras aplicar las exclusiones no queda ninguna fuente/);
   });
 });

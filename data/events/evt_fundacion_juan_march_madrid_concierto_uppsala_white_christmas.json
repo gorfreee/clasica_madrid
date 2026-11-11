@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_uppsala_white_christmas",
+  "slug": "de-uppsala-a-white-christmas",
+  "title": "De Uppsala a White Christmas",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_uppsala_white_christmas_01",
+      "date": "2026-12-13",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Kebyart",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pere Méndez Marsal"
+    },
+    {
+      "name": "Víctor Serra Noguera"
+    },
+    {
+      "name": "Robert Seara Mora"
+    },
+    {
+      "name": "Daniel Miguel Guerrero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bernat Vivancos"
+    },
+    {
+      "name": "Caroline Shaw"
+    },
+    {
+      "name": "Fran Barajas"
+    },
+    {
+      "name": "Irving Berlin"
+    }
+  ],
+  "works": [
+    {
+      "title": "El cant dels ocells (glosa de Bernat Vivancos)"
+    },
+    {
+      "title": "Ay luna que reluces",
+      "composerName": "Bernat Vivancos"
+    },
+    {
+      "title": "Entr'acte",
+      "composerName": "Caroline Shaw"
+    },
+    {
+      "title": "H de Humor [Abecedario] (estreno absoluto, encargo de Radio Clásica de RNE)",
+      "composerName": "Fran Barajas"
+    },
+    {
+      "title": "Nit de vetlla (arreglo de Kebyart)"
+    },
+    {
+      "title": "White Christmas (arreglo de Kebyart)",
+      "composerName": "Irving Berlin"
+    },
+    {
+      "title": "El noi de la mare (arreglo de Kebyart)"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/uppsala-white-christmas",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/uppsala-white-christmas"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

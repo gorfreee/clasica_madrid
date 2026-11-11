@@ -1,5 +1,7 @@
 ---
 import type { AgendaPageModel } from '../lib/presentation/agenda.ts';
+import SearchIcon from './SearchIcon.astro';
+import '../styles/agenda-toolbar.css';
 
 type Props = {
   model: AgendaPageModel;
@@ -7,7 +9,7 @@ type Props = {
 
 const { model } = Astro.props;
 ---
-{/* Contrato UI interno: [data-agenda-filters] y [data-clear-filters] los usa agenda-client.ts. */}
+{/* Contrato UI interno: [data-agenda-filters], [data-agenda-shortcuts], [data-agenda-shortcut], [data-result-count], [data-clear-filters], [data-advanced-filters-toggle] y [data-advanced-filters-panel] los usa agenda-client.ts. */}
 
 <section class="filters" aria-labelledby="buscar-titulo">
   <form class="filters__form" method="get" action="/" data-agenda-filters>
@@ -15,75 +17,106 @@ const { model } = Astro.props;
     <div class="search-line">
       <label class="search-field">
         <span class="visually-hidden">Buscar en la agenda</span>
-        <input type="search" name="q" value={model.query} placeholder="Busca una obra, intérprete, compositor o lugar" />
+        <input
+          type="search"
+          name="q"
+          value={model.query}
+          data-search-placeholder-wide="Busca conciertos, intérpretes, compositores o lugares"
+          data-search-placeholder-narrow="Busca conciertos, compositores..."
+          placeholder="Busca conciertos, compositores..."
+        />
       </label>
-      <button class="search-submit" type="submit" aria-label="Aplicar filtros">Buscar</button>
+      <button class="search-submit" type="submit" aria-label="Buscar">
+        <span class="search-submit__compact" aria-hidden="true">
+          <SearchIcon />
+        </span>
+        <span class="search-submit__label">Buscar</span>
+      </button>
     </div>
 
-    <nav class="shortcuts" aria-label="Accesos rápidos de agenda">
-      {model.shortcuts.map((shortcut) => (
-        <a class:list={["shortcut", { "shortcut--emphasis": shortcut.emphasis }]} href={shortcut.href}>
-          {shortcut.label}
-        </a>
-      ))}
-    </nav>
+    <div class="filters__toolbar">
+      <nav class="shortcuts" aria-label="Accesos rápidos de agenda" data-agenda-shortcuts>
+        {model.shortcuts.map((shortcut) => (
+          <a
+            class="shortcut"
+            href={shortcut.href}
+            rel={shortcut.href.includes('?') ? 'nofollow' : undefined}
+            data-agenda-shortcut={shortcut.id}
+            aria-pressed={shortcut.active ? 'true' : 'false'}
+          >
+            {shortcut.id === 'free' ? <span class="free-signal">{shortcut.label}</span> : shortcut.label}
+          </a>
+        ))}
+      </nav>
 
-    <details class="filters__advanced">
-      <summary>
-        <span>Filtros avanzados</span>
-        <span class="filters__summary-mark" aria-hidden="true">+</span>
-      </summary>
-      <div class="filters__panel">
-        <div class="filters__grid">
-          <label class="field">
-            <span>Desde</span>
-            <input type="date" name="from" value={model.from} />
-          </label>
-          <label class="field">
-            <span>Hasta</span>
-            <input type="date" name="to" value={model.to} />
-          </label>
-          {
-            model.selectFilters.map((field) => (
-              <label class="field">
-                <span>{field.label}</span>
-                <select name={field.name}>
-                  {field.options.map((option) => (
-                    <option value={option.value} selected={option.value === field.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))
-          }
-          <label class="field">
-            <span>Compositor</span>
-            <input
-              type="text"
-              name="composer"
-              value={model.composer}
-              list="composer-suggestions"
-              autocomplete="off"
-              placeholder="Nombre del compositor"
-            />
-            <datalist id="composer-suggestions">
-              {model.composerSuggestions.map((name) => <option value={name} />)}
-            </datalist>
-          </label>
-        </div>
-        <div class="filters__actions">
-          <button type="submit">Aplicar filtros</button>
-        </div>
+      <button
+        class="filters__toggle"
+        type="button"
+        data-advanced-filters-toggle
+        aria-expanded="false"
+        aria-controls="agenda-advanced-filters"
+      >
+        <span>Filtros</span>
+        <span class="filters__toggle-mark" aria-hidden="true">
+          <svg viewBox="0 0 10 6" width="10" height="6" focusable="false">
+            <path d="m1 1 4 4 4-4"></path>
+          </svg>
+        </span>
+      </button>
+
+      <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
+    </div>
+
+    <div id="agenda-advanced-filters" class="filters__panel" hidden data-advanced-filters-panel>
+      <div class="filters__grid">
+        <label class="field">
+          <span>Desde</span>
+          <input type="date" name="from" value={model.from} />
+        </label>
+        <label class="field">
+          <span>Hasta</span>
+          <input type="date" name="to" value={model.to} />
+        </label>
+        {
+          model.selectFilters.map((field) => (
+            <label class="field">
+              <span>{field.label}</span>
+              <select name={field.name}>
+                {field.options.map((option) => (
+                  <option value={option.value} selected={option.value === field.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))
+        }
+        <label class="field">
+          <span>Compositor</span>
+          <input
+            type="text"
+            name="composer"
+            value={model.composer}
+            list="composer-suggestions"
+            autocomplete="off"
+            placeholder="Nombre del compositor"
+          />
+          <datalist id="composer-suggestions">
+            {model.composerSuggestions.map((name) => <option value={name} />)}
+          </datalist>
+        </label>
       </div>
-    </details>
+      <div class="filters__actions">
+        <button type="submit">Aplicar filtros</button>
+      </div>
+    </div>
 
-    <div class="active-filters" data-active-filters aria-live="polite"></div>
-    <div class="filters__clear-row">
-      <a class="filters__clear" href="/" data-clear-filters hidden>Limpiar todo</a>
+    <div class="filters__active-row">
+      <div class="active-filters" data-active-filters aria-live="polite"></div>
+      <a class="filters__clear" href="/" data-clear-filters hidden>Limpiar filtros</a>
     </div>
   </form>
   <noscript>
-    <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript.</p>
+    <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript</p>
   </noscript>
 </section>

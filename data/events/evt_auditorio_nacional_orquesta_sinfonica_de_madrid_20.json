@@ -21,6 +21,9 @@
     },
     {
       "name": "Alexander Prior"
+    },
+    {
+      "name": "Curtis Phill Hsu"
     }
   ],
   "composers": [
@@ -28,7 +31,7 @@
       "name": "Ludwig van Beethoven"
     },
     {
-      "name": "Piotr I. Tchaikovsky"
+      "name": "Piotr Ilich Chaikovski"
     }
   ],
   "works": [
@@ -38,7 +41,7 @@
     },
     {
       "title": "Sinfonía n.° 6 en si menor “Patética”, op. 74",
-      "composerName": "Piotr I. Tchaikovsky"
+      "composerName": "Piotr Ilich Chaikovski"
     }
   ],
   "eras": [
@@ -54,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-20",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "orquesta-sinfonica-de-madrid-20"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

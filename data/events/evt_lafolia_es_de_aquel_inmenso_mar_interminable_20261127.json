@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_lafolia_es_de_aquel_inmenso_mar_interminable_20261127",
+  "slug": "de-aquel-inmenso-mar-interminable-la-folia",
+  "title": "De aquel inmenso mar interminable — La Folía",
+  "status": "scheduled",
+  "venueId": "ven_museo_prado_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_lafolia_es_de_aquel_inmenso_mar_interminable_20261127_01",
+      "date": "2026-11-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo de música barroca La Folía",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pedro Bonet",
+      "role": "conductor"
+    },
+    {
+      "name": "Celia Alcedo",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Pérez Bocanegra"
+    },
+    {
+      "name": "Domenico Zipoli"
+    },
+    {
+      "name": "André Cardinal Destouches"
+    },
+    {
+      "name": "Santiago de Murcia"
+    },
+    {
+      "name": "Teodorico Pedrini"
+    },
+    {
+      "name": "Carlos Galán"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_lafolia_es",
+      "url": "https://www.lafolia.es/agenda.html",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "sourceId": "src_museo_prado",
+      "url": "https://entradas.museodelprado.es/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_lafolia_es",
+  "lastVerifiedAt": "2026-10-14"
+}

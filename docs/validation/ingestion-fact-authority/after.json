@@ -1,0 +1,788 @@
+{
+  "schemaVersion": 1,
+  "code": "fix/ingestion-fact-authority",
+  "window": {
+    "from": "2026-10-02",
+    "to": "2027-07-31"
+  },
+  "scope": "Dry-run. Full source parsers and validation; observations scoped to 2197 / Hannigan / 64667 before hydration. Disappearance diagnostics of the scoped run are not a source-coverage evaluation.",
+  "liveResponseHashes": [
+    {
+      "url": "https://auditorionacional.inaem.gob.es/front-page-events.json?start=2026-10-02&end=2027-07-31",
+      "sha256": "45113a4bbb2184e541b9509f0510c3e7cde9e6909495c0e1b37ef7dcbbedc61a",
+      "bytes": 117159
+    },
+    {
+      "url": "https://ateneodemadrid.com/wp-json/tribe/events/v1/events?per_page=50&page=1&start_date=2026-10-02+00%3A00%3A00&end_date=2027-07-31+23%3A59%3A59&status=publish",
+      "sha256": "b906ab2878c111836cb281360a9dcaba0dcb386c68fa8b34d72966da28dbf4dc",
+      "bytes": 245031
+    },
+    {
+      "url": "https://www.fundacionpiumosso.com/programacion/",
+      "sha256": "9d53eba8e1ffdc90071e3603cb1098143559ac1df8cf0370ff1b3dcf4534905d",
+      "bytes": 614300
+    },
+    {
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+      "sha256": "27901d1c41ea982eb05c1ab75403466c847dc841aa9486c36f1a394f604873ee",
+      "bytes": 44872
+    },
+    {
+      "url": "https://ateneodemadrid.com/wp-json/tribe/events/v1/events?per_page=50&page=2&start_date=2026-10-02+00%3A00%3A00&end_date=2027-07-31+23%3A59%3A59&status=publish",
+      "sha256": "2ef3ed5d25dfc1d3dfc162fb8779fd5c23906a7cd6a72a994f89584a20c188a1",
+      "bytes": 229417
+    },
+    {
+      "url": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
+      "sha256": "efc867018203c7f354730cb37cde1a73098d289ad5b7f1d0af638265ca42da90",
+      "bytes": 189704
+    }
+  ],
+  "liveDecisions": [
+    {
+      "sourceId": "ateneo-madrid",
+      "sourceUrl": "https://ateneodemadrid.com/evento/ruy-lopez-de-segura-la-cara-oculta-del-tablero",
+      "title": "Ruy López de Segura: La cara oculta del tablero",
+      "hydration": {
+        "status": "not-requested"
+      },
+      "externalId": "64667",
+      "observed": {
+        "title": "Ruy López de Segura: La cara oculta del tablero",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "Sala Pérez Galdós. 19:00",
+            "date": "2026-10-22",
+            "time": "19:00"
+          }
+        ],
+        "description": "Presentación del libro.\nAgrupaciones Agustín Argüelles y Ángel Garma. Intervienen: Daniel Gragera – coautor, Francisco de Asís, Gragera – coautor, Francisco Delgado-Iribarren, María Crespo. Belén González Nistal Mayorga – retratista, Juan Carlos Fernández Calderón. Presenta: José Antonio\nGarcía Regueiro, Belén Rico García. Modera: Juan López . Sala Pérez Galdós. 19:00.",
+        "categoryText": "Presentación del libro",
+        "venueText": "Sala Pérez Galdós",
+        "seriesText": "Presentación del libro"
+      },
+      "normalized": {
+        "title": "Ruy López de Segura: La cara oculta del tablero",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "date": "2026-10-22",
+            "time": "19:00"
+          }
+        ],
+        "description": "Presentación del libro. Agrupaciones Agustín Argüelles y Ángel Garma. Intervienen: Daniel Gragera – coautor, Francisco de Asís, Gragera – coautor, Francisco Delgado-Iribarren, María Crespo. Belén González Nistal Mayorga – retratista, Juan Carlos Fernández Calderón. Presenta: José Antonio García Regueiro, Belén Rico García. Modera: Juan López . Sala Pérez Galdós. 19:00.",
+        "categoryText": "Presentación del libro",
+        "venueText": "Sala Pérez Galdós",
+        "seriesText": "Presentación del libro"
+      },
+      "eligibility": {
+        "value": "exclude",
+        "method": "rule",
+        "ruleId": "non-performance-activity",
+        "evidence": [
+          "Presentación del libro"
+        ]
+      }
+    },
+    {
+      "sourceId": "auditorio-nacional",
+      "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+      "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou"
+      },
+      "externalId": "3458720415294d028ad8af92e3777416",
+      "identity": {
+        "action": "unchanged",
+        "method": "externalId",
+        "eventId": "evt_auditorio_nacional_24018"
+      },
+      "candidate": {
+        "id": "evt_auditorio_nacional_24018",
+        "slug": "barbara-hannigan-bertrand-chamayou",
+        "status": "scheduled",
+        "venueId": "ven_auditorio_nacional_sala_camara",
+        "occurrences": [
+          {
+            "date": "2027-04-11",
+            "time": "19:30",
+            "status": "scheduled"
+          }
+        ],
+        "performers": [
+          {
+            "name": "Barbara Hannigan"
+          },
+          {
+            "name": "Bertrand Chamayou"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen"
+          },
+          {
+            "name": "Alexander Scriabin"
+          },
+          {
+            "name": "John Zorn"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen"
+          },
+          {
+            "title": "Poème-nocturne , op. 61 (1911)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Vers la flamme , op. 72 (1914)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Jumalattaret ** (2012)",
+            "composerName": "John Zorn"
+          }
+        ],
+        "eras": [
+          "twentieth"
+        ],
+        "formats": [
+          "recital"
+        ],
+        "kind": "established",
+        "access": "paid"
+      },
+      "observed": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [
+          {
+            "name": "BARBARA HANNIGAN",
+            "roleText": "soprano"
+          },
+          {
+            "name": "BERTRAND CHAMAYOU",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne, op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme, op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "raw": "CONCIERTO APLAZADO. AL 11 de ABRIL de 2027. BARBARA HANNIGAN soprano. BERTRAND CHAMAYOU piano. Olivier Messiaen (1908-1992). Chants de terre et de ciel (1938). Alexander Scriabin (1872-1915). Poème-nocturne, op. 61 (1911). Vers la flamme, op. 72 (1914). John Zorn (1953). Jumalattaret ** (2012). ** Estreno en España",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara",
+        "accessText": "36, 27 y 18 € CONSULTAR ABONOS CNDM y ENTRADAS SUELTAS",
+        "programText": "Olivier Messiaen (1908-1992)\nChants de terre et de ciel (1938)\nAlexander Scriabin (1872-1915)\nPoème-nocturne, op. 61 (1911)\nVers la flamme, op. 72 (1914)\nJohn Zorn (1953)\nJumalattaret (2012)",
+        "eventStatus": "scheduled"
+      },
+      "normalized": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [
+          {
+            "name": "BARBARA HANNIGAN",
+            "roleText": "soprano"
+          },
+          {
+            "name": "BERTRAND CHAMAYOU",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne, op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme, op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara",
+        "accessText": "36, 27 y 18 € CONSULTAR ABONOS CNDM y ENTRADAS SUELTAS",
+        "programText": "Olivier Messiaen (1908-1992)\nChants de terre et de ciel (1938)\nAlexander Scriabin (1872-1915)\nPoème-nocturne, op. 61 (1911)\nVers la flamme, op. 72 (1914)\nJohn Zorn (1953)\nJumalattaret (2012)",
+        "dateFromDetail": true,
+        "eventStatus": "scheduled"
+      },
+      "listing": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "2026-10-23T19:30:00+02:00",
+            "date": "2026-10-23",
+            "time": "19:30"
+          },
+          {
+            "raw": "2027-04-11T19:30:00+02:00",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara"
+      },
+      "eligibility": {
+        "value": "include",
+        "method": "knowledge",
+        "ruleId": "known-classical-composer",
+        "evidence": [
+          "Olivier Messiaen",
+          "Alexander Scriabin"
+        ]
+      }
+    },
+    {
+      "sourceId": "fundacion-piu-mosso",
+      "sourceUrl": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
+      "title": "ORQUESTA SINFÓNICA DE GETAFE. CONCIERTO NÚMERO 2 DE S. RACHMANINOV",
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov"
+      },
+      "externalId": "2197",
+      "identity": {
+        "action": "unchanged",
+        "method": "externalId",
+        "eventId": "evt_orquesta_ciudad_getafe_ecos_del_destino"
+      },
+      "candidate": {
+        "id": "evt_orquesta_ciudad_getafe_ecos_del_destino",
+        "slug": "ecos-del-destino",
+        "status": "scheduled",
+        "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+        "occurrences": [
+          {
+            "date": "2026-10-17",
+            "time": "19:00",
+            "status": "scheduled"
+          }
+        ],
+        "performers": [
+          {
+            "name": "Carlos Díez Martín",
+            "role": "conductor"
+          },
+          {
+            "name": "Francisco Fierro",
+            "role": "soloist"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Serguéi Rajmáninov"
+          },
+          {
+            "name": "Piotr Ilich Chaikovski"
+          }
+        ],
+        "works": [
+          {
+            "title": "Concierto para piano n.º 2 en do menor, Op. 18",
+            "composerName": "Serguéi Rajmáninov"
+          },
+          {
+            "title": "Sinfonía n.º 5 en mi menor, Op. 64",
+            "composerName": "Piotr Ilich Chaikovski"
+          }
+        ],
+        "eras": [
+          "romantic"
+        ],
+        "formats": [
+          "symphonic"
+        ],
+        "kind": "established",
+        "access": "paid"
+      },
+      "observed": {
+        "title": "ORQUESTA SINFÓNICA DE GETAFE. CONCIERTO NÚMERO 2 DE S. RACHMANINOV",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "2026-10-17 08:00 - 17:00",
+            "date": "2026-10-17"
+          }
+        ],
+        "venueText": "Teatro Federico García Lorca",
+        "eventStatus": "scheduled"
+      },
+      "normalized": {
+        "title": "ORQUESTA SINFÓNICA DE GETAFE. CONCIERTO NÚMERO 2 DE S. RACHMANINOV",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "date": "2026-10-17",
+            "time": null
+          }
+        ],
+        "venueText": "Teatro Federico García Lorca",
+        "dateFromDetail": true,
+        "eventStatus": "scheduled"
+      },
+      "listing": {
+        "title": "ORQUESTA SINFÓNICA DE GETAFE. CONCIERTO NÚMERO 2 DE S. RACHMANINOV",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "2026-10-17T08:00:00+02:00",
+            "date": "2026-10-17"
+          }
+        ],
+        "venueText": "Teatro Federico García Lorca",
+        "eventStatus": "scheduled"
+      },
+      "eligibility": {
+        "value": "include",
+        "method": "knowledge",
+        "ruleId": "known-classical-composer",
+        "evidence": [
+          "Serguéi Rajmáninov"
+        ]
+      }
+    }
+  ],
+  "hanniganWithFailedCndmDetail": [
+    {
+      "sourceId": "auditorio-nacional",
+      "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+      "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou"
+      },
+      "externalId": "3458720415294d028ad8af92e3777416",
+      "identity": {
+        "action": "unchanged",
+        "method": "externalId",
+        "eventId": "evt_auditorio_nacional_24018"
+      },
+      "candidate": {
+        "id": "evt_auditorio_nacional_24018",
+        "slug": "barbara-hannigan-bertrand-chamayou",
+        "status": "scheduled",
+        "venueId": "ven_auditorio_nacional_sala_camara",
+        "occurrences": [
+          {
+            "date": "2027-04-11",
+            "time": "19:30",
+            "status": "scheduled"
+          }
+        ],
+        "performers": [
+          {
+            "name": "Barbara Hannigan"
+          },
+          {
+            "name": "Bertrand Chamayou"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen"
+          },
+          {
+            "name": "Alexander Scriabin"
+          },
+          {
+            "name": "John Zorn"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen"
+          },
+          {
+            "title": "Poème-nocturne , op. 61 (1911)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Vers la flamme , op. 72 (1914)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Jumalattaret ** (2012)",
+            "composerName": "John Zorn"
+          }
+        ],
+        "eras": [
+          "twentieth"
+        ],
+        "formats": [
+          "recital"
+        ],
+        "kind": "established",
+        "access": "paid"
+      },
+      "observed": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [
+          {
+            "name": "BARBARA HANNIGAN",
+            "roleText": "soprano"
+          },
+          {
+            "name": "BERTRAND CHAMAYOU",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne, op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme, op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "raw": "CONCIERTO APLAZADO. AL 11 de ABRIL de 2027. BARBARA HANNIGAN soprano. BERTRAND CHAMAYOU piano. Olivier Messiaen (1908-1992). Chants de terre et de ciel (1938). Alexander Scriabin (1872-1915). Poème-nocturne, op. 61 (1911). Vers la flamme, op. 72 (1914). John Zorn (1953). Jumalattaret ** (2012). ** Estreno en España",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara",
+        "programText": "Olivier Messiaen (1908-1992)\nChants de terre et de ciel (1938)\nAlexander Scriabin (1872-1915)\nPoème-nocturne, op. 61 (1911)\nVers la flamme, op. 72 (1914)\nJohn Zorn (1953)\nJumalattaret (2012)",
+        "eventStatus": "scheduled"
+      },
+      "normalized": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [
+          {
+            "name": "BARBARA HANNIGAN",
+            "roleText": "soprano"
+          },
+          {
+            "name": "BERTRAND CHAMAYOU",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne, op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme, op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara",
+        "programText": "Olivier Messiaen (1908-1992)\nChants de terre et de ciel (1938)\nAlexander Scriabin (1872-1915)\nPoème-nocturne, op. 61 (1911)\nVers la flamme, op. 72 (1914)\nJohn Zorn (1953)\nJumalattaret (2012)",
+        "dateFromDetail": true,
+        "eventStatus": "scheduled"
+      },
+      "listing": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "2026-10-23T19:30:00+02:00",
+            "date": "2026-10-23",
+            "time": "19:30"
+          },
+          {
+            "raw": "2027-04-11T19:30:00+02:00",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara"
+      },
+      "eligibility": {
+        "value": "include",
+        "method": "knowledge",
+        "ruleId": "known-classical-composer",
+        "evidence": [
+          "Olivier Messiaen",
+          "Alexander Scriabin"
+        ]
+      }
+    },
+    {
+      "sourceId": "cndm",
+      "sourceUrl": "https://cndm.inaem.gob.es/node/23814",
+      "title": "[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+      "hydration": {
+        "status": "failed",
+        "detailUrl": "https://cndm.inaem.gob.es/node/23814",
+        "message": "tiempo agotado al pedir https://cndm.inaem.gob.es/node/23814"
+      },
+      "externalId": "23814",
+      "identity": {
+        "action": "unchanged",
+        "method": "externalId",
+        "eventId": "evt_auditorio_nacional_24018"
+      },
+      "candidate": {
+        "id": "evt_auditorio_nacional_24018",
+        "slug": "barbara-hannigan-bertrand-chamayou",
+        "status": "scheduled",
+        "venueId": "ven_auditorio_nacional_sala_camara",
+        "occurrences": [
+          {
+            "date": "2027-04-11",
+            "time": "19:30",
+            "status": "scheduled"
+          }
+        ],
+        "performers": [
+          {
+            "name": "Barbara Hannigan"
+          },
+          {
+            "name": "Bertrand Chamayou"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen"
+          },
+          {
+            "name": "Alexander Scriabin"
+          },
+          {
+            "name": "John Zorn"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen"
+          },
+          {
+            "title": "Poème-nocturne , op. 61 (1911)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Vers la flamme , op. 72 (1914)",
+            "composerName": "Alexander Scriabin"
+          },
+          {
+            "title": "Jumalattaret ** (2012)",
+            "composerName": "John Zorn"
+          }
+        ],
+        "eras": [
+          "twentieth"
+        ],
+        "formats": [
+          "recital"
+        ],
+        "kind": "established",
+        "access": "paid"
+      },
+      "observed": {
+        "title": "[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "raw": "2026-10-23 19:30",
+            "date": "2026-10-23",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Auditorio Nacional (Cámara) | Madrid"
+      },
+      "normalized": {
+        "title": "[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "occurrences": [
+          {
+            "date": "2026-10-23",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Auditorio Nacional (Cámara) | Madrid"
+      },
+      "eligibility": {
+        "value": "uncertain",
+        "method": "fallback",
+        "ruleId": "ai-unavailable",
+        "evidence": [
+          "no hay evidencia musical suficientemente fuerte para include ni una exclusión determinista",
+          "provider de IA no configurado o no disponible"
+        ]
+      }
+    }
+  ],
+  "goldenOriginal68": {
+    "expectedInclude": {
+      "include": 34,
+      "exclude": 0,
+      "uncertain": 2
+    },
+    "expectedExclude": {
+      "include": 0,
+      "exclude": 21,
+      "uncertain": 2
+    },
+    "expectedUncertain": {
+      "include": 0,
+      "exclude": 0,
+      "uncertain": 9
+    },
+    "unsafePublications": 0,
+    "includeLeftForAi": 2,
+    "excludeLeftForAi": 2,
+    "formatSubsetMatches": 30,
+    "formatSubsetEvaluated": 30,
+    "eraSubsetMatches": 24,
+    "eraSubsetEvaluated": 24,
+    "accessMatches": 68,
+    "accessEvaluated": 68,
+    "kindDefinedForInclude": 34,
+    "kindExactMatches": 27
+  },
+  "goldenAugmented69": {
+    "expectedInclude": {
+      "include": 34,
+      "exclude": 0,
+      "uncertain": 2
+    },
+    "expectedExclude": {
+      "include": 0,
+      "exclude": 22,
+      "uncertain": 2
+    },
+    "expectedUncertain": {
+      "include": 0,
+      "exclude": 0,
+      "uncertain": 9
+    },
+    "unsafePublications": 0,
+    "includeLeftForAi": 2,
+    "excludeLeftForAi": 2,
+    "formatSubsetMatches": 30,
+    "formatSubsetEvaluated": 30,
+    "eraSubsetMatches": 24,
+    "eraSubsetEvaluated": 24,
+    "accessMatches": 69,
+    "accessEvaluated": 69,
+    "kindDefinedForInclude": 34,
+    "kindExactMatches": 27
+  }
+}

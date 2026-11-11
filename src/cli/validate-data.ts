@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { defaultDataDir } from '../lib/repository/fs.ts';
 import { validateDataDir } from '../lib/validation/validate-dir.ts';
 

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50441642",
+  "slug": "concierto-de-gala-nova-camera-orquesta",
+  "title": "Concierto de gala. Nova Cámera Orquesta",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_10189992",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50441642_01",
+      "date": "2026-10-18",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nova Cámera Orquesta"
+    },
+    {
+      "name": "Eugenio Uñón"
+    },
+    {
+      "name": "Flores Chaviano"
+    },
+    {
+      "name": "J. A. García Fuertes"
+    },
+    {
+      "name": "Meng Su"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joaquín Rodrigo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Asturiana para guitarra y orquesta"
+    },
+    {
+      "title": "Fantasía para un gentilhombre",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Concierto de Aranjuez",
+      "composerName": "Joaquín Rodrigo"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=f873b0bec9a01a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50441642"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_virtuosos",
+  "slug": "virtuosos",
+  "title": "Virtuosos",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_nicolas_salmeron",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_virtuosos_01",
+      "date": "2026-10-22",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Krisztina Nagy"
+    },
+    {
+      "name": "Dóra Demeter"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Ernst von Dohnányi"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Jules Massenet"
+    },
+    {
+      "name": "Béla Bartók"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Igualdad-y-diversidad/Publicaciones/Virtuosos?vgnextchannel=37faaaa26f535510VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=e5695197b7ce0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-17"
+}

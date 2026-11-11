@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_asispa_musica_sacra_st_joan_arc_2026_11_13",
+  "slug": "asispa-musica-sacra-st-joan-arc-2026-11-13",
+  "title": "Concierto de música sacra — St. Joan of Arc Choir and Handbell Choir",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_manuel_y_san_benito",
+  "organizerIds": [
+    "org_asispa"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_asispa_musica_sacra_st_joan_arc_2026_11_13_01",
+      "date": "2026-11-13",
+      "time": "20:45",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "St. Joan of Arc Choir and Handbell Choir",
+      "role": "ensemble"
+    },
+    {
+      "name": "Jon Thibo",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_asispa_org",
+      "url": "https://asispa.org/concierto-musica-sacra-madrid-soledadcero-noviembre-2026/",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_asispa_org",
+  "lastVerifiedAt": "2026-10-17"
+}

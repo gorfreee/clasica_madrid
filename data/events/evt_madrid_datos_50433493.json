@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50433493",
+  "slug": "en-punto",
+  "title": "En Punto",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6017747",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50433493_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Maribel Literas",
+      "role": "soloist"
+    },
+    {
+      "name": "Raúl de Frutos",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Fernando Sor"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Frederic Mompou"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Ernesto Nazareth"
+    },
+    {
+      "name": "Adrián Politi"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa6f78c4107e0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50433493"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

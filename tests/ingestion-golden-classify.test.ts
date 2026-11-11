@@ -24,6 +24,21 @@ describe('golden set → deterministic classifier', () => {
     }
   });
 
+  it('incluye Pequeño concierto de Año Nuevo por el programText, no por título ni por «y danza»', async () => {
+    const cases = await loadGoldenCases();
+    const anoNuevo = cases.find((item) => item.caseId === 'golden_pequeno_concierto_ano_nuevo');
+    expect(anoNuevo).toBeDefined();
+    expect(anoNuevo!.expected.eligibility).toBe('include');
+    expect(anoNuevo!.observed.title).toBe('Pequeño concierto de Año Nuevo');
+    expect(anoNuevo!.observed.performers).toEqual([]);
+    expect(anoNuevo!.observed.composers).toEqual([{ name: 'y danza' }]);
+    const actual = classify(anoNuevo!.observed);
+    expect(actual.eligibility.value).toBe('include');
+    expect(actual.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(actual.eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(actual.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
   it('mantiene Sarao Barroco como golden uncertain sin excepción por título', async () => {
     const cases = await loadGoldenCases();
     const sarao = cases.find((item) => item.caseId === 'golden_sarao_barroco');
@@ -79,5 +94,50 @@ describe('golden set → deterministic classifier', () => {
       const actual = resolveAccess(item.observed.accessText).value;
       expect(actual, item.caseId).toBe(item.expected.access);
     }
+  });
+
+  it('protege las regresiones de charla secundaria, repertorio+cuerdas y pop inequívoco', async () => {
+    const cases = await loadGoldenCases();
+    const byId = Object.fromEntries(cases.map((item) => [item.caseId, item]));
+
+    const fito = classify(byId.golden_fito_paez!.observed);
+    expect(fito.eligibility.value).not.toBe('include');
+    expect(fito.eligibility.ruleId).not.toBe('popular-music-identity');
+
+    const abba = classify(byId.golden_abba_queen_beatles!.observed);
+    expect(abba.eligibility.value).toBe('exclude');
+    expect(abba.eligibility.ruleId).toBe('popular-music-identity');
+
+    const manon = classify(byId.golden_te_suena_manon!.observed);
+    expect(manon.eligibility.value).toBe('exclude');
+    expect(manon.eligibility.ruleId).toBe('non-performance-activity');
+
+    const williams = classify(byId.golden_john_williams!.observed);
+    expect(williams.eligibility.value).toBe('exclude');
+
+    const ailey = classify(byId.golden_alvin_ailey!.observed);
+    expect(ailey.eligibility.value).toBe('exclude');
+
+    const myra = classify(byId.golden_myra_melford!.observed);
+    expect(myra.eligibility.value).toBe('exclude');
+
+    const anoNuevo = classify(byId.golden_pequeno_concierto_ano_nuevo!.observed);
+    expect(anoNuevo.eligibility.value).toBe('include');
+    expect(anoNuevo.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(anoNuevo.eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
+  it('no convierte un recital en ópera porque el nombre del proyecto contiene Ópera', async () => {
+    const cases = await loadGoldenCases();
+    const salon = cases.find((item) => item.caseId === 'golden_opera_company_salon_recital');
+    expect(salon).toBeDefined();
+    const actual = classify(salon!.observed);
+    expect(actual.eligibility.value).toBe('include');
+    expect(actual.eligibility.ruleId).not.toBe('opera-event');
+    expect(actual.formats?.value).toEqual(['recital']);
+    expect(actual.formats?.value).not.toContain('opera');
+
+    const manon = cases.find((item) => item.caseId === 'golden_manon_lescaut');
+    expect(classify(manon!.observed).formats?.value).toContain('opera');
   });
 });

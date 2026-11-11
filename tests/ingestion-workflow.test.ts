@@ -10,7 +10,7 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     const upload = section(yaml, 'Upload ingestion run artifact');
     const ingest = section(yaml, 'Run ingestion');
     const format = section(yaml, 'Render report and PR body');
-    const gemini = section(yaml, 'Restore persistent Gemini state');
+    const aiState = section(yaml, 'Restore persistent AI pool state');
     const publish = section(yaml, 'Publish data pull request');
     const dryRun = section(yaml, 'Record dry-run outcome');
     const checkout = section(yaml, 'Checkout');
@@ -33,12 +33,53 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(format).toContain('--run-manifest');
     expect(format).toContain('--artifact-name');
 
-    expect(gemini).toContain('.local/ai/quota.json');
-    expect(gemini).toContain('.local/ai/cache/**');
-    expect(gemini).toContain('.local/ai/pending/**');
-    expect(gemini).not.toContain('run.lock');
+    expect(aiState).toContain('.local/ai/quota.json');
+    expect(aiState).toContain('.local/ai/cache/**');
+    expect(aiState).toContain('.local/ai/pending/**');
+    expect(aiState).toContain('ingestion-gemini-${{ runner.os }}-');
+    expect(aiState).not.toContain('run.lock');
+    expect(yaml).toContain('AI_PROVIDER: pool');
+    expect(yaml).toContain("AI_ZERO_COST_ONLY: 'true'");
+    expect(yaml).toContain('AI_STATE_DIR: ${{ github.workspace }}/.local/ai');
+    expect(yaml).toContain('GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}');
+    expect(yaml).toContain('MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}');
+    expect(yaml).toContain('ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}');
+    expect(yaml).toContain('CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
+    expect(yaml).toContain('CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
+    expect(yaml).toContain('VERCEL_AI_GATEWAY_API_KEY: ${{ secrets.VERCEL_AI_GATEWAY_API_KEY }}');
+    expect(yaml).toContain('KILO_API_KEY: ${{ secrets.KILO_API_KEY }}');
+    expect(yaml).toContain('OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}');
+    expect(yaml).toContain('GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}');
+    expect(yaml).toContain('GROQ_MODELS: ${{ vars.GROQ_MODELS }}');
+    expect(yaml).toContain('GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}');
+    expect(yaml).toContain('GROQ_MODEL_TPM: ${{ vars.GROQ_MODEL_TPM }}');
+    expect(yaml).toContain('GROQ_MODEL_RPD: ${{ vars.GROQ_MODEL_RPD }}');
+    expect(yaml).toContain('MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}');
+    expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
+    expect(yaml).toContain('MISTRAL_MODEL_RPM: ${{ vars.MISTRAL_MODEL_RPM }}');
+    expect(yaml).toContain('MISTRAL_MODEL_TPM: ${{ vars.MISTRAL_MODEL_TPM }}');
+    expect(yaml).toContain('MISTRAL_MODEL_RPD: ${{ vars.MISTRAL_MODEL_RPD }}');
+    expect(yaml).toContain('ZAI_MODEL_RPM: ${{ vars.ZAI_MODEL_RPM }}');
+    expect(yaml).toContain('ZAI_MODELS: ${{ vars.ZAI_MODELS }}');
+    expect(yaml).toContain('ZAI_MODEL_TPM: ${{ vars.ZAI_MODEL_TPM }}');
+    expect(yaml).toContain('ZAI_MODEL_RPD: ${{ vars.ZAI_MODEL_RPD }}');
+    expect(yaml).toContain('CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}');
+    expect(yaml).toContain('CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}');
+    expect(yaml).not.toContain('secrets.GROQ_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.MISTRAL_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.ZAI_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.CLOUDFLARE_MODEL_RPM');
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
+    expect(publish).toContain('commit_sha=$(git rev-parse HEAD)');
+    expect(publish).toContain('Branch publicada:');
+    expect(publish).toContain('ya están en el remoto. Si la creación de la PR falla');
+    expect(publish).toContain('::error::Falló la creación de la PR de ingestión');
+    expect(publish).toContain('pull/new/${branch}');
+    expect(publish).toContain('Recuperación manual:');
+    expect(publish).toContain('Ya existe una PR de ingestión abierta');
+    expect(publish).toContain('startswith("automation/ingestion-")');
+    expect(publish.match(/gh pr create/g)?.length).toBe(2);
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
     expect(yaml).not.toContain('if-no-files-found: error');
 
@@ -49,12 +90,49 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(checkout).not.toMatch(/ref:\s*main\s*$/m);
     expect(config).toContain('Publish ejecuta siempre el código de main');
     expect(config).toContain('code_sha=$(git rev-parse HEAD)');
+    expect(config).toContain('season_window="true"');
+    expect(config).toContain('season_window="false"');
+    expect(config).toContain('echo "season_window=$season_window"');
+    expect(config).toContain('exclude_sources=""');
+    expect(config).toContain('exclude_sources="$DISPATCH_EXCLUDE_SOURCES"');
+    expect(config).toContain('echo "exclude_sources=$exclude_sources"');
+    expect(config).toContain('DISPATCH_EXCLUDE_SOURCES');
+    expect(yaml).toContain('exclude_sources:');
+    expect(yaml).toMatch(/description:\s*"IDs a excluir, separados por coma"/);
+    expect(ingest).toContain('--season-window');
+    expect(ingest).toContain('SEASON_WINDOW: ${{ steps.config.outputs.season_window }}');
+    expect(ingest).toContain('EXCLUDE_SOURCES: ${{ steps.config.outputs.exclude_sources }}');
+    expect(ingest).toContain('--exclude-sources');
     expect(ingest).toContain('GITHUB_SHA: ${{ steps.config.outputs.code_sha }}');
     expect(ingest).toContain('INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}');
     expect(ingest).toContain('INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}');
     expect(ingest).not.toContain('secrets.INGEST_FETCH_RELAY_URL');
     expect(ingest).not.toContain('workers.dev');
     expect(yaml).not.toMatch(/INGEST_FETCH_RELAY_TOKEN:\s*['\"]?[A-Za-z0-9_-]{8,}/);
+  });
+
+  it('inyecta controles de presión y cuotas Cloudflare desde vars, sin hardcodear números', async () => {
+    const yaml = await readFile(workflowPath, 'utf8');
+    const pressure = [
+      'GROQ_MODEL_MAX_CONCURRENT', 'GROQ_MODEL_MIN_INTERVAL_MS', 'GROQ_MAX_CONCURRENT', 'GROQ_MIN_INTERVAL_MS',
+      'MISTRAL_MODEL_MAX_CONCURRENT', 'MISTRAL_MODEL_MIN_INTERVAL_MS', 'MISTRAL_MAX_CONCURRENT', 'MISTRAL_MIN_INTERVAL_MS',
+      'ZAI_MODEL_MAX_CONCURRENT', 'ZAI_MODEL_MIN_INTERVAL_MS', 'ZAI_MAX_CONCURRENT', 'ZAI_MIN_INTERVAL_MS',
+      'CLOUDFLARE_MODEL_MAX_CONCURRENT', 'CLOUDFLARE_MODEL_MIN_INTERVAL_MS', 'CLOUDFLARE_MAX_CONCURRENT', 'CLOUDFLARE_MIN_INTERVAL_MS',
+      'CLOUDFLARE_MODEL_RPM', 'CLOUDFLARE_MODEL_TPM', 'CLOUDFLARE_MODEL_RPD',
+      'VERCEL_MODEL_MAX_CONCURRENT', 'VERCEL_MODEL_MIN_INTERVAL_MS', 'VERCEL_MAX_CONCURRENT', 'VERCEL_MIN_INTERVAL_MS', 'VERCEL_RPD',
+      'KILO_MODEL_MAX_CONCURRENT', 'KILO_MODEL_MIN_INTERVAL_MS', 'KILO_MAX_CONCURRENT', 'KILO_MIN_INTERVAL_MS', 'KILO_RPD',
+      'OPENROUTER_MODEL_MAX_CONCURRENT', 'OPENROUTER_MODEL_MIN_INTERVAL_MS', 'OPENROUTER_MAX_CONCURRENT', 'OPENROUTER_MIN_INTERVAL_MS', 'OPENROUTER_RPD',
+    ] as const;
+    for (const name of pressure) {
+      expect(yaml, name).toContain(`${name}: \${{ vars.${name} }}`);
+      expect(yaml, name).not.toContain(`secrets.${name}`);
+    }
+    expect(yaml).not.toMatch(/GROQ_MAX_CONCURRENT:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/MISTRAL_MIN_INTERVAL_MS:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/ZAI_MAX_CONCURRENT:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/CLOUDFLARE_MIN_INTERVAL_MS:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/MISTRAL_MODELS:\s*['\"]?ministral/);
+    expect(yaml).not.toMatch(/ZAI_MODELS:\s*['\"]?glm/);
   });
 });
 

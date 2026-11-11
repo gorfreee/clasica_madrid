@@ -29,8 +29,24 @@
       "name": "Julia Fischer"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Jean Sibelius"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto doble para violín y violonchelo",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sinfonía núm. 5",
+      "composerName": "Jean Sibelius"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -39,15 +55,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-london-philharmonic-orchestra-11",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-10-14",
       "externalId": "ibermusica-london-philharmonic-orchestra-11"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-10-14"
 }

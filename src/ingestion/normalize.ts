@@ -1,4 +1,7 @@
-import { collapseWhitespace } from './html.ts';
+import type { CalendarEvidence } from './calendar-evidence.ts';
+import { canonicalizeArtificiallyUppercase } from './event-title.ts';
+import { canonicalizeComposerName } from './composer-name.ts';
+import { collapseWhitespace, decodeHtmlEntities } from './html.ts';
 import { collapseOccurrences, parseObservedDateTime, parseObservedTime } from './dates.ts';
 import {
   normalizeComposerList,
@@ -32,10 +35,13 @@ export type NormalizedEvent = {
   occurrences: NormalizedOccurrence[];
   /** Detail page replaced the listing date with an explicit new date. */
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
   venueText?: string;
   /** Source facility id when the adapter observed one. Not a catalog venue id. */
   venueFacilityId?: string;
+  /** Listing address when the adapter observed one. Used to create new venues. */
+  venueAddress?: string;
   organizerText?: string;
   seriesText?: string;
   accessText?: string;
@@ -50,34 +56,24 @@ export type NormalizedEvent = {
   foundVia?: string;
 };
 
-export function normalizeRawEvents(rawEvents: RawEvent[]): {
-  events: NormalizedEvent[];
-  skipped: number;
-} {
-  const events: NormalizedEvent[] = [];
-  let skipped = 0;
-  for (const raw of rawEvents) {
-    const normalized = normalizeRawEvent(raw);
-    if (!normalized) {
-      skipped += 1;
-      continue;
-    }
-    events.push(normalized);
-  }
-  return { events, skipped };
-}
-
 export function normalizeSkipReason(raw: RawEvent): string | undefined {
+  if (raw.hydration?.reason === 'source-conflict') return `fuente oficial contradictoria: ${raw.hydration.message ?? 'requiere revisión'}`;
+  if (raw.hydration?.reason === 'structural-skip') {
+    return raw.hydration.message ?? 'estructura no publicable';
+  }
   if (normalizeRawEvent(raw)) return undefined;
   if (raw.hydration?.reason === 'outside-window') return 'fuera de ventana (hint del listing; ficha no solicitada)';
   if (raw.hydration?.reason === 'circuit-open') return 'ficha no solicitada: circuito abierto';
   if (raw.sourceId === 'teatro-zarzuela' && raw.hydration?.status === 'failed') return `sin calendario fiable: ${raw.hydration.message ?? 'hydration fallida'}`;
-  const title = collapseWhitespace(raw.observed.title);
+  const title = collapseWhitespace(decodeHtmlEntities(raw.observed.title));
   return title ? 'sin fecha' : 'sin título';
 }
 
 export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
-  const title = collapseWhitespace(raw.observed.title);
+  // Failed hydration ordinarily keeps listing facts. Contradictory official
+  // evidence is different: do not silently publish the disputed listing.
+  if (raw.hydration?.reason === 'source-conflict') return undefined;
+  const title = collapseWhitespace(decodeHtmlEntities(raw.observed.title));
   if (!title) return undefined;
   const occurrences = collapseOccurrences(
     raw.observed.occurrences.flatMap((occurrence) => {
@@ -96,21 +92,38 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     title,
     description: optionalText(raw.observed.description),
     occurrences,
+    ...(raw.calendarEvidence ? { calendarEvidence: raw.calendarEvidence } : {}),
     ...(raw.dateFromDetail ? { dateFromDetail: true } : {}),
     ...(raw.eventStatus ? { eventStatus: raw.eventStatus } : {}),
     venueText: optionalText(raw.observed.venueText),
     venueFacilityId: optionalText(raw.venueFacilityId),
+    venueAddress: optionalText(raw.venueAddress),
     organizerText: optionalText(raw.observed.organizerText),
     seriesText: optionalText(raw.observed.seriesText),
     accessText,
     categoryText: optionalText(raw.observed.categoryText),
-    programText: optionalText(raw.observed.programText),
+    programText: optionalProgramText(raw.observed.programText),
     performers: normalizePersonList(raw.observed.performers),
-    composers: normalizeComposerList(raw.observed.composers),
-    works: normalizeWorkList(raw.observed.works),
+    composers: normalizeComposerList(raw.observed.composers.map((item) => ({ name: canonicalObservedVariant(item.name, raw.sourceId) }))),
+    works: normalizeWorkList(raw.observed.works.map((item) => ({
+      ...item, ...(item.composerName ? { composerName: canonicalObservedVariant(item.composerName, raw.sourceId) } : {}),
+    }))),
     ...(raw.proposedVenue ? { proposedVenue: raw.proposedVenue } : {}),
     ...(raw.foundVia ? { foundVia: raw.foundVia } : {}),
   };
+}
+
+/** Exact official-source spellings resolved at the observation boundary. These
+ * must not change global catalog validation of already published records. */
+function canonicalObservedVariant(name: string, sourceId: string): string {
+  const spelling = collapseWhitespace(name);
+  if (sourceId === 'escuela-reina-sofia' && /^[^,]+,\s*[^,]+$/u.test(spelling)) {
+    const [surname, given] = spelling.split(',').map((part) => part.trim());
+    return canonicalizeComposerName(`${given} ${canonicalizeArtificiallyUppercase(surname!)}`) ?? `${given} ${canonicalizeArtificiallyUppercase(surname!)}`;
+  }
+  if (/^C\.\s*Monteverdi$/iu.test(spelling)) return 'Claudio Monteverdi';
+  if (/^Felix Mendelssohn-Bartholdy$/iu.test(spelling)) return 'Felix Mendelssohn';
+  return name;
 }
 
 /**
@@ -136,6 +149,22 @@ export function observedFactsFromNormalized(event: NormalizedEvent): ObservedFac
 
 function optionalText(value: string | undefined): string | undefined {
   return value ? collapseWhitespace(value) || undefined : undefined;
+}
+
+/**
+ * Programme copy keeps block boundaries as `\n`. Collapse whitespace inside
+ * each line, drop empty lines, and leave significant line breaks intact.
+ */
+function optionalProgramText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const normalized = value
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n')
+    .map((line) => collapseWhitespace(line))
+    .filter(Boolean)
+    .join('\n');
+  return normalized || undefined;
 }
 
 function parseOccurrence(occurrence: RawOccurrence): { date: string; time: string | null } | undefined {

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fso_clasictacular_20270702",
+  "slug": "film-symphony-orchestra-clasictacular",
+  "title": "Film Symphony Orchestra. Clasictacular",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fso_clasictacular_20270702_01",
+      "date": "2027-07-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Film Symphony Orchestra",
+      "role": "orchestra"
+    },
+    {
+      "name": "Constantino Martínez-Orts",
+      "role": "conductor"
+    },
+    {
+      "name": "Paloma Friedhoff",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Carl Orff"
+    },
+    {
+      "name": "Nikolai Rimsky-Korsakov"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Johann Strauss I"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Danubio azul",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "El lago de los cisnes (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Carmina Burana (selección)",
+      "composerName": "Carl Orff"
+    },
+    {
+      "title": "El vuelo del moscardón",
+      "composerName": "Nikolai Rimsky-Korsakov"
+    },
+    {
+      "title": "Carmen (selección)",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Turandot: Nessun dorma",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Nabucco (selección)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "La traviata (selección)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Pavana"
+    },
+    {
+      "title": "Danza húngara n.º 5",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Marcha Radetzky",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "El Cascanueces (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Obertura 1812",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/film-symphony-orchestra-clasictacular-3",
+      "checkedAt": "2026-10-21",
+      "externalId": "film-symphony-orchestra-clasictacular-3"
+    },
+    {
+      "sourceId": "src_palomafriedhoff_com",
+      "url": "https://www.palomafriedhoff.com/",
+      "checkedAt": "2026-10-21"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

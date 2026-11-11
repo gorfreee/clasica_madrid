@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_condeduque_lucia_iglesias_marcos_madrigal_20270428",
+  "slug": "lucia-iglesias-y-marcos-madrigal",
+  "title": "Lucía Iglesias y Marcos Madrigal",
+  "status": "scheduled",
+  "venueId": "ven_condeduque_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_condeduque_lucia_iglesias_marcos_madrigal_20270428_01",
+      "date": "2027-04-28",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lucía Iglesias",
+      "role": "soloist"
+    },
+    {
+      "name": "Marcos Madrigal",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gabriel Pierné"
+    },
+    {
+      "name": "Alfred Vernet"
+    },
+    {
+      "name": "Henri Hirschmann"
+    },
+    {
+      "name": "Alexandre Schanne"
+    },
+    {
+      "name": "Lucien Collin"
+    },
+    {
+      "name": "Hector Salomon"
+    },
+    {
+      "name": "Jules Massenet"
+    },
+    {
+      "name": "Montserrat Lladó"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Pablo Luna"
+    },
+    {
+      "name": "Joaquín Turina"
+    }
+  ],
+  "works": [
+    {
+      "title": "Mimì Pinson, Vingt mélodies",
+      "composerName": "Gabriel Pierné"
+    },
+    {
+      "title": "Mademoiselle Musette",
+      "composerName": "Alfred Vernet"
+    },
+    {
+      "title": "La petite Bohème: Couplets de Mimì",
+      "composerName": "Henri Hirschmann"
+    },
+    {
+      "title": "Nuit d’hiver, Margot, Impromptu",
+      "composerName": "Alexandre Schanne"
+    },
+    {
+      "title": "Le Retour de Musette: O temps heureux de nos amours",
+      "composerName": "Lucien Collin"
+    },
+    {
+      "title": "A ma cousine Angèle, Nouvelles Mélodies",
+      "composerName": "Hector Salomon"
+    },
+    {
+      "title": "La chanson de Musette",
+      "composerName": "Jules Massenet"
+    },
+    {
+      "title": "Obra de estreno",
+      "composerName": "Montserrat Lladó"
+    },
+    {
+      "title": "Escenas románticas: Sueños del poeta",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "Chanson de Barberine",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Séguedille, Trois mélodies",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Musetta: Canción de Musetta",
+      "composerName": "Pablo Luna"
+    },
+    {
+      "title": "V-Las locas por amor, Poema en forma de canciones",
+      "composerName": "Joaquín Turina"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_condeduque",
+      "url": "https://www.condeduquemadrid.es/actividades/lucia-iglesias-y-marcos-madrigal",
+      "checkedAt": "2026-10-21"
+    }
+  ],
+  "primarySourceId": "src_condeduque",
+  "lastVerifiedAt": "2026-10-21"
+}

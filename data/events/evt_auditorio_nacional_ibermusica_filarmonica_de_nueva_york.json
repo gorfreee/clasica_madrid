@@ -26,8 +26,17 @@
       "name": "Gustavo Dudamel"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Serguéi Prokófiev"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 5",
+      "composerName": "Serguéi Prokófiev"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -37,15 +46,15 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-de-nueva-york",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-14",
       "externalId": "ibermusica-filarmonica-de-nueva-york"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-14"
 }

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_coro_tomas_luis_de_victoria_xxx_aniversario_brunete_2026_11_28",
+  "slug": "coro-tomas-luis-de-victoria-xxx-aniversario-brunete-2026-11-28",
+  "title": "Concierto XXX Aniversario del Coro Tomás Luis de Victoria",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_nuestra_senora_de_la_asuncion_brunete",
+  "organizerIds": [
+    "org_coro_tomas_luis_de_victoria"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_coro_tomas_luis_de_victoria_xxx_aniversario_brunete_2026_11_28_01",
+      "date": "2026-11-28",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Tomás Luis de Victoria",
+      "role": "choir"
+    },
+    {
+      "name": "Antonio Peces Gómez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "John Dowland"
+    },
+    {
+      "name": "Anton Bruckner"
+    },
+    {
+      "name": "Claudio Monteverdi"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Orlande de Lassus"
+    },
+    {
+      "name": "Josef Gabriel Rheinberger"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tradiderunt me",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "What if I never speede",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Con qué la lavaré"
+    },
+    {
+      "title": "Ecco mormorar l’onde",
+      "composerName": "Claudio Monteverdi"
+    },
+    {
+      "title": "Jesu meine freude",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Quel volto",
+      "composerName": "Orlande de Lassus"
+    },
+    {
+      "title": "Incipit oratio",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Taedet animam meam",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Christus factus est",
+      "composerName": "Anton Bruckner"
+    },
+    {
+      "title": "Super flumina Babilonys",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Abendlied",
+      "composerName": "Josef Gabriel Rheinberger"
+    },
+    {
+      "title": "Locus iste",
+      "composerName": "Anton Bruckner"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_corotomasluisdevictoria_com",
+      "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_corotomasluisdevictoria_com",
+      "url": "https://corotomasluisdevictoria.com/xxx-aniversario-del-coro/varios/",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_corotomasluisdevictoria_com",
+  "lastVerifiedAt": "2026-10-29"
+}

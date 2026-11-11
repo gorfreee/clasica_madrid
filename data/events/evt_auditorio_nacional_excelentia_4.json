@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_4",
+  "slug": "excelentia-noche-espanola",
+  "title": "Excelentia. Noche Española",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_4_01",
+      "date": "2027-05-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Pablo de Sarasate"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Federico Chueca"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Isaac Albéniz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Música nocturna de las calles de Madrid",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Romanza andaluza",
+      "composerName": "Pablo de Sarasate"
+    },
+    {
+      "title": "Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Fandango",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "El bateo",
+      "composerName": "Federico Chueca"
+    },
+    {
+      "title": "Danza española (La vida breve)",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Danzas españolas (selección)",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "Carmen Fantasy",
+      "composerName": "Pablo de Sarasate"
+    },
+    {
+      "title": "Aires gitanos",
+      "composerName": "Pablo de Sarasate"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-4",
+      "checkedAt": "2026-10-14",
+      "externalId": "excelentia-4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}

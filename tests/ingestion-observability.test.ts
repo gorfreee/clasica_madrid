@@ -10,6 +10,7 @@ import {
   parseGithubAttempt,
   readFailureContext,
   resolveObservabilityDir,
+  redactSecrets,
   sanitizeErrorMessage,
   startObservability,
   EVENT_JOURNAL_FILE,
@@ -123,6 +124,7 @@ describe('observabilidad de ingestión', () => {
     expect(report.events[0]!.observed?.title).toBe('OCNE. Sinfónico 01');
     expect(report.events[0]!.normalized?.title).toBe('OCNE. Sinfónico 01');
     expect(report.events[0]!.eligibility?.value).toBe('include');
+    expect(report.events[0]!.outcome).toBe('created');
     expect(report.events[0]!.listing).toBeDefined();
 
     const manifest = JSON.parse(await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8')) as IngestRunManifest;
@@ -138,9 +140,10 @@ describe('observabilidad de ingestión', () => {
     const journal = await readJsonl(path.join(obsDir, EVENT_JOURNAL_FILE));
     expect(journal.some((entry) => entry.kind === 'observation' && entry.observed)).toBe(true);
     expect(journal.some((entry) => entry.kind === 'decision' && entry.classification?.eligibility?.value === 'include')).toBe(true);
+    expect(journal.some((entry) => entry.kind === 'decision' && entry.outcome === 'created')).toBe(true);
     for (const entry of journal) {
       expect(entry.schemaVersion).toBe(1);
-      expect(['observation', 'decision', 'source-failure']).toContain(entry.kind);
+      expect(['observation', 'decision', 'source-failure', 'adapter-discard']).toContain(entry.kind);
     }
   });
 
@@ -253,10 +256,21 @@ describe('observabilidad de ingestión', () => {
       'relay=[INGEST_FETCH_RELAY_TOKEN]',
     );
     expect(sanitizeErrorMessage('Authorization: Bearer abc.def')).toBe('Authorization: Bearer [redacted]');
+    for (const key of ['GROQ_API_KEY', 'MISTRAL_API_KEY', 'ZAI_API_KEY', 'CLOUDFLARE_API_TOKEN', 'VERCEL_AI_GATEWAY_API_KEY', 'KILO_API_KEY', 'OPENROUTER_API_KEY'] as const) {
+      expect(sanitizeErrorMessage('provider=another-provider-secret', { [key]: 'another-provider-secret' }))
+        .toBe(`provider=[${key}]`);
+    }
     expect(classifyFailureCode('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY')).toBe(
       'ai-config-fatal',
     );
     expect(classifyFailureCode('ENOENT')).toBe('unexpected-exception');
+    const long = `report ${'PASS '.repeat(1_000)}secret=super-secret-key-value`;
+    expect(long.length).toBeGreaterThan(2_000);
+    expect(sanitizeErrorMessage(long, { GEMINI_API_KEY: 'super-secret-key-value' })).toContain('…[truncated]');
+    const redacted = redactSecrets(long, { GEMINI_API_KEY: 'super-secret-key-value' });
+    expect(redacted.length).toBeGreaterThan(2_000);
+    expect(redacted).not.toContain('super-secret-key-value');
+    expect(redacted).toContain('[GEMINI_API_KEY]');
   });
 
   it('anota el contexto de fallo sin cambiar el mensaje original', () => {

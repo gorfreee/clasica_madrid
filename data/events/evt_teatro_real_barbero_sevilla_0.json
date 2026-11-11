@@ -4,7 +4,7 @@
   "slug": "el-barbero-de-sevilla-2",
   "title": "El barbero de Sevilla",
   "status": "scheduled",
-  "venueId": "ven_real_teatro_retiro",
+  "venueId": "ven_real_teatro_retiro_sala_principal",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
@@ -18,7 +18,7 @@
   "performers": [],
   "composers": [
     {
-      "name": "Gioachino Rossini Libreto de Cesare Sterbini, basado en El barbero de Sevilla Versión para la infancia de Maite García Heres Premio Ópera XXI al Mejor proyecto de difusión de la ópera"
+      "name": "Gioachino Rossini"
     }
   ],
   "works": [],
@@ -29,15 +29,15 @@
     "opera"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/barbero-sevilla-0",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "barbero-sevilla-0"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

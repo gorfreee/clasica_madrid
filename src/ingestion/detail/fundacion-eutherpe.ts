@@ -1,7 +1,8 @@
 import { parseObservedTime } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
+import { sourceConflict } from './conflicts.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundacioneutherpe.com', 'fundacioneutherpe.com']);
@@ -28,7 +29,6 @@ const MONTH_HEADING = new RegExp(
   'i',
 );
 const NUMERIC_DATE = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/;
-const DIRECTORY_DAY_MONTH = /^(\d{1,2})\s*\/\s*(\d{1,2})$/;
 const MAX_MONTHS = 24;
 
 type CalendarHit = {
@@ -67,8 +67,10 @@ export function eutherpeListingUrl(href: string, base?: string): string | undefi
 }
 
 export function extractEutherpeListing(body: string, url: string, sourceId: string): RawEvent[] {
+  // Webflow leaves fallback text in conditionally hidden elements.
+  body = visibleEutherpeHtml(body);
   assertListingSurface(body, url);
-  if (/\b(?:page-numbers|e-load-more-anchor|data-next-page)\b|rel=["']next["']/i.test(body)) {
+  if (/\b(?:page-numbers|e-load-more-anchor|data-next-page|w-pagination-next)\b|rel=["']next["']/i.test(body)) {
     throw new Error('fundacion-eutherpe: paginación no soportada');
   }
   const months = eutherpeBlocks(body, 'div', 'w-slide').filter((block) =>
@@ -89,16 +91,20 @@ export function extractEutherpeListing(body: string, url: string, sourceId: stri
   }
 
   const directory = parseDirectory(body, url);
+  coalesceKnownDuplicates(calendar, directory);
   return mergeListing(calendar, directory, sourceId);
 }
 
 export function parseEutherpeDetail(event: RawEvent, body: string): ObservedFactPatch {
+  body = visibleEutherpeHtml(body);
   if (!/\bhead-conciertos\b/i.test(body) || !/\btitular-conciertos\b/i.test(body) || !/\bheading-43\b/i.test(body)) {
     throw new Error('fundacion-eutherpe: falta la ficha del concierto');
   }
   const titles = uniqueTexts(body, /<h1\b[^>]*class=["'][^"']*\bheading-43\b[^"']*["'][^>]*>([\s\S]*?)<\/h1>/gi);
   if (titles.length !== 1 || titles[0] !== event.observed.title) {
-    throw new Error('fundacion-eutherpe: ficha sin identidad de concierto coincidente');
+    throw sourceConflict('fundacion-eutherpe: ficha sin identidad de concierto coincidente', 'identity', [
+      { surface: 'listing', value: event.observed.title }, { surface: 'detail', value: titles.join('; ') },
+    ]);
   }
   const venueTexts = uniqueTexts(
     body,
@@ -110,11 +116,30 @@ export function parseEutherpeDetail(event: RawEvent, body: string): ObservedFact
   if (!facts.date) {
     if (listingDates.length === 0) throw new Error('fundacion-eutherpe: fecha de ficha no reconocible');
   } else if (listingDates.length > 0 && !listingDates.includes(facts.date)) {
-    throw new Error('fundacion-eutherpe: fecha de ficha distinta del listado');
+    throw sourceConflict('fundacion-eutherpe: fecha de ficha distinta del listado', 'date', [
+      { surface: 'calendar', value: listingDates.join(', ') }, { surface: 'detail', value: facts.date },
+    ]);
+  }
+  const directoryDate = /^(\d{1,2}) \/ (\d{1,2})$/.exec(event.listingDateText ?? '');
+  if (directoryDate && facts.date) {
+    const [, month, day] = facts.date.split('-');
+    if (Number(day) !== Number(directoryDate[1]) || Number(month) !== Number(directoryDate[2])) {
+      throw sourceConflict('fundacion-eutherpe: fecha de ficha distinta del directorio', 'date', [
+        { surface: 'directory', value: event.listingDateText! }, { surface: 'detail', value: facts.date },
+      ]);
+    }
+  }
+  const listingTime = event.observed.occurrences.find(item => item.time)?.time;
+  if (facts.time && listingTime && facts.time !== listingTime) {
+    throw sourceConflict('fundacion-eutherpe: hora de ficha distinta del listado', 'time', [
+      { surface: 'listing', value: listingTime }, { surface: 'detail', value: facts.time },
+    ]);
   }
   const venueText = venueTexts[0];
   if (venueText && event.observed.venueText && !compatibleVenue(event.observed.venueText, venueText)) {
-    throw new Error('fundacion-eutherpe: sede de ficha distinta del listado');
+    throw sourceConflict('fundacion-eutherpe: sede de ficha distinta del listado', 'venue', [
+      { surface: 'listing', value: event.observed.venueText }, { surface: 'detail', value: venueText },
+    ]);
   }
   const date = facts.date ?? listingDates[0];
   const time = facts.time ?? event.observed.occurrences.find((item) => item.time)?.time;
@@ -128,14 +153,15 @@ export function parseEutherpeDetail(event: RawEvent, body: string): ObservedFact
           date,
           ...(time ? { time } : {}),
         };
-  const programText = programFrom(body);
+  const programme = programFrom(body);
   const accessText = ticketText(body);
   return {
     ...(occurrence ? { occurrences: [occurrence] } : {}),
     ...(venueText && !event.observed.venueText ? { venueText } : {}),
-    ...(programText ? { programText } : {}),
-    ...(accessText ? { accessText } : {}),
     ...emptyObservedLists(),
+    ...programme,
+    ...performerFromTitle(event.observed.title),
+    ...(accessText ? { accessText } : {}),
   };
 }
 
@@ -150,7 +176,7 @@ function assertListingSurface(body: string, url: string): void {
     throw new Error('fundacion-eutherpe: falta el calendario de programación');
   }
   const heading = stripTags(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(body)?.[1] ?? '');
-  if (!/programaci[oó]n de conciertos/i.test(heading)) {
+  if (!/programaci[oó]n de conciertos|^Ciclo en Shigeru Kawai Center, Madrid \d{4}$/i.test(heading)) {
     throw new Error('fundacion-eutherpe: falta el calendario de programación');
   }
 }
@@ -328,8 +354,8 @@ function eventFromDirectory(card: DirectoryHit, sourceId: string): RawEvent {
     listingDateText: card.listingDateText,
     observed: {
       title: card.title,
-      occurrences: [],
-      ...(card.venueText ? { venueText: card.venueText } : {}),
+      occurrences: card.time ? [{ raw: `${card.listingDateText} ${card.timeRaw}`, time: card.time }] : [],
+      ...(card.venueText || card.categoryText ? { venueText: card.venueText || card.categoryText } : {}),
       ...(card.categoryText ? { categoryText: card.categoryText } : {}),
       ...emptyObservedLists(),
     },
@@ -346,7 +372,7 @@ function absorbDirectory(event: RawEvent, card: DirectoryHit): void {
     if (!match) return false;
     return Number(match[3]) === card.day && Number(match[2]) === card.month;
   });
-  if (event.observed.occurrences.length > 0 && matching.length === 0) {
+  if (event.observed.occurrences.some(item => item.date) && matching.length === 0) {
     throw new Error('fundacion-eutherpe: fecha del directorio distinta del calendario');
   }
   if (card.time) {
@@ -409,7 +435,7 @@ export function eutherpeNumericDate(text: string): string | undefined {
 }
 
 export function eutherpeTime(text: string): string | undefined {
-  const match = /(\d{1,2})\s*[:.]\s*(\d{1,2})/.exec(stripTags(text));
+  const match = /^(\d{1,2})\s*[:.]\s*(\d{1,2})(?:\s*(?:h(?:oras)?\.?))?$/i.exec(stripTags(text));
   if (!match) return undefined;
   const hour = Number(match[1]);
   const minute = Number(match[2]);
@@ -417,19 +443,45 @@ export function eutherpeTime(text: string): string | undefined {
   return parseObservedTime(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`) ?? undefined;
 }
 
-export function eutherpeDirectoryDayMonth(text: string): { day: number; month: number } | undefined {
-  const match = DIRECTORY_DAY_MONTH.exec(stripTags(text));
-  if (!match) return undefined;
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  if (day < 1 || day > 31 || month < 1 || month > 12) return undefined;
-  return { day, month };
+/** Each CMS row binds its own composer and work block; biographies stay outside. */
+function programFrom(body: string): ObservedFactPatch {
+  const rows = eutherpeBlocks(body, 'div', 'programa-content');
+  const parts: string[] = [];
+  const composers: Array<{ name: string }> = [];
+  const observedWorks: Array<{ title: string; composerName?: string }> = [];
+  for (const row of rows) {
+    const composer = stripTags(/<div\b[^>]*class=["'][^"']*\btext-block-39\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(row)?.[1] ?? '');
+    const workBlocks = eutherpeBlocks(row, 'div', 'programa-de-concierto-1');
+    const works = workBlocks.map(flattenHtmlBlocks).map(cleanText).filter(Boolean);
+    if (!works.length) continue;
+    if (composer) composers.push({ name: composer });
+    for (const html of workBlocks) {
+      for (const paragraph of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+        const content = paragraph[1]!;
+        const text = cleanText(stripTags(content));
+        // Explicit work headings and dash-led works only. Roman-numeral
+        // movements and unmarked prose remain solely in programText.
+        if ((!/<strong\b/i.test(content) && !/^[-–—]\s*\p{L}/u.test(text))
+          || /^(?:[IVXLCDM]+\.|[·•])\s*/u.test(text)) continue;
+        const title = text.replace(/^[-–—]\s*/, '');
+        if (title) observedWorks.push({ title, ...(composer ? { composerName: composer } : {}) });
+      }
+    }
+    parts.push([composer, ...works].filter(Boolean).join('\n'));
+  }
+  // Older fixtures/templates can expose work blocks without a row wrapper.
+  if (!rows.length) parts.push(...eutherpeBlocks(body, 'div', 'programa-de-concierto-1')
+    .map(flattenHtmlBlocks).map(cleanText).filter(Boolean));
+  const programText = [...new Set(parts)].join('\n');
+  return {
+    ...(programText ? { programText } : {}),
+    ...(composers.length ? { composers: [...new Map(composers.map(c => [c.name, c])).values()] } : {}),
+    ...(observedWorks.length ? { works: observedWorks } : {}),
+  };
 }
 
-function programFrom(body: string): string | undefined {
-  const block = /<div\b[^>]*class=["'][^"']*\bprograma-de-concierto-1\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(body)?.[1];
-  if (!block || /\bw-dyn-bind-empty\b/.test(block)) return undefined;
-  return stripTags(block) || undefined;
+function cleanText(value: string): string {
+  return value.replace(/[\u200b-\u200d\ufeff]/g, '').trim();
 }
 
 function ticketText(body: string): string | undefined {
@@ -486,6 +538,9 @@ function uniqueTexts(html: string, pattern: RegExp): string[] {
 }
 
 function compatibleVenue(left: string, right: string): boolean {
+  if (isEutherpeMadridVenue(left) || isEutherpeMadridVenue(right)) {
+    return isEutherpeMadridVenue(left) && isEutherpeMadridVenue(right);
+  }
   const a = normalizeLoose(expandHashtagVenue(left));
   const b = normalizeLoose(expandHashtagVenue(right));
   if (a === b) return true;
@@ -547,4 +602,77 @@ export function eutherpeBlocks(html: string, tag: string, className: string): st
     if (depth) throw new Error('fundacion-eutherpe: sección HTML incompleta');
   }
   return blocks;
+}
+
+/** Webflow keeps placeholder values in conditionally hidden elements. */
+export function visibleEutherpeHtml(html: string): string {
+  const opening = /<([a-z][a-z0-9]*)\b[^>]*class=["'][^"']*\bw-condition-invisible\b[^"']*["'][^>]*>/i;
+  let match: RegExpExecArray | null;
+  while ((match = opening.exec(html))) {
+    const tag = match[1]!;
+    const offset = match.index + match[0].length;
+    let depth = 1;
+    let endIndex: number | undefined;
+    for (const end of html.slice(offset).matchAll(new RegExp(`<\\/?${tag}\\b[^>]*>`, 'gi'))) {
+      depth += /^<\//.test(end[0]) ? -1 : 1;
+      if (!depth) { endIndex = offset + end.index + end[0].length; break; }
+    }
+    if (endIndex === undefined) throw new Error('fundacion-eutherpe: sección HTML oculta incompleta');
+    html = html.slice(0, match.index) + html.slice(endIndex);
+  }
+  return html;
+}
+
+/** Only explicit venue/cycle labels, never an artist's origin or page heading. */
+export function isEutherpeMadridVenue(text: string | undefined): boolean {
+  const key = normalizeLoose(text ?? '').replace(/ /g, '');
+  return ['shigerukawaicenter', 'shigerukawaicentermadrid', 'shigerukawaicenterdemadrid',
+    'eutherpemadrid', 'salaeutherpemadrid'].includes(key);
+}
+
+// Verified CMS duplicates (2026-11-11). These are explicit aliases, not a rule
+// merging arbitrary concerts sharing a date, venue, instrument or surname.
+const DUPLICATE_SLUGS: Record<string, string> = {
+  'shigeru-kawai-center-madrid-duo-violin-y-piano-antonio-ortiz-trabalon-y-antonio-ortiz': 'duo-antonio-ortiz-violin-y-antonio-ortiz-piano-espana',
+  'shigeru-kawai-center-madrid-massimo-urban-piano': 'massimo-urban-piano-italia',
+  'shigeru-kawai-center-madrid-carlota-galli-piano': 'carlota-galli-italia',
+  'shigeru-kawai-center-madrid-duo-chang-e-fiorentini-saxo-y-piano': 'duo-chanh--florentini-saxofon-y-piano-italia-y-china',
+  'shigeru-kawai-center-madrid-duo-carvajal-y-oltra-viola-y-piano': 'el-duo-carvajal-oltra',
+  'shigeru-kawai-center-madrid-alejandro-espina-piano': 'alejandro-espina-piano-espana',
+};
+
+function coalesceKnownDuplicates(calendar: Map<string, CalendarHit[]>, directory: DirectoryHit[]): void {
+  for (const [alias, canonical] of Object.entries(DUPLICATE_SLUGS)) {
+    const target = directory.find(card => card.externalId === canonical);
+    const duplicate = directory.find(card => card.externalId === alias);
+    if (!target || !duplicate) continue;
+    if (target.day !== duplicate.day || target.month !== duplicate.month
+      || !target.time || target.time !== duplicate.time
+      || !isEutherpeMadridVenue(target.categoryText) || !isEutherpeMadridVenue(duplicate.categoryText)) {
+      throw new Error('fundacion-eutherpe: alias CMS con calendario o sede distintos');
+    }
+    const hits = calendar.get(duplicate.sourceUrl);
+    if (hits) {
+      if (hits.some(hit => Number(hit.date.slice(5, 7)) !== target.month
+        || Number(hit.date.slice(8)) !== target.day || !isEutherpeMadridVenue(hit.venueText))) {
+        throw new Error('fundacion-eutherpe: alias CMS con fecha o sede distinta del calendario');
+      }
+      const existing = calendar.get(target.sourceUrl);
+      if (existing && existing.map(h => h.date).sort().join() !== hits.map(h => h.date).sort().join()) {
+        throw new Error('fundacion-eutherpe: alias CMS con años distintos');
+      }
+      calendar.set(target.sourceUrl, hits.map(hit => ({ ...hit,
+        sourceUrl: target.sourceUrl, externalId: target.externalId, title: target.title,
+      })));
+      calendar.delete(duplicate.sourceUrl);
+    }
+    directory.splice(directory.indexOf(duplicate), 1);
+  }
+}
+
+/** The CMS title explicitly credits a single soloist; no biography mining. */
+function performerFromTitle(title: string): ObservedFactPatch {
+  const match = /^([\p{L}][\p{L} .’'\-]+),\s*(piano|violín|viola|violonchelo|flauta|guitarra)(?:\s*\([^()]+\))?$/iu.exec(title);
+  if (!match) return {};
+  return { performers: [{ name: match[1]!.trim(), roleText: match[2]! }] };
 }

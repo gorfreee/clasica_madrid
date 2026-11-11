@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayuntamiento_madrid_mom_coro_de_san_jeronimo_el_real_20261015",
+  "slug": "madrid-otra-mirada-concierto-coro-san-jeronimo-el-real",
+  "title": "MOM 2026 — Concierto de música religiosa del Coro de San Jerónimo el Real",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_jeronimo_el_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayuntamiento_madrid_mom_coro_de_san_jeronimo_el_real_20261015_01",
+      "date": "2026-10-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de San Jerónimo el Real",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://patrimonioypaisaje.madrid.es/portales/monumenta/es/En-portada/Madrid-Otra-Mirada-2026/?vgnextchannel=e89c3cb702aa4510VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=ebe99ee3c03d0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-14"
+}

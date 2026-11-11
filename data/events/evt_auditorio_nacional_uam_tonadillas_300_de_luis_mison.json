@@ -26,25 +26,25 @@
   ],
   "composers": [
     {
-      "name": "Luis Misón (1727 - 1766)"
+      "name": "Luis Misón"
     }
   ],
   "works": [
     {
       "title": "Tonadilla de El Abandono (a solo)",
-      "composerName": "Luis Misón (1727 - 1766)"
+      "composerName": "Luis Misón"
     },
     {
       "title": "Tonadilla de El compositor (a dúo)",
-      "composerName": "Luis Misón (1727 - 1766)"
+      "composerName": "Luis Misón"
     },
     {
       "title": "Tonadilla de Los ciegos (a tres)",
-      "composerName": "Luis Misón (1727 - 1766)"
+      "composerName": "Luis Misón"
     },
     {
       "title": "Tonadilla de El sacristán, el payo y su mujer (a tres)",
-      "composerName": "Luis Misón (1727 - 1766)"
+      "composerName": "Luis Misón"
     }
   ],
   "eras": [
@@ -60,10 +60,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-tonadillas-300-de-luis-mison",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "uam-tonadillas-300-de-luis-mison"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

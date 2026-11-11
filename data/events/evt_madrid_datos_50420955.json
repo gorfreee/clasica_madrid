@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50420955",
+  "slug": "banda-sinfonica-municipal",
+  "title": "Banda sinfónica municipal",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_7034889",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50420955_01",
+      "date": "2026-09-24",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sergio Casas",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Julián Palanca"
+    },
+    {
+      "name": "Charles Strouse"
+    },
+    {
+      "name": "John Barry"
+    },
+    {
+      "name": "Santiago Lope"
+    },
+    {
+      "name": "Gerónimo Giménez"
+    },
+    {
+      "name": "Pablo Luna"
+    },
+    {
+      "name": "Ruperto Chapí"
+    },
+    {
+      "name": "Agustín Lara"
+    },
+    {
+      "name": "Ignacio Hidalgo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Goya",
+      "composerName": "Julián Palanca"
+    },
+    {
+      "title": "Highlights From “Annie”",
+      "composerName": "Charles Strouse"
+    },
+    {
+      "title": "Memorias de África",
+      "composerName": "John Barry"
+    },
+    {
+      "title": "Dauder",
+      "composerName": "Santiago Lope"
+    },
+    {
+      "title": "La Torre del Oro",
+      "composerName": "Gerónimo Giménez"
+    },
+    {
+      "title": "Danza del Fuego",
+      "composerName": "Pablo Luna"
+    },
+    {
+      "title": "La Revoltosa",
+      "composerName": "Ruperto Chapí"
+    },
+    {
+      "title": "Madrid",
+      "composerName": "Agustín Lara"
+    },
+    {
+      "title": "De la Villa y Corte",
+      "composerName": "Ignacio Hidalgo"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=4ec03893f4ba0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-18",
+      "externalId": "50420955"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-18"
+}

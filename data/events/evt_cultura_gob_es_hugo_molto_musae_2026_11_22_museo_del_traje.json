@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_gob_es_hugo_molto_musae_2026_11_22_museo_del_traje",
+  "slug": "hugo-molto-musae",
+  "title": "Hugo Moltó — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_del_traje",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_gob_es_hugo_molto_musae_2026_11_22_museo_del_traje_01",
+      "date": "2026-11-22",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Hugo Moltó"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Josefina P. de Morisoli"
+    },
+    {
+      "name": "Mlle. Bocquet"
+    },
+    {
+      "name": "Lisanella Gentili"
+    },
+    {
+      "name": "Catharina Josepha Pelzer"
+    },
+    {
+      "name": "Madeleine Cottin"
+    },
+    {
+      "name": "Annette Kruisbrink"
+    },
+    {
+      "name": "Emilia Giuliani"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cultura_gob_es",
+      "url": "https://www.cultura.gob.es/mtraje/eu/actividades/artes/musica/musae.html",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_cultura_gob_es",
+  "lastVerifiedAt": "2026-10-08"
+}

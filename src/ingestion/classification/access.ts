@@ -17,6 +17,7 @@ export function resolveAccess(accessText: string | undefined): Resolution<Access
       method: 'fallback',
       ruleId: 'access-missing',
       evidence: [],
+      strength: 'unresolved',
     };
   }
   const collapsed = collapseWhitespace(accessText);
@@ -27,6 +28,7 @@ export function resolveAccess(accessText: string | undefined): Resolution<Access
       method: 'fallback',
       ruleId: 'access-missing',
       evidence: [],
+      strength: 'unresolved',
     };
   }
 
@@ -36,6 +38,7 @@ export function resolveAccess(accessText: string | undefined): Resolution<Access
       method: 'rule',
       ruleId: 'access-free',
       evidence: [collapsed],
+      strength: 'strong',
     };
   }
 
@@ -45,6 +48,7 @@ export function resolveAccess(accessText: string | undefined): Resolution<Access
       method: 'rule',
       ruleId: 'access-paid',
       evidence: [collapsed],
+      strength: 'strong',
     };
   }
 
@@ -53,6 +57,7 @@ export function resolveAccess(accessText: string | undefined): Resolution<Access
     method: 'fallback',
     ruleId: 'access-unclear',
     evidence: [collapsed],
+    strength: 'unresolved',
   };
 }
 

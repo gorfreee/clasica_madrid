@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_conservatorio_amaniel_salon_de_actos",
+  "slug": "conservatorio-amaniel-salon-de-actos",
+  "name": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle Amaniel, 2, 28015 Madrid",
+  "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+  "parentVenueId": "ven_conservatorio_profesional_musica_amaniel",
+  "spaceName": "Salón de Actos",
+  "lastVerifiedAt": "2026-10-17"
+}

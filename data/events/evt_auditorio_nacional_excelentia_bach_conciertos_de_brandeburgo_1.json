@@ -25,25 +25,25 @@
   ],
   "composers": [
     {
-      "name": "J. S. Bach"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Suite orquestal n.º 1 en do mayor, BWV 1066",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 2 en fa mayor, BWV 1047",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 4 en sol mayor, BWV 1049",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 5 en re mayor, BWV 1050",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [
@@ -53,15 +53,15 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-22",
       "externalId": "excelentia-bach-conciertos-de-brandeburgo-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-22"
 }

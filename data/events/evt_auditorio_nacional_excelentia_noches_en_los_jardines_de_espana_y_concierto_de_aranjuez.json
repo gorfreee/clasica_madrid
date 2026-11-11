@@ -32,24 +32,49 @@
   ],
   "composers": [
     {
-      "name": "J.Turina.- La Procesión del Rocío"
+      "name": "Emmanuel Chabrier"
     },
     {
-      "name": "Rodrigo"
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Joaquín Rodrigo"
     }
   ],
   "works": [
     {
-      "title": "Granados · Goyescas, Intermezzo",
-      "composerName": "J.Turina.- La Procesión del Rocío"
+      "title": "España",
+      "composerName": "Emmanuel Chabrier"
+    },
+    {
+      "title": "Danzas fantásticas",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Noches en los jardines de España",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La procesión del Rocío",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Goyescas, Intermezzo",
+      "composerName": "Enrique Granados"
     },
     {
       "title": "Concierto de Aranjuez",
-      "composerName": "Rodrigo"
+      "composerName": "Joaquín Rodrigo"
     },
     {
-      "title": "Falla · El sombrero de tres picos, danza final",
-      "composerName": "Rodrigo"
+      "title": "El sombrero de tres picos, danza final",
+      "composerName": "Manuel de Falla"
     }
   ],
   "eras": [
@@ -64,10 +89,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

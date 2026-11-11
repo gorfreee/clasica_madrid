@@ -1,0 +1,32 @@
+[
+  {
+    "id": 10559,
+    "slug": "festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2",
+    "status": "publish",
+    "link": "https://realhermandaddelrefugio.org/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2/",
+    "title": { "rendered": "Festival Internacional de Órgano San Antonio de los Alemanes 2026" },
+    "content": { "rendered": "<p>El Festival Internacional de Órgano San Antonio de los Alemanes 2026 continúa con una cita imprescindible.</p>", "protected": false },
+    "categoria-eventos": [47],
+    "class_list": ["post-10559", "calendario-eventos", "categoria-eventos-conciertos"]
+  },
+  {
+    "id": 10557,
+    "slug": "musica-que-nos-une-concierto",
+    "status": "publish",
+    "link": "https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto/",
+    "title": { "rendered": "Música que nos une | Concierto" },
+    "content": { "rendered": "<p>Capilla Musical de San Antonio de los Alemanes desde hace varios años ofrece conciertos.</p>", "protected": false },
+    "categoria-eventos": [47],
+    "class_list": ["post-10557", "calendario-eventos", "categoria-eventos-conciertos"]
+  },
+  {
+    "id": 10538,
+    "slug": "un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico",
+    "status": "publish",
+    "link": "https://realhermandaddelrefugio.org/calendario-de-eventos/un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico/",
+    "title": { "rendered": "Un Recorrido por la Historia de la Música Española. Concierto Benéfico." },
+    "content": { "rendered": "<p>La música, el patrimonio y la solidaridad se unen en una velada única.</p>", "protected": false },
+    "categoria-eventos": [47],
+    "class_list": ["post-10538", "calendario-eventos", "categoria-eventos-conciertos"]
+  }
+]

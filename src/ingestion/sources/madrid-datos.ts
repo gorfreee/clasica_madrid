@@ -1,6 +1,7 @@
 import { parseMadridDatosDetail } from '../detail/madrid-datos.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { collapseWhitespace } from '../html.ts';
+import { formatMadridDatosAddress } from '../venues.ts';
 import {
   emptyObservedLists,
   normalizeComposerList,
@@ -8,7 +9,14 @@ import {
   normalizeWorkList,
   type ObservedFactPatch,
 } from '../observed.ts';
-import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+import {
+  reportAdapterDiscard,
+  type AdapterContext,
+  type AdapterDiscardReport,
+  type RawEvent,
+  type SourceAdapter,
+  type SourceDefinition,
+} from '../types.ts';
 
 /**
  * Madrid Datos JSON-LD is the primary source for identity, date/time, venue,
@@ -18,12 +26,17 @@ import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
- * facility that is not yet in the catalog may become a new Venue on the Candidate.
+ * facility that is not yet in the catalog may become a new Venue on the Candidate
+ * when the listing also carries a physical `address.area`.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
+/** Official municipal concert label, also used when the kos @type is a street-activity bucket. */
+const MUSIC_PERFORMANCE_TITLE = /^actuaci[oó]n m[uú]sica(l)?\b/i;
+const MUSIC_PERFORMANCE_ID = /(?:^|-)actuacion-musica(l)?(?:-|\.json|$)/i;
 
 type GraphEvent = {
+  '@id'?: unknown;
   '@type'?: unknown;
   id?: unknown;
   uid?: unknown;
@@ -36,6 +49,7 @@ type GraphEvent = {
   free?: unknown;
   recurrence?: unknown;
   relation?: unknown;
+  address?: unknown;
 };
 
 export const madridDatosAdapter: SourceAdapter = {
@@ -50,8 +64,17 @@ export const madridDatosAdapter: SourceAdapter = {
     try {
       parsed = JSON.parse(body);
     } catch (error) {
-      const detail = error instanceof Error ? error.message : 'JSON inválido';
-      throw new Error(`madrid-datos: JSON inválido (${detail})`);
+      try {
+        // The municipal JSON-LD occasionally contains literal control characters
+        // in quoted descriptions. Repair only that JSON violation, then let the
+        // ordinary parser reject any other corruption.
+        const repaired = escapeJsonStringControls(body);
+        if (repaired === body) throw error;
+        parsed = JSON.parse(repaired);
+      } catch (recoveryError) {
+        const detail = recoveryError instanceof Error ? recoveryError.message : 'JSON inválido';
+        throw new Error(`madrid-datos: JSON inválido (${detail})`);
+      }
     }
     if (!parsed || typeof parsed !== 'object' || !('@graph' in parsed)) {
       throw new Error('madrid-datos: se esperaba un documento JSON-LD con @graph');
@@ -66,7 +89,7 @@ export const madridDatosAdapter: SourceAdapter = {
       if (raw) events.push(raw);
     }
     if (graph.length > 0 && events.length === 0) {
-      throw new Error('madrid-datos: no hay eventos de música con fecha, hora, título y lugar');
+      throw new Error('madrid-datos: no hay eventos de música con fecha, título, URL, identificador y lugar');
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
@@ -75,41 +98,127 @@ export const madridDatosAdapter: SourceAdapter = {
   },
 };
 
+export function escapeJsonStringControls(body: string): string {
+  let quoted = false;
+  let escaped = false;
+  let repaired = '';
+  for (const char of body) {
+    if (quoted && escaped) {
+      repaired += char;
+      escaped = false;
+    } else if (quoted && char === '\\') {
+      repaired += char;
+      escaped = true;
+    } else if (char === '"') {
+      repaired += char;
+      quoted = !quoted;
+    } else if (quoted && char.charCodeAt(0) < 0x20) {
+      repaired += `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    } else {
+      repaired += char;
+    }
+  }
+  return repaired;
+}
+
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const item = value as GraphEvent;
-  const type = typeof item['@type'] === 'string' ? item['@type'] : '';
-  if (!MUSICA_TYPE.test(type)) return undefined;
-  // Recurrence is a weekly/interval schedule (expos, talleres, ciclos), not a
-  // single concert date. Expanding it needs occurrence semantics this source
-  // does not have yet; a one-off music listing never carries this field today.
-  if (item.recurrence && typeof item.recurrence === 'object') return undefined;
+  if (!isMadridDatosMusicActivity(item)) return undefined;
+
   const title = asNonEmptyString(item.title);
   const link = asNonEmptyString(item.link);
   const dtstart = asNonEmptyString(item.dtstart);
   const venueText = asNonEmptyString(item['event-location']);
   const id = asNonEmptyString(item.id) ?? asNonEmptyString(item.uid);
-  if (!title || !link || !dtstart || !venueText || !id) return undefined;
+  const discard = (reason: string) =>
+    discardMadridDatos(ctx, reason, { title, link, id });
+
+  // Recurrence is a weekly/interval schedule (expos, talleres, ciclos), not a
+  // single concert date. Expanding it needs occurrence semantics this source
+  // does not have yet; a one-off music listing never carries this field today.
+  if (item.recurrence && typeof item.recurrence === 'object') {
+    discard('recurrence-unsupported');
+    return undefined;
+  }
+  if (!title) {
+    discard('missing-title');
+    return undefined;
+  }
+  if (!link) {
+    discard('missing-url');
+    return undefined;
+  }
+  if (!id) {
+    discard('missing-id');
+    return undefined;
+  }
+  if (!dtstart) {
+    discard('missing-date');
+    return undefined;
+  }
   const parsed = parseObservedDateTime(dtstart);
-  if (!parsed) return undefined;
-  const time = asNonEmptyString(item.time) ? parseObservedTime(String(item.time)) : parsed.time;
-  if (!time) return undefined;
+  if (!parsed) {
+    discard('invalid-date');
+    return undefined;
+  }
+  if (!venueText) {
+    discard('missing-venue');
+    return undefined;
+  }
+
+  const listedTime = asNonEmptyString(item.time);
+  const explicitTime = listedTime ? parseObservedTime(listedTime) : undefined;
+  // Empty `time` plus midnight in dtstart is the source's "hora desconocida"
+  // sentinel. Do not invent 00:00; omit RawOccurrence.time so normalize yields null.
+  const time = explicitTime ?? (parsed.time && parsed.time !== '00:00' ? parsed.time : undefined);
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
   const venueFacilityId = facilityIdFromRelation(item.relation);
+  const venueAddress = addressFromListing(item.address);
   return {
     sourceId: ctx.source.id,
     sourceUrl: httpsUrl,
     externalId: id,
     ...(venueFacilityId ? { venueFacilityId } : {}),
+    ...(venueAddress ? { venueAddress } : {}),
     observed: {
       title,
       description: asNonEmptyString(item.description),
-      occurrences: [{ raw: dtstart, date: parsed.date, time }],
+      occurrences: [{ raw: dtstart, date: parsed.date, ...(time ? { time } : {}) }],
       venueText,
       accessText: item.free === 1 || item.free === '1' ? 'free' : item.free === 0 || item.free === '0' ? 'paid' : undefined,
       ...emptyObservedLists(),
     },
   };
+}
+
+/**
+ * In-scope musical activities: kos type `Musica` (and subtypes), or Madrid's
+ * official "Actuación música/musical" label when the event is filed under a
+ * non-music kos bucket such as `ActividadesCalleArteUrbano`.
+ *
+ * Theatre, workshops, exhibitions, astronomy talks and other street
+ * activities stay out of scope and are not reported as adapter discards.
+ */
+function isMadridDatosMusicActivity(item: GraphEvent): boolean {
+  const type = typeof item['@type'] === 'string' ? item['@type'] : '';
+  if (MUSICA_TYPE.test(type)) return true;
+  const title = asNonEmptyString(item.title);
+  if (title && MUSIC_PERFORMANCE_TITLE.test(title)) return true;
+  const jsonLdId = asNonEmptyString(item['@id']);
+  return Boolean(jsonLdId && MUSIC_PERFORMANCE_ID.test(jsonLdId));
+}
+
+function discardMadridDatos(
+  ctx: AdapterContext,
+  reason: string,
+  fields: { title?: string; link?: string; id?: string },
+): void {
+  const discard: AdapterDiscardReport = { reason };
+  if (fields.title) discard.title = fields.title;
+  if (fields.link) discard.sourceUrl = fields.link.replace(/^http:\/\//i, 'https://');
+  if (fields.id) discard.externalId = fields.id;
+  reportAdapterDiscard(ctx, discard);
 }
 
 /** Numeric id from `…/entidadesyorganismos/{id}-….json`. */
@@ -119,6 +228,18 @@ export function facilityIdFromRelation(value: unknown): string | undefined {
   if (!href) return undefined;
   const match = /\/entidadesyorganismos\/(\d+)/.exec(href);
   return match?.[1];
+}
+
+function addressFromListing(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object' || !('area' in value)) return undefined;
+  const area = (value as { area?: unknown }).area;
+  if (!area || typeof area !== 'object') return undefined;
+  const fields = area as { locality?: unknown; 'postal-code'?: unknown; 'street-address'?: unknown };
+  return formatMadridDatosAddress({
+    streetAddress: asNonEmptyString(fields['street-address']),
+    postalCode: asNonEmptyString(fields['postal-code']),
+    locality: asNonEmptyString(fields.locality),
+  });
 }
 
 function asNonEmptyString(value: unknown): string | undefined {

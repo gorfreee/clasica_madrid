@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from '../src/ingestion/classification/classify.ts';
+import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
+import { strongFormatValues } from '../src/ingestion/classification/formats.ts';
+import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
+import {
+  hasClassicalVocalEnsembleAnchor,
+  hasObservedClassicalAcademicAnchor,
+} from '../src/ingestion/classification/eligibility.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
 function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>): ObservedFacts {
@@ -10,6 +17,63 @@ function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>)
     ...overrides,
   };
 }
+
+
+describe('eligibility — regresiones de Discovery', () => {
+  it('no convierte el nombre de un programa educativo en repertorio de Mozart', () => {
+    const result = classify(
+      facts({
+        title: 'Mozart para Bebés: Contamos y Cantamos la Navidad',
+        categoryText: 'Música para bebés',
+        description:
+          'Concierto familiar de villancicos y música navideña de diversos lugares del mundo. El título identifica el programa educativo Mozart para Bebés; el anuncio no declara obras de Mozart.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
+  it('reconoce piezas de zarzuela interpretadas por banda como bloque clásico del concierto', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto de Navidad: Duende de España',
+        categoryText: 'Concierto de Navidad',
+        performers: [{ name: 'Banda Sinfónica La Lira de Pozuelo' }],
+        programText: 'Obras de Luis Serrano Alarcón, piezas de zarzuela y villancicos populares.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('described-classical-repertoire');
+  });
+
+  it('deja como incierto un programa mixto de bandas sonoras y selecciones de ópera', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto XX aniversario de la Unión Musical de Pozuelo',
+        programText: 'Bandas sonoras, pasodobles y selecciones de óperas entre otros.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+
+  it('deja como incierto un recital que declara un arco del Renacimiento al pop', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto conmemorativo del XX aniversario del Coro Garoé de Majadahonda',
+        description:
+          'Recital de diversos estilos, desde el Renacimiento hasta el pop contemporáneo, pasando por bolero y música iberoamericana.',
+        performers: [{ name: 'Coro Garoé' }],
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+});
 
 describe('eligibility — exclusiones de identidad', () => {
   it('excluye jazz como identidad principal, no por el venue', () => {
@@ -22,6 +86,37 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('jazz-identity');
+  });
+
+  it('excluye la programación Café Central / Ateneo-Café Central, no por quinteto en el título', () => {
+    const elorrieta = classify(
+      facts({
+        title: 'JAVIER ELORRIETA QUINTETO',
+        categoryText: 'Conciertos Ateneo-Café Central',
+        seriesText: 'Conciertos Ateneo-Café Central',
+        description: 'Información y entradas (aquí). Cátedra Mayor. Pase: 19:30h.',
+      }),
+    );
+    expect(elorrieta.eligibility.value).toBe('exclude');
+    expect(elorrieta.eligibility.ruleId).toBe('jazz-identity');
+    expect(elorrieta.formats).toBeUndefined();
+
+    const titleOnly = classify(facts({ title: 'JAVIER ELORRIETA QUINTETO' }));
+    expect(titleOnly.eligibility.value).toBe('uncertain');
+    expect(titleOnly.eligibility.ruleId).toBe('insufficient-evidence');
+  });
+
+  it('permite un bloque clásico sustancial dentro de un ciclo Café Central', () => {
+    const mixed = classify(
+      facts({
+        title: 'Velada de cámara en Café Central',
+        categoryText: 'Conciertos Ateneo-Café Central',
+        programText: 'Johann Sebastian Bach: Suite. Ludwig van Beethoven: Cuarteto de cuerda.',
+        composers: [{ name: 'Johann Sebastian Bach' }, { name: 'Ludwig van Beethoven' }],
+      }),
+    );
+    expect(mixed.eligibility.value).toBe('include');
+    expect(mixed.eligibility.ruleId).toBe('mixed-program-classical-block');
   });
 
   it('excluye flamenco anunciado como gala, no un concierto que mencione Andalucía', () => {
@@ -50,6 +145,23 @@ describe('eligibility — exclusiones de identidad', () => {
         }),
       ).eligibility.value,
     ).toBe('exclude');
+  });
+
+  it('no convierte una zambomba navideña coral-sinfónica en flamenco por el título', () => {
+    const result = classify(
+      facts({
+        title: 'Zambombas y panderetas en sinfónico',
+        description:
+          'Concierto navideño de tres coros acompañados por orquesta sinfónica con villancicos tradicionales en arreglos sinfónicos contemporáneos.',
+        performers: [
+          { name: 'Coro Infantil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro Juvenil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro de Adultos Villa de Las Rozas', roleText: 'coro' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).not.toBe('exclude');
+    expect(result.eligibility.ruleId).not.toBe('flamenco-identity');
   });
 
   it('no excluye por flamenco la escuela franco-flamenca ni el Códice de Chigi', () => {
@@ -97,12 +209,302 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(suite.eligibility.value).toBe('include');
   });
 
+  it('incluye un concierto clásico con compañía de danza coprincipal si hay interpretación musical independiente', () => {
+    const viennese = classify(
+      facts({
+        title: 'Filarmonía de Madrid. Viena en Madrid',
+        performers: [
+          { name: 'Orquesta Filarmonía' },
+          { name: 'Compañía JAC Ballet' },
+          { name: 'Coreógrafo invitado', roleText: 'Coreógrafo' },
+        ],
+        composers: [{ name: 'F. V. Suppé' }, { name: 'J. Offenbach' }, { name: 'F. Lehár' }],
+        works: [
+          { title: 'Pique Dame', composerName: 'F. V. Suppé' },
+          { title: 'La Belle Hélène', composerName: 'J. Offenbach' },
+          { title: 'Nechledil March', composerName: 'F. Lehár' },
+        ],
+        programText:
+          'Pique Dame, F. V. Suppé. La Belle Hélène, J. Offenbach. Nechledil March, F. Lehár.',
+      }),
+    );
+    expect(viennese.eligibility.value).toBe('include');
+    expect(viennese.eligibility.ruleId).not.toBe('dance-spectacle');
+
+    const family = classify(
+      facts({
+        title: 'OCNE. En Familia',
+        performers: [
+          { name: 'Orquesta Nacional de España' },
+          { name: 'Ballet Nacional de España' },
+        ],
+        programText: 'Domenico Scarlatti / Miguel Ángel Coria. Seis sonatas para la reina de España',
+      }),
+    );
+    expect(family.eligibility.value).toBe('include');
+    expect(family.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
+  it('sigue excluyendo un espectáculo de danza aunque el repertorio sea clásico', () => {
+    const spectacle = classify(
+      facts({
+        title: 'Gala de danza contemporánea',
+        performers: [{ name: 'Compañía Nacional de Ballet' }],
+        description: 'Espectáculo de danza con coreografía original.',
+      }),
+    );
+    expect(spectacle.eligibility.value).toBe('exclude');
+    expect(spectacle.eligibility.ruleId).toBe('dance-spectacle');
+
+    const balletGala = classify(
+      facts({
+        title: 'Gala de ballet',
+        performers: [{ name: 'Compañía Nacional de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+      }),
+    );
+    expect(balletGala.eligibility.value).toBe('exclude');
+    expect(balletGala.eligibility.ruleId).toBe('dance-spectacle');
+
+    const swanLake = classify(
+      facts({
+        title: 'El lago de los cisnes',
+        performers: [{ name: 'Compañía de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+        programText:
+          'Chaikovski: El lago de los cisnes. Stravinski: El pájaro de fuego. Ballet completo.',
+      }),
+    );
+    expect(swanLake.eligibility.value).toBe('exclude');
+    expect(swanLake.eligibility.ruleId).toBe('dance-spectacle');
+
+    const balletWithCategory = classify(
+      facts({
+        title: 'El lago de los cisnes',
+        categoryText: 'Danza',
+        composers: [{ name: 'Chaikovski' }, { name: 'Minkus' }],
+        performers: [{ name: 'Compañía de Ballet' }],
+      }),
+    );
+    expect(balletWithCategory.eligibility.value).toBe('exclude');
+    expect(balletWithCategory.eligibility.ruleId).toBe('dance-spectacle');
+  });
+
+  it('incluye un concierto vienés observado en programText aunque performers[] esté vacío', () => {
+    const observed = facts({
+      title: 'Pequeño concierto de Año Nuevo',
+      description: 'Música y danza',
+      categoryText: 'El Real Junior',
+      venueText: 'HALL Real Teatro de Retiro',
+      programText:
+        'Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular del Teatro Real. Un cuarteto de cuerdas de la Orquesta Sinfónica de Madrid, Titular del Teatro Real, junto con la bailarina Elisa Bermejo y las voces de los solistas de la Orquesta Titular del Teatro Real, introducirá al público en los ritmos que se escuchan en Viena. Valses, mazurkas y polkas serán los protagonistas. En Navidad, vamos a bailar como si estuviéramos en Viena.',
+    });
+    const result = classify(observed);
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(result.eligibility.ruleId).not.toBe('dance-spectacle');
+
+    const withSpuriousComposer = classify(
+      facts({
+        ...observed,
+        composers: [{ name: 'y danza' }],
+      }),
+    );
+    expect(withSpuriousComposer.eligibility.value).toBe('include');
+    expect(withSpuriousComposer.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(withSpuriousComposer.eligibility.ruleId).not.toBe('known-classical-composer');
+
+    const mixedCategory = classify(
+      facts({
+        ...observed,
+        categoryText: 'Música y danza',
+      }),
+    );
+    expect(mixedCategory.eligibility.value).toBe('include');
+    expect(mixedCategory.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
+  it('no convierte orquesta, cuerdas, piano o danza aislados en include', () => {
+    expect(
+      classify(
+        facts({
+          title: 'Velada en el salón',
+          description: 'Habrá orquesta, cuerdas y piano. También danza.',
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'Concierto extraordinario',
+          programText: 'Acompañado por un octeto de cuerdas y piano, recorrerá su repertorio.',
+          performers: [{ name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gran baile de salón',
+          description: 'Vamos a bailar valses de Viena con orquesta.',
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'FITO PÁEZ CLÁSICO',
+          description:
+            'Espectáculo especialmente concebido para disfrutar la obra de Fito. Acompañado por un octeto de cuerdas, recorrerá parte fundamental de su repertorio.',
+          performers: [{ name: 'Fito Páez' }, { name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+  });
+
+  it('valora el bloque clásico declarado en pop/cine y conserva la identidad principal de jazz, flamenco y ballet', () => {
+    expect(
+      classify(
+        facts({
+          title: 'ABBA, Queen, Beatles y Otros Grandes del Pop',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por la orquesta. Viaje a Viena.',
+          performers: [{ name: 'Pop Orchestra', roleText: 'orquesta' }],
+        }),
+      ).eligibility,
+    ).toMatchObject({ value: 'include', ruleId: 'mixed-program-classical-block' });
+
+    expect(
+      classify(
+        facts({
+          title: 'Film Symphony Orchestra. Especial John Williams',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por la orquesta en un salón vienés.',
+          composers: [{ name: 'John Williams' }],
+          performers: [{ name: 'Film Symphony Orchestra', roleText: 'orquesta' }],
+        }),
+      ).eligibility.ruleId,
+    ).toBe('mixed-program-classical-block');
+
+    expect(
+      classify(
+        facts({
+          title: 'Jazz en el Auditorio',
+          categoryText: 'Jazz en el Auditorio',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por el cuarteto de cuerdas en Viena.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('jazz-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gala de jóvenes flamencos',
+          categoryText: 'Andalucía Flamenca',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por un cuarteto de cuerdas. Salón vienés.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('flamenco-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gala de ballet',
+          categoryText: 'Danza',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular. Un cuarteto de cuerdas en un salón vienés.',
+          performers: [{ name: 'Compañía Nacional de Ballet' }],
+        }),
+      ).eligibility,
+    ).toMatchObject({ value: 'exclude', ruleId: 'dance-spectacle' });
+  });
+
   it('excluye cine cuando ver la película es la actividad principal', () => {
     const result = classify(
       facts({
         title: 'Cineclásica: El gabinete del doctor Caligari',
         categoryText: 'Cine mudo con música en vivo',
         description: 'Proyección de una de las películas más influyentes del cine mudo.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('incluye un concierto de órgano en directo aunque la ficha mencione la proyección de una película muda', () => {
+    const fromListing = classify(
+      facts({
+        title: 'Ciclo de órgano. Organista invitado',
+        performers: [{ name: 'Organista invitado', roleText: 'órgano' }],
+        programText: 'Improvisaciones sobre la película muda Amanecer (1927), de Friedrich Wilhelm Murnau',
+      }),
+    );
+    expect(fromListing.eligibility.value).toBe('include');
+    expect(fromListing.eligibility.ruleId).toBe('organ-concert');
+    expect(fromListing.formats?.value).toContain('organ');
+
+    const fromDetail = classify(
+      facts({
+        title: 'Organista invitado',
+        seriesText: 'Bach Vermut',
+        description:
+          'Concierto en el órgano de la Sala Sinfónica. Pondrá música en directo a la proyección de Amanecer (1927), obra maestra del cine mudo. Improvisación concebida en tiempo real.',
+        programText: 'Improvisaciones sobre la película Amanecer (1927), de Friedrich Wilhelm Murnau (1888-1931)',
+      }),
+    );
+    expect(fromDetail.eligibility.value).toBe('include');
+    expect(fromDetail.eligibility.ruleId).not.toBe('cinema-projection');
+  });
+
+  it('no trata como concierto clásico una proyección cinematográfica con banda sonora o música en vivo genérica', () => {
+    const screening = classify(
+      facts({
+        title: 'El Real Junior de cine: La pequeña cerillera',
+        categoryText: 'Proyección de espectáculo musical',
+        description: 'Este ciclo propone la proyección de títulos emblemáticos. Música: César Frank.',
+        composers: [{ name: 'César Frank' }],
+      }),
+    );
+    expect(screening.eligibility.value).toBe('exclude');
+    expect(screening.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('excluye una proyección con acompañamiento de órgano sin identidad concertística', () => {
+    const nosferatu = classify(
+      facts({
+        title: 'Proyección de Nosferatu',
+        description: 'película muda con acompañamiento en directo',
+        performers: [{ name: 'Juan Pérez', roleText: 'órgano' }],
+      }),
+    );
+    expect(nosferatu.eligibility.value).toBe('exclude');
+    expect(nosferatu.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('no trata cine experimental como proyección cuando es el medio de un concierto electrónico', () => {
+    const result = classify(
+      facts({
+        title: 'L.E.V. 2026: Conciertos. Síntesis modular y cine experimental',
+        description:
+          'Un encuentro entre composición electroacústica y cine experimental en tiempo real. El compositor presenta un universo sonoro donde la síntesis modular, la composición electroacústica y los samples se entrelazan.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).not.toBe('cinema-projection');
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('sigue excluyendo un ciclo de cine experimental cuya actividad es ver películas', () => {
+    const result = classify(
+      facts({
+        title: 'Ciclo de cine experimental',
+        description: 'Proyección de cortometrajes. Película muda con música en vivo.',
       }),
     );
     expect(result.eligibility.value).toBe('exclude');
@@ -122,6 +524,189 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.ruleId).toBe('non-performance-activity');
   });
 
+  it('incluye un recital clásico con charla introductoria secundaria', () => {
+    const result = classify(
+      facts({
+        title: 'Recital de Bach con charla introductoria',
+        description: 'Recital de Johann Sebastian Bach. Tras una breve charla introductoria se interpretan las Partitas.',
+        composers: [{ name: 'Johann Sebastian Bach' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+  });
+
+  it('excluye una charla cuya actividad principal es la charla, aunque cite a Bach', () => {
+    const result = classify(
+      facts({
+        title: 'Charla introductoria sobre Bach',
+        description: 'Charla introductoria sobre la vida y la obra de Johann Sebastian Bach.',
+        composers: [{ name: 'Johann Sebastian Bach' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('non-performance-activity');
+  });
+
+  it('deja uncertain un encuentro ambiguo con Bach y charla sin identidad concertística', () => {
+    const result = classify(
+      facts({
+        title: 'Encuentro Bach',
+        description: 'Una charla y posiblemente música.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('incluye un concierto barroco con pie de charlas previas al ciclo', () => {
+    const result = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+        seriesText: 'Universo Barroco',
+        description:
+          'Marc Minkowski inaugura el ciclo Universo Barroco con los Concerti grossi, op. 3, de George Frideric Haendel. CONTEXTOS BARROCOS Charlas previas al ciclo de conciertos. Charla sobre el concierto de Les Musiciens du Louvre.',
+        programText: 'George Frideric Haendel (1685-1759) Concerti grossi, op. 3 (1710-1718)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [
+          {
+            title: 'Concerti grossi, op. 3 (1710-1718)',
+            composerName: 'George Frideric Haendel (1685-1759)',
+          },
+        ],
+        performers: [{ name: 'Marc Minkowski', roleText: 'director' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).not.toBe('classical-and-nonclassical-coprincipal');
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+  });
+
+  it('incluye una ópera barroca listada aunque el pie mencione una conferencia educativa', () => {
+    const result = classify(
+      facts({
+        title: 'LES ACCENTS: "AGRIPPINA" (G. F. HAENDEL)',
+        seriesText: 'Universo Barroco',
+        description:
+          'Les Accents interpretan Agrippina, la ópera de George Frideric Haendel. Educación: Conferencia de Thibault Noally. Charlas previas al ciclo de conciertos. Charla sobre el concierto de Les Accents.',
+        programText: 'George Frideric Haendel (1685-1759) Agrippina, HWV 6 (1709)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [{ title: 'Agrippina, HWV 6 (1709)', composerName: 'George Frideric Haendel (1685-1759)' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+  });
+
+  it('un listing sin programa queda uncertain y la ficha hidratada incluye', () => {
+    const listing = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+      }),
+    );
+    expect(listing.eligibility.value).toBe('uncertain');
+
+    const hydrated = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+        seriesText: 'Universo Barroco',
+        programText: 'George Frideric Haendel (1685-1759) Concerti grossi, op. 3 (1710-1718)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [
+          {
+            title: 'Concerti grossi, op. 3 (1710-1718)',
+            composerName: 'George Frideric Haendel (1685-1759)',
+          },
+        ],
+      }),
+    );
+    expect(hydrated.eligibility.value).toBe('include');
+  });
+
+  it('incluye una zarzuela barroca listada aunque el pie mencione charlas previas', () => {
+    const result = classify(
+      facts({
+        title: 'IL FERVORE: "JÚPITER Y CALISTO" (G. B. MELE)',
+        seriesText: 'Universo Barroco',
+        description:
+          'Il Fervore recupera Júpiter y Calisto, zarzuela barroca en dos jornadas de Giovanni Battista Mele. CONTEXTOS BARROCOS Charlas previas al ciclo de conciertos. Charla sobre el concierto de Il Fervore.',
+        programText:
+          'Giovanni Battista Mele (ca. 1701-1752) Júpiter y Calisto, zarzuela barroca en dos jornadas (ca. 1736)',
+        composers: [{ name: 'Giovanni Battista Mele (ca. 1701-1752)' }],
+        works: [
+          {
+            title: 'Júpiter y Calisto, zarzuela barroca en dos jornadas (ca. 1736)',
+            composerName: 'Giovanni Battista Mele (ca. 1701-1752)',
+          },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toContain('zarzuela');
+    expect(result.eligibility.ruleId).not.toBe('classical-and-nonclassical-coprincipal');
+  });
+
+  it('incluye Andrómeda y Perseo por Juan Hidalgo, no por correo electrónico', () => {
+    const result = classify(
+      facts({
+        title: 'Andrómeda y Perseo',
+        description:
+          'Fábula mitológica. Música atribuida a JUAN DE HIDALGO. Libreto de PEDRO CALDERÓN DE LA BARCA. Correo electrónico de contacto: reservas@example.test',
+        categoryText: 'Nuevos públicos',
+        composers: [{ name: 'atribuida a JUAN DE HIDALGO' }],
+        performers: [{ name: 'AARÓN ZAPICO', roleText: 'Dirección musical y clave' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('known-classical-composer');
+    expect(result.eras?.value).toEqual(['baroque']);
+  });
+
+  it('incluye Zarzuelita como concierto de género chico, no como electrónica', () => {
+    const result = classify(
+      facts({
+        title: 'Zarzuelita',
+        description:
+          'Género chico para grandes oyentes. Formato concierto. Correo electrónico de contacto del centro escolar.',
+        categoryText: 'Nuevos públicos',
+        performers: [
+          { name: 'Lucía Beltrán', roleText: 'Soprano' },
+          { name: 'Adrián Quiñones', roleText: 'Tenor' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toContain('zarzuela');
+  });
+
+  it('no trata un cuarteto aislado de Saint-Saëns en un tributo pop como bloque clásico', () => {
+    const result = classify(
+      facts({
+        title: 'Tribute to Tom Petty',
+        programText: 'Free Fallin’; Refugee; El cisne de Saint-Saëns.',
+        composers: [{ name: 'Tom Petty' }, { name: 'Camille Saint-Saëns' }],
+        works: [
+          { title: 'Free Fallin’', composerName: 'Tom Petty' },
+          { title: 'Le cygne', composerName: 'Camille Saint-Saëns' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('no trata Taller Sonoro como actividad educativa', () => {
+    const result = classify(
+      facts({
+        title: 'XVII Festival de Ensembles: TALLER SONORO',
+        categoryText: 'Música contemporánea',
+        description:
+          'PluralEnsemble presenta el festival. Participa Taller Sonoro. El objetivo es estrenar nuevas obras y fomentar el repertorio musical contemporáneo.',
+        performers: [{ name: 'Taller Sonoro' }],
+      }),
+    );
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+    expect(result.eligibility.value).toBe('include');
+  });
+
   it('excluye pop anunciado como identidad, aunque haya orquesta', () => {
     const result = classify(
       facts({
@@ -131,6 +716,31 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('popular-music-identity');
+  });
+
+  it('no infiere popular-music-identity por su repertorio + cuerdas sin evidencia popular', () => {
+    const contemporary = classify(
+      facts({
+        title: 'Concierto de música contemporánea',
+        categoryText: 'Música contemporánea',
+        description:
+          'El compositor presenta su repertorio para cuerdas. Estreno de nuevas obras de tradición académica.',
+      }),
+    );
+    expect(contemporary.eligibility.ruleId).not.toBe('popular-music-identity');
+    expect(contemporary.eligibility.value).not.toBe('exclude');
+    expect(contemporary.eligibility.value).toBe('include');
+
+    const fito = classify(
+      facts({
+        title: 'FITO PÁEZ CLÁSICO',
+        description:
+          'Espectáculo especialmente concebido para disfrutar la obra de Fito. Acompañado por un octeto de cuerdas, recorrerá parte fundamental de su repertorio.',
+        performers: [{ name: 'Fito Páez' }, { name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+      }),
+    );
+    expect(fito.eligibility.ruleId).not.toBe('popular-music-identity');
+    expect(fito.eligibility.value).not.toBe('include');
   });
 
   it('excluye DJ / crossover aunque cite a Vivaldi', () => {
@@ -157,6 +767,19 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('film-music-identity');
+  });
+
+  it('no excluye por mencionar música de cine junto a un repertorio clásico declarado', () => {
+    const result = classify(
+      facts({
+        title: 'Música que nos une | Concierto',
+        categoryText: 'Conciertos',
+        description:
+          'El grupo interpreta un amplio y diverso repertorio musical clásico (desde el Renacimiento hasta el siglo XXI) y de otros géneros musicales: famosas arias de ópera, lied alemán, romanzas de zarzuela, canción popular española, boleros, canción francesa, música de cine. El órgano permite la interpretación del rico repertorio organístico (incluidas famosas composiciones de Juan Sebastián Bach y música antigua ibérica).',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
   });
 });
 
@@ -550,6 +1173,7 @@ describe('eligibility — conflictos y fallback', () => {
     expect(lied.eligibility.value).toBe('include');
     expect(lied.eligibility.ruleId).toBe('classical-concert-series');
     expect(lied.formats.value).toContain('lied');
+    expect(lied.formats.strength).toBe('strong');
 
     const liceo = classify(
       facts({
@@ -559,6 +1183,71 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(liceo.eligibility.value).toBe('include');
     expect(liceo.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
+  it('la canción antes del Lied no anuncia el género Lied', async () => {
+    const observed = facts({
+      title: 'Viajando por la canción antes del Lied',
+      categoryText: 'Concierto de música antigua',
+      composers: [{ name: 'Josquin des Prez' }, { name: 'Gaspar Sanz' }],
+      works: [{ title: 'Mille regretz', composerName: 'Josquin des Prez' }],
+    });
+    expect(resolveFormats(observed).value).toEqual(['early-music']);
+    const ai: AiClassifier = {
+      async classify() { return { formats: ['lied', 'early-music'], eras: ['renaissance'], evidence: ['Josquin des Prez'] }; },
+    };
+    expect((await classifyObserved(observed, { ai })).formats.value).not.toContain('lied');
+    const inferred = await classifyObserved({ ...observed, categoryText: 'Concierto' }, { ai });
+    expect(inferred.formats.value).toEqual(['early-music']);
+    expect(resolveFormats({ ...observed, programText: 'Segunda parte: Lieder de Schubert' }).value).toContain('lied');
+  });
+
+  it('una obra titulada Mélodie italienne no congela el concierto como lied fuerte', async () => {
+    const programText = [
+      'Manuel de Falla (1876-1946)',
+      'Danza de La vida breve (1904)',
+      'Maurice Ravel (1875-1937)',
+      'Canciones populares para canto y piano sobre textos populares (1910)',
+      '1. Chanson espagnole',
+      '2. Chanson française',
+      '3. Mélodie italienne',
+      '4. Chanson hébraïque',
+      'Sonata n.º 1 Sonate postuma para violín y piano (1897)',
+    ].join('\n');
+    const observed = facts({
+      title: 'Amistad e influencia mutua',
+      seriesText: 'Música vs. Espacios',
+      performers: [{ name: 'Ars Combinatoria' }],
+      composers: [{ name: 'Manuel de Falla' }, { name: 'Maurice Ravel' }],
+      programText,
+      works: [{ title: 'Mélodie italienne', composerName: 'Maurice Ravel' }],
+    });
+    expect(strongFormatValues(observed)).not.toContain('lied');
+    const formats = resolveFormats(observed);
+    expect(formats.value.includes('lied') ? formats.strength : 'absent').not.toBe('strong');
+    const ai: AiClassifier = {
+      async classify(_facts, context) {
+        if (context?.purpose === 'taxonomy') {
+          return {
+            formats: ['chamber'],
+            eras: ['twentieth'],
+            evidence: ['Mélodie italienne'],
+          };
+        }
+        return { candidates: [] };
+      },
+    };
+    const classified = await classifyObserved(observed, { ai });
+    expect(classified.formats.value).toContain('chamber');
+    expect(classified.formats.value).not.toContain('lied');
+
+    const announced = classify(facts({
+      title: 'Récital de mélodies',
+      categoryText: 'Ciclo de Lieder',
+      performers: [{ name: 'Soprano', roleText: 'soprano' }, { name: 'Piano', roleText: 'piano' }],
+    }));
+    expect(announced.formats.value).toContain('lied');
+    expect(announced.formats.strength).toBe('strong');
   });
 
   it('incluye ciclos del Auditorio cuyo título lleva el nombre de la serie', () => {
@@ -619,6 +1308,44 @@ describe('eligibility — conflictos y fallback', () => {
     expect(larrocha.eligibility.ruleId).toBe('classical-concert-series');
   });
 
+  it('incluye ciclos oficiales de cámara, interpretación histórica y solistas por evidencia observada', () => {
+    const daCamera = classify(
+      facts({
+        title: 'Ciclo Da Camera: Grupos de Cuerdas',
+        seriesText: 'Da Camera',
+        description:
+          'Un ciclo para escuchar el repertorio esencial de cámara de la mano de formaciones de cámara jóvenes.',
+      }),
+    );
+    expect(daCamera.eligibility.value).toBe('include');
+    expect(daCamera.eligibility.ruleId).toBe('classical-concert-series');
+
+    const historica = classify(
+      facts({
+        title: 'Interpretación Histórica: Conjuntos Barrocos',
+        seriesText: 'Interpretación Histórica',
+        description:
+          'El programa trabaja las tradiciones del Renacimiento, el Barroco y el Clasicismo en este ciclo de conciertos de repertorio antiguo.',
+      }),
+    );
+    expect(historica.eligibility.value).toBe('include');
+    expect(historica.eligibility.ruleId).toBe('classical-concert-series');
+
+    const solistas = classify(
+      facts({
+        title: 'Solistas del Siglo XXI. Recital de violonchelo',
+        seriesText: 'Solistas del Siglo XXI',
+        description: 'Los violonchelistas Luis Aracama y Yiqi Chen ofrecerán un recital.',
+        performers: [
+          { name: 'Luis Aracama', roleText: 'violonchelista' },
+          { name: 'Yiqi Chen', roleText: 'violonchelista' },
+        ],
+      }),
+    );
+    expect(solistas.eligibility.value).toBe('include');
+    expect(solistas.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
   it('no trata un código de temporada OCNE o un Satélite gospel como ciclo clásico', () => {
     const coded = classify(
       facts({
@@ -635,6 +1362,27 @@ describe('eligibility — conflictos y fallback', () => {
       }),
     );
     expect(gospel.eligibility.value).not.toBe('include');
+  });
+
+  it('no incluye un jam de jazz por el recinto de la Escuela ni relaja un quinteto genérico', () => {
+    const jazz = classify(
+      facts({
+        title: 'Jam de jazz en el Auditorio Sony',
+        venueText: 'Auditorio Sony, Madrid',
+        categoryText: 'Jazz',
+        description: 'Sesión de jazz en la Escuela Superior de Música Reina Sofía.',
+      }),
+    );
+    expect(jazz.eligibility.value).toBe('exclude');
+    expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+
+    const quintet = classify(
+      facts({
+        title: 'Quinteto de cuerda',
+        description: 'Un quinteto ofrece un recital.',
+      }),
+    );
+    expect(quintet.eligibility.value).not.toBe('include');
   });
 
   it('no infiere include por un recital Impacta sin repertorio ni por un gala Bernstein-Gershwin', () => {
@@ -723,6 +1471,61 @@ describe('eligibility — conflictos y fallback', () => {
     }
   });
 
+  it('no trata la palabra ópera en un nombre de proyecto o compañía como ópera del evento', () => {
+    const salon = facts({
+      title: 'Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas',
+      description: 'Concierto a piano y voz. Recital de canciones y piezas para piano del romanticismo.',
+      categoryText: 'Música',
+      performers: [
+        { name: 'Ana Pérez', roleText: 'soprano' },
+        { name: 'Luis García', roleText: 'piano' },
+      ],
+      composers: [{ name: 'Franz Schubert' }, { name: 'Robert Schumann' }],
+      works: [
+        { title: 'Gretchen am Spinnrade', composerName: 'Franz Schubert' },
+        { title: 'Widmung', composerName: 'Robert Schumann' },
+      ],
+    });
+    const classified = classify(salon);
+    expect(classified.eligibility.value).toBe('include');
+    expect(classified.eligibility.ruleId).not.toBe('opera-event');
+    expect(classified.formats?.value).toEqual(['recital']);
+    expect(classified.formats?.value).not.toContain('opera');
+
+    const titleOnly = classify(
+      facts({ title: 'Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas' }),
+    );
+    expect(titleOnly.eligibility.value).not.toBe('include');
+    expect(titleOnly.eligibility.ruleId).not.toBe('opera-event');
+  });
+
+  it('sigue clasificando óperas reales por categoría, título de gala o ficha de detalle', () => {
+    const byCategory = classify(
+      facts({
+        title: 'Manon Lescaut',
+        categoryText: 'Ópera',
+        description: 'Dramma lirico en cuatro actos.',
+      }),
+    );
+    expect(byCategory.eligibility.value).toBe('include');
+    expect(byCategory.eligibility.ruleId).toBe('opera-event');
+    expect(byCategory.formats?.value).toContain('opera');
+    expect(byCategory.formats?.strength).toBe('strong');
+
+    const gala = classify(facts({ title: 'Filarmonía de Madrid. Gala de Ópera' }));
+    expect(gala.eligibility.value).toBe('include');
+    expect(gala.formats?.value).toEqual(['opera']);
+    expect(gala.formats?.strength).toBe('strong');
+
+    const concertVersion = resolveFormats(
+      facts({
+        title: 'Riccardo Primo',
+        description: 'Ópera en tres actos, HWV 23. Ópera en versión de concierto.',
+      }),
+    );
+    expect(concertVersion.value).toContain('opera');
+  });
+
   it('incluye COMA y una categoría explícita de música clásica, y sigue excluyendo jazz en un ciclo mixto', () => {
     const coma = classify(
       facts({
@@ -752,6 +1555,31 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(jazz.eligibility.value).toBe('exclude');
     expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+  });
+
+  it('no excluye por una mención estilística de jazz en descripción o programa', () => {
+    const stylistic = classify(
+      facts({
+        title: 'Trío de piano, flauta y percusión',
+        seriesText: 'Fronteras',
+        description:
+          'Proyecto en el que la tradición musical convive con la escritura contemporánea, la improvisación y elementos procedentes del jazz y la música clásica.',
+        programText: 'Ecos del estrecho',
+      }),
+    );
+    expect(stylistic.eligibility.value).not.toBe('exclude');
+    expect(stylistic.eligibility.ruleId).not.toBe('jazz-identity');
+    expect(stylistic.eligibility.value).toBe('uncertain');
+
+    const titledJazz = classify(
+      facts({
+        title: 'Miniclásica: descubriendo el jazz',
+        performers: [{ name: 'Índigo Jazz' }],
+        description: 'Ritmos del jazz clásico y del swing.',
+      }),
+    );
+    expect(titledJazz.eligibility.value).toBe('exclude');
+    expect(titledJazz.eligibility.ruleId).toBe('jazz-identity');
   });
 
   it('excluye open piano y jam participativa aunque el festival sea de piano clásico', () => {
@@ -893,6 +1721,16 @@ describe('eras', () => {
     ).toEqual(['baroque', 'classical', 'romantic']);
 
     expect(resolveEras(facts({ title: 'Concierto extraordinario' })).value).toEqual([]);
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Bach y una nota editorial',
+          programText: 'Johann Sebastian Bach: Suite n.º 1.',
+          description: 'El solista también ha grabado a los compositores del Romanticismo y a David del Puerto.',
+        }),
+      ).value,
+    ).toEqual(['baroque']);
   });
 
   it('no toma CIM ANTONIO SOLER ni un tema de Rameau como época barroca', () => {
@@ -925,6 +1763,49 @@ describe('eras', () => {
         }),
       ).value,
     ).toEqual(['contemporary']);
+  });
+
+  it('toma una declaración explícita de época y no las menciones biográficas', () => {
+    const piuMosso = resolveEras(
+      facts({
+        title: 'Martín Llade y Darío Meta. Los Románticos y la Poesía.',
+        description: [
+          'Darío Meta nos tocará a los compositores del Romanticismo. Estamos esperando el programa.',
+          'BIOGRAFÍAS DE AMBOS:',
+          'Actuaciones en el Beethoven Haus de Bonn y mentoría de Gabriela Montero.',
+          'Se estrena la ópera de cámara Lazarillo de Tormes con música del Premio Nacional David del Puerto.',
+          'El misterio Razumovski, con Ludwig van Beethoven como detective.',
+        ].join(' '),
+      }),
+    );
+    expect(piuMosso).toMatchObject({
+      value: ['romantic'],
+      method: 'rule',
+      ruleId: 'eras-declared-programme',
+    });
+    expect(piuMosso.value).not.toContain('classical');
+    expect(piuMosso.value).not.toContain('contemporary');
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Los Románticos y la Poesía',
+          description: 'Un recital de piano y poesía. Estamos esperando el programa.',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('no añade época porque una biografía nombre a un compositor', () => {
+    expect(
+      resolveEras(
+        facts({
+          title: 'Recital de piano',
+          description:
+            'El pianista se formó interpretando a Beethoven y ha estrenado obras de Tomás Marco y Mauricio Sotelo. No se anuncia el programa de este concierto.',
+        }),
+      ).value,
+    ).toEqual([]);
   });
 });
 
@@ -984,6 +1865,22 @@ describe('formats', () => {
   it('no fuerza un format ambiguo', () => {
     expect(resolveFormats(facts({ title: 'Concierto' })).value).toEqual([]);
     expect(resolveFormats(facts({ title: 'Concierto' })).value).not.toContain('other');
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Música en torno a la Independencia de los Estados Unidos de América',
+          performers: [{ name: 'Grupo de música barroca “La Folía”' }],
+        }),
+      ),
+    ).toMatchObject({ value: ['early-music'], strength: 'strong' });
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Concierto',
+          description: 'El clavecinista ha grabado música barroca y tocó con un grupo de música antigua.',
+        }),
+      ).value,
+    ).toEqual([]);
   });
 
   it('alinea opera/recital/choral/symphonic con hechos ya extraídos, sin inventar era', () => {
@@ -1022,18 +1919,45 @@ describe('formats', () => {
     ).toEqual(['choral']);
   });
 
-  it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío y rol solista', () => {
+  it('no trata quinteto, trío o dúo del título como evidencia de eligibility', () => {
+    expect(classify(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).eligibility.value).toBe(
+      'uncertain',
+    );
+    expect(classify(facts({ title: 'Trío Arbós' })).eligibility.value).toBe('uncertain');
+    expect(
+      classify(facts({ title: 'Dúo Mujeres Compositoras. Del Clásico a lo Conceptual' }))
+        .eligibility.value,
+    ).toBe('uncertain');
+    expect(resolveFormats(facts({ title: 'Trío Arbós' })).value).toEqual(['chamber']);
+    expect(resolveFormats(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).value).toEqual(['chamber']);
+    expect(resolveFormats(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).strength).toBe('weak');
+  });
+
+  it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío, dúo y rol solista', () => {
+    expect(
+      resolveFormats(facts({ title: 'Concierto sinfónico' })).value,
+    ).toEqual(['symphonic']);
+
     expect(
       resolveFormats(
         facts({
-          title: 'Programa clásico',
-          programText: 'Johannes Brahms: Sinfonía núm. 1',
+          title: 'Temporada',
+          categoryText: 'Concierto sinfónico',
         }),
       ).value,
     ).toEqual(['symphonic']);
 
     expect(
       resolveFormats(facts({ title: 'Orquesta Nacional de España. Temporada' })).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Temporada',
+          performers: [{ name: 'Orquesta Sinfónica de Madrid' }],
+        }),
+      ).value,
     ).toEqual(['symphonic']);
 
     expect(
@@ -1049,6 +1973,14 @@ describe('formats', () => {
     ).toEqual(['chamber']);
 
     expect(
+      resolveFormats(facts({ title: 'Gara Quartet' })).value,
+    ).toEqual(['chamber']);
+
+    expect(
+      resolveFormats(facts({ title: 'Dúo Mujeres Compositoras. Del Clásico a lo Conceptual' })).value,
+    ).toEqual(['chamber']);
+
+    expect(
       resolveFormats(
         facts({
           title: 'CNDM. Recital',
@@ -1056,6 +1988,70 @@ describe('formats', () => {
         }),
       ).value,
     ).toEqual(['recital']);
+  });
+
+  it('no clasifica formato por biografías que mencionan otras formaciones', () => {
+    const pianistWithOrchestraBio = resolveFormats(
+      facts({
+        title: 'Martín Llade y Darío Meta. Los Románticos y la Poesía',
+        description:
+          'Darío Meta, pianista. Ha colaborado con the Orchestra of the Americas y otras orquestas sinfónicas. Recital de piano y poesía.',
+        performers: [
+          { name: 'Martín Llade' },
+          { name: 'Darío Meta', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(pianistWithOrchestraBio.value).not.toContain('symphonic');
+    expect(pianistWithOrchestraBio.value).toContain('recital');
+
+    const flutePianoDuo = resolveFormats(
+      facts({
+        title: 'Dúo flauta y piano',
+        description:
+          'La flautista ha sido solista de varias orquestas y de the Orchestra of the Americas. El pianista ha tocado con orquestas sinfónicas de Europa.',
+        performers: [
+          { name: 'Ana Flauta', roleText: 'flauta' },
+          { name: 'Luis Piano', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(flutePianoDuo.value).toContain('chamber');
+    expect(flutePianoDuo.value).not.toContain('symphonic');
+
+    const soloistWithChamberBio = resolveFormats(
+      facts({
+        title: 'Karin Lechner, la gran pianista y la vida y obra de Cécile Chaminade',
+        description:
+          'Karin Lechner ha cultivado la música de cámara y ha formado parte de tríos y cuartetos a lo largo de su carrera. Este programa es un recital de piano dedicado a Chaminade.',
+        performers: [{ name: 'Karin Lechner', roleText: 'piano' }],
+      }),
+    );
+    expect(soloistWithChamberBio.value).not.toContain('chamber');
+    expect(soloistWithChamberBio.value).toContain('recital');
+  });
+
+  it('no infiere symphonic de una sinfonía en el programa sin formación orquestal del evento', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Programa clásico',
+          programText: 'Johannes Brahms: Sinfonía núm. 1',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('no trata a los solistas de una orquesta como concierto sinfónico', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Domingos de Cámara I',
+          categoryText: 'Domingos de Cámara',
+          performers: [{ name: 'solistas de la Orquesta Titular del Teatro Real' }],
+        }),
+      ).value,
+    ).toEqual(['chamber']);
   });
 
   it('asigna chamber/symphonic a categorías municipales inequívocas', () => {
@@ -1142,6 +2138,34 @@ describe('formats', () => {
     ).toEqual(['recital']);
   });
 
+  it('no asigna recital y chamber a la vez cuando la fuente enumera alternativas', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Festival Alicia de Larrocha: Consagración, la maestría musical',
+          description: 'Concierto de música clásica. Actuará un pianista o un grupo de cámara.',
+          programText: 'Actuará un pianista o un grupo de cámara.',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('conserva varios formats cuando la fuente afirma que el concierto combina formaciones', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Programa doble',
+          performers: [
+            { name: 'Ana Piano', roleText: 'piano' },
+            { name: 'Cuarteto Casals', roleText: 'cuarteto' },
+          ],
+          description:
+            'El concierto combina un recital de piano y un grupo de cámara: primera parte recital, segunda parte cuarteto.',
+        }),
+      ).value,
+    ).toEqual(['chamber', 'recital']);
+  });
+
   it('varios cantantes con piano no se fuerzan a recital ni a chamber por la sala', () => {
     expect(
       resolveFormats(
@@ -1194,6 +2218,77 @@ describe('kind', () => {
   });
 });
 
+describe('eligibility — formación vocal lírica', () => {
+  const vozInfinita = facts({
+    title: '«La voz infinita. (Una mañana de gala)»',
+    categoryText: 'Concierto',
+    description: 'Ciclo «Matinales de Amalgama»',
+    performers: [
+      { name: 'Alba Chantar', roleText: 'soprano' },
+      { name: 'Ekaterina Antipova', roleText: 'mezzosoprano' },
+      { name: 'Igor Peral', roleText: 'tenor' },
+      { name: 'Javier Franco', roleText: 'barítono' },
+      { name: 'Javier Carmena', roleText: 'piano' },
+      { name: 'Ismael García', roleText: 'oboe' },
+    ],
+  });
+
+  it('incluye una gala lírica con al menos tres familias vocales y acompañamiento de cámara', () => {
+    expect(hasClassicalVocalEnsembleAnchor(vozInfinita)).toBe(true);
+    expect(hasObservedClassicalAcademicAnchor(vozInfinita)).toBe(true);
+    const result = classify(vozInfinita);
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('classical-vocal-ensemble');
+  });
+
+  it('no convierte un dúo cantante+piano en clásico', () => {
+    const duo = facts({
+      title: 'Recital de voz y piano',
+      categoryText: 'Concierto',
+      performers: [
+        { name: 'Laura Fdez. Alcalde', roleText: 'soprano' },
+        { name: 'Irene de Juan Bernabeu', roleText: 'piano' },
+      ],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(duo)).toBe(false);
+    expect(classify(duo).eligibility.value).toBe('uncertain');
+  });
+
+  it('no convierte en clásico un concierto pop o jazz con una sola soprano', () => {
+    const popSoprano = facts({
+      title: 'Grandes del pop',
+      categoryText: 'Concierto',
+      performers: [{ name: 'Ana Pop', roleText: 'soprano' }],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(popSoprano)).toBe(false);
+    expect(classify(popSoprano).eligibility.value).toBe('exclude');
+    expect(classify(popSoprano).eligibility.ruleId).toBe('popular-music-identity');
+
+    const jazzSoprano = facts({
+      title: 'Velada en el Auditorio',
+      categoryText: 'Jazz en el Auditorio',
+      performers: [{ name: 'Ana Jazz', roleText: 'soprano' }],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(jazzSoprano)).toBe(false);
+    expect(classify(jazzSoprano).eligibility.value).toBe('exclude');
+    expect(classify(jazzSoprano).eligibility.ruleId).toBe('jazz-identity');
+  });
+
+  it('no toma saxos tenor y soprano como voces líricas', () => {
+    const saxQuintet = facts({
+      title: 'Quinteto en concierto',
+      categoryText: 'Concierto',
+      performers: [
+        { name: 'Ingrid Laubrock', roleText: 'saxos tenor y soprano' },
+        { name: 'Myra Melford', roleText: 'piano' },
+        { name: 'Lesley Mok', roleText: 'batería' },
+      ],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(saxQuintet)).toBe(false);
+    expect(classify(saxQuintet).eligibility.value).not.toBe('include');
+  });
+});
+
 describe('access', () => {
   it('resuelve sólo desde accessText y no trata entradas gratuitas como paid', () => {
     expect(resolveAccess('entrada libre').value).toBe('free');
@@ -1208,5 +2303,21 @@ describe('access', () => {
     expect(resolveAccess(undefined).value).toBe('unknown');
     expect(resolveAccess('consultar').value).toBe('unknown');
     expect(resolveAccess('entradas').value).toBe('unknown');
+  });
+});
+
+describe('eligibility — institutional composer names', () => {
+  it('no usa Rodolfo Halffter como repertorio cuando sólo nombra al conservatorio', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto de Navidad',
+        description:
+          'El Conservatorio Profesional de Música Rodolfo Halffter reúne a sus coros, bandas y orquestas en el Teatro del Bosque.',
+        organizerText: 'Conservatorio Profesional de Música Rodolfo Halffter',
+        performers: [{ name: 'Conservatorio Profesional de Música Rodolfo Halffter' }],
+      }),
+    );
+
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
   });
 });

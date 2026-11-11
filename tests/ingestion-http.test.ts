@@ -6,7 +6,7 @@ import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/f
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
-import { fetchRelayHosts, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
+import { fetchRelayHosts, fetchTransportForHost, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts';
 
@@ -176,15 +176,20 @@ describe('getText fetch relay', () => {
       'teatro-zarzuela',
       'fundacion-juan-march',
       'cndm',
-      'real-hermandad-refugio',
     ]);
     expect(fetchRelayHosts()).toEqual([
       'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
-      'realhermandaddelrefugio.org',
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
     ]);
+    expect(fetchTransportForHost('realhermandaddelrefugio.org')).toBe('direct');
+    expect(fetchTransportForHost('www.march.es')).toBe('relay');
+    expect(fetchTransportForHost('teatrodelazarzuela.inaem.gob.es')).toBe('relay');
+    expect(fetchTransportForHost('auditorionacional.inaem.gob.es')).toBe('relay');
+    expect(fetchTransportForHost('cndm.inaem.gob.es')).toBe('relay-then-direct');
+    expect(fetchTransportForHost('www.fundacionmutua.es')).toBe('direct');
+    expect(fetchTransportForHost('www.teatroreal.es')).toBe('direct');
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
     expect(resolveFetchRelay(auditorioListing, relayEnv)?.requestUrl).toContain(
       encodeURIComponent(auditorioListing),
@@ -448,6 +453,32 @@ describe('getText fetch relay', () => {
     })).rejects.toThrow(`relay de fetch inválido al pedir ${listing}`);
     await expect(getText(ordinary, 30_000, { INGEST_FETCH_RELAY_TOKEN: token })).resolves.toBe('[]');
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('Refugio uses a single direct HTTP hop and does not fall back to the relay', async () => {
+    const archive = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(url).toBe(archive);
+      expect(header(init, 'authorization')).toBeUndefined();
+      return new Response('challenge', { status: 202 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(archive, 30_000, relayEnv)).rejects.toMatchObject({ status: 202 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(String(fetch.mock.calls[0]?.[0])).toBe(archive);
+  });
+
+  it('does not try a direct hop for March, Zarzuela, Auditorio or CNDM when the relay is configured', async () => {
+    for (const target of [listing, zarzuelaHome, auditorioListing, 'https://cndm.inaem.gob.es/']) {
+      const fetch = vi.fn(async (url: string) => {
+        expect(String(url)).not.toBe(target);
+        expect(new URL(String(url)).origin).toBe(relayOrigin);
+        return new Response('ok', { status: 200 });
+      });
+      vi.stubGlobal('fetch', fetch);
+      await expect(getText(target, 30_000, relayEnv)).resolves.toBe('ok');
+      expect(fetch).toHaveBeenCalledTimes(1);
+    }
   });
 });
 

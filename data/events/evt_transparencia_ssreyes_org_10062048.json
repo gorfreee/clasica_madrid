@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_transparencia_ssreyes_org_10062048",
+  "slug": "musica-clasica-por-que-es-especial-el-carnaval-de-los-animales",
+  "title": "Música clásica: ¿Por qué es especial? El carnaval de los animales",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_municipal_adolfo_marsillach",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_transparencia_ssreyes_org_10062048_01",
+      "date": "2026-11-08",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica Camerata Musicalis",
+      "role": "orchestra"
+    },
+    {
+      "name": "Edgar Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "El carnaval de los animales",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_transparencia_ssreyes_org",
+      "url": "https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/musica-clasica-por-que-es-especial-el-carnaval-de-los-animales/10062048/vBxusUciXi0M",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_transparencia_ssreyes_org",
+  "lastVerifiedAt": "2026-09-28"
+}

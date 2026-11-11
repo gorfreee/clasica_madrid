@@ -1,3 +1,4 @@
+import { fundacionEutherpeAdapter } from './sources/fundacion-eutherpe.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Source } from '../lib/schemas/index.ts';
 import { auditorioNacionalAdapter } from './sources/auditorio-nacional.ts';
@@ -15,10 +16,26 @@ import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
 import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
 import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
 import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
-import { fundacionEutherpeAdapter } from './sources/fundacion-eutherpe.ts';
+import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
+import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
+import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
+import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
+import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
+import { rcsmmAdapter } from './sources/rcsmm.ts';
+import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
+import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
+import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
+import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.ts';
+import { condeduqueAdapter } from './sources/condeduque.ts';
+import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
+import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
+import { culturalcalaAdapter } from './sources/culturalcala.ts';
+import { orquestaCiudadGetafeAdapter } from './sources/orquesta-ciudad-getafe.ts';
+import { fundacionCulturalLasRozasAdapter } from './sources/fundacion-cultural-las-rozas.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
+  [fundacionEutherpeAdapter.id]: fundacionEutherpeAdapter,
   [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
   [fundacionCanalAdapter.id]: fundacionCanalAdapter,
   [circuloBellasArtesAdapter.id]: circuloBellasArtesAdapter,
@@ -34,7 +51,22 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [fundacionPiuMossoAdapter.id]: fundacionPiuMossoAdapter,
   [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
   [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
-  [fundacionEutherpeAdapter.id]: fundacionEutherpeAdapter,
+  [fundacionGoetheAdapter.id]: fundacionGoetheAdapter,
+  [madridATempoAdapter.id]: madridATempoAdapter,
+  [patrimonioNacionalAdapter.id]: patrimonioNacionalAdapter,
+  [ateneoMadridAdapter.id]: ateneoMadridAdapter,
+  [escuelaReinaSofiaAdapter.id]: escuelaReinaSofiaAdapter,
+  [rcsmmAdapter.id]: rcsmmAdapter,
+  [talaProduccionesAdapter.id]: talaProduccionesAdapter,
+  [fundacionMutuaAdapter.id]: fundacionMutuaAdapter,
+  [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
+  [residenciaEstudiantesAdapter.id]: residenciaEstudiantesAdapter,
+  [condeduqueAdapter.id]: condeduqueAdapter,
+  [aytoSanLorenzoAdapter.id]: aytoSanLorenzoAdapter,
+  [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
+  [culturalcalaAdapter.id]: culturalcalaAdapter,
+  [orquestaCiudadGetafeAdapter.id]: orquestaCiudadGetafeAdapter,
+  [fundacionCulturalLasRozasAdapter.id]: fundacionCulturalLasRozasAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -211,6 +243,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: cndmAdapter.id,
     catalogSourceId: 'src_cndm',
     useFetchRelay: true,
+    fetchTransport: 'relay-then-direct',
     seedSource: {
       schemaVersion: 1,
       id: 'src_cndm',
@@ -253,10 +286,9 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
   {
     id: 'real-hermandad-refugio',
     name: 'Real Hermandad del Refugio',
-    urls: ['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos'],
+    urls: ['https://realhermandaddelrefugio.org/categoria-eventos/conciertos/'],
     adapterId: realHermandadRefugioAdapter.id,
     catalogSourceId: 'src_real_hermandad_refugio',
-    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_real_hermandad_refugio',
@@ -282,10 +314,254 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     },
   },
   {
+    id: 'fundacion-goethe',
+    name: 'Fundación Goethe',
+    urls: ['https://www.fundaciongoethe.org/es/eventos/'],
+    adapterId: fundacionGoetheAdapter.id,
+    catalogSourceId: 'src_fundacion_goethe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_goethe',
+      slug: 'fundacion-goethe',
+      name: 'Fundación Goethe',
+      kind: 'official',
+      url: 'https://www.fundaciongoethe.org/',
+    },
+  },
+  {
+    id: 'madrid-a-tempo',
+    name: 'Madrid a Tempo',
+    urls: ['https://www.madridatempo.com/proximos-conciertos'],
+    adapterId: madridATempoAdapter.id,
+    catalogSourceId: 'src_madrid_a_tempo',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_madrid_a_tempo',
+      slug: 'madrid-a-tempo',
+      name: 'Madrid a Tempo',
+      kind: 'official',
+      url: 'https://www.madridatempo.com/',
+    },
+  },
+  {
+    id: 'patrimonio-nacional',
+    name: 'Patrimonio Nacional',
+    urls: ['https://www.patrimonionacional.es/jsonapi/node/eventos'],
+    adapterId: patrimonioNacionalAdapter.id,
+    catalogSourceId: 'src_patrimonio_nacional',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_patrimonio_nacional',
+      slug: 'patrimonio-nacional',
+      name: 'Patrimonio Nacional',
+      kind: 'official',
+      url: 'https://www.patrimonionacional.es/',
+    },
+  },
+  {
+    id: 'ateneo-madrid',
+    name: 'Ateneo de Madrid',
+    urls: ['https://ateneodemadrid.com/wp-json/tribe/events/v1/events'],
+    adapterId: ateneoMadridAdapter.id,
+    catalogSourceId: 'src_ateneo_madrid',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_ateneo_madrid',
+      slug: 'ateneo-de-madrid',
+      name: 'Ateneo de Madrid',
+      kind: 'official',
+      url: 'https://ateneodemadrid.com/',
+    },
+  },
+  {
+    id: 'escuela-reina-sofia',
+    name: 'Escuela Superior de Música Reina Sofía',
+    urls: ['https://www.escuelasuperiordemusicareinasofia.es/agenda/'],
+    adapterId: escuelaReinaSofiaAdapter.id,
+    catalogSourceId: 'src_escuela_superior_musica_reina_sofia',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_escuela_superior_musica_reina_sofia',
+      slug: 'escuela-superior-musica-reina-sofia',
+      name: 'Escuela Superior de Música Reina Sofía',
+      kind: 'official',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/',
+    },
+  },
+  {
+    id: 'rcsmm',
+    name: 'Real Conservatorio Superior de Música de Madrid',
+    urls: ['https://rcsmm.eu/eventos'],
+    adapterId: rcsmmAdapter.id,
+    catalogSourceId: 'src_rcsmm',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_rcsmm',
+      slug: 'real-conservatorio-superior-musica-madrid',
+      name: 'Real Conservatorio Superior de Música de Madrid',
+      kind: 'official',
+      url: 'https://rcsmm.eu/',
+    },
+  },
+  {
+    id: 'tala-producciones',
+    name: 'TALA Producciones',
+    urls: ['https://www.tala-producciones.es/salon-del-ateneo/'],
+    adapterId: talaProduccionesAdapter.id,
+    catalogSourceId: 'src_tala_producciones_es',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_tala_producciones_es',
+      slug: 'tala-producciones',
+      name: 'TALA Producciones',
+      kind: 'official',
+      url: 'https://www.tala-producciones.es/',
+    },
+  },
+  {
+    id: 'fundacion-mutua',
+    name: 'Fundación Mutua Madrileña',
+    urls: ['https://www.fundacionmutua.es/cultura/conciertos/'],
+    adapterId: fundacionMutuaAdapter.id,
+    catalogSourceId: 'src_fundacion_mutua_madrilena',
+    // Temporarily excluded from scheduled/default syncs: direct HTTP, the
+    // relay and Chrome all receive a persistent Cloudflare challenge in
+    // GitHub Actions (confirmed by run 35749261325). Keep explicit source
+    // runs available to requalify transport before re-enabling it here.
+    skipDefaultSync: true,
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_mutua_madrilena',
+      slug: 'fundacion-mutua-madrilena',
+      name: 'Fundación Mutua Madrileña',
+      kind: 'official',
+      url: 'https://www.fundacionmutua.es/',
+    },
+  },
+  {
+    id: 'coro-camara-madrid',
+    name: 'Coro de Cámara de Madrid',
+    urls: ['https://www.corodecamarademadrid.com/agenda/'],
+    adapterId: coroCamaraMadridAdapter.id,
+    catalogSourceId: 'src_corodecamarademadrid_com',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_corodecamarademadrid_com',
+      slug: 'coro-de-camara-de-madrid',
+      name: 'Coro de Cámara de Madrid',
+      kind: 'official',
+      url: 'https://www.corodecamarademadrid.com/',
+    },
+  },
+  {
+    id: 'residencia-estudiantes',
+    name: 'Residencia de Estudiantes',
+    urls: ['https://residenciadeestudiantes.com/actividades/'],
+    adapterId: residenciaEstudiantesAdapter.id,
+    catalogSourceId: 'src_residencia_estudiantes',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_residencia_estudiantes',
+      slug: 'residencia-de-estudiantes',
+      name: 'Residencia de Estudiantes',
+      kind: 'official',
+      url: 'https://residenciadeestudiantes.com/',
+    },
+  },
+  {
+    id: 'condeduque',
+    name: 'Contemporánea Condeduque',
+    urls: ['https://www.condeduquemadrid.es/programacion/musica'],
+    adapterId: condeduqueAdapter.id,
+    catalogSourceId: 'src_condeduque',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_condeduque',
+      slug: 'contemporanea-condeduque',
+      name: 'Contemporánea Condeduque',
+      kind: 'official',
+      url: 'https://www.condeduquemadrid.es/',
+    },
+  },
+  {
+    id: 'ayto-san-lorenzo',
+    name: 'Ayuntamiento de San Lorenzo de El Escorial',
+    urls: ['https://www.aytosanlorenzo.es/eventos/'],
+    adapterId: aytoSanLorenzoAdapter.id,
+    catalogSourceId: 'src_ayto_san_lorenzo',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_ayto_san_lorenzo',
+      slug: 'ayuntamiento-san-lorenzo-el-escorial',
+      name: 'Ayuntamiento de San Lorenzo de El Escorial',
+      kind: 'official',
+      url: 'https://www.aytosanlorenzo.es/',
+    },
+  },
+  {
+    id: 'teatro-auditorio-escorial',
+    name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+    urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'],
+    adapterId: teatroAuditorioEscorialAdapter.id,
+    catalogSourceId: 'src_teatro_auditorio_escorial',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_teatro_auditorio_escorial',
+      slug: 'teatro-auditorio-escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+      kind: 'official',
+      url: 'https://www.teatroauditorioescorial.es/',
+    },
+  },
+  {
+    id: 'culturalcala',
+    name: 'CulturAlcalá',
+    urls: ['https://culturalcala.es/musica-y-danza/'],
+    adapterId: culturalcalaAdapter.id,
+    catalogSourceId: 'src_culturalcala',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_culturalcala',
+      slug: 'culturalcala',
+      name: 'CulturAlcalá',
+      kind: 'official',
+      url: 'https://culturalcala.es/',
+    },
+  },
+  {
+    id: 'orquesta-ciudad-getafe',
+    name: 'Orquesta Sinfónica Ciudad de Getafe',
+    urls: ['https://orquestaciudaddegetafe.com/wp-sitemap.xml'],
+    adapterId: orquestaCiudadGetafeAdapter.id,
+    catalogSourceId: 'src_orquesta_ciudad_getafe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_orquesta_ciudad_getafe',
+      slug: 'orquesta-sinfonica-ciudad-de-getafe',
+      name: 'Orquesta Sinfónica Ciudad de Getafe',
+      kind: 'official',
+      url: 'https://orquestaciudaddegetafe.com/',
+    },
+  },
+  {
+    id: 'fundacion-cultural-las-rozas',
+    name: 'Fundación Cultural Las Rozas',
+    urls: ['https://fundacionculturalasrozas.org/agenda/'],
+    adapterId: fundacionCulturalLasRozasAdapter.id,
+    catalogSourceId: 'src_fundacion_cultural_las_rozas',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_cultural_las_rozas',
+      slug: 'fundacion-cultural-las-rozas',
+      name: 'Fundación Cultural Las Rozas',
+      kind: 'official',
+      url: 'https://fundacionculturalasrozas.org/',
+    },
+  },
+  {
     id: 'fundacion-eutherpe',
     name: 'Fundación Eutherpe',
     urls: [
-      'https://www.fundacioneutherpe.com/programacion',
       'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid',
     ],
     adapterId: fundacionEutherpeAdapter.id,
@@ -305,11 +581,11 @@ export function listSourceDefinitions(): SourceDefinition[] {
   return SOURCE_REGISTRY;
 }
 
-/** Listing hostnames of sources with `useFetchRelay`. The Worker has no copy of this list. */
+/** Listing hostnames that may use the fetch relay. The Worker has no copy of this list. */
 export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_REGISTRY): string[] {
   const hosts = new Set<string>();
   for (const source of sources) {
-    if (!source.useFetchRelay) continue;
+    if (!usesFetchRelay(source)) continue;
     for (const url of source.urls) {
       try {
         const host = new URL(url).hostname.toLowerCase().replace(/\.$/, '');
@@ -320,6 +596,32 @@ export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_RE
     }
   }
   return [...hosts].sort();
+}
+
+export function fetchTransportForHost(
+  hostname: string,
+  sources: readonly SourceDefinition[] = SOURCE_REGISTRY,
+): 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct' {
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  for (const source of sources) {
+    const strategy = source.fetchTransport ?? (source.useFetchRelay ? 'relay' : 'direct');
+    if (strategy === 'direct') continue;
+    for (const url of source.urls) {
+      try {
+        if (new URL(url).hostname.toLowerCase().replace(/\.$/, '') === host) return strategy;
+      } catch {
+        // ignore unparseable listing URLs
+      }
+    }
+  }
+  return 'direct';
+}
+
+function usesFetchRelay(source: SourceDefinition): boolean {
+  return Boolean(source.useFetchRelay)
+    || source.fetchTransport === 'relay'
+    || source.fetchTransport === 'direct-then-relay'
+    || source.fetchTransport === 'relay-then-direct';
 }
 
 export function getSourceDefinition(id: string): SourceDefinition {

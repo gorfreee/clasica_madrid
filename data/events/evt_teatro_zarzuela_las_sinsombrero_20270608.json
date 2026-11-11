@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_las_sinsombrero_20270608",
+  "slug": "las-sinsombrero",
+  "title": "Las sinsombrero",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_las_sinsombrero_20270608_01",
+      "date": "2027-06-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ambigu-2026-2027/las-sinsombrero",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/temporada/ambigu-2026-2027/las-sinsombrero"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-10-21"
+}

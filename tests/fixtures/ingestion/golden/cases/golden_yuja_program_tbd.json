@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_yuja_program_tbd",
+  "origin": "published-catalog",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-yuja-wang",
+  "listingTitle": "Impacta. Yuja Wang",
+  "observed": {
+    "title": "Impacta. Yuja Wang",
+    "programText": "Programa por determinar",
+    "venueText": "Sala Sinfónica",
+    "performers": [
+      { "name": "Yuja Wang", "roleText": "piano" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Recital de piano probable, pero Impacta no es un ciclo clásico establecido y no hay programa. Un nombre de intérprete no basta.",
+  "missingEvidence": "Falta el programa de obras o una declaración de que este recital es de repertorio clásico/académico.",
+  "checkedAt": "2026-09-14"
+}

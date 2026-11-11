@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amaniel_encina_inmaculada_calzado_2027_01_28",
+  "slug": "amaniel-encina-inmaculada-calzado-2027-01-28",
+  "title": "Concierto de la Encina — Inmaculada Calzado",
+  "status": "scheduled",
+  "venueId": "ven_conservatorio_amaniel_salon_de_actos",
+  "organizerIds": [
+    "org_conservatorio_profesional_musica_amaniel"
+  ],
+  "seriesId": "ser_conciertos_de_la_encina_2026_27",
+  "occurrences": [
+    {
+      "id": "occ_amaniel_encina_inmaculada_calzado_2027_01_28_01",
+      "date": "2027-01-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Inmaculada Calzado",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+      "checkedAt": "2026-10-17"
+    },
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_cpm_amaniel",
+  "lastVerifiedAt": "2026-10-17"
+}

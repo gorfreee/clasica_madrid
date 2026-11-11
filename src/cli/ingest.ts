@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { readFile } from 'node:fs/promises';
 import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';
@@ -11,7 +10,7 @@ import {
   writeIngestReportSync,
 } from '../ingestion/report.ts';
 import { runDiscoveryIngest, runIngest } from '../ingestion/pipeline.ts';
-import { defaultIngestWindow } from '../ingestion/dates.ts';
+import { defaultIngestWindow, seasonIngestWindow } from '../ingestion/dates.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { DiscoveryBatchError, parseDiscoveryBatch } from '../ingestion/discovery.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
@@ -28,7 +27,7 @@ import {
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 import { loadLocalAiEnv } from './load-local-env.ts';
 import type { AiClassifier } from '../ingestion/classification/ai.ts';
-import { GeminiClassifier } from '../ingestion/classification/gemini.ts';
+import { AiPoolClassifier } from '../ingestion/classification/ai-pool.ts';
 
 loadLocalAiEnv();
 
@@ -41,7 +40,9 @@ if (!parsed.ok) {
 }
 
 const dataDir = parsed.dataDir ?? defaultDataDir();
-const window = parsed.window ?? defaultIngestWindow(systemClock.now());
+const now = systemClock.now();
+const window = parsed.window
+  ?? (parsed.seasonWindow ? seasonIngestWindow(now) : defaultIngestWindow(now));
 const requestedSources =
   parsed.command === 'source'
     ? [parsed.sourceId]
@@ -117,12 +118,13 @@ process.once('SIGTERM', () => shutdown('SIGTERM'));
 try {
   ai = createAiClassifierFromEnv({
     ...process.env,
-    ...(parsed.aiModel ? { GEMINI_MODELS: parsed.aiModel } : {}),
-    ...(parsed.aiNoCache ? { GEMINI_CACHE: 'off' } : {}),
-    ...(parsed.aiMaxRequests !== undefined ? { GEMINI_MAX_REQUESTS: String(parsed.aiMaxRequests) } : {}),
+    ...(parsed.aiRoute ? { AI_ROUTE: parsed.aiRoute } : {}),
+    ...(parsed.aiModel && !parsed.aiRoute ? { AI_ROUTE: `gemini:${parsed.aiModel}` } : {}),
+    ...(parsed.aiNoCache ? { AI_CACHE: 'off' } : {}),
+    ...(parsed.aiMaxRequests !== undefined ? { AI_MAX_REQUESTS: String(parsed.aiMaxRequests) } : {}),
   });
-  if ((parsed.aiModel || parsed.aiNoCache || parsed.aiMaxRequests !== undefined) && !(ai instanceof GeminiClassifier)) {
-    throw new Error('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY');
+  if ((parsed.aiRoute || parsed.aiModel || parsed.aiNoCache || parsed.aiMaxRequests !== undefined) && !(ai instanceof AiPoolClassifier)) {
+    throw new Error('Las opciones --ai-* requieren un pool de IA configurado');
   }
   ai?.initialize?.();
   const catalog = await loadCatalogFromDir(dataDir);
@@ -131,9 +133,9 @@ try {
       ? await runDiscoveryIngest({
           dataDir,
           catalog,
-          now: systemClock.now(),
+          now,
           dryRun,
-          window: parsed.window,
+          window,
           ai,
           observability,
           batch: await loadDiscoveryBatch(parsed.batchPath),
@@ -141,10 +143,13 @@ try {
       : await runIngest({
           dataDir,
           catalog,
-          now: systemClock.now(),
+          now,
           dryRun,
           sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
-          window: parsed.window,
+          ...(parsed.command === 'sync' && parsed.excludeSourceIds
+            ? { excludeSourceIds: parsed.excludeSourceIds }
+            : {}),
+          window,
           ai,
           observability,
         });

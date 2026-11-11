@@ -17,61 +17,64 @@
   ],
   "performers": [
     {
-      "name": "VÁCLAV LUKS",
+      "name": "Václav Luks",
       "role": "conductor"
     },
     {
-      "name": "ERIC STOKLOSSA"
+      "name": "Eric Stoklossa"
     },
     {
-      "name": "MATTHIAS WINCKHLER"
+      "name": "Matthias Winckhler"
     },
     {
-      "name": "CÉLINE SCHEEN"
+      "name": "Céline Scheen"
     },
     {
-      "name": "TEREZA ZIMKOVÁ"
+      "name": "Tereza Zimková"
     },
     {
-      "name": "PAVLA RADOSTOVÁ"
+      "name": "Pavla Radostová"
     },
     {
-      "name": "LUCIANA MANCINI"
+      "name": "Luciana Mancini"
     },
     {
-      "name": "ANETA PETRASOVÁ"
+      "name": "Aneta Petrasová"
     },
     {
-      "name": "ONDŘEJ HOLUB"
+      "name": "Ondřej Holub"
     },
     {
-      "name": "JAN PETRYKA"
+      "name": "Jan Petryka"
     },
     {
-      "name": "LUKÁŠ ZEMAN"
+      "name": "Lukáš Zeman"
     },
     {
-      "name": "JIŘÍ MIROSLAV PROCHÁZKA"
+      "name": "Jiří Miroslav Procházka"
     },
     {
-      "name": "KREŠIMIR STRAŽANAC"
+      "name": "Krešimir Stražanac"
     },
     {
-      "name": "TOMÁŠ ŠELC"
+      "name": "Tomáš Šelc"
     },
     {
       "name": "Collegium Vocale 1704"
+    },
+    {
+      "name": "Collegium 1704"
     }
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "La pasión según san Mateo, BWV 244 (1727)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [
@@ -87,16 +90,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-1704-collegium-1704",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-collegium-vocale-1704-collegium-1704"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23804",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23804"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

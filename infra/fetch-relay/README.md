@@ -24,7 +24,12 @@ GitHub Settings.
 - if the origin answers 403/503 (or similar) **and** sets a new cookie,
   retries that same URL once with the cookie (the March 307 challenge
   generalized to Imperva-style session cookies)
+- HTTP 202 is never a valid document. If it also sets/changes origin cookies
+  and/or a bounded error body matches SiteGround/`sgcaptcha`, the Worker
+  retries the same GET with limited backoff and the new cookie
 - returns the final HTML
+- on a recovered challenge, returns `x-relay-recoveries` (a count, never
+  cookie values) to the authenticated caller
 - returns origin cookies to the **authenticated** caller only, via
   `x-relay-origin-cookie` (never as `Set-Cookie`, never in error bodies,
   never without a valid Bearer token)

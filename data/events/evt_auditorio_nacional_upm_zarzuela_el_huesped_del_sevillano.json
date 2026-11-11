@@ -20,14 +20,18 @@
       "name": "Compañía L’OPERAMORE"
     },
     {
-      "name": "CORO DE LA UNIVERSIDAD POLITÉCNICA DE MADRID"
+      "name": "Coro de la Universidad Politécnica de Madrid"
     },
     {
       "name": "Javier Corcuera Martínez",
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Jacinto Guerrero"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -42,10 +46,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-zarzuela-el-huesped-del-sevillano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "upm-zarzuela-el-huesped-del-sevillano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

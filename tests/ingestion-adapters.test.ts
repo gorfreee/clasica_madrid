@@ -2,15 +2,39 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nacional.ts';
-import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
+import { escapeJsonStringControls, madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { teatroRealAdapter } from '../src/ingestion/sources/teatro-real.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 
-function ctx(sourceId: string): AdapterContext {
+describe('recuperación JSON-LD municipal', () => {
+  it('escapa únicamente controles literales dentro de strings y conserva escapes válidos', () => {
+    const body = '{"@graph":[],"note":"línea\nseguida\u0000 y \\n literal y \\\\n"}';
+    expect(JSON.parse(escapeJsonStringControls(body))).toEqual({
+      '@graph': [], note: 'línea\nseguida\u0000 y \n literal y \\n',
+    });
+    expect(escapeJsonStringControls('{\n"@graph": []\n}')).toBe('{\n"@graph": []\n}');
+    expect(madridDatosAdapter.extract('{"@graph":[],"note":"a\nb"}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'))).toEqual([]);
+    expect(() => madridDatosAdapter.extract('{"@graph": [garbage]}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'))).toThrow(/JSON inválido/);
+  });
+});
+
+it('normaliza variantes canónicas de la observación antes de reconciliar sin alterar fichas históricas', () => {
+  const normalized = normalizeRawEvent({
+    sourceId: 'auditorio-nacional', sourceUrl: 'https://example.test/monteverdi',
+    observed: { title: 'Programa', occurrences: [{ raw: '2026-09-24 19:00', date: '2026-09-24', time: '19:00' }],
+      performers: [], composers: [{ name: 'C. Monteverdi' }, { name: 'Felix Mendelssohn-Bartholdy' }],
+      works: [{ title: 'L’Orfeo', composerName: 'C. Monteverdi' }] },
+  });
+  expect(normalized?.composers).toEqual([{ name: 'Claudio Monteverdi' }, { name: 'Felix Mendelssohn' }]);
+  expect(normalized?.works[0]?.composerName).toBe('Claudio Monteverdi');
+});
+
+function ctx(sourceId: string, reportDiscard?: (discard: AdapterDiscardReport) => void): AdapterContext {
   return {
     source: getSourceDefinition(sourceId),
     now: TEST_NOW,
@@ -18,6 +42,7 @@ function ctx(sourceId: string): AdapterContext {
     get: async () => {
       throw new Error('no debe pedirse red en tests de fixtures');
     },
+    ...(reportDiscard ? { reportDiscard } : {}),
   };
 }
 
@@ -52,6 +77,32 @@ describe('adapter Auditorio Nacional (JSON)', () => {
     expect(auditorioNacionalAdapter.extract('[]', 'https://example.test/events.json', ctx('auditorio-nacional'))).toEqual(
       [],
     );
+  });
+
+  it('registra missing-url/missing-title en candidatos reconocidos y no cambia los extraídos', () => {
+    const discards: AdapterDiscardReport[] = [];
+    const good = {
+      title: 'OCNE. Sinfónico 01',
+      url: 'https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1',
+      start: '2026-09-18T19:30:00+02:00',
+      className: 'sinfonica',
+      id: 'ocne-0',
+    };
+    const events = auditorioNacionalAdapter.extract(
+      JSON.stringify([
+        good,
+        { title: 'Sin URL', start: '2026-09-19T19:30:00+02:00', id: 'sin-url' },
+        { url: 'https://auditorionacional.inaem.gob.es/es/programacion/sin-titulo', start: '2026-09-20T19:30:00+02:00' },
+        { foo: 1 },
+      ]),
+      'https://example.test/events.json',
+      ctx('auditorio-nacional', (discard) => discards.push(discard)),
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]?.observed.title).toBe('OCNE. Sinfónico 01');
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-title', 'missing-url']);
+    expect(discards.find((item) => item.reason === 'missing-url')?.title).toBe('Sin URL');
+    expect(discards.find((item) => item.reason === 'missing-title')?.sourceUrl).toContain('sin-titulo');
   });
 
   it('usa exactamente start/end de la ventana solicitada', () => {
@@ -126,7 +177,7 @@ describe('adapter Teatro Real (HTML)', () => {
 });
 
 describe('adapter Madrid datos (JSON-LD)', () => {
-  it('se queda solo con música puntual que tiene título, URL, fecha, hora y lugar', async () => {
+  it('se queda solo con música puntual que tiene título, URL, fecha y lugar', async () => {
     const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
     const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
     expect(events).toHaveLength(8);
@@ -141,18 +192,22 @@ describe('adapter Madrid datos (JSON-LD)', () => {
     const casaVacas = events.find((event) => event.externalId === '50322790');
     expect(casaVacas?.observed.venueText).toBe('Centro Cultural Casa de Vacas (Retiro)');
     expect(casaVacas?.venueFacilityId).toBe('1945');
+    expect(casaVacas?.venueAddress).toBe('Paseo Colombia, 1, 28009 Madrid');
 
     const sameFacility = events.find((event) => event.externalId === '50322791');
     expect(sameFacility?.venueFacilityId).toBe('1945');
     expect(sameFacility?.observed.venueText).toBe('Centro Cultural Casa de Vacas');
+    expect(sameFacility?.venueAddress).toBeUndefined();
 
     const condeduque = events.find((event) => event.externalId === '50234843');
     expect(condeduque?.observed.venueText).toBe('Centro de Cultura Contemporánea CondeDuque');
     expect(condeduque?.venueFacilityId).toBe('1916');
+    expect(condeduque?.venueAddress).toBe('Calle Conde Duque, 9, 28015 Madrid');
 
     const secondBuenavista = events.find((event) => event.externalId === '50341120');
     expect(secondBuenavista?.venueFacilityId).toBe('64851');
     expect(secondBuenavista?.observed.venueText).toBe('Centro Cultural Buenavista');
+    expect(secondBuenavista?.venueAddress).toBe('Avenida Toreros, 5, 28028 Madrid');
 
     const unidentified = events.find((event) => event.externalId === '50341121');
     expect(unidentified?.observed.venueText).toBe('Sala sin identificar');
@@ -212,5 +267,123 @@ describe('adapter Madrid datos (JSON-LD)', () => {
         ctx('madrid-datos'),
       ),
     ).toThrow(/no hay eventos de música/);
+  });
+
+  it('conserva un concierto con fecha válida y hora desconocida, sin inventar hora', () => {
+    const body = JSON.stringify({
+      '@graph': [
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50400001',
+          title: 'Recital de Bach',
+          dtstart: '2026-09-20',
+          time: '',
+          link: 'http://www.madrid.es/evento/recital-bach-sin-hora',
+          'event-location': 'Teatro Real',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50400002',
+          title: 'Concierto municipal',
+          dtstart: '2026-09-21 00:00:00.0',
+          time: '',
+          link: 'http://www.madrid.es/evento/concierto-medianoche-sentinel',
+          'event-location': 'Teatro Real',
+        },
+      ],
+    });
+    const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
+    expect(events).toHaveLength(2);
+    for (const event of events) {
+      expect(event.observed.occurrences[0]?.date).toMatch(/^2026-09-2[01]$/);
+      expect(event.observed.occurrences[0]?.time).toBeUndefined();
+      const normalized = normalizeRawEvent(event);
+      expect(normalized?.occurrences).toEqual([
+        { date: event.observed.occurrences[0]!.date, time: null },
+      ]);
+    }
+  });
+
+  it('cuenta descartes de candidatos Musica y no infla con exposiciones', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events).toHaveLength(8);
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-venue', 'recurrence-unsupported']);
+    expect(discards.some((item) => item.externalId === '50341118')).toBe(true);
+    expect(discards.some((item) => item.externalId === '50390002')).toBe(true);
+    expect(discards.some((item) => item.reason === 'missing-time')).toBe(false);
+  });
+
+  it('observa Los sonidos del universo aunque el kos @type sea ActividadesCalleArteUrbano', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = await readFile(path.join(fixtures, 'madrid-agenda-sonidos-universo.json'), 'utf8');
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events.map((event) => event.externalId).sort()).toEqual(['50376447', '50379614', '50379624']);
+    const sonidos = events.find((event) => event.externalId === '50379624');
+    expect(sonidos?.observed.title).toBe('Actuación música. Música clásica');
+    expect(sonidos?.observed.occurrences).toEqual([
+      { raw: '2026-09-27 21:00:00.0', date: '2026-09-27', time: '21:00' },
+    ]);
+    expect(sonidos?.observed.venueText).toBe('Parque Lineal de Palomeras');
+    expect(sonidos?.venueFacilityId).toBe('5977748');
+    expect(sonidos?.sourceUrl).toContain('vgnextoid=aab47760175ff910');
+    expect(events.some((event) => event.externalId === '50379622')).toBe(false);
+    expect(events.some((event) => event.externalId === '50322723')).toBe(false);
+    expect(events.some((event) => event.externalId === '50366129')).toBe(false);
+    expect(events.some((event) => event.externalId === '50286330')).toBe(false);
+    expect(discards).toEqual([]);
+  });
+
+  it('un Actuación música sin lugar se reporta; teatro y exposiciones siguen fuera de ámbito', () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = JSON.stringify({
+      '@graph': [
+        {
+          '@id': 'https://datos.madrid.es/egob/catalogo/tipo/evento/50990001-actuacion-musica-musica-clasica.json',
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/ActividadesCalleArteUrbano',
+          id: '50990001',
+          title: 'Actuación música. Música clásica',
+          dtstart: '2026-09-27 21:00:00.0',
+          time: '21:00',
+          link: 'http://www.madrid.es/evento/sonidos',
+          'event-location': '',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50990003',
+          title: 'Recital de piano',
+          dtstart: '2026-09-20 19:00:00.0',
+          time: '19:00',
+          link: 'http://www.madrid.es/evento/recital',
+          'event-location': 'Centro Cultural Casa de Vacas',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/TeatroPerformance',
+          id: '50990002',
+          title: 'Obra de teatro',
+          dtstart: '2026-09-27 19:00:00.0',
+          link: 'http://www.madrid.es/evento/teatro',
+          'event-location': 'Centro cultural',
+        },
+      ],
+    });
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events.map((event) => event.externalId)).toEqual(['50990003']);
+    expect(discards).toEqual([
+      expect.objectContaining({ reason: 'missing-venue', externalId: '50990001', title: 'Actuación música. Música clásica' }),
+    ]);
   });
 });

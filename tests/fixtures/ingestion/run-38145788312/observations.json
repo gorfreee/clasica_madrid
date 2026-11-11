@@ -1,0 +1,452 @@
+[
+  {
+    "sourceId": "ateneo-madrid",
+    "sourceUrl": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-kebyart-quartet-punto-di-fuga",
+    "externalId": "64491",
+    "observed": {
+      "title": "«Ciclo El Salón del Ateneo». Kebyart Quartet – ‘Punto di Fuga’",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-28 19:30:00",
+          "date": "2026-11-28",
+          "time": "19:30"
+        }
+      ],
+      "description": "Venta de entradas: ( aquí ) | Socios: código en el Área de Socios.\nNacido en Barcelona en 2014, Kebyart es una de las agrupaciones más prometedoras de la escena musical actual. Estos cuatro talentosos músicos comparten una pasión infinita por la música de cámara y el deseo de llevar aire fresco a la forma de transmitir la música clásica. Su empe​ño por transformar sus actuaciones en una experiencia singular resulta en una puesta en escena enérgica y dinámica, elogiada por el público y la crítica especializada. La firma inconfundible de Kebyart se refleja en una visión creativa sobre el repertorio construida a partir de tres ejes: la literatura original, el compromiso con la nueva creación y los arreglos propios sobre un amplio abanico de estilos.\nPROGRAMA\nJean-Philippe Rameau (1683-1764) Arr. Kebyart Suite en mi menor RCT 2 de Pièces de clavecin avec une méthode I. Allemande II. Courante III. Gigue en rondeau I-Gigue en rondeau II IV. Le Rappel des Oiseaux V. La Villageoise. Rondeau VI. Rigaudon I – Rigaudon II et Double VII. Musette en rondeau. Tendrement VIII. Tambourin César Franck (1822-1890), Arr. Kebyart Prélude, Fugue et Variation, Op. 18 *** Johann Sebastian Bach (1685-1750), Arr. Kebyart Preludio y fuga en do sostenido menor, BWV 849 Franz Schubert (1797-1828), Arr. Kebyart Fantasía en fa menor D. 940 György Ligeti (1923-2006), Arr. Kebyart Seis Bagatelas",
+      "categoryText": "Concierto",
+      "venueText": "Ateneo de Madrid",
+      "programText": "Jean-Philippe Rameau (1683-1764) Arr. Kebyart Suite en mi menor RCT 2 de Pièces de clavecin avec une méthode I. Allemande II. Courante III. Gigue en rondeau I-Gigue en rondeau II IV. Le Rappel des Oiseaux V. La Villageoise. Rondeau VI. Rigaudon I – Rigaudon II et Double VII. Musette en rondeau. Tendrement VIII. Tambourin César Franck (1822-1890), Arr. Kebyart Prélude, Fugue et Variation, Op. 18 *** Johann Sebastian Bach (1685-1750), Arr. Kebyart Preludio y fuga en do sostenido menor, BWV 849 Franz Schubert (1797-1828), Arr. Kebyart Fantasía en fa menor D. 940 György Ligeti (1923-2006), Arr. Kebyart Seis Bagatelas"
+    }
+  },
+  {
+    "sourceId": "escuela-reina-sofia",
+    "sourceUrl": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas-3",
+    "externalId": "83078",
+    "observed": {
+      "title": "Ciclo Da Camera: Cuarteto Ineo y Cuarteto Citadelle",
+      "performers": [
+        {
+          "name": "CUARTETO CITADELLE"
+        },
+        {
+          "name": "Pauline Solange Eliane Boudon",
+          "roleText": "Violín"
+        },
+        {
+          "name": "Meiko Nakahira",
+          "roleText": "Violín"
+        },
+        {
+          "name": "Raphaël Garac",
+          "roleText": "Violín"
+        },
+        {
+          "name": "Paolo Nicolas Schena",
+          "roleText": "Viola"
+        },
+        {
+          "name": "CUARTETO INEO"
+        },
+        {
+          "name": "Liubov Kalmykova",
+          "roleText": "Violín"
+        },
+        {
+          "name": "Nadezda Kalmykova",
+          "roleText": "Violín"
+        },
+        {
+          "name": "Patrizia Batik",
+          "roleText": "Viola"
+        },
+        {
+          "name": "Constantin Paul Siepermann",
+          "roleText": "Violonchelo"
+        }
+      ],
+      "composers": [
+        {
+          "name": "MOZART, Wolfgang Amadeus"
+        },
+        {
+          "name": "MENDELSSOHN, Felix"
+        },
+        {
+          "name": "BRAHMS, Johannes"
+        }
+      ],
+      "works": [
+        {
+          "title": "Cuarteto de cuerda en re menor K 421",
+          "composerName": "MOZART, Wolfgang Amadeus"
+        },
+        {
+          "title": "Cuarteto de cuerda núm. 2 en la menor op 13",
+          "composerName": "MENDELSSOHN, Felix"
+        },
+        {
+          "title": "Cuarteto de cuerda en do menor op 51 núm. 1",
+          "composerName": "BRAHMS, Johannes"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "23/10/2026 19:30",
+          "date": "2026-10-23",
+          "time": "19:30"
+        }
+      ],
+      "description": "Cada mes, el Auditorio Sony se convierte en el escenario donde descubrir a las formaciones de cámara jóvenes más destacadas del panorama internacional . Grupos que ya giran por las grandes salas del mundo acuden a refinar su formación en el Instituto Internacional de Música de Cámara que, desde esta temporada, dirigirán Vera Martínez Mehner (Cuarteto Casals) y Heime Müller (Cuarteto Artemis).\nUn ciclo para escuchar el repertorio esencial de cámara de la mano del virtuosismo y frescura de estos conjuntos , en una sala, de excepcional acústica, diseñada expresamente para disfrutar de este género.\nEste concierto se retransmitirá en directo en el canal YouTube de la Escuela.",
+      "venueText": "Auditorio Sony, Madrid",
+      "seriesText": "Da Camera",
+      "programText": "MOZART, Wolfgang Amadeus\nCuarteto de cuerda en re menor K 421\nI. Allegro\nII. Andante\nIII. Menuetto. Allegretto\nIV. Allegro ma non troppo - Più allegro\nCUARTETO CITADELLE\nPauline Solange Eliane Boudon , Violín\nMeiko Nakahira , Violín\nRaphaël Garac , Violín\nPaolo Nicolas Schena , Viola\nMENDELSSOHN, Felix\nCuarteto de cuerda núm. 2 en la menor op 13\nI. Adagio - Allegro vivace\nII. Adagio non lento\nIII. Intermezzo. Allegretto con moto - Allegro di molto\nIV. Presto - Adagio non lento\nCUARTETO CITADELLE\nMeiko Nakahira , Violín\nPauline Solange Eliane Boudon , Violín\nRaphaël Garac , Violín\nPaolo Nicolas Schena , Viola\n-- PAUSA --\nBRAHMS, Johannes\nCuarteto de cuerda en do menor op 51 núm. 1\nI. Allegro\nII. Romanze. Poco adagio\nIII. Allegretto molto moderato e comodo - Un poco più animato\nIV. Allegro\nCUARTETO INEO\nLiubov Kalmykova , Violín\nNadezda Kalmykova , Violín\nPatrizia Batik , Viola\nConstantin Paul Siepermann , Violonchelo"
+    },
+    "listing": {
+      "title": "Ciclo Da Camera: Cuarteto Ineo y Cuarteto Citadelle",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "23/10/2026 19:30",
+          "date": "2026-10-23",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Auditorio Sony, Madrid",
+      "seriesText": "Da Camera"
+    }
+  },
+  {
+    "sourceId": "escuela-reina-sofia",
+    "sourceUrl": "https://www.escuelasuperiordemusicareinasofia.es/evento/ensemble-doha-de-maqam-clasico-un-viaje-de-300-anos-con-el-segah",
+    "externalId": "85123",
+    "observed": {
+      "title": "Ensemble Doha de Maqam Clásico: «Un viaje de 300 años con el Segah»",
+      "performers": [
+        {
+          "name": "Ensemble Doha de Maqam Clásico: «Un viaje de 300 años con el Segah»"
+        }
+      ],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "15/10/2026 19:00",
+          "date": "2026-10-15",
+          "time": "19:00"
+        }
+      ],
+      "description": "La Cátedra de Estudios Árabes de la Escuela Reina Sofía , desarrollada en colaboración con Qatar Foundation , tiene como objetivo el intercambio de conocimiento y aprendizaje de la música y cultura árabe, además de construir nuevos puentes entre sociedades diversas sin olvidar las características históricas de cada una de ellas.\nComo inauguración de las II Jornadas de la Cátedra , el Ensemble Doha de Maqam Clásico ofrecerá un concierto que propone un viaje a través del maqam , conocido hoy como Segah, abarcando desde repertorios antiguos hasta contemporáneos, e incluye tanto composiciones árabes como obras procedentes de otras culturas que pasaron a formar parte de la civilización islámica, desde la Península Ibérica hasta las fronteras de China. El programa recoge más de 300 años de patrimonio musica l reunidos gracias a una extensa labor de investigación y exploración de manuscritos y grabaciones sonoras antiguas.\nEnsemble Doha de Maqam Clásico\n-Dr. Mustafa Said: concepto, oud y voz\n-Taoufik Mirkhan, qanun\n-Ahmed Al-Karawi: oud kabir y voz\n-Ibrahim Kadar, nai\n-Dr. Hani Alkhatib: violín\n-Ali Hout, percusión\nLas II Jornadas de la Cátedra de Estudios Árabes , bajo el lema de \" Historias compartidas, tradiciones vivas \" se desarrollarán entre el jueves 15 y el sábado 17 de octubre en la Escuela Superior de Música Reina Sofía. Puedes consultar el programa de actividades e inscribirte gratuitamente aquí .\nEste concierto se retransmitirá en directo en el canal YouTube de la Escuela.",
+      "venueText": "Auditorio Sony, Madrid",
+      "accessText": "La Cátedra de Estudios Árabes de la Escuela Reina Sofía , desarrollada en colaboración con Qatar Foundation , tiene como objetivo el intercambio de conocimiento y aprendizaje de la música y cultura árabe, además de construir nuevos puentes entre sociedades diversas sin olvidar las características históricas de cada una de ellas. Como inauguración de las II Jornadas de la Cátedra , el Ensemble Doha de Maqam Clásico ofrecerá un concierto que propone un viaje a través del maqam , conocido hoy como Segah, abarcando desde repertorios antiguos hasta contemporáneos, e incluye tanto composiciones árabes como obras procedentes de otras culturas que pasaron a formar parte de la civilización islámica, desde la Península Ibérica hasta las fronteras de China. El programa recoge más de 300 años de patrimonio musica l reunidos gracias a una extensa labor de investigación y exploración de manuscritos y grabaciones sonoras antiguas. Ensemble Doha de Maqam Clásico -Dr. Mustafa Said: concepto, oud y voz -Taoufik Mirkhan, qanun -Ahmed Al-Karawi: oud kabir y voz -Ibrahim Kadar, nai -Dr. Hani Alkhatib: violín -Ali Hout, percusión Las II Jornadas de la Cátedra de Estudios Árabes , bajo el lema de \" Historias compartidas, tradiciones vivas \" se desarrollarán entre el jueves 15 y el sábado 17 de octubre en la Escuela Superior de Música Reina Sofía. Puedes consultar el programa de actividades e inscribirte gratuitamente aquí . Este concierto se retransmitirá en directo en el canal YouTube de la Escuela."
+    },
+    "listing": {
+      "title": "Ensemble Doha de Maqam Clásico: «Un viaje de 300 años con el Segah»",
+      "performers": [
+        {
+          "name": "Ensemble Doha de Maqam Clásico: «Un viaje de 300 años con el Segah»"
+        }
+      ],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "15/10/2026 19:00",
+          "date": "2026-10-15",
+          "time": "19:00"
+        }
+      ],
+      "venueText": "Auditorio Sony, Madrid"
+    }
+  },
+  {
+    "sourceId": "escuela-reina-sofia",
+    "sourceUrl": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
+    "externalId": "83109",
+    "observed": {
+      "title": "Solistas del Siglo XXI. «Fantasmas de la forma»: recital de piano",
+      "performers": [
+        {
+          "name": "Uladzislau Khandohi",
+          "roleText": "Piano"
+        }
+      ],
+      "composers": [
+        {
+          "name": "CHOPIN, Fryderyck Franciszek"
+        },
+        {
+          "name": "LISZT, Franz"
+        },
+        {
+          "name": "RACHMANINOV, Sergey"
+        },
+        {
+          "name": "Frédéric Chopin"
+        },
+        {
+          "name": "Liszt"
+        },
+        {
+          "name": "Rachmaninov"
+        },
+        {
+          "name": "Robert Schumann"
+        },
+        {
+          "name": "Bellini"
+        },
+        {
+          "name": "Saint-Saëns"
+        }
+      ],
+      "works": [
+        {
+          "title": "Sonata para piano en si bemol menor op 35",
+          "composerName": "CHOPIN, Fryderyck Franciszek"
+        },
+        {
+          "title": "Réminiscences de Norma (Reminiscencias de Norma) de V. Bellini para dos pianos S 655 (versión para piano solo)",
+          "composerName": "LISZT, Franz"
+        },
+        {
+          "title": "Sonata para piano núm. 2 en si bemol menor op 36 (revisión de 1931)",
+          "composerName": "RACHMANINOV, Sergey"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "17/10/2026 12:00",
+          "date": "2026-10-17",
+          "time": "12:00"
+        }
+      ],
+      "description": "El ciclo más longevo de la Escuela aborda su edición número 35. Realizado en colaboración con Radio Clásica , que emite todos los conciertos en directo, Solistas del Siglo XXI propone un formato accesible y diferente , con programas que invitan a descubrir un repertorio poco habitual de distintos estilos, épocas e instrumentos.\nDurante el concierto, los especialistas de Radio Clásica realizarán una introducción a las obras y, además, al finalizar, se ofrecerá al público un encuentro con los músicos sobre el escenario con los que podrá conversar y compartir la experiencia que han vivido.\nEn el segundo concierto de la serie de otoño, \"Fantasmas de la forma\" , el pianista Uladzislau Khandohi ofrecerá un recital con obras de Chopin , Liszt y Rachmaninov .\nEn el sosiego estival, Frédéric Chopin y Serguéi Rachmaninov dieron forma a dos de sus obras más ambiciosas para piano. El primero, retomó en 1839 su célebre Marcha fúnebre , compuesta en 1837, transformándola en el corazón de su segunda Sonata para piano. Su singular arquitectura, que despertó las reservas de Robert Schumann, reúne la intensidad dramática, el lirismo y la experimentación formal característicos del compositor. Décadas después, Serguéi Rachmaninov abordaría una ambición semejante en su Sonata n.º 1 en re menor, op. 28 , concebida inicialmente a partir de los personajes del Fausto de Goethe. Aunque abandonó su planteamiento programático, la obra conserva una dimensión casi sinfónica, marcada por amplios desarrollos temáticos y una escritura de gran densidad sonora.\nCon estas dos sonatas, Uladzislau Khandohi abrirá su primer recital a solo en la Escuela tras obtener el Segundo Premio en el Concurso Internacional de Piano Arthur Rubinstein . La recta final del programa estará dedicada a la transformación pianística de obras concebidas para otros géneros, una práctica que encontró en Franz Lisz t a uno de sus máximos exponentes. Sus Réminiscences de Norma , que Khandohi interpretó durante la fase final del certamen, recrean el universo operístico de Bellini a través de una escritura de extraordinario virtuosismo. Un procedimiento semejante guía su reinterpretación de la Danza macabra de Saint-Saëns, en la que los timbres y efectos orquestales encuentran una nueva expresión en el teclado.\nEste concierto se retransmitirá en directo en el canal YouTube de la Escuela.",
+      "venueText": "Auditorio Sony, Madrid",
+      "seriesText": "Solistas del Siglo XXI",
+      "programText": "CHOPIN, Fryderyck Franciszek\nSonata para piano en si bemol menor op 35\nI. Grave - Doppio movimento\nII. Scherzo\nIII. Marcha funebre. Lento\nIV. Finale. Presto\nUladzislau Khandohi , Piano\nLISZT, Franz\nRéminiscences de Norma (Reminiscencias de Norma) de V. Bellini para dos pianos S 655 (versión para piano solo)\nUladzislau Khandohi , Piano\nRACHMANINOV, Sergey\nSonata para piano núm. 2 en si bemol menor op 36 (revisión de 1931)\nI. Allegro agitato\nII. Non allegro - Lento\nIII. L'istesso tempo - Allegro molto\nUladzislau Khandohi , Piano"
+    },
+    "listing": {
+      "title": "Solistas del Siglo XXI. «Fantasmas de la forma»: recital de piano",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "17/10/2026 12:00",
+          "date": "2026-10-17",
+          "time": "12:00"
+        }
+      ],
+      "venueText": "Auditorio Sony, Madrid",
+      "seriesText": "Solistas del Siglo XXI"
+    }
+  },
+  {
+    "sourceId": "fundacion-cultural-las-rozas",
+    "sourceUrl": "https://fundacionculturalasrozas.org/agenda/concierto-de-ano-nuevo/",
+    "externalId": "9196",
+    "observed": {
+      "title": "CONCIERTO DE AÑO NUEVO.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2 ene S - 20:00",
+          "date": "2027-01-02",
+          "time": "20:00"
+        }
+      ],
+      "description": "Las Rozas vuelve a recibir el nuevo año con una de sus citas musicales más esperadas. Inspirada en la tradición del célebre Concierto de Año Nuevo de Viena, esta gala reúne una brillante selección de valses, polcas y marchas que han convertido a la familia Strauss en símbolo universal de celebración, elegancia y optimismo.Interpretado por la Orquesta Filarmonía de Madrid bajo la dirección de Pascual Osa, el concierto transporta al público a los salones de la Viena imperial a través de algunas de las páginas más célebres del repertorio centroeuropeo. La brillantez de la Pizzicato-Polka , la majestuosidad del Vals del Emperador (Kaiser-Walzer) , la energía de la Marcha Española y el inconfundible encanto de Accelerationen conforman una velada llena de ritmo, humor y sofisticación. ‌ El programa se completa con obras de autores esenciales del género como Franz von Suppé, Jacques Offenbach y Franz Lehár, culminando con el vals más famoso de todos los tiempos, El Bello Danubio Azul, auténtico emblema de la celebración vienesa. ‌ Un concierto festivo para todos los públicos que convierte el Auditorio Joaquín Rodrigo en una pequeña Viena y ofrece la mejor bienvenida posible al nuevo año. ‌",
+      "categoryText": "Música",
+      "venueText": "Auditorio Joaquín Rodrigo"
+    },
+    "listing": {
+      "title": "CONCIERTO DE AÑO NUEVO.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2 ene S - 20:00",
+          "date": "2027-01-02",
+          "time": "20:00"
+        }
+      ],
+      "categoryText": "Música",
+      "venueText": "Auditorio Joaquín Rodrigo"
+    }
+  },
+  {
+    "sourceId": "fundacion-cultural-las-rozas",
+    "sourceUrl": "https://fundacionculturalasrozas.org/agenda/gala-de-la-hispanidad/",
+    "externalId": "9215",
+    "observed": {
+      "title": "Gala de la Hispanidad.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "17 oct S - 13:00",
+          "date": "2026-10-17",
+          "time": "13:00"
+        }
+      ],
+      "description": "El Auditorio Joaquín Rodrigo acoge la gala de la Jornada de la Hispanidad de Las Rozas, un encuentro de música y danza que celebrará la riqueza de las tradiciones españolas e iberoamericanas como cierre de una jornada cultural por las calles del municipio. El acto contará con la participación de José Ángel Hevia, la Escuela Municipal de Música «Joaquín Rodrigo», la Escuela Municipal de Danza «Pilar López» y bailarines de Ibérica de Danza. El programa propone un recorrido desde el folclore español hasta los ritmos brasileños y el tango argentino, con piezas como La rogativa de Valdestillas , con coreografía de Manuel Segovia y arreglos musicales de Diego Blanes; Tico-Tico no Fubá , de Zequinha de Abreu; y Verano porteño , de Astor Piazzolla. José Ángel Hevia interpretará Muiñeira de Barganaz , Panderetera y Volver , de Carlos Gardel y Alfredo Le Pera. Como broche final, la tradicional Danza de Santa Ana , de Llanes, reunirá a músicos, bailarines y público en una celebración compartida. La celebración de la Jornada de la Hispanidad de Las Rozas comenzará a las 11:30 horas en la Plaza de las Javerianas con el inicio de un pasacalle participativo protagonizado por el Ballet Folclórico de Madrid y la compañía Ibérica de Danza. La propuesta invita al público a dejar de ser únicamente espectador y sumarse a la fiesta: los bailarines enseñarán sencillos pasos de danza tradicional para que vecinos, visitantes, niños y mayores puedan incorporarse a la comitiva. El pasacalle realizará una nueva parada en la Plaza de España, antes de continuar su recorrido hasta el Auditorio Joaquín Rodrigo donde se han programado diferentes propuestas para todos los públicos.",
+      "categoryText": "Música y Danza",
+      "venueText": "Auditorio Joaquín Rodrigo",
+      "accessText": "Precio: Entrada libre"
+    },
+    "listing": {
+      "title": "Gala de la Hispanidad.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "17 oct S - 13:00",
+          "date": "2026-10-17",
+          "time": "13:00"
+        }
+      ],
+      "categoryText": "Música y Danza",
+      "venueText": "Auditorio Joaquín Rodrigo"
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3b446dbb5b42d910VgnVCM200000f921e388RCRD",
+    "externalId": "50265465",
+    "observed": {
+      "title": "A&amp;J classical",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-10-11 19:00:00.0",
+          "date": "2026-10-11",
+          "time": "19:00"
+        }
+      ],
+      "description": "Recital de clarinete y piano.    Adrián Sánchez Ballesteros, piano.  Julio Juan Rodríguez Fernández, clarinete.   Reparto de entradas desde una hora antes en el centro cultural. Máximo dos entradas por persona hasta completar aforo.",
+      "venueText": "Centro Cultural Casa de Vacas (Retiro)",
+      "accessText": "free",
+      "programText": "Recital de clarinete y piano.",
+      "venueFacilityId": "1945"
+    },
+    "listing": {
+      "title": "A&amp;J classical",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-10-11 19:00:00.0",
+          "date": "2026-10-11",
+          "time": "19:00"
+        }
+      ],
+      "description": "Recital de clarinete y piano.    Adrián Sánchez Ballesteros, piano.  Julio Juan Rodríguez Fernández, clarinete.   Reparto de entradas desde una hora antes en el centro cultural. Máximo dos entradas por persona hasta completar aforo.",
+      "venueText": "Centro Cultural Casa de Vacas (Retiro)",
+      "accessText": "free",
+      "venueFacilityId": "1945"
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3ec336c2a53c0a10VgnVCM200000f921e388RCRD",
+    "externalId": "50427303",
+    "observed": {
+      "title": "Orquesta de Cámara Santa Cecilia",
+      "performers": [],
+      "composers": [],
+      "works": [
+        {
+          "title": "Carlo Pallavicino"
+        },
+        {
+          "title": "Primer concierto"
+        },
+        {
+          "title": "Tercer concierto"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "2026-10-10 20:00:00.0",
+          "date": "2026-10-10",
+          "time": "20:00"
+        }
+      ],
+      "description": "La Orquesta Clásica Santa Cecilia, está integrada por profesores de dilatada experiencia que han tocado en los atriles de las más prestigiosas orquestas de España y de Europa, y que permite cultivar con la máxima calidad los repertorios clásicos. Ha sido dirigida por importantes maestros como Roberto Abbado, Julian Rachlin, Grzegorz Nowak, Michail Jurowski, Jean- Jacques Kantorow, Thomas Sanderling, Kynan Johns, János Kovács, Alexander Polyanichko, Henrik Schaefer, entre otros. Asimismo, han actuado junto con la Orquesta Clásica Santa Cecilia, solistas instrumentales de la talla de Krystian Zimerman, Nicola Benedetti, Vadim Gluzman, Vadim Repin, Julian Rachlin, Alexei Volodin, Gabriela Montero, Boris Andrianov, Vesko Eschkenazy, Renaud Capuçon, Maxim Rysanov, Radovan Vlatkovic, Leticia Moreno, Eric Le Sage, Clara Jumi Kang, entre otros grandes solistas del panorama internacional. La Orquesta invita regularmente a concertinos de las mejores orquestas del mundo, como la Royal Contergebouw Orchestra de Amsterdam, la Israel Philharmonic Orchestra, por citar algunas. La Orquesta Clásica Santa Cecilia ha actuado en escenarios como el Auditorio Nacional de Madrid, Teatro Real de Madrid, Palau de la Música Catalana, Palacio de Euskalduna de Bilbao y en el Palau de la Música de Valencia, Kursaal de San Sebastián, Auditorio Miguel Delibes de Valladolid, Auditorio de Zaragoza, Auditori de Barcelona, entre otros tantos selectos emplazamientos. Recientemente ha participado en el prestigioso Festival Zurich International Orchestra Series en el Cadogan Hall de Londres. Por último, cabe destacar también su participación en importantes festivales, como el Festival de Santander, de Galicia y el Festival de Pedraza. Programa: Armide Obertura Passacaglia L’Antiope Aria de Antiope: «Vieni, corri, volami in braccio» «Ven, corre, vuela a mis brazos» Seis conciertos transcritos para sexteto I. La Coulicam II. La Livri III. Le Vézinet I. La Poplinière II. La Tímida III. Tamboriles Dido y Eneas «Lamento de Dido» Rinaldo «Lascia ch’io pianga» «Déjame llorar» Concierto para violín en la menor, op. 7, n.º 5 I. Vivace II. Largo III. Allegro assai",
+      "venueText": "Parroquia Santa María La Antigua",
+      "accessText": "free",
+      "programText": "La Orquesta Clásica Santa Cecilia, está integrada por profesores de dilatada experiencia que han tocado en los atriles de las más prestigiosas orquestas de España y de Europa, y que permite cultivar con la máxima calidad los repertorios clásicos. Ha sido dirigida por importantes maestros como Roberto Abbado, Julian Rachlin, Grzegorz Nowak, Michail Jurowski, Jean- Jacques Kantorow, Thomas Sanderling, Kynan Johns, János Kovács, Alexander Polyanichko, Henrik Schaefer, entre otros. Asimismo, han actuado junto con la Orquesta Clásica Santa Cecilia, solistas instrumentales de la talla de Krystian Zimerman, Nicola Benedetti, Vadim Gluzman, Vadim Repin, Julian Rachlin, Alexei Volodin, Gabriela Montero, Boris Andrianov, Vesko Eschkenazy, Renaud Capuçon, Maxim Rysanov, Radovan Vlatkovic, Leticia Moreno, Eric Le Sage, Clara Jumi Kang, entre otros grandes solistas del panorama internacional. La Orquesta invita regularmente a concertinos de las mejores orquestas del mundo, como la Royal Contergebouw Orchestra de Amsterdam, la Israel Philharmonic Orchestra, por citar algunas. La Orquesta Clásica Santa Cecilia ha actuado en escenarios como el Auditorio Nacional de Madrid, Teatro Real de Madrid, Palau de la Música Catalana, Palacio de Euskalduna de Bilbao y en el Palau de la Música de Valencia, Kursaal de San Sebastián, Auditorio Miguel Delibes de Valladolid, Auditorio de Zaragoza, Auditori de Barcelona, entre otros tantos selectos emplazamientos. Recientemente ha participado en el prestigioso Festival Zurich International Orchestra Series en el Cadogan Hall de Londres. Por último, cabe destacar también su participación en importantes festivales, como el Festival de Santander, de Galicia y el Festival de Pedraza. Programa: Armide Obertura Passacaglia L’Antiope Aria de Antiope: «Vieni, corri, volami in braccio» «Ven, corre, vuela a mis brazos» Seis conciertos transcritos para sexteto I. La Coulicam II. La Livri III. Le Vézinet I. La Poplinière II. La Tímida III. Tamboriles Dido y Eneas «Lamento de Dido» Rinaldo «Lascia ch’io pianga» «Déjame llorar» Concierto para violín en la menor, op. 7, n.º 5 I. Vivace II. Largo III. Allegro assai",
+      "venueFacilityId": "3592"
+    },
+    "listing": {
+      "title": "Orquesta de Cámara Santa Cecilia",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-10-10 20:00:00.0",
+          "date": "2026-10-10",
+          "time": "20:00"
+        }
+      ],
+      "description": "La Orquesta Clásica Santa Cecilia, está integrada por profesores de dilatada experiencia que han tocado en los atriles de las más prestigiosas orquestas de España y de Europa, y que permite cultivar con la máxima calidad los repertorios clásicos.   Ha sido dirigida por importantes maestros como Roberto Abbado, Julian Rachlin, Grzegorz Nowak, Michail Jurowski, Jean- Jacques Kantorow, Thomas Sanderling, Kynan Johns, János Kovács, Alexander Polyanichko, Henrik Schaefer, entre otros. Asimismo, han actuado junto con la Orquesta Clásica Santa Cecilia, solistas instrumentales de la talla de Krystian Zimerman, Nicola Benedetti, Vadim Gluzman, Vadim Repin, Julian Rachlin, Alexei Volodin, Gabriela Montero, Boris Andrianov, Vesko Eschkenazy, Renaud Capuçon, Maxim Rysanov, Radovan Vlatkovic, Leticia Moreno, Eric Le Sage, Clara Jumi Kang, entre otros grandes solistas del panorama internacional. La Orquesta invita regularmente a concertinos de las mejores orquestas del mundo, como la Royal Contergebouw Orchestra de Amsterdam, la Israel Philharmonic Orchestra, por citar algunas. La Orquesta Clásica Santa Cecilia ha actuado en escenarios como el Auditorio Nacional de Madrid, Teatro Real de Madrid, Palau de la Música Catalana, Palacio de Euskalduna de Bilbao y en el Palau de la Música de Valencia, Kursaal de San Sebastián, Auditorio Miguel Delibes de Valladolid, Auditorio de Zaragoza, Auditori de Barcelona, entre otros tantos selectos emplazamientos. Recientemente ha participado en el prestigioso Festival Zurich International Orchestra Series en el Cadogan Hall de Londres.  Por último, cabe destacar también su participación en importantes festivales, como el Festival de Santander, de Galicia y el Festival de Pedraza.  Programa:    Jean-Baptiste Lully   ArmideOberturaPassacaglia    Carlo Pallavicino   L’AntiopeAria de Antiope: «Vieni, corri, volami in braccio»«Ven, corre, vuela a mis brazos»    Jean-Philippe Rameau   Seis conciertos transcritos para sexteto    Primer concierto   I. La CoulicamII. La LivriIII. Le Vézinet    Tercer concierto   I. La PoplinièreII. La TímidaIII. Tamboriles    Henry Purcell   Dido y Eneas«Lamento de Dido»    George Frideric Händel   Rinaldo«Lascia ch’io pianga»«Déjame llorar»    Jean-Marie Leclair   Concierto para violín en la menor, op. 7, n.º 5I. VivaceII. LargoIII. Allegro assai",
+      "venueText": "Parroquia Santa María La Antigua",
+      "accessText": "free",
+      "venueFacilityId": "3592"
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=bfcf37f66e3c0a10VgnVCM200000f921e388RCRD",
+    "externalId": "50427679",
+    "observed": {
+      "title": "Concierto de Otoño.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-10-24 19:00:00.0",
+          "date": "2026-10-24",
+          "time": "19:00"
+        }
+      ],
+      "description": "Celeste Classic & Celeste 21 Dos formaciones y dos maneras de acercarse a la música se encuentran en un mismo escenario. Celeste Classic y Celeste 21 presentan un concierto conjunto que propone un recorrido desde las grandes páginas del repertorio clásico hasta el pop, el jazz y la música contemporánea. Celeste Classic interpretará obras de Mozart, Beethoven, Gounod, Grieg, Holst y Prokófiev, con piezas tan reconocibles como la Pequeña serenata nocturna, la Sinfonía nº 8 de Beethoven, La mañana de Grieg, Júpiter de Los Planetas o Capuletos y Montescos. Celeste 21 aportará la vertiente más actual del programa con música de Paul Barker , Rick Stitzel y arreglos de grandes temas como What Makes You Beautiful , The Lady Is a Tramp o Can’t Take My Eyes Off You. Una propuesta dinámica y variada,pensada para todos los públicos, que muestra diferentes posibilidades de la música orquestal en una misma velada.",
+      "venueText": "Centro Cultural Antonio Machado (San Blas - Canillejas)",
+      "accessText": "free",
+      "programText": "Celeste Classic & Celeste 21 Dos formaciones y dos maneras de acercarse a la música se encuentran en un mismo escenario. Celeste Classic y Celeste 21 presentan un concierto conjunto que propone un recorrido desde las grandes páginas del repertorio clásico hasta el pop, el jazz y la música contemporánea. Celeste Classic interpretará obras de Mozart, Beethoven, Gounod, Grieg, Holst y Prokófiev, con piezas tan reconocibles como la Pequeña serenata nocturna, la Sinfonía nº 8 de Beethoven, La mañana de Grieg, Júpiter de Los Planetas o Capuletos y Montescos. Celeste 21 aportará la vertiente más actual del programa con música de Paul Barker , Rick Stitzel y arreglos de grandes temas como What Makes You Beautiful , The Lady Is a Tramp o Can’t Take My Eyes Off You. Una propuesta dinámica y variada,pensada para todos los públicos, que muestra diferentes posibilidades de la música orquestal en una misma velada.",
+      "venueFacilityId": "1942"
+    },
+    "listing": {
+      "title": "Concierto de Otoño.",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-10-24 19:00:00.0",
+          "date": "2026-10-24",
+          "time": "19:00"
+        }
+      ],
+      "description": "Celeste Classic &amp;amp; Celeste 21   Dos formaciones y dos maneras de acercarse a la música se encuentran en un mismo escenario. Celeste Classic y Celeste 21 presentan un concierto conjunto que propone un recorrido desde las grandes páginas del repertorio clásico hasta el pop, el jazz y la música contemporánea. Celeste Classic interpretará obras de Mozart, Beethoven, Gounod, Grieg, Holst y Prokófiev, con piezas tan reconocibles como la Pequeña serenata nocturna, la Sinfonía nº 8 de Beethoven, La mañana de Grieg, Júpiter de Los Planetas o Capuletos y Montescos. Celeste 21 aportará la vertiente más actual del programa con música de Paul Barker, Rick Stitzel y arreglos de grandes temas como What Makes You Beautiful, The Lady Is a Tramp o Can’t Take My Eyes Off You.  Una propuesta dinámica y variada,pensada para todos los públicos, que muestra diferentes posibilidades de la música orquestal en una misma velada.  Recomendada para todos los públicos.",
+      "venueText": "Centro Cultural Antonio Machado (San Blas - Canillejas)",
+      "accessText": "free",
+      "venueFacilityId": "1942"
+    }
+  }
+]

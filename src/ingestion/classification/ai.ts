@@ -1,18 +1,25 @@
 import { z } from 'zod';
-import { ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxonomies.ts';
-import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
+import { ACCESS_MODES, ERAS, FORMATS } from '../../lib/schemas/taxonomies.ts';
+import type { Era, Format } from '../../lib/schemas/taxonomies.ts';
 import type { ObservedFacts } from '../observed.ts';
 import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
+import type { AiPressureKind, AiRateLimitSnapshot, AiTransportErrorKind } from './ai-transport.ts';
 
 /**
  * Provider-agnostic AI classification. Implementations return a JSON-compatible
- * payload; `parseAiClassification` is the only validation gate the enrich
+ * payload; `parseAiOutputForPurpose` is the validation gate the enrich
  * layer trusts. Tests inject fakes; CI never calls a live model.
  *
  * Optional hooks stay provider-agnostic: Gemini uses them for rate-limit
  * diagnostics; OpenAI and test fakes omit them.
  */
-export type AiCallPurpose = 'eligibility' | 'taxonomy';
+export const AI_CALL_PURPOSES = [
+  'eligibility',
+  'composer-extraction',
+  'access-classification',
+  'taxonomy',
+] as const;
+export type AiCallPurpose = (typeof AI_CALL_PURPOSES)[number];
 
 export type AiFailureKind =
   | 'malformed-output'
@@ -20,7 +27,11 @@ export type AiFailureKind =
   | 'incomplete'
   | 'empty-output'
   | 'rate-limit'
+  | 'concurrency-pressure'
   | 'timeout'
+  | 'auth'
+  | 'unavailable'
+  | 'bad-request'
   | 'transport-error';
 
 export type AiTokenCounts = {
@@ -31,22 +42,30 @@ export type AiTokenCounts = {
 
 /** One technically failed HTTP/model attempt. No secrets; excerpt is truncated. */
 export type AiAttemptFailure = {
+  provider?: string;
   model: string;
+  routeId?: string;
   kind: AiFailureKind;
   status?: string;
+  code?: string;
+  retryable?: boolean;
   finishReason?: string;
   tokens?: AiTokenCounts;
   excerpt?: string;
+  pressure?: AiPressureKind;
+  rateLimit?: AiRateLimitSnapshot;
 };
 
 export type AiCallDiagnostics = {
+  provider?: string;
   model?: string;
+  routeId?: string;
   purpose?: AiCallPurpose;
   fallbackUsed?: boolean;
   attempts?: number;
   cacheHit?: boolean;
   deferred?: boolean;
-  routing?: Array<{ model: string; reason: string }>;
+  routing?: Array<{ provider?: string; model: string; routeId?: string; reason: string }>;
   failures?: AiAttemptFailure[];
   status?: string;
   tokens?: AiTokenCounts;
@@ -56,22 +75,76 @@ export type AiCallDiagnostics = {
 export type AiCallContext = {
   signal?: AbortSignal;
   onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
-  /** Eligibility fallback vs taxonomy-only completion. Default eligibility. */
+  /** Versioned task routed through the shared provider/budget. Default eligibility. */
   purpose?: AiCallPurpose;
   /**
-   * Taxonomy completion: formats were empty before this call, so an empty or
-   * omitted `formats` array is not a satisfactory resolution. Providers reuse
-   * their existing retry / model-fallback loop. Eligibility calls ignore this.
+   * Taxonomy completion: formats were empty before this call. An empty or
+   * omitted `formats` array is then unsatisfactory — unless the observed facts
+   * show exclusive alternatives or still-undetermined programming, in which
+   * case `formats=[]` is a valid final resolution. Eligibility calls ignore this.
    */
   requireFormats?: boolean;
+};
+
+/** Per-route runtime snapshot for reports. Not persisted across runs. */
+export type AiRouteRuntimeStats = {
+  routeId: string;
+  provider: string;
+  model: string;
+  httpRequests: number;
+  valid: number;
+  failures: number;
+  failuresByKind: Partial<Record<AiFailureKind, number>>;
+  rateLimits: number;
+  quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Partial<Record<AiPressureKind, number>>;
+  circuitOpen: boolean;
+  circuitReason?: string;
+  consecutiveFailures: number;
 };
 
 export type AiProviderStats = {
   httpRequests: number;
   retries: number;
+  /**
+   * Legacy alias of `httpFallbacks`. Historically counted every HTTP selection
+   * that was not the pool's first route, including RPM/cooldown skips.
+   */
   modelFallbacks: number;
-  requestsByModel: Record<string, number>;
-  classificationsByModel: Record<string, number>;
+  /** classify() executions that entered the scheduler (not in-flight coalescing). */
+  logicalCalls?: number;
+  /** Extra HTTP attempts on the same route inside one logical call. */
+  sameRouteRetries?: number;
+  /** HTTP attempts performed after another route already failed in this call. */
+  httpFallbacks?: number;
+  /** Logical calls that issued at least one `httpFallbacks` attempt. */
+  fallbackCalls?: number;
+  /** Routes whose circuit opened during this execution. */
+  circuitOpenRoutes?: number;
+  rateLimitsByRoute?: Record<string, number>;
+  rateLimitsByProvider?: Record<string, number>;
+  routes?: AiRouteRuntimeStats[];
+  /** Canonical provider-aware aggregates. Keys are stable `provider:model` route IDs. */
+  requestsByRoute: Record<string, number>;
+  classificationsByRoute: Record<string, number>;
+  inputTokensByRoute?: Record<string, number>;
+  dailyRequestsByRoute?: Record<string, number>;
+  requestsByProvider?: Record<string, number>;
+  classificationsByProvider?: Record<string, number>;
+  requestsByPurpose?: Partial<Record<AiCallPurpose, number>>;
+  failuresByKind?: Partial<Record<AiFailureKind, number>>;
+  rateLimits?: number;
+  quotaExhausted?: number;
+  concurrencyPressure?: number;
+  pressureByKind?: Partial<Record<AiPressureKind, number>>;
+  concurrencyPressureByProvider?: Record<string, number>;
+  concurrencyPressureByRoute?: Record<string, number>;
+  outputTokensByRoute?: Record<string, number>;
+  thoughtTokensByRoute?: Record<string, number>;
+  /** Legacy compatibility aliases; new consumers must use route-keyed maps. */
+  requestsByModel?: Record<string, number>;
+  classificationsByModel?: Record<string, number>;
   cacheHits?: number;
   deferred?: number;
   inputTokensByModel?: Record<string, number>;
@@ -93,8 +166,8 @@ export type AiClassifier = {
 /** Per-HTTP-request timeout for providers that manage their own transport. */
 export const AI_CLASSIFY_TIMEOUT_MS = 15_000;
 
-/** Zod max for `rationale`. Longer strings are truncated before validation. */
-export const AI_RATIONALE_MAX_CHARS = 800;
+/** Max evidence spans accepted from eligibility/taxonomy. Prompt and schema agree. */
+export const AI_EVIDENCE_MAX_ITEMS = 4;
 
 /**
  * Rate-limit / quota failure after the provider exhausted its own retries.
@@ -174,6 +247,18 @@ export function failureKindForUnusable(kind: AiUnusableOutputKind): AiFailureKin
   return 'malformed-output';
 }
 
+export function failureKindForTransport(
+  kind: AiTransportErrorKind,
+  pressure?: AiPressureKind,
+): AiFailureKind {
+  if (kind === 'timeout') return 'timeout';
+  if (kind === 'auth') return 'auth';
+  if (kind === 'unavailable') return 'unavailable';
+  if (kind === 'bad-request') return 'bad-request';
+  if (kind === 'rate-limit') return pressure === 'concurrency' ? 'concurrency-pressure' : 'rate-limit';
+  return 'transport-error';
+}
+
 /** Truncate and strip obvious secrets. Never store API keys or huge blobs. */
 export function sanitizeAiOutputExcerpt(raw: string, secret?: string): string {
   let text = raw.replace(/\s+/g, ' ').trim();
@@ -184,65 +269,302 @@ export function sanitizeAiOutputExcerpt(raw: string, secret?: string): string {
   return text.slice(0, AI_OUTPUT_EXCERPT_MAX_CHARS);
 }
 
-export type AiClassificationResult = {
+/** Compact sanitized excerpt of a model payload. Omits empty content. */
+export function excerptAiOutput(value: unknown, secret?: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  let raw: string;
+  if (typeof value === 'string') raw = value;
+  else {
+    try { raw = JSON.stringify(value); }
+    catch { raw = String(value); }
+  }
+  const excerpt = sanitizeAiOutputExcerpt(raw, secret);
+  return excerpt || undefined;
+}
+
+export type AiEligibilityResult = {
   eligibility: Eligibility;
-  formats?: Format[];
-  eras?: Era[];
-  kind?: EventKind;
+  formats: Format[];
   evidence: string[];
 };
 
-export const aiClassificationSchema = z.object({
-  eligibility: z.enum(ELIGIBILITIES),
-  formats: z.array(z.enum(FORMATS)).optional(),
-  eras: z.array(z.enum(ERAS)).optional(),
-  kind: z.enum(EVENT_KINDS).optional(),
-  evidence: z.array(z.string().trim().min(1).max(400)).max(12).optional(),
-  rationale: z.string().trim().min(1).max(800).optional(),
-});
+/** @deprecated Use AiEligibilityResult. Kept as an alias during the contract split. */
+export type AiClassificationResult = AiEligibilityResult;
+
+export type AiTaxonomyResult = {
+  formats: Format[];
+  eras: Era[];
+  evidence: string[];
+};
+
+export type AiAccessResult = {
+  classification: 'free' | 'paid' | 'unknown';
+  evidence: string;
+};
+
+export type AiComposerCandidate = {
+  name: string;
+  evidence: string;
+};
+
+export type AiComposerExtractionResult = {
+  candidates: AiComposerCandidate[];
+};
+
+const evidenceSpanSchema = z.string().trim().min(1).max(400);
+
+export const aiEligibilitySchema = z
+  .object({
+    eligibility: z.enum(ELIGIBILITIES),
+    formats: z.array(z.enum(FORMATS)).max(FORMATS.length),
+    evidence: z.array(evidenceSpanSchema).max(AI_EVIDENCE_MAX_ITEMS),
+  })
+  .strict();
+
+export const aiTaxonomySchema = z
+  .object({
+    formats: z.array(z.enum(FORMATS)).max(FORMATS.length),
+    eras: z.array(z.enum(ERAS)).max(ERAS.length),
+    evidence: z.array(evidenceSpanSchema).max(AI_EVIDENCE_MAX_ITEMS),
+  })
+  .strict();
+
+/** @deprecated Use aiEligibilitySchema. */
+export const aiClassificationSchema = aiEligibilitySchema;
+
+export const aiAccessSchema = z
+  .object({
+    classification: z.enum(ACCESS_MODES),
+    evidence: evidenceSpanSchema,
+  })
+  .strict();
+
+export const aiComposerExtractionSchema = z
+  .object({
+    candidates: z
+      .array(
+        z
+          .object({
+            name: z.string().trim().min(1).max(200),
+            evidence: evidenceSpanSchema,
+          })
+          .strict(),
+      )
+      .max(20),
+  })
+  .strict();
+
+const evidenceJson = {
+  type: 'array',
+  maxItems: AI_EVIDENCE_MAX_ITEMS,
+  items: { type: 'string' },
+  description:
+    '1-4 brief verbatim excerpts copied from the observed musical fields. A phrase or less each. Not conclusions, not the full input.',
+} as const;
+
+const formatsJson = {
+  type: 'array',
+  items: { type: 'string', enum: [...FORMATS] },
+  description:
+    'Concert formats from observed facts. Assign at least one when a reasonable musical inference is possible. Empty only if evidence is genuinely insufficient. Do not use other merely to avoid an empty array.',
+} as const;
 
 /**
- * JSON Schema for provider structured-output requests.
- * Must stay aligned with `aiClassificationSchema` / `parseAiClassification`.
+ * Eligibility structured-output schema. Does not ask for eras, kind or rationale:
+ * kind is deterministic from venue; eras are knowledge-first with taxonomy fallback.
  */
-export const AI_CLASSIFICATION_JSON_SCHEMA = {
+export const AI_ELIGIBILITY_JSON_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['eligibility', 'eras'],
+  required: ['eligibility', 'formats', 'evidence'],
   properties: {
     eligibility: { type: 'string', enum: [...ELIGIBILITIES] },
-    formats: {
-      type: 'array',
-      items: { type: 'string', enum: [...FORMATS] },
+    formats: formatsJson,
+    evidence: {
+      ...evidenceJson,
       description:
-        'Concert formats from observed facts. Assign at least one when a reasonable musical inference is possible. Empty only if evidence is genuinely insufficient. Do not use other merely to avoid an empty array.',
-    },
-    eras: {
-      type: 'array',
-      items: { type: 'string', enum: [...ERAS] },
-      description:
-        'Musical eras from observed works, composers or programText. Empty only if the programme cannot support a reasonable estimate.',
-    },
-    kind: { type: 'string', enum: [...EVENT_KINDS] },
-    evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },
-    rationale: {
-      type: 'string',
-      description: '1-2 short sentences. Do not repeat evidence. Keep well under 800 characters.',
+        '1-4 brief verbatim excerpts. Required for include/exclude; empty only for uncertain.',
     },
   },
 } as const;
 
-export type ParseAiClassification =
-  | { ok: true; value: AiClassificationResult }
+export const AI_TAXONOMY_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['formats', 'eras', 'evidence'],
+  properties: {
+    formats: formatsJson,
+    eras: {
+      type: 'array',
+      items: { type: 'string', enum: [...ERAS] },
+      description:
+        'Musical eras from named composers/works or an explicit era declaration. Empty if evidence is insufficient. Do not infer from venue, festival, instrument or likely programmes.',
+    },
+    evidence: evidenceJson,
+  },
+} as const;
+
+/** @deprecated Use AI_ELIGIBILITY_JSON_SCHEMA. New requests never send the old mega-schema. */
+export const AI_CLASSIFICATION_JSON_SCHEMA = AI_ELIGIBILITY_JSON_SCHEMA;
+
+export const AI_ACCESS_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['classification', 'evidence'],
+  properties: {
+    classification: { type: 'string', enum: [...ACCESS_MODES] },
+    evidence: {
+      type: 'string',
+      description: 'Short verbatim excerpt from accessText supporting the classification. Not the full text if it is long.',
+    },
+  },
+} as const;
+
+export const AI_COMPOSER_EXTRACTION_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['candidates'],
+  properties: {
+    candidates: {
+      type: 'array',
+      maxItems: 20,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['name', 'evidence'],
+        properties: {
+          name: { type: 'string' },
+          evidence: {
+            type: 'string',
+            description: 'Short verbatim span from the observed programme containing the proposed name. Not the whole programme.',
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export function aiJsonSchemaForPurpose(purpose: AiCallPurpose): object {
+  if (purpose === 'access-classification') return AI_ACCESS_JSON_SCHEMA;
+  if (purpose === 'composer-extraction') return AI_COMPOSER_EXTRACTION_JSON_SCHEMA;
+  if (purpose === 'taxonomy') return AI_TAXONOMY_JSON_SCHEMA;
+  return AI_ELIGIBILITY_JSON_SCHEMA;
+}
+
+export type ParseAiEligibility =
+  | { ok: true; value: AiEligibilityResult }
   | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
 
+export type ParseAiClassification = ParseAiEligibility;
+
+export type ParseAiTaxonomy =
+  | { ok: true; value: AiTaxonomyResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
+
+/**
+ * Eligibility parser. New requests never ask for eras/kind/rationale.
+ * Legacy payloads that still include those fields are accepted: extras are
+ * stripped and ignored. The enrich layer does not read them.
+ */
+export function parseAiEligibility(raw: unknown): ParseAiEligibility {
+  return parsePickedOutput(raw, pickEligibilityFields, aiEligibilitySchema, (data) => ({
+    eligibility: data.eligibility,
+    formats: uniqueKeepOrder(data.formats),
+    evidence: uniqueKeepOrder(data.evidence),
+  }));
+}
+
+/** @deprecated Use parseAiEligibility. */
 export function parseAiClassification(raw: unknown): ParseAiClassification {
+  return parseAiEligibility(raw);
+}
+
+export function parseAiTaxonomy(raw: unknown): ParseAiTaxonomy {
+  return parsePickedOutput(raw, pickTaxonomyFields, aiTaxonomySchema, (data) => ({
+    formats: uniqueKeepOrder(data.formats),
+    eras: uniqueKeepOrder(data.eras),
+    evidence: uniqueKeepOrder(data.evidence),
+  }));
+}
+
+export type ParseAiAccess =
+  | { ok: true; value: AiAccessResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
+
+export function parseAiAccess(raw: unknown): ParseAiAccess {
+  return parseStrictOutput(raw, aiAccessSchema);
+}
+
+export type ParseAiComposerExtraction =
+  | { ok: true; value: AiComposerExtractionResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
+
+export function parseAiComposerExtraction(raw: unknown): ParseAiComposerExtraction {
+  return parseStrictOutput(raw, aiComposerExtractionSchema);
+}
+
+export function parseAiOutputForPurpose(
+  purpose: AiCallPurpose,
+  raw: unknown,
+):
+  | { ok: true; value: AiEligibilityResult | AiTaxonomyResult | AiAccessResult | AiComposerExtractionResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+  if (purpose === 'access-classification') return parseAiAccess(raw);
+  if (purpose === 'composer-extraction') return parseAiComposerExtraction(raw);
+  if (purpose === 'taxonomy') return parseAiTaxonomy(raw);
+  return parseAiEligibility(raw);
+}
+
+/** Empty or omitted formats: valid JSON, but not a completed format assignment. */
+export function taxonomyFormatsStillUnresolved(
+  result: { formats?: Format[] },
+): boolean {
+  return !result.formats || result.formats.length === 0;
+}
+
+/**
+ * Transitional pick: keep purpose fields, drop legacy extras (kind, rationale,
+ * eras on eligibility, eligibility on taxonomy). Caps evidence at 4.
+ * Does not invent enums.
+ */
+function pickEligibilityFields(raw: unknown): unknown {
+  if (!isPlainObject(raw)) return raw;
+  return {
+    eligibility: raw.eligibility,
+    formats: Array.isArray(raw.formats) ? raw.formats : [],
+    evidence: clipEvidence(raw.evidence),
+  };
+}
+
+function pickTaxonomyFields(raw: unknown): unknown {
+  if (!isPlainObject(raw)) return raw;
+  return {
+    formats: Array.isArray(raw.formats) ? raw.formats : [],
+    eras: Array.isArray(raw.eras) ? raw.eras : [],
+    evidence: clipEvidence(raw.evidence),
+  };
+}
+
+function clipEvidence(value: unknown): unknown {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, AI_EVIDENCE_MAX_ITEMS);
+}
+
+function isPlainObject(raw: unknown): raw is Record<string, unknown> {
+  return Boolean(raw) && typeof raw === 'object' && !Array.isArray(raw);
+}
+
+function parsePickedOutput<TSchema, TValue>(
+  raw: unknown,
+  pick: (value: unknown) => unknown,
+  schema: z.ZodType<TSchema>,
+  toValue: (data: TSchema) => TValue,
+): { ok: true; value: TValue } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
   const asObject = coerceObject(raw);
   if (!asObject.ok) {
     return { ok: false, ruleId: 'ai-malformed-output', reason: asObject.reason };
   }
-
-  const parsed = aiClassificationSchema.safeParse(normalizeAiClassificationInput(asObject.value));
+  const parsed = schema.safeParse(pick(asObject.value));
   if (!parsed.success) {
     return {
       ok: false,
@@ -250,45 +572,7 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
       reason: parsed.error.issues.map((issue) => issue.message).join('; ') || 'schema de IA inválido',
     };
   }
-
-  const evidence = [
-    ...(parsed.data.evidence ?? []),
-    ...(parsed.data.rationale ? [parsed.data.rationale] : []),
-  ];
-
-  return {
-    ok: true,
-    value: {
-      eligibility: parsed.data.eligibility,
-      formats: parsed.data.formats ? uniqueKeepOrder(parsed.data.formats) : undefined,
-      eras: parsed.data.eras ? uniqueKeepOrder(parsed.data.eras) : undefined,
-      kind: parsed.data.kind,
-      evidence,
-    },
-  };
-}
-
-/** Empty or omitted formats: valid JSON, but not a completed format assignment. */
-export function taxonomyFormatsStillUnresolved(
-  result: Pick<AiClassificationResult, 'formats'>,
-): boolean {
-  return !result.formats || result.formats.length === 0;
-}
-
-/**
- * Non-semantic pre-validation fixups. Truncates an overlong `rationale`
- * so explanatory metadata cannot void an otherwise valid classification.
- * Does not invent enums, repair eligibility/formats/eras, or add evidence.
- */
-export function normalizeAiClassificationInput(raw: unknown): unknown {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
-  const rationale = (raw as { rationale?: unknown }).rationale;
-  if (typeof rationale !== 'string') return raw;
-  const trimmed = rationale.trim();
-  if (trimmed.length <= AI_RATIONALE_MAX_CHARS) {
-    return trimmed === rationale ? raw : { ...(raw as object), rationale: trimmed };
-  }
-  return { ...(raw as object), rationale: trimmed.slice(0, AI_RATIONALE_MAX_CHARS) };
+  return { ok: true, value: toValue(parsed.data) };
 }
 
 function coerceObject(raw: unknown): { ok: true; value: unknown } | { ok: false; reason: string } {
@@ -308,6 +592,25 @@ function coerceObject(raw: unknown): { ok: true; value: unknown } | { ok: false;
     return { ok: false, reason: 'respuesta de IA no es un objeto' };
   }
   return { ok: true, value: raw };
+}
+
+function parseStrictOutput<T>(
+  raw: unknown,
+  schema: z.ZodType<T>,
+): { ok: true; value: T } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+  const asObject = coerceObject(raw);
+  if (!asObject.ok) {
+    return { ok: false, ruleId: 'ai-malformed-output', reason: asObject.reason };
+  }
+  const parsed = schema.safeParse(asObject.value);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      ruleId: 'ai-invalid-output',
+      reason: parsed.error.issues.map((issue) => issue.message).join('; ') || 'schema de IA inválido',
+    };
+  }
+  return { ok: true, value: parsed.data };
 }
 
 function uniqueKeepOrder<T>(items: T[]): T[] {

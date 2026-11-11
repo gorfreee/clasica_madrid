@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_revistatierrasanta_com_iv_ciclo_de_organo_de_la_obra_pia_kinue_aota_2026_10_22_real_basilica_de_san_francisco_el_gra",
+  "slug": "iv-ciclo-de-organo-de-la-obra-pia-kinue-aota",
+  "title": "IV Ciclo de Órgano de la Obra Pía — Kinue Aota",
+  "status": "scheduled",
+  "venueId": "ven_real_basilica_de_san_francisco_el_grande",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_revistatierrasanta_com_iv_ciclo_de_organo_de_la_obra_pia_kinue_aota_2026_10_22_real_basilica_de_san_francisco_el_gra",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Kinue Aota"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_revistatierrasanta_com",
+      "url": "https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_revistatierrasanta_com",
+  "lastVerifiedAt": "2026-10-08"
+}

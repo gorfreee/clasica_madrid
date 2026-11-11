@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_cndm_lucie_zakova",
   "slug": "cndm-lucie-zakova",
+  "slugAliases": [
+    "lucie-zakova"
+  ],
   "title": "CNDM. Lucie Žáková",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
@@ -17,46 +20,47 @@
   ],
   "performers": [
     {
-      "name": "LUCIE ŽÁKOVÁ"
+      "name": "Lucie Žáková"
     }
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Philip Glass (1937)"
+      "name": "Philip Glass"
     },
     {
-      "name": "J. S. Bach"
+      "name": "Bedřich Antonín Wiedermann"
     },
     {
-      "name": "Bedřich Antonín Wiedermann (1883-1951)"
-    },
-    {
-      "name": "Bedřich Smetana (1824-1884)"
+      "name": "Bedřich Smetana"
     }
   ],
   "works": [
     {
       "title": "Preludio y fuga en la menor, BWV 543 (d. 1715)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Dance n.º 4 (1979)",
-      "composerName": "Philip Glass (1937)"
+      "composerName": "Philip Glass"
     },
     {
       "title": "Ich ruf zu dir, Herr Jesu Christ (Orgelbüchlein), BWV 639 (1713-1715)",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Toccata y fuga en fa menor (1912)",
-      "composerName": "Bedřich Antonín Wiedermann (1883-1951)"
+      "composerName": "Bedřich Antonín Wiedermann"
     },
     {
       "title": "Vltava (El Moldava), de Má vlast, op. 111, n.º 2 (1874, arr. J. Scott)",
-      "composerName": "Bedřich Smetana (1824-1884)"
+      "composerName": "Bedřich Smetana"
+    },
+    {
+      "title": "Mad rush (1979)",
+      "composerName": "Philip Glass"
     }
   ],
   "eras": [
@@ -74,10 +78,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lucie-zakova",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-lucie-zakova"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23846",
+      "checkedAt": "2026-09-06",
+      "externalId": "23846"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

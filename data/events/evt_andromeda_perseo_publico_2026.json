@@ -123,9 +123,9 @@
   "citations": [
     {
       "sourceId": "src_fundacion_juan_march",
-      "url": "https://www.march.es/es/madrid/concierto/andromeda-perseo",
-      "checkedAt": "2026-08-31",
-      "externalId": "/es/madrid/concierto/andromeda-perseo"
+      "url": "https://www.march.es/es/madrid/concierto/andromeda-perseo-calderon-barca-juan-hidalgo",
+      "checkedAt": "2026-09-24",
+      "externalId": "/es/madrid/concierto/andromeda-perseo-calderon-barca-juan-hidalgo"
     },
     {
       "sourceId": "src_cntc",
@@ -134,5 +134,5 @@
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_museo_del_traje",
+  "slug": "museo-del-traje",
+  "name": "Museo del Traje",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Avenida de Juan de Herrera, 2, 28040 Madrid",
+  "url": "https://www.cultura.gob.es/mtraje/",
+  "lastVerifiedAt": "2026-10-08"
+}

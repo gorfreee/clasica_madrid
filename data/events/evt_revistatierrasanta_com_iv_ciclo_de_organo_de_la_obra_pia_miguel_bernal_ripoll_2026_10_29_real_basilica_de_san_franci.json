@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_revistatierrasanta_com_iv_ciclo_de_organo_de_la_obra_pia_miguel_bernal_ripoll_2026_10_29_real_basilica_de_san_franci",
+  "slug": "iv-ciclo-de-organo-de-la-obra-pia-miguel-bernal-ripoll",
+  "title": "IV Ciclo de Órgano de la Obra Pía — Miguel Bernal Ripoll",
+  "status": "scheduled",
+  "venueId": "ven_real_basilica_de_san_francisco_el_grande",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_revistatierrasanta_com_iv_ciclo_de_organo_de_la_obra_pia_miguel_bernal_ripoll_2026_10_29_real_basilica_de_san_franci",
+      "date": "2026-10-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Miguel Bernal Ripoll"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_revistatierrasanta_com",
+      "url": "https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_revistatierrasanta_com",
+  "lastVerifiedAt": "2026-10-08"
+}

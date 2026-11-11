@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_residencia_estudiantes",
+  "slug": "residencia-de-estudiantes",
+  "name": "Residencia de Estudiantes",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle del Pinar, 21-23, 28006 Madrid",
+  "url": "https://residenciadeestudiantes.com/",
+  "lastVerifiedAt": "2026-09-24"
+}

@@ -25,24 +25,24 @@
   ],
   "composers": [
     {
-      "name": "Cherubini"
+      "name": "Luigi Cherubini"
     },
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Médée, obertura",
-      "composerName": "Cherubini"
+      "composerName": "Luigi Cherubini"
     },
     {
       "title": "Concierto para piano n.º 5 “Emperador”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía n.º 6 “Pastoral”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [
@@ -58,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-emperador-beethoven-y-201cpastoral201d",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "excelentia-emperador-beethoven-y-201cpastoral201d"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

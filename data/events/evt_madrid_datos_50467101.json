@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50467101",
+  "slug": "iii-ciclo-de-musica-clasica-el-ave-maria-ayer-hoy-y-siempre",
+  "title": "III Ciclo de Música Clásica. El Ave María ayer, hoy y siempre",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_4703422",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50467101_01",
+      "date": "2026-11-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Reyes Moraleda",
+      "role": "soloist"
+    },
+    {
+      "name": "Javier Checa",
+      "role": "soloist"
+    },
+    {
+      "name": "Dania Rodríguez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Giulio Caccini"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Charles Gounod"
+    },
+    {
+      "name": "Fermín María Álvarez"
+    },
+    {
+      "name": "Modest Mussorgski"
+    },
+    {
+      "name": "Francesco Paolo Tosti"
+    },
+    {
+      "name": "Pietro Mascagni"
+    },
+    {
+      "name": "William Gómez"
+    },
+    {
+      "name": "Michał Lorenc"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ave María, op. 52",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Giulio Caccini"
+    },
+    {
+      "title": "O Sanctissima!",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Ave María. Preghiera de Desdémona (Otello)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Charles Gounod"
+    },
+    {
+      "title": "Repentir",
+      "composerName": "Charles Gounod"
+    },
+    {
+      "title": "Plegaria",
+      "composerName": "Fermín María Álvarez"
+    },
+    {
+      "title": "Molitva (Oración)",
+      "composerName": "Modest Mussorgski"
+    },
+    {
+      "title": "Ridonami la calma",
+      "composerName": "Francesco Paolo Tosti"
+    },
+    {
+      "title": "Ave María (música del intermezzo de Cavalleria rusticana)",
+      "composerName": "Pietro Mascagni"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "William Gómez"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Michał Lorenc"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=777bc4c0a5d71a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50467101"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_musica_pintada_oido_vista_barroco_ii_nostalgia_laud",
+  "slug": "musica-pintada-oido-y-vista-en-el-barroco-ii-la-nostalgia-del-laud",
+  "title": "Música pintada: oído y vista en el Barroco (II): La nostalgia del laúd",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_musica_pintada_oido_vista_barroco_ii_nostalgia_laud_01",
+      "date": "2027-01-16",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jakob Lindberg"
+    }
+  ],
+  "composers": [
+    {
+      "name": "David Kellner"
+    },
+    {
+      "name": "Silvius Leopold Weiss"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasía nº 5 en Do mayor",
+      "composerName": "David Kellner"
+    },
+    {
+      "title": "Fantasía nº 3 en Fa mayor",
+      "composerName": "David Kellner"
+    },
+    {
+      "title": "Fantasia nº 1 en La menor, IDK 7",
+      "composerName": "David Kellner"
+    },
+    {
+      "title": "Sonata nº 34 en Re menor, ISW 6",
+      "composerName": "Silvius Leopold Weiss"
+    },
+    {
+      "title": "Melodías escocesas del Manuscrito Balcarres (c. 1690)"
+    },
+    {
+      "title": "Sonata nº 29 en La menor, \"L'infidèle\"",
+      "composerName": "Silvius Leopold Weiss"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-ii-nostalgia-laud",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/musica-pintada-oido-vista-barroco-ii-nostalgia-laud"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -4,7 +4,17 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createZarzuelaDetailClient, zarzuelaListingBounds } from '../src/ingestion/detail/zarzuela-hydration.ts';
-import { createZarzuelaListingGet } from '../src/ingestion/detail/zarzuela-transport.ts';
+import {
+  createZarzuelaListingGet,
+  resetZarzuelaOriginSessions,
+  setZarzuelaClock,
+  zarzuelaOriginStats,
+  ZARZUELA_CIRCUIT_DISTINCT_URLS,
+  ZARZUELA_COOLDOWN_MS,
+  ZARZUELA_GAP_MS,
+  ZARZUELA_JITTER_MS,
+  ZARZUELA_MAX_ATTEMPTS_PER_URL,
+} from '../src/ingestion/detail/zarzuela-transport.ts';
 import { getText, HttpError, resetOriginCookieJar } from '../src/ingestion/http.ts';
 import { hydrateEvents, memoizeGet } from '../src/ingestion/hydrate.ts';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
@@ -32,7 +42,22 @@ async function advance<T>(pending: Promise<T>): Promise<T> {
   await vi.runAllTimersAsync();
   return pending;
 }
-afterEach(() => { resetOriginCookieJar(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+function useZarzuelaPacing(): void {
+  vi.useFakeTimers();
+  setZarzuelaClock({
+    now: () => Date.now(),
+    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+    random: () => Math.random(),
+  });
+}
+afterEach(() => {
+  resetZarzuelaOriginSessions();
+  setZarzuelaClock(undefined);
+  resetOriginCookieJar();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('prefiltro conservador del listing', () => {
   it.each([
@@ -57,7 +82,7 @@ describe('prefiltro conservador del listing', () => {
   });
 
   it('evita requests fuera de ventana; hidrata dentro, solapamientos, límites inclusivos y ambigüedad', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const get = vi.fn(async () => detail);
     const texts = ['Del 8 al 18 de julio de 2027', '8 de octubre de 2026',
       'Del 23 de septiembre al 4 de octubre de 2026', 'Del 23 de septiembre al 4 de octubre',
@@ -75,14 +100,14 @@ describe('prefiltro conservador del listing', () => {
   it('no publica ni normaliza fechas del listing, ni añade horas o endpoints si falla la ficha', async () => {
     const html = `<ul class="listadoObras">${['Martes, 29 de septiembre de 2026', 'Del 23 de septiembre al 4 de octubre de 2026'].map((text, i) => `<li><h3><a href="${category}/${i}">Concierto</a></h3><p class="entradilla">${text}</p></li>`).join('')}</ul>`;
     const listing = parseZarzuelaListing(html, category, ctx);
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const events = await advance(hydrateEvents(listing, teatroZarzuelaAdapter, { ...ctx, get: async () => { throw new HttpError(404, category); } }));
     expect(events.map((e) => e.listingDateText)).toEqual(['Martes, 29 de septiembre de 2026', 'Del 23 de septiembre al 4 de octubre de 2026']);
     expect(events.every((e) => e.observed.occurrences.length === 0 && normalizeRawEvent(e) === undefined)).toBe(true);
   });
 
   it('no prefiltra URLs duplicadas con fechas contradictorias en distintos listados', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
     const events = await advance(teatroZarzuelaAdapter.extract(home, base, { ...ctx, get: async (url) => `<ul class="listadoObras"><li><h3><a href="${category}/same">Obra</a></h3><p class="entradilla">${url.includes('/a-') ? '8 de octubre de 2026' : '8 de julio de 2027'}</p></li></ul>` }));
     expect(events).toHaveLength(1);
@@ -91,52 +116,129 @@ describe('prefiltro conservador del listing', () => {
 });
 
 describe('transporte de fichas respetuoso y acotado', () => {
-  it.each([403, 429, 408, 500, 502, 503, 504])('reintenta HTTP %s realmente, con pausa y jitter; no cachea el rechazo', async (status) => {
-    vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+  const cooldown = (attempt: 0 | 1, random = 0.5) =>
+    ZARZUELA_COOLDOWN_MS[attempt] + Math.floor(random * ZARZUELA_JITTER_MS);
+
+  it('varias fichas 200 respetan el pacing secuencial', async () => {
+    useZarzuelaPacing();
     const times: number[] = [];
-    const get = vi.fn(async () => { times.push(Date.now()); if (times.length === 1) throw new HttpError(status, category); return detail; });
-    const client = createZarzuelaDetailClient(memoizeGet(get));
-    const result = await advance(client(category));
-    expect(get).toHaveBeenCalledTimes(2);
-    expect(times[1]! - times[0]!).toBe(2250);
-    expect(result.hydration).toMatchObject({ status: 'succeeded', requestAttempts: 2, httpStatuses: [status], retryDelaysMs: [2250] });
-    expect(result.hydration.reason).toBeUndefined();
-    await advance(client(`${category}/next`));
-    expect(times[2]! - times[1]!).toBe(1500);
+    const get = vi.fn(async () => {
+      times.push(Date.now());
+      return detail;
+    });
+    const client = createZarzuelaDetailClient(get);
+    await advance(client(`${category}/a`));
+    await advance(client(`${category}/b`));
+    await advance(client(`${category}/c`));
+    expect(times[1]! - times[0]!).toBe(ZARZUELA_GAP_MS);
+    expect(times[2]! - times[1]!).toBe(ZARZUELA_GAP_MS);
+    expect(get).toHaveBeenCalledTimes(3);
   });
 
-  it.each([403, 429, 503])('limita a dos requests por ficha ante HTTP %s persistente', async (status) => {
-    vi.useFakeTimers();
-    const get = vi.fn(async () => { throw new HttpError(status, category); });
-    const result = await advance(createZarzuelaDetailClient(get)(category));
+  it.each([403, 429, 408, 500, 502, 503, 504])('HTTP %s → cooldown → 200 recupera la ficha y continúa', async (status) => {
+    useZarzuelaPacing();
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const times: number[] = [];
+    const get = vi.fn(async () => {
+      times.push(Date.now());
+      if (times.length === 1) throw new HttpError(status, category);
+      return detail;
+    });
+    const wrapped = memoizeGet(get);
+    const client = createZarzuelaDetailClient(wrapped);
+    const result = await advance(client(category));
     expect(get).toHaveBeenCalledTimes(2);
-    expect(result.hydration).toMatchObject({ status: 'failed', requestAttempts: 2, httpStatuses: [status, status] });
+    expect(times[1]! - times[0]!).toBe(cooldown(0));
+    expect(result.hydration).toMatchObject({
+      status: 'succeeded',
+      requestAttempts: 2,
+      httpStatuses: [status],
+      retryDelaysMs: [cooldown(0)],
+    });
+    await advance(client(`${category}/next`));
+    expect(times[2]! - times[1]!).toBeGreaterThanOrEqual(ZARZUELA_GAP_MS);
+    expect(zarzuelaOriginStats(wrapped)?.circuitOpen).toBe(false);
+  });
+
+  it('dos 403 de retries de la misma URL no equivalen a dos fallos distintos del circuito', async () => {
+    useZarzuelaPacing();
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const get = vi.fn(async () => { throw new HttpError(403, category); });
+    const client = createZarzuelaDetailClient(get);
+    const first = await advance(client(`${category}/same`));
+    expect(first.hydration).toMatchObject({
+      status: 'failed',
+      requestAttempts: ZARZUELA_MAX_ATTEMPTS_PER_URL,
+      httpStatuses: [403, 403, 403],
+    });
+    expect(zarzuelaOriginStats(get)).toMatchObject({ distinctBlocked: 1, circuitOpen: false });
+    const next = await advance(client(`${category}/other`));
+    expect(next.hydration.status).not.toBe('not-requested');
+    expect(next.hydration.reason).not.toBe('circuit-open');
+    expect(get).toHaveBeenCalledTimes(ZARZUELA_MAX_ATTEMPTS_PER_URL * 2);
+  });
+
+  it('un bloqueo transitorio no deja decenas de fichas en circuit-open', async () => {
+    useZarzuelaPacing();
+    const get = vi.fn(async (url: string) => {
+      if (url.endsWith('/0')) throw new HttpError(403, url);
+      return detail;
+    });
+    const raw = Array.from({ length: 12 }, (_, i) => event(undefined, String(i)));
+    const events = await advance(hydrateEvents(raw, teatroZarzuelaAdapter, { ...ctx, get }));
+    expect(events[0]?.hydration?.status).toBe('failed');
+    expect(events.slice(1).every((item) => item.hydration?.status === 'succeeded')).toBe(true);
+    expect(events.filter((item) => item.hydration?.reason === 'circuit-open')).toHaveLength(0);
+    expect(get.mock.calls.length).toBeGreaterThan(12);
+  });
+
+  it('bloqueo persistente en varias URLs distintas abre el circuito de forma acotada', async () => {
+    useZarzuelaPacing();
+    const get = vi.fn(async () => { throw new HttpError(403, category); });
+    const raw = Array.from({ length: 10 }, (_, i) => event(undefined, String(i)));
+    const events = await advance(hydrateEvents(raw, teatroZarzuelaAdapter, { ...ctx, get }));
+    expect(get).toHaveBeenCalledTimes(ZARZUELA_CIRCUIT_DISTINCT_URLS * ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(events.filter((item) => item.hydration?.status === 'failed')).toHaveLength(ZARZUELA_CIRCUIT_DISTINCT_URLS);
+    expect(events.filter((item) => item.hydration?.reason === 'circuit-open')).toHaveLength(10 - ZARZUELA_CIRCUIT_DISTINCT_URLS);
+    expect(events.slice(ZARZUELA_CIRCUIT_DISTINCT_URLS).every((item) => item.hydration?.requestAttempts === 0)).toBe(true);
+    const decision = buildEventDecision({
+      raw: events[ZARZUELA_CIRCUIT_DISTINCT_URLS]!,
+      title: 'Fixture',
+      aiAttempted: false,
+      publishable: false,
+      candidateGenerated: false,
+    });
+    expect(decision.hydration).toMatchObject({ status: 'not-requested', reason: 'circuit-open', requestAttempts: 0 });
   });
 
   it.each(['10', 'Mon, 31 Aug 2026 00:00:10 GMT'])('respeta Retry-After: %s', async (retryAfter) => {
-    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-08-31T00:00:00Z'));
+    useZarzuelaPacing();
+    vi.setSystemTime(new Date('2026-08-31T00:00:00Z'));
     const times: number[] = [];
-    const get = vi.fn(async () => { times.push(Date.now()); if (times.length === 1) throw new HttpError(429, category, retryAfter); return detail; });
+    const get = vi.fn(async () => {
+      times.push(Date.now());
+      if (times.length === 1) throw new HttpError(429, category, retryAfter);
+      return detail;
+    });
     const result = await advance(createZarzuelaDetailClient(get)(category));
     expect(times[1]! - times[0]!).toBe(10_000);
     expect(result.hydration.retryDelaysMs).toEqual([10_000]);
   });
 
   it('Retry-After de la última respuesta retrasa también la siguiente ficha', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const times: number[] = [];
     const client = createZarzuelaDetailClient(async () => {
       times.push(Date.now());
-      if (times.length < 3) throw new HttpError(503, category, times.length === 2 ? '10' : null);
-      return detail;
+      throw new HttpError(503, category, '10');
     });
-    await advance(client(category)); await advance(client(`${category}/next`));
-    expect(times[2]! - times[1]!).toBe(10_000);
+    await advance(client(category));
+    await advance(client(`${category}/next`));
+    expect(times[ZARZUELA_MAX_ATTEMPTS_PER_URL]! - times[ZARZUELA_MAX_ATTEMPTS_PER_URL - 1]!).toBe(10_000);
   });
 
   it('no acorta un Retry-After largo: abre circuito sin reintentar', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const get = vi.fn(async () => { throw new HttpError(429, category, '120'); });
     const client = createZarzuelaDetailClient(get);
     const first = await client(category);
@@ -146,32 +248,24 @@ describe('transporte de fichas respetuoso y acotado', () => {
     expect(get).toHaveBeenCalledTimes(1);
   });
 
-  it.each([403, 429])('tres HTTP %s consecutivos abren circuito y diagnostican las fichas restantes', async (status) => {
-    vi.useFakeTimers();
-    const get = vi.fn(async () => { throw new HttpError(status, category); });
-    const raw = Array.from({ length: 8 }, (_, i) => event(undefined, String(i)));
-    const events = await advance(hydrateEvents(raw, teatroZarzuelaAdapter, { ...ctx, get }));
-    expect(get).toHaveBeenCalledTimes(3);
-    expect(events.slice(0, 2).every((e) => e.hydration?.status === 'failed')).toBe(true);
-    expect(events.slice(2).every((e) => e.hydration?.reason === 'circuit-open' && e.hydration.requestAttempts === 0)).toBe(true);
-    const decision = buildEventDecision({ raw: events[2]!, title: 'Fixture', aiAttempted: false, publishable: false, candidateGenerated: false });
-    expect(decision.hydration).toMatchObject({ status: 'not-requested', reason: 'circuit-open', requestAttempts: 0 });
-    expect(events.every((e) => e.observed.occurrences.length === 0)).toBe(true);
-  });
-
-  it('un éxito o un HTTP distinto reinician los bloqueos consecutivos; otro run no hereda circuito', async () => {
-    vi.useFakeTimers();
-    const replies = [403, 403, 429, 429, 200, 403, 403, 200];
-    const get = vi.fn(async () => { const status = replies.shift()!; if (status !== 200) throw new HttpError(status, category); return detail; });
+  it('otro run no hereda circuito; listing e hydration comparten pacing del mismo get', async () => {
+    useZarzuelaPacing();
+    const times: number[] = [];
+    const get = vi.fn(async () => {
+      times.push(Date.now());
+      return detail;
+    });
+    const listingGet = createZarzuelaListingGet(get);
+    await advance(listingGet(`${category}/listing`));
     const client = createZarzuelaDetailClient(get);
-    for (let i = 0; i < 5; i++) await advance(client(`${category}/${i}`));
-    expect(get).toHaveBeenCalledTimes(8);
+    await advance(client(`${category}/ficha`));
+    expect(times[1]! - times[0]!).toBe(ZARZUELA_GAP_MS);
     const fresh = await createZarzuelaDetailClient(async () => detail)(category);
     expect(fresh.hydration.status).toBe('succeeded');
   });
 
   it('no reintenta 404 ni errores de parsing; otras sources no reciben pausas ni retry', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const missing = vi.fn(async () => { throw new HttpError(404, category); });
     await advance(createZarzuelaDetailClient(missing)(category));
     expect(missing).toHaveBeenCalledTimes(1);
@@ -191,13 +285,17 @@ describe('transporte de fichas respetuoso y acotado', () => {
     vi.stubGlobal('fetch', fetch);
     await expect(getText(category, 30_000, {})).rejects.toMatchObject({ status: 429, retryAfter: '15' });
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(category, expect.objectContaining({ headers: expect.objectContaining({ 'user-agent': 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)' }) }));
+    expect(fetch).toHaveBeenCalledWith(category, expect.objectContaining({
+      headers: expect.objectContaining({
+        'user-agent': 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)',
+      }),
+    }));
   });
 });
 
 describe('listados de temporada respetuosos y fail-closed', () => {
   it('aplica el retry de Zarzuela también al inicio que descubre las secciones', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     let homeAttempts = 0;
     const get = vi.fn(async (url: string) => {
@@ -219,8 +317,8 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     expect(events.map((item) => item.observed.title)).toEqual(['Uno']);
   });
 
-  it('separa los listados 1,5 s y reintenta un HTTP 403; un segundo 403 sigue fallando la fuente', async () => {
-    vi.useFakeTimers();
+  it('separa los listados 2,75 s y reintenta un HTTP 403; un segundo 403 sigue fallando la fuente', async () => {
+    useZarzuelaPacing();
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     const times: number[] = [];
     let concertAttempts = 0;
@@ -234,13 +332,13 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
     const events = await advance(teatroZarzuelaAdapter.extract(home, base, { ...ctx, get }));
     expect(get).toHaveBeenCalledTimes(3);
-    expect(times[1]! - times[0]!).toBe(1500);
-    expect(times[2]! - times[1]!).toBe(2250);
+    expect(times[1]! - times[0]!).toBe(ZARZUELA_GAP_MS);
+    expect(times[2]! - times[1]!).toBe(ZARZUELA_COOLDOWN_MS[0] + 250);
     expect(events).toHaveLength(2);
   });
 
   it('un 403 persistente en una sección no descarta las demás y no finge cobertura completa', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const get = vi.fn(async (url: string) => {
       if (url.endsWith('/a-2026-2027')) return `<ul class="listadoObras"><li><h3><a href="${category}/one">Uno</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
       throw new HttpError(403, url);
@@ -255,11 +353,11 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     if (!(error instanceof IncompleteListingError)) throw error;
     expect(error.events).toHaveLength(1);
     expect(error.events[0]?.observed.title).toBe('Uno');
-    expect(get).toHaveBeenCalledTimes(3);
+    expect(get).toHaveBeenCalledTimes(1 + ZARZUELA_MAX_ATTEMPTS_PER_URL);
   });
 
   it('createZarzuelaListingGet no abre circuito: el segundo listado sigue intentándose', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const get = vi.fn(async () => { throw new HttpError(503, category); });
     const listingGet = createZarzuelaListingGet(get);
     const first = listingGet(`${category}/a`);
@@ -270,7 +368,7 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     const secondAssert = expect(second).rejects.toMatchObject({ status: 503 });
     await vi.runAllTimersAsync();
     await secondAssert;
-    expect(get).toHaveBeenCalledTimes(4);
+    expect(get).toHaveBeenCalledTimes(ZARZUELA_MAX_ATTEMPTS_PER_URL * 2);
   });
 });
 
@@ -317,7 +415,7 @@ describe('cobertura, health y desapariciones', () => {
   );
 
   it('un fallo aislado sigue degraded pero no usa ausencias de un snapshot incompleto', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const fixture = pipelineRun(1);
     const run = await advance(fixture.pending);
     expect(run.summary.sourcesSucceeded).toEqual([source.id]);
@@ -330,7 +428,7 @@ describe('cobertura, health y desapariciones', () => {
   });
 
   it('una source sana conserva la detección de desapariciones', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const run = await advance(pipelineRun(0).pending);
     expect(run.summary.sourcesSucceeded).toEqual([source.id]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([]);
@@ -338,24 +436,25 @@ describe('cobertura, health y desapariciones', () => {
   });
 
   it('un fallo masivo conserva observaciones, bloquea auto-merge y elimina falsos missing', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const fixture = pipelineRun(40, 40, true);
     const run = await advance(fixture.pending);
-    expect(fixture.detailCalls()).toBe(3);
+    expect(fixture.detailCalls()).toBe(ZARZUELA_CIRCUIT_DISTINCT_URLS * ZARZUELA_MAX_ATTEMPTS_PER_URL);
     expect(run.summary).toMatchObject({
-      rawEvents: 40, detailHydrationAttempted: 2, detailHydrationFailed: 2,
-      detailHydrationSkippedCircuitOpen: 38, health: 'fatal', autoMergeEligible: false,
+      rawEvents: 40, detailHydrationAttempted: ZARZUELA_CIRCUIT_DISTINCT_URLS,
+      detailHydrationFailed: ZARZUELA_CIRCUIT_DISTINCT_URLS,
+      detailHydrationSkippedCircuitOpen: 40 - ZARZUELA_CIRCUIT_DISTINCT_URLS, health: 'fatal', autoMergeEligible: false,
       sourcesSucceeded: [], possiblyMissing: 0, skippedUnusable: 40, candidates: 0, written: [],
     });
     expect(run.summary.sourcesFailed[0]).toMatchObject({ sourceId: source.id, stage: 'hydration' });
     expect(run.summary.healthReasons).toContain('source-hydration-incomplete:teatro-zarzuela');
-    expect(run.decisions.filter((d) => d.structuralSkip?.reason === 'ficha no solicitada: circuito abierto')).toHaveLength(38);
+    expect(run.decisions.filter((d) => d.structuralSkip?.reason === 'ficha no solicitada: circuito abierto')).toHaveLength(40 - ZARZUELA_CIRCUIT_DISTINCT_URLS);
     expect(run.rawEvents).toHaveLength(40);
     expect(JSON.stringify(fixture.catalog)).toBe(fixture.before);
   });
 
   it('el denominador excluye prefiltrados y permite un snapshot sano sin fichas necesarias', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const fixture = pipelineRun(0, 40, false, 'Del 8 al 18 de julio de 2027');
     const run = await advance(fixture.pending);
     expect(fixture.detailCalls()).toBe(0);
@@ -366,7 +465,7 @@ describe('cobertura, health y desapariciones', () => {
   });
 
   it('una URL vista y prefiltrada no desaparece ni cambia su fecha publicada', async () => {
-    vi.useFakeTimers();
+    useZarzuelaPacing();
     const catalog = catalogWithMissing();
     const existing = catalog.events[0]!;
     const before = JSON.stringify(existing);

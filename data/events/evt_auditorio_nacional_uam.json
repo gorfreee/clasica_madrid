@@ -17,7 +17,7 @@
   ],
   "performers": [
     {
-      "name": "SPARK"
+      "name": "Spark"
     },
     {
       "name": "Andre Ritter"
@@ -37,122 +37,135 @@
   ],
   "composers": [
     {
-      "name": "BAILE Y ENSOÑACIÓN"
+      "name": "Sebastian Bartmann"
     },
     {
-      "name": "Le roi s'amuse (1882)"
+      "name": "Christian Fritz"
     },
     {
-      "name": "Francis Poulenc (1899-1963)"
+      "name": "Léo Delibes"
     },
     {
-      "name": "Ernest Krähmer (1795-1837)"
+      "name": "Francis Poulenc"
     },
     {
-      "name": "Pauline Viardot-García (1821-1910)"
+      "name": "Chiel Meijering"
     },
     {
-      "name": "LIKE A BOHO"
+      "name": "Ernest Krähmer"
     },
     {
-      "name": "RAPSODIA ROMANÍ"
+      "name": "Pauline Viardot"
     },
     {
-      "name": "La Bohème (1965)"
+      "name": "Michael Nyman"
+    },
+    {
+      "name": "Giovanni Sollima"
+    },
+    {
+      "name": "Andrea Ritter"
+    },
+    {
+      "name": "Adam Ilyas Kuruc"
+    },
+    {
+      "name": "Robert Lakatos"
+    },
+    {
+      "name": "Charles Aznavour"
+    },
+    {
+      "name": "Elena Kats-Chernin"
+    },
+    {
+      "name": "Georges Bizet"
     }
   ],
   "works": [
     {
-      "title": "Christian Fritz (1988 -)",
-      "composerName": "BAILE Y ENSOÑACIÓN"
+      "title": "Paris 1830 (2025)",
+      "composerName": "Sebastian Bartmann"
+    },
+    {
+      "title": "Waltz of the ladybirds (2024)",
+      "composerName": "Christian Fritz"
+    },
+    {
+      "title": "Le roi s'amuse (1882)",
+      "composerName": "Léo Delibes"
     },
     {
       "title": "Pavane \"Belle qui tiens ma vie\"",
-      "composerName": "Le roi s'amuse (1882)"
+      "composerName": "Léo Delibes"
     },
     {
       "title": "Scène du Bouquet",
-      "composerName": "Le roi s'amuse (1882)"
+      "composerName": "Léo Delibes"
     },
     {
       "title": "Toccata FP 48:3 (1928)",
-      "composerName": "Francis Poulenc (1899-1963)"
-    },
-    {
-      "title": "Chiel Meijering (1954-)",
-      "composerName": "Francis Poulenc (1899-1963)"
+      "composerName": "Francis Poulenc"
     },
     {
       "title": "Es War Einmal ein König / Érase una vez un Rey (2007)",
-      "composerName": "Francis Poulenc (1899-1963)"
+      "composerName": "Chiel Meijering"
     },
     {
       "title": "Introducción y Variaciones sobre un tema original, Op. 32",
-      "composerName": "Ernest Krähmer (1795-1837)"
+      "composerName": "Ernest Krähmer"
     },
     {
       "title": "Sérénade para piano solo",
-      "composerName": "Pauline Viardot-García (1821-1910)"
-    },
-    {
-      "title": "Christian Fritz (1988-)",
-      "composerName": "Pauline Viardot-García (1821-1910)"
+      "composerName": "Pauline Viardot"
     },
     {
       "title": "Fantasie sur Carmen (2025/26)",
-      "composerName": "Pauline Viardot-García (1821-1910)"
-    },
-    {
-      "title": "Michael Nyman (1944-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Christian Fritz"
     },
     {
       "title": "Chasing Sheep is best left to Shepherds (1982)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Música de la película \"El contrato del dibujante”",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Giovanni Sollima (1962-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Michael Nyman"
     },
     {
       "title": "La Tempesta (del “Viaggio in Italia”, 2000)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Andrea Ritter (1978-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Giovanni Sollima"
     },
     {
       "title": "Pauline (2025)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Adam Ilyas Kuruc (1984-)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Andrea Ritter"
     },
     {
       "title": "Bohemian Suite (2025/26)",
-      "composerName": "RAPSODIA ROMANÍ"
-    },
-    {
-      "title": "Con motivos y melodías de los Manuscritos Uhrovska",
-      "composerName": "RAPSODIA ROMANÍ"
-    },
-    {
-      "title": "Robert Lakatos (1991-)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Adam Ilyas Kuruc"
     },
     {
       "title": "Alom para dos instrumentos de cuerda (2022)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Robert Lakatos"
     },
     {
-      "title": "Elena Kats-Chernin (1957-)",
-      "composerName": "La Bohème (1965)"
+      "title": "La Bohème (1965)",
+      "composerName": "Charles Aznavour"
+    },
+    {
+      "title": "Fast Blue Village (2022)",
+      "composerName": "Elena Kats-Chernin"
+    },
+    {
+      "title": "Con motivos de piezas de Hector Berlioz, Giacomo Meyerbeer y Frédéric Chopin",
+      "composerName": "Sebastian Bartmann"
+    },
+    {
+      "title": "Temas de la ópera Carmen (1875)",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Música de la película \"El contrato del dibujante”",
+      "composerName": "Michael Nyman"
+    },
+    {
+      "title": "Con motivos y melodías de los Manuscritos Uhrovska",
+      "composerName": "Adam Ilyas Kuruc"
     }
   ],
   "eras": [
@@ -165,15 +178,15 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-22",
       "externalId": "uam"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-22"
 }

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_transparencia_ssreyes_org_10061702",
+  "slug": "noche-de-cabaret-homenaje-al-maestro-alonso",
+  "title": "Noche de cabaret: Homenaje al Maestro Alonso",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_municipal_adolfo_marsillach",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_transparencia_ssreyes_org_10061702_01",
+      "date": "2026-10-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra",
+      "role": "orchestra"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Alonso"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Calesera",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "Las Leandras",
+      "composerName": "Francisco Alonso"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_transparencia_ssreyes_org",
+      "url": "https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/noche-de-cabaret-homenaje-al-maestro-alonso/10061702/vBxusUciXi0M",
+      "checkedAt": "2026-09-28",
+      "externalId": "10061702"
+    }
+  ],
+  "primarySourceId": "src_transparencia_ssreyes_org",
+  "lastVerifiedAt": "2026-09-28"
+}

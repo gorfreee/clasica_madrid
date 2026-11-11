@@ -15,6 +15,7 @@ yarn-error.log*
 # environment
 .env
 .env.production
+.dev.vars
 .local/
 
 # macOS
@@ -29,6 +30,8 @@ ingestion/work/**
 !ingestion/work/.gitkeep
 ingestion/reports/**
 !ingestion/reports/.gitkeep
+ingestion/requests/**
+!ingestion/requests/.gitkeep
 
 # leftover ingest batch temp dirs (normally cleaned up after each write)
 .ingest-tmp-*

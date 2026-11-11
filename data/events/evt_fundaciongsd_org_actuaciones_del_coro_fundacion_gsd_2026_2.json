@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026_2",
+  "slug": "coro-fundacion-gsd-concierto-velada-residencia-santa-lucia",
+  "title": "Coro Fundación GSD — Concierto Velada (Credo RV 591)",
+  "status": "scheduled",
+  "venueId": "ven_residencia_fundacion_santa_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026_2_01",
+      "date": "2026-10-24",
+      "time": "16:45",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Fundación GSD",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Credo RV 591",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundaciongsd_org",
+      "url": "https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_fundaciongsd_org",
+  "lastVerifiedAt": "2026-10-17"
+}

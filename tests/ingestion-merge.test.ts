@@ -210,6 +210,282 @@ describe('merge conservador de eventos publicados', () => {
   });
 });
 
+describe('enriquecimiento monotónico de performers, composers y works', () => {
+  it('composers: un superconjunto compatible añade el compositor nuevo', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Johannes Brahms' }, { name: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([
+      { name: 'Ludwig van Beethoven' },
+      { name: 'Johannes Brahms' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(true);
+  });
+
+  it('composers: un subconjunto no elimina un compositor publicado', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+  });
+
+  it('performers: una observación posterior incorpora un intérprete nuevo', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'Orquesta X' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([
+      { name: 'Orquesta X' },
+      { name: 'María Pérez', role: 'conductor' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('performers:'))).toEqual([]);
+  });
+
+  it('performers: un intérprete existente sigue pudiendo ganar role', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'Kent Nagano' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'Kent Nagano', role: 'conductor' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([{ name: 'Kent Nagano', role: 'conductor' }]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('performers:'))).toEqual([]);
+  });
+
+  it('performers: una observación posterior más limpia no borra nombres ni roles publicados', () => {
+    const existing = makeEvent({
+      performers: [
+        { name: 'Intervienen' },
+        { name: 'Josu De Solaun' },
+        { name: 'Paco Moya', role: 'conductor' },
+      ],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [
+          { name: 'Josu De Solaun' },
+          { name: 'Paco Moya' },
+        ],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual(existing.performers);
+    expect(merged.diagnostics.some((item) => item.startsWith('performers:'))).toBe(true);
+    expect(merged.diffs.some((item) => item.startsWith('performers:'))).toBe(false);
+  });
+
+  it('works: un superconjunto compatible añade la obra nueva', () => {
+    const existing = makeEvent({
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.works).toEqual([
+      { title: 'Sinfonía nº 5' },
+      { title: 'Obertura Coriolano' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('works:'))).toEqual([]);
+  });
+
+  it('works: una obra existente sigue pudiendo ganar composerName', () => {
+    const existing = makeEvent({
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        works: [{ title: 'Sinfonía nº 5', composerName: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.works).toEqual([
+      { title: 'Sinfonía nº 5', composerName: 'Ludwig van Beethoven' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('works:'))).toEqual([]);
+  });
+
+  it('una observación incompatible no añade elementos sueltos ni borra lo canónico', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+      performers: [{ name: 'Orquesta X' }, { name: 'Coro Y' }],
+      works: [{ title: 'Sinfonía nº 5' }, { title: 'Sinfonía nº 7' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Franz Schubert' }],
+        performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+        works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.event.performers).toEqual(existing.performers);
+    expect(merged.event.works).toEqual(existing.works);
+    expect(merged.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(merged.diagnostics.some((item) => item.startsWith('performers:'))).toBe(true);
+    expect(merged.diagnostics.some((item) => item.startsWith('works:'))).toBe(true);
+    expect(merged.diffs).toEqual([]);
+  });
+
+  it('repetir la misma observación enriquecida es idempotente y no duplica', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }],
+      performers: [{ name: 'Orquesta X' }],
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const incoming = proposal({
+      title: existing.title,
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+      performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+      works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+    });
+    const first = mergeExistingEvent(existing, incoming, TEST_NOW);
+    expect(first.event.composers).toHaveLength(2);
+    expect(first.event.performers).toHaveLength(2);
+    expect(first.event.works).toHaveLength(2);
+
+    const second = mergeExistingEvent(first.event, incoming, TEST_NOW);
+    expect(second.event.composers).toEqual(first.event.composers);
+    expect(second.event.performers).toEqual(first.event.performers);
+    expect(second.event.works).toEqual(first.event.works);
+    expect(second.diffs).toEqual([]);
+    expect(second.diagnostics).toEqual([]);
+  });
+
+  it('corrige un performer publicado en ALL CAPS sin duplicarlo', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'JEAN RONDEAU' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'JEAN RONDEAU' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([{ name: 'Jean Rondeau' }]);
+    expect(merged.event.performers).toHaveLength(1);
+    expect(merged.diffs.some((item) => item.startsWith('performers:'))).toBe(true);
+  });
+
+  it('un Event con composers vacíos admite el backfill de una observación posterior', () => {
+    const existing = makeEvent({
+      composers: [],
+      works: [],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [
+          { name: 'Johann Sebastian Bach' },
+          { name: 'François Couperin' },
+          { name: 'Heinrich Ignaz Franz Biber' },
+          { name: 'György Ligeti' },
+        ],
+        works: [],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([
+      { name: 'Johann Sebastian Bach' },
+      { name: 'François Couperin' },
+      { name: 'Heinrich Ignaz Franz Biber' },
+      { name: 'György Ligeti' },
+    ]);
+    expect(merged.event.works).toEqual([]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+  });
+
+  it('una observación autoritativa corrige un crédito Music contaminado sin borrar otros composers', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Music Gioachino Rossini' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Gioachino Rossini' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(true);
+
+    const incomplete = mergeExistingEvent(
+      makeEvent({
+        composers: [{ name: 'Gioachino Rossini' }, { name: 'Wolfgang Amadeus Mozart' }],
+      }),
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Gioachino Rossini' }],
+      }),
+      TEST_NOW,
+    );
+    expect(incomplete.event.composers).toEqual([
+      { name: 'Gioachino Rossini' },
+      { name: 'Wolfgang Amadeus Mozart' },
+    ]);
+    expect(incomplete.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(incomplete.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+  });
+});
+
 function assertNeverLosesPublishedIdentity(event: Event): void {
   expect(event.id).toMatch(/^evt_/);
   expect(event.slug).toBeTruthy();
@@ -236,5 +512,111 @@ describe('invariantes de identidad canónica', () => {
     expect(merged.event.id).toBe(existing.id);
     expect(merged.event.slug).toBe(existing.slug);
     assertNeverLosesPublishedIdentity(merged.event);
+  });
+
+  it('conserva la URL portal de Madrid si el listing comparte vgnextoid y añade externalId', () => {
+    const portal =
+      'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Retransmision-del-Pleno-en-directo/Actuacion-musica-Musica-clasica/?vgnextchannel=cd0a32e941f22610VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const listing =
+      'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const existing = makeEvent({
+      id: 'evt_sonidos_universo_20260927',
+      slug: 'los-sonidos-del-universo',
+      title: 'Los sonidos del universo',
+      citations: [{ sourceId: 'src_ayuntamiento_madrid', url: portal, checkedAt: '2026-08-28' }],
+      primarySourceId: 'src_ayuntamiento_madrid',
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: 'Actuación música. Música clásica',
+        citations: [
+          {
+            sourceId: 'src_ayuntamiento_madrid',
+            url: listing,
+            checkedAt: '2026-09-01',
+            externalId: '50379624',
+          },
+        ],
+      }),
+      TEST_NOW,
+    );
+    expect(merged.event.citations).toEqual([
+      {
+        sourceId: 'src_ayuntamiento_madrid',
+        url: portal,
+        checkedAt: '2026-09-01',
+        externalId: '50379624',
+      },
+    ]);
+    expect(merged.event.title).toBe('Los sonidos del universo');
+  });
+});
+
+describe('Reina Sofía no degrada el concierto Freixenet ya publicado', () => {
+  it('conserva Dvořák, Brahms y la orquesta canónica si el programa de la Escuela está vacío', () => {
+    const existing = makeEvent({
+      id: 'evt_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+      slug: 'fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27',
+      title: 'Fundación Albéniz. Escuela Superior de Música Reina Sofía. Concierto de Inauguracion del Curso Academico 26/27',
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      organizerIds: [],
+      seriesId: null,
+      occurrences: [{
+        id: 'occ_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+        date: '2026-10-01',
+        time: '19:30',
+        status: 'scheduled',
+      }],
+      performers: [
+        { name: 'Orquesta Sinfónica Freixenet de la Escuela Superior de Música Reina Sofía' },
+        { name: 'Josep Pons', role: 'conductor' },
+        { name: 'Luis Aracama' },
+      ],
+      composers: [{ name: 'Antonín Dvořák' }, { name: 'Johannes Brahms' }],
+      works: [
+        { title: 'Concierto para violonchelo', composerName: 'Antonín Dvořák' },
+        { title: 'Cuarta Sinfonía', composerName: 'Johannes Brahms' },
+      ],
+      eras: ['romantic'],
+      formats: ['symphonic'],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: 'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+        venueId: existing.venueId,
+        occurrences: [{ date: '2026-10-01', time: '19:30' }],
+        performers: [
+          { name: 'Orquesta Sinfónica Freixenet' },
+          { name: 'Josep Pons', role: 'conductor' },
+          { name: 'Luis Aracama', role: 'soloist' },
+        ],
+        composers: [{ name: 'Dvořák' }, { name: 'Brahms' }],
+        works: [],
+        citations: [{
+          sourceId: 'src_escuela_superior_musica_reina_sofia',
+          url: 'https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama',
+          checkedAt: '2026-09-15',
+          externalId: '83051',
+        }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.title).toBe(existing.title);
+    expect(merged.event.performers[0]?.name).toBe(
+      'Orquesta Sinfónica Freixenet de la Escuela Superior de Música Reina Sofía',
+    );
+    expect(merged.event.performers).toEqual(expect.arrayContaining([
+      { name: 'Josep Pons', role: 'conductor' },
+      { name: 'Luis Aracama', role: 'soloist' },
+    ]));
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.event.works).toEqual(existing.works);
+    expect(merged.event.eras).toEqual(['romantic']);
+    expect(merged.event.formats).toEqual(['symphonic']);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+    expect(merged.diffs.some((item) => item.startsWith('works:'))).toBe(false);
   });
 });

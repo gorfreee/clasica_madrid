@@ -5,7 +5,35 @@ import type { Venue } from '../schemas/venue.ts';
 import { DEFAULT_DESCRIPTION, SITE_NAME } from './constants.ts';
 import { musicEventSchemaStatus } from './event-status.ts';
 import { formatLabels } from './labels.ts';
-import { AGENDA_PATH, eventUrl, publicUrl, venueUrl, VENUES_INDEX_PATH } from './urls.ts';
+import { ABOUT_PATH, AGENDA_PATH, BLOG_PATH, eventUrl, publicAssetUrl, publicUrl, venueUrl, VENUES_INDEX_PATH } from './urls.ts';
+
+export function buildCollectionPageJsonLd(params: {
+  name: string;
+  description: string;
+  path: string;
+}): Record<string, unknown>[] {
+  const url = publicUrl(params.path);
+  const siteUrl = publicUrl(AGENDA_PATH);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: params.name,
+      description: params.description,
+      url,
+      inLanguage: 'es-ES',
+      isPartOf: {
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: siteUrl,
+      },
+    },
+    breadcrumbList([
+      { name: 'Agenda', url: siteUrl },
+      { name: params.name, url },
+    ]),
+  ];
+}
 
 export function buildWebsiteJsonLd(): Record<string, unknown> {
   const url = publicUrl(AGENDA_PATH);
@@ -22,6 +50,50 @@ export function buildWebsiteJsonLd(): Record<string, unknown> {
       url,
     },
   };
+}
+
+export function buildBlogPostingJsonLd(input: {
+  title: string;
+  description: string;
+  path: string;
+  publishedAt: string;
+  updatedAt?: string;
+  image: string;
+}): Record<string, unknown>[] {
+  const url = publicUrl(input.path);
+  const image = input.image.startsWith('http') ? input.image : publicAssetUrl(input.image);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: input.title,
+      description: input.description,
+      url,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
+      },
+      datePublished: input.publishedAt,
+      dateModified: input.updatedAt ?? input.publishedAt,
+      inLanguage: 'es-ES',
+      author: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: publicUrl(ABOUT_PATH),
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: publicUrl(AGENDA_PATH),
+      },
+      image: [image],
+    },
+    breadcrumbList([
+      { name: 'Agenda', url: publicUrl(AGENDA_PATH) },
+      { name: 'Blog', url: publicUrl(BLOG_PATH) },
+      { name: input.title, url },
+    ]),
+  ];
 }
 
 export function buildVenueJsonLd(venue: Venue, principal: Venue = venue): Record<string, unknown>[] {
@@ -50,7 +122,7 @@ export function buildVenueJsonLd(venue: Venue, principal: Venue = venue): Record
 }
 
 export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>[] {
-  const { event, organizers, series, primaryCitation } = resolved;
+  const { event, organizers, series } = resolved;
   const pageUrl = eventUrl(event.slug);
   const location = jsonLdLocation(resolved);
   const description = buildMusicEventDescription(event);
@@ -72,7 +144,8 @@ export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, u
       if (description) data.description = description;
       if (event.access === 'free') data.isAccessibleForFree = true;
       if (event.access === 'paid') data.isAccessibleForFree = false;
-      data.offers = buildOffers(event, primaryCitation.url);
+      // Citations establish provenance, not ticket availability. Only restore
+      // offers when the model provides an explicit, verified ticket URL.
       if (organizers.length > 0) {
         data.organizer = organizers.map((organizer) => ({
           '@type': 'Organization',
@@ -148,18 +221,6 @@ function jsonLdPerformer(performer: Performer): Record<string, unknown> {
     '@type': person ? 'Person' : 'PerformingGroup',
     name: performer.name,
   };
-}
-
-function buildOffers(event: Event, officialUrl: string): Record<string, unknown> {
-  const offers: Record<string, unknown> = {
-    '@type': 'Offer',
-    url: officialUrl,
-  };
-  if (event.access === 'free') {
-    offers.price = 0;
-    offers.priceCurrency = 'EUR';
-  }
-  return offers;
 }
 
 function buildMusicEventDescription(event: Event): string | undefined {

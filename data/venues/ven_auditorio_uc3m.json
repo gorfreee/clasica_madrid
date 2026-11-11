@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_auditorio_uc3m",
+  "slug": "auditorio-uc3m",
+  "name": "Auditorio UC3M",
+  "municipality": "Leganés",
+  "area": "nearby",
+  "address": "Calle de Butarque, 15, Leganés",
+  "url": "https://cultura.uc3m.es/auditorio/",
+  "lastVerifiedAt": "2026-10-08"
+}

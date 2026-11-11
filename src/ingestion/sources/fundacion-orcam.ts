@@ -1,7 +1,12 @@
 import { orcamDiv, orcamOccurrence, parseOrcamDetail } from '../detail/fundacion-orcam.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
-import type { RawEvent, SourceAdapter } from '../types.ts';
+import { reportAdapterDiscard, type RawEvent, type SourceAdapter } from '../types.ts';
+
+const STALE_FINAL_DEL_VIAJE = {
+  externalId: '4861',
+  date: '2027-05-11',
+} as const;
 
 export const fundacionOrcamAdapter: SourceAdapter = {
   id: 'fundacion-orcam',
@@ -40,6 +45,19 @@ export const fundacionOrcamAdapter: SourceAdapter = {
       if (events.has(id) || [...events.values()].some((e) => e.sourceUrl === sourceUrl)) throw new Error('fundacion-orcam: tarjeta duplicada');
       const month = occurrence.date!.slice(0, 7);
       actual.set(month, (actual.get(month) ?? 0) + 1);
+      // The individual ficha for 4861 still contradicts both the ORCAM
+      // season programme and Auditorio Nacional (10 May, Tenerife orchestra).
+      // Keep counting the card for coverage, but do not hydrate or reconcile
+      // the stale 11 May observation. This expires as soon as ORCAM fixes it.
+      if (id === STALE_FINAL_DEL_VIAJE.externalId && occurrence.date === STALE_FINAL_DEL_VIAJE.date) {
+        reportAdapterDiscard(ctx, {
+          reason: 'stale-conflicting-schedule',
+          title,
+          sourceUrl,
+          externalId: id,
+        });
+        continue;
+      }
       const category = orcamDiv(card, /<div\b[^>]*data-widget_type=["']post-info\.default["'][^>]*>/i);
       events.set(id, {
         sourceId: ctx.source.id, sourceUrl, externalId: id,

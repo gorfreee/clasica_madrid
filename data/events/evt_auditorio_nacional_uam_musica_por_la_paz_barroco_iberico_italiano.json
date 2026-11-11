@@ -17,25 +17,40 @@
   ],
   "performers": [
     {
+      "name": "La Folía",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pedro Bonet",
+      "role": "conductor"
+    },
+    {
       "name": "Jacobo Díaz Giráldez"
     }
   ],
   "composers": [
     {
-      "name": "Benedetto Marcello (1686 - 1739)"
+      "name": "Benedetto Marcello"
     },
     {
-      "name": "Antonio Vivaldi (1678-1741)"
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Francisco Corselli"
     }
   ],
   "works": [
     {
       "title": "Concierto para oboe en re menor, S.Z799",
-      "composerName": "Benedetto Marcello (1686 - 1739)"
+      "composerName": "Benedetto Marcello"
     },
     {
       "title": "Concierto para flautino en Do mayor RV 443",
-      "composerName": "Antonio Vivaldi (1678-1741)"
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Invitatorio de Difuntos",
+      "composerName": "Francisco Corselli"
     }
   ],
   "eras": [
@@ -51,10 +66,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-musica-por-la-paz-barroco-iberico-italiano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "uam-musica-por-la-paz-barroco-iberico-italiano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

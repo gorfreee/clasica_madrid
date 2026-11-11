@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_palacio_real_madrid_capilla_real",
+  "slug": "palacio-real-de-madrid-capilla-real",
+  "name": "Palacio Real de Madrid — Capilla Real",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Bailén, s/n, 28071 Madrid",
+  "url": "https://www.patrimonionacional.es/visita/palacio-real-de-madrid",
+  "lastVerifiedAt": "2026-09-14",
+  "parentVenueId": "ven_palacio_real_madrid",
+  "spaceName": "Capilla Real"
+}

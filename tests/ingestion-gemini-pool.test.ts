@@ -2,11 +2,20 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AiRateLimitedError, AiUnusableOutputError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
+import {
+  AI_ACCESS_JSON_SCHEMA,
+  AI_COMPOSER_EXTRACTION_JSON_SCHEMA,
+  AI_ELIGIBILITY_JSON_SCHEMA,
+  AI_TAXONOMY_JSON_SCHEMA,
+  AiRateLimitedError,
+  AiUnusableOutputError,
+  type AiCallDiagnostics,
+} from '../src/ingestion/classification/ai.ts';
+import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE, buildAiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import {
   GeminiClassifier, GEMINI_DEFAULT_MODELS, resolveGeminiConfig, resolveRetryAfterMs,
-  thinkingConfigForModel,
+  thinkingConfigForModel, buildGeminiRequestBody, geminiModelProfile,
   type GeminiClassifierOptions,
 } from '../src/ingestion/classification/gemini.ts';
 import { nextQuotaReset, quotaDay } from '../src/ingestion/classification/gemini-state.ts';
@@ -77,7 +86,7 @@ describe('persistent cache and recovery', () => {
   it('does not cache transport errors or invalid enums; pending is cleared on success', async () => {
     const stateDir = directory();
     const fetch = vi.fn()
-      .mockResolvedValueOnce(response({ eligibility: 'include', eras: ['invented'] }))
+      .mockResolvedValueOnce(response({ eligibility: 'include', formats: ['invented'] }))
       .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
       .mockResolvedValueOnce(response({ eligibility: 'exclude' }));
     const p = provider({ stateDir, fetch, maxRetries: 0 });
@@ -294,14 +303,18 @@ describe('quota accounting and bounded scheduling', () => {
     } });
     await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'include' });
     expect(p.lastDiagnostics()).toMatchObject({ attempts: 2, fallbackUsed: true, model: 'working' });
-    expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'unavailable-model-or-config' });
+    expect(p.lastDiagnostics()?.routing).toEqual(expect.arrayContaining([
+      expect.objectContaining({ model: 'unavailable', reason: 'unavailable-model-or-config' }),
+    ]));
     expect(p.lastDiagnostics()?.failures?.[0]?.excerpt).toContain(`Gemini HTTP ${status}`);
     // Beyond RPM/cooldown windows: a permanent failure must still be disabled.
     time.set(time.now() + 120_000);
     for (const purpose of ['eligibility', 'taxonomy'] as const) {
       await expect(p.classify({ ...facts, title: 'Otro concierto' }, { purpose })).resolves.toEqual({ eligibility: 'include' });
       expect(p.lastDiagnostics()).toMatchObject({ attempts: 1, failures: [] });
-      expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'disabled' });
+      expect(p.lastDiagnostics()?.routing).toEqual(expect.arrayContaining([
+        expect.objectContaining({ model: 'unavailable', reason: 'disabled' }),
+      ]));
     }
     expect(sent).toEqual(['unavailable', 'working', 'working', 'working']);
     expect(p.snapshotStats()).toMatchObject({
@@ -395,6 +408,10 @@ describe('Pacific day and configuration', () => {
   });
 
   it('parses pinned benchmark and request budget flags, rejecting missing/invalid values', () => {
+    expect(parseIngestArgs(['sync', '--ai-route', 'gemini:gemini-3.8-flash'], [])).toMatchObject({
+      ok: true, aiRoute: 'gemini:gemini-3.8-flash',
+    });
+    expect(parseIngestArgs(['sync', '--ai-route', 'gemini:a', '--ai-model', 'b'], []).ok).toBe(false);
     expect(parseIngestArgs(['sync', '--dry-run', '--ai-model', 'gemma-4-31b-it', '--ai-no-cache', '--ai-max-requests', '40'], [])).toMatchObject({ ok: true, aiModel: 'gemma-4-31b-it', aiNoCache: true, aiMaxRequests: 40 });
     for (const args of [['sync', '--ai-model'], ['sync', '--ai-model', 'a,b'], ['sync', '--ai-max-requests', '-1'], ['sync', '--ai-max-requests', 'NaN']]) {
       expect(parseIngestArgs(args, []).ok).toBe(false);
@@ -505,7 +522,12 @@ describe('recoverable unusable output and thinking', () => {
         if (model === 'gemini-3.1-flash-lite') {
           return response({ eligibility: 'include', formats: [], eras: ['romantic'] });
         }
-        return response({ eligibility: 'include', formats: ['symphonic'], eras: ['romantic'] });
+        return response({
+          eligibility: 'include',
+          formats: ['symphonic'],
+          eras: ['romantic'],
+          evidence: ['Johannes Brahms'],
+        });
       },
     });
     const result = await classifyObserved(includeFacts, { ai: p });
@@ -595,7 +617,11 @@ describe('recoverable unusable output and thinking', () => {
       const fetch = vi.fn<typeof globalThis.fetch>(async (_url, init) => {
         const body = JSON.parse(String(init?.body));
         expect(body.model).toBe(model);
-        expect(body.generation_config).toEqual({ max_output_tokens: 600, tool_choice: 'none', ...thinking });
+        expect(body.generation_config).toEqual({
+          max_output_tokens: AI_MAX_OUTPUT_TOKENS_BY_PURPOSE[purpose],
+          tool_choice: 'none',
+          ...thinking,
+        });
         return response();
       });
       const p = provider({ ...resolveGeminiConfig({ GEMINI_MODEL: model }), fetch });
@@ -604,5 +630,32 @@ describe('recoverable unusable output and thinking', () => {
     }
     expect(thinkingConfigForModel(' GEMINI-3.7-FLASH ')).toEqual({ thinking_level: 'low' });
     expect(thinkingConfigForModel('')).toBeUndefined();
+  });
+
+  it('el payload Gemini usa el schema del purpose y no sube max_output_tokens', () => {
+    const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
+    const cases = [
+      ['eligibility', AI_ELIGIBILITY_JSON_SCHEMA],
+      ['taxonomy', AI_TAXONOMY_JSON_SCHEMA],
+      ['access-classification', AI_ACCESS_JSON_SCHEMA],
+      ['composer-extraction', AI_COMPOSER_EXTRACTION_JSON_SCHEMA],
+    ] as const;
+    for (const [purpose, schema] of cases) {
+      const request = buildAiRequest(observed, purpose);
+      const body = buildGeminiRequestBody('gemini-3.8-flash', request);
+      expect(body.response_format).toEqual({
+        type: 'text', mime_type: 'application/json', schema,
+      });
+      expect(body.generation_config).toEqual({
+        max_output_tokens: AI_MAX_OUTPUT_TOKENS_BY_PURPOSE[purpose],
+        tool_choice: 'none',
+        thinking_level: 'low',
+      });
+      expect(body.generation_config.max_output_tokens).toBe(request.generation.maxOutputTokens);
+    }
+    expect(geminiModelProfile('gemini-3.8-flash')).toEqual({
+      structuredOutput: 'schema', thinking: { thinking_level: 'low' },
+    });
+    expect(geminiModelProfile('gemma-4-26b-a4b-it')).toEqual({ structuredOutput: 'schema' });
   });
 });

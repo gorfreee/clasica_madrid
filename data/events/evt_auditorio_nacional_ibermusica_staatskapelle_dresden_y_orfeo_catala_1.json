@@ -38,8 +38,28 @@
       "name": "Christian Gerhaher"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Jörg Widmann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 8",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Obra a determinar. Estreno",
+      "composerName": "Jörg Widmann"
+    },
+    {
+      "title": "Sinfonía núm. 9 “Coral”",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -49,15 +69,15 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-staatskapelle-dresden-y-orfeo-catala-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-14",
       "externalId": "ibermusica-staatskapelle-dresden-y-orfeo-catala-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-14"
 }

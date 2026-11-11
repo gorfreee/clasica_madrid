@@ -1,12 +1,17 @@
+import { sourceConflict } from './conflicts.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { looksLikeEnsembleName } from '../observed-cleanup.ts';
 import {
   emptyObservedLists,
   normalizeComposerList,
+  normalizePersonList,
   normalizeWorkList,
   type ObservedFactPatch,
+  type ObservedPerson,
 } from '../observed.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
+import { parseAuditorioPersonCredits } from './auditorio-segments.ts';
 
 const PROGRAM_STOP = /plazos de venta|informaci[oó]n sobre plazos/i;
 
@@ -31,7 +36,7 @@ export function parseCbaDetail(event: RawEvent, body: string): ObservedFactPatch
   const sala = fields.get('Sala') ?? '';
   const occurrence = cbaOccurrence(dateText, timeText);
   const espacio = espacioName(body);
-  if (espacio && sala && espacio !== sala) throw new Error('circulo-bellas-artes: sala y espacio no coinciden');
+  if (espacio && sala && venueLabel(espacio) !== venueLabel(sala)) throw sourceConflict('circulo-bellas-artes: sala y espacio no coinciden', 'venue', [{ surface: 'detail:Sala', value: sala }, { surface: 'detail:espacio', value: espacio }]);
   const program = parseProgram(body);
   if (!occurrence) {
     // Ranges and opening hours are observed activities, not a broken template.
@@ -44,6 +49,7 @@ export function parseCbaDetail(event: RawEvent, body: string): ObservedFactPatch
         ...(fields.get('Precio') ? { accessText: fields.get('Precio') } : {}),
         ...(program.description ? { description: program.description } : {}),
         ...emptyObservedLists(),
+        performers: performersFromCbaTitle(event.observed.title),
       };
     }
     throw new Error('circulo-bellas-artes: fecha u hora de función no reconocible');
@@ -58,6 +64,7 @@ export function parseCbaDetail(event: RawEvent, body: string): ObservedFactPatch
     ...(program.description ? { description: program.description } : {}),
     ...(program.programText ? { programText: program.programText } : {}),
     ...emptyObservedLists(),
+    performers: performersFromCbaTitle(event.observed.title),
     composers: program.composers,
     works: program.works,
   };
@@ -221,4 +228,25 @@ function firstParagraphs(html: string | undefined): string | undefined {
     .map((item) => stripTags(item[1]!))
     .filter(Boolean);
   return parts.join(' ') || undefined;
+}
+
+/**
+ * Recital titles that are themselves an official credit: `Name, piano`.
+ * One comma, a person-like name, and a recognised instrument/voice. Ensemble
+ * or multi-artist titles stay untouched.
+ */
+export function performersFromCbaTitle(title: string): ObservedPerson[] {
+  const trimmed = title.trim();
+  if (!trimmed || trimmed.split(',').length !== 2) return [];
+  const people = parseAuditorioPersonCredits(trimmed);
+  if (people.length !== 1) return [];
+  const person = people[0]!;
+  if (!person.roleText) return [];
+  if (looksLikeEnsembleName(person.name)) return [];
+  return normalizePersonList([person]);
+}
+
+/** Typography alone is not a different physical room; no fuzzy venue matching. */
+function venueLabel(value: string): string {
+  return value.replace(/[«»“”"']/g, '').replace(/\s+/g, ' ').trim();
 }

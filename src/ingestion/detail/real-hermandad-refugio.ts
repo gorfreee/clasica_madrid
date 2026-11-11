@@ -49,7 +49,10 @@ export function parseRefugioDetail(event: RawEvent, body: string): ObservedFactP
   }
   const main = refugioDiv(body, /<div\b[^>]*data-elementor-type=["']single-post["'][^>]*>/i);
   const postId = /\bpostid-(\d+)\b/.exec(body.match(/<body\b[^>]*>/i)?.[0] ?? '')?.[1];
-  if (!main || !postId || postId !== event.externalId) {
+  if (!main) {
+    throw new Error('real-hermandad-refugio: ficha sin identidad de evento coincidente');
+  }
+  if (event.externalId && postId !== event.externalId) {
     throw new Error('real-hermandad-refugio: ficha sin identidad de evento coincidente');
   }
   const title = stripTags(field(main, FIELDS.title) ?? '');
@@ -141,7 +144,7 @@ function labelledDate(text: string, label: 'Empieza' | 'Termina'): { date: strin
 }
 
 function labelledTime(text: string): string | undefined {
-  const match = /^Hora\s+(\d{1,2}:\d{2})$/i.exec(text);
+  const match = /^Hora:?\s+(\d{1,2}:\d{2})$/i.exec(text);
   if (!match) return undefined;
   return parseObservedTime(match[1]!) ?? undefined;
 }
@@ -161,4 +164,162 @@ function descriptionText(html: string): string | undefined {
   const block = refugioDiv(html, /<div\b[^>]*data-widget_type=["']theme-post-content\.default["'][^>]*>/i);
   const text = block ? stripTags(block) : '';
   return text || undefined;
+}
+
+export const REFUGIO_CONCERT_ARCHIVE_URL = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
+
+export type RefugioArchiveEvent = {
+  sourceUrl: string;
+  title: string;
+  externalId?: string;
+  description?: string;
+  venueText?: string;
+  accessText?: string;
+  occurrence?: RawOccurrence;
+};
+
+export function refugioArchivePageUrl(page: number): string {
+  if (page <= 1) return REFUGIO_CONCERT_ARCHIVE_URL;
+  return `https://realhermandaddelrefugio.org/categoria-eventos/conciertos/page/${page}/`;
+}
+
+/**
+ * Official JetEngine taxonomy archive for `categoria-eventos=conciertos`.
+ * `data-pages` is the completeness signal; load-more AJAX is POST and unused.
+ */
+export function parseRefugioConcertArchive(body: string): { events: RefugioArchiveEvent[]; pages: number } {
+  const pages = archivePageCount(body);
+  if (pages === undefined) {
+    throw new Error('real-hermandad-refugio: archivo de conciertos sin paginación reconocible');
+  }
+  const events: RefugioArchiveEvent[] = [];
+  const seen = new Set<string>();
+  const itemStart = /<div\b[^>]*class=["'][^"']*\bjet-listing-grid__item\b(?!s)[^"']*["'][^>]*>/gi;
+  for (const start of body.matchAll(itemStart)) {
+    if (start.index === undefined) continue;
+    const block = refugioDiv(body.slice(start.index), /<div\b/i);
+    if (!block) continue;
+    const parsed = archiveCard(block);
+    if (!parsed) continue;
+    if (seen.has(parsed.sourceUrl) || (parsed.externalId && seen.has(parsed.externalId))) {
+      throw new Error('real-hermandad-refugio: evento duplicado');
+    }
+    seen.add(parsed.sourceUrl);
+    if (parsed.externalId) seen.add(parsed.externalId);
+    events.push(parsed);
+  }
+  return { events, pages };
+}
+
+function archivePageCount(body: string): number | undefined {
+  const open = /<div\b[^>]*\bjet-listing-grid__items\b[^>]*>/i.exec(body)?.[0];
+  if (!open) return undefined;
+  const pages = /\bdata-pages=["'](\d+)["']/i.exec(open)?.[1];
+  const n = pages ? Number(pages) : NaN;
+  return Number.isSafeInteger(n) && n >= 1 ? n : undefined;
+}
+
+function archiveCard(html: string): RefugioArchiveEvent | undefined {
+  const terms = /jet-listing-dynamic-terms__link[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i.exec(html);
+  if (terms && !/\/categoria-eventos\/conciertos\/?$/i.test(terms[1]!) && !/^Conciertos$/i.test(stripTags(terms[2] ?? ''))) {
+    return undefined;
+  }
+  const overlay = /data-url=["']([^"']+)["']/i.exec(html)?.[1]
+    ?? /<a\b[^>]*class=["'][^"']*jet-engine-listing-overlay-link[^"']*["'][^>]*href=["']([^"']+)["']/i.exec(html)?.[1]
+    ?? /<a\b[^>]*href=["']([^"']+)["'][^>]*class=["'][^"']*jet-engine-listing-overlay-link/i.exec(html)?.[1];
+  const sourceUrl = overlay ? refugioEventUrl(overlay) : undefined;
+  if (!sourceUrl) {
+    throw new Error('real-hermandad-refugio: tarjeta del archivo sin URL oficial de concierto');
+  }
+  const title = archiveCardTitle(html);
+  if (!title) throw new Error('real-hermandad-refugio: tarjeta del archivo sin título');
+  const postId = /\bdata-post-id=["'](\d+)["']/i.exec(html)?.[1]
+    ?? /\bjet-listing-dynamic-post-(\d+)\b/i.exec(html)?.[1];
+  const description = archiveCardDescription(html);
+  const fields = archiveCardFields(html);
+  const start = fields.start ? parseRefugioDate(fields.start) : undefined;
+  const end = fields.end ? parseRefugioDate(fields.end) : undefined;
+  const time = fields.time ? parseObservedTime(fields.time) ?? undefined : undefined;
+  const occurrence = archiveOccurrence(fields, start, end, time);
+  return {
+    sourceUrl,
+    title,
+    ...(postId ? { externalId: postId } : {}),
+    ...(description ? { description } : {}),
+    ...(fields.venue ? { venueText: fields.venue } : {}),
+    ...(fields.price ? { accessText: fields.price } : {}),
+    ...(occurrence ? { occurrence } : {}),
+  };
+}
+
+function archiveOccurrence(
+  fields: ArchiveCardFields,
+  start: string | undefined,
+  end: string | undefined,
+  time: string | undefined,
+): RawOccurrence | undefined {
+  if (!start) return undefined;
+  if (end && end !== start) return undefined;
+  const raw = [
+    fields.start ? `Fecha inicio: ${fields.start}` : undefined,
+    fields.time ? `Hora: ${fields.time}` : undefined,
+  ].filter(Boolean).join(' ');
+  return { raw, date: start, ...(time ? { time } : {}) };
+}
+
+type ArchiveCardFields = {
+  start?: string;
+  end?: string;
+  time?: string;
+  venue?: string;
+  price?: string;
+};
+
+function archiveCardFields(html: string): ArchiveCardFields {
+  const fields: ArchiveCardFields = {};
+  for (const match of html.matchAll(/jet-listing-dynamic-field__content"\s*>([\s\S]*?)<\/div>/gi)) {
+    const text = collapseWhitespace(stripTags(match[1] ?? ''));
+    const labelled = /^(Fecha inicio|Fecha fin|Hora|Lugar|Precio)\s*:\s*(.+)$/i.exec(text);
+    if (!labelled) continue;
+    const value = labelled[2]?.trim();
+    if (!value || value === '-' || value === '—') continue;
+    switch (labelled[1]!.toLowerCase()) {
+      case 'fecha inicio':
+        fields.start = value;
+        break;
+      case 'fecha fin':
+        fields.end = value;
+        break;
+      case 'hora':
+        fields.time = value;
+        break;
+      case 'lugar':
+        fields.venue = value;
+        break;
+      case 'precio':
+        fields.price = value;
+        break;
+      default:
+        break;
+    }
+  }
+  return fields;
+}
+
+function archiveCardTitle(html: string): string | undefined {
+  for (const match of html.matchAll(/jet-listing-dynamic-field__content"\s*>([\s\S]*?)<\/div>/gi)) {
+    const text = stripTags(match[1] ?? '');
+    if (!text) continue;
+    if (/^(Fecha inicio|Fecha fin|Hora|Lugar|Precio)\b/i.test(text)) continue;
+    return text;
+  }
+  return undefined;
+}
+
+function archiveCardDescription(html: string): string | undefined {
+  const fields = [...html.matchAll(/jet-listing-dynamic-field__content"\s*>([\s\S]*?)<\/div>/gi)]
+    .map((match) => stripTags(match[1] ?? ''))
+    .filter(Boolean)
+    .filter((text) => !/^(Fecha inicio|Fecha fin|Hora|Lugar|Precio)\b/i.test(text));
+  return fields[1] || undefined;
 }

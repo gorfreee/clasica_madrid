@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { GeminiClassifier } from '../src/ingestion/classification/gemini.ts';
-import { createAiClassifierFromEnv } from '../src/ingestion/classification/provider.ts';
+import { createAiClassifierFromEnv, createFreeRoutesFromEnv } from '../src/ingestion/classification/provider.ts';
 import {
   applyLocalAiEnv,
   loadLocalAiEnv,
@@ -16,6 +16,10 @@ describe('parseLocalAiEnv', () => {
     const parsed = parseLocalAiEnv(`
 # comment
 AI_PROVIDER=gemini
+AI_ROUTE=gemini:gemini-3.1-flash-lite
+AI_MAX_REQUESTS=20
+AI_CACHE=off
+AI_STATE_DIR=.local/ai-v2
 GEMINI_API_KEY="test-key"
 GEMINI_MODEL=gemini-3.1-flash-lite
 GEMINI_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash
@@ -28,6 +32,10 @@ export OPENAI_MODEL=gpt-4o-mini
 `);
     expect(parsed).toEqual({
       AI_PROVIDER: 'gemini',
+      AI_ROUTE: 'gemini:gemini-3.1-flash-lite',
+      AI_MAX_REQUESTS: '20',
+      AI_CACHE: 'off',
+      AI_STATE_DIR: '.local/ai-v2',
       GEMINI_API_KEY: 'test-key',
       GEMINI_MODEL: 'gemini-3.1-flash-lite',
       GEMINI_MODELS: 'gemini-3.1-flash-lite,gemini-2.5-flash',
@@ -39,6 +47,60 @@ export OPENAI_MODEL=gpt-4o-mini
     });
     expect(parsed).not.toHaveProperty('PATH');
     expect(LOCAL_AI_ENV_KEYS).toContain('GEMINI_API_KEY');
+    expect(LOCAL_AI_ENV_KEYS).toEqual(expect.arrayContaining([
+      'AI_ZERO_COST_ONLY',
+      'GROQ_API_KEY', 'GROQ_FREE_TIER_CONFIRMED',
+      'GROQ_MODEL_RPM', 'GROQ_MODEL_TPM', 'GROQ_MODEL_RPD',
+      'GROQ_MODEL_MAX_CONCURRENT', 'GROQ_MODEL_MIN_INTERVAL_MS',
+      'GROQ_MAX_CONCURRENT', 'GROQ_MIN_INTERVAL_MS',
+      'MISTRAL_API_KEY', 'MISTRAL_FREE_MODE_CONFIRMED',
+      'MISTRAL_MODEL_RPM', 'MISTRAL_MODEL_TPM', 'MISTRAL_MODEL_RPD',
+      'MISTRAL_MODEL_MAX_CONCURRENT', 'MISTRAL_MODEL_MIN_INTERVAL_MS',
+      'MISTRAL_MAX_CONCURRENT', 'MISTRAL_MIN_INTERVAL_MS',
+      'ZAI_API_KEY', 'ZAI_MODELS',
+      'ZAI_MODEL_RPM', 'ZAI_MODEL_TPM', 'ZAI_MODEL_RPD',
+      'ZAI_MODEL_MAX_CONCURRENT', 'ZAI_MODEL_MIN_INTERVAL_MS',
+      'ZAI_MAX_CONCURRENT', 'ZAI_MIN_INTERVAL_MS',
+      'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_WORKERS_FREE_CONFIRMED',
+      'CLOUDFLARE_MODEL_RPM', 'CLOUDFLARE_MODEL_TPM', 'CLOUDFLARE_MODEL_RPD',
+      'CLOUDFLARE_MODEL_MAX_CONCURRENT', 'CLOUDFLARE_MODEL_MIN_INTERVAL_MS',
+      'CLOUDFLARE_MAX_CONCURRENT', 'CLOUDFLARE_MIN_INTERVAL_MS',
+      'VERCEL_AI_GATEWAY_API_KEY', 'VERCEL_FREE_TIER_CONFIRMED', 'VERCEL_MODELS',
+      'VERCEL_MAX_CONCURRENT', 'VERCEL_MIN_INTERVAL_MS', 'VERCEL_RPD',
+      'KILO_API_KEY', 'KILO_FREE_TIER_CONFIRMED', 'KILO_MODELS',
+      'KILO_MAX_CONCURRENT', 'KILO_MIN_INTERVAL_MS', 'KILO_RPD',
+      'OPENROUTER_API_KEY', 'OPENROUTER_FREE_TIER_CONFIRMED', 'OPENROUTER_MODELS',
+      'OPENROUTER_MAX_CONCURRENT', 'OPENROUTER_MIN_INTERVAL_MS', 'OPENROUTER_RPD',
+    ]));
+  });
+
+  it('carga los límites de presión y los entrega a createFreeRoutesFromEnv', () => {
+    const parsed = parseLocalAiEnv(`
+GROQ_API_KEY=groq-key
+GROQ_FREE_TIER_CONFIRMED=true
+GROQ_MODEL_MAX_CONCURRENT=openai/gpt-oss-120b:1
+GROQ_MAX_CONCURRENT=2
+GROQ_MIN_INTERVAL_MS=400
+MISTRAL_MODEL_MIN_INTERVAL_MS=mistral-small-latest:1500
+ZAI_MAX_CONCURRENT=1
+CLOUDFLARE_MIN_INTERVAL_MS=300
+PATH=/ignored
+`);
+    expect(parsed).toMatchObject({
+      GROQ_MODEL_MAX_CONCURRENT: 'openai/gpt-oss-120b:1',
+      GROQ_MAX_CONCURRENT: '2',
+      GROQ_MIN_INTERVAL_MS: '400',
+      MISTRAL_MODEL_MIN_INTERVAL_MS: 'mistral-small-latest:1500',
+      ZAI_MAX_CONCURRENT: '1',
+      CLOUDFLARE_MIN_INTERVAL_MS: '300',
+    });
+    expect(parsed).not.toHaveProperty('PATH');
+    const env: NodeJS.ProcessEnv = { AI_ZERO_COST_ONLY: 'true' };
+    applyLocalAiEnv(parsed, env);
+    const routes = createFreeRoutesFromEnv(env);
+    expect(routes.find((item) => item.routeId === 'groq:openai/gpt-oss-120b')?.limits).toMatchObject({
+      maxConcurrent: 1, providerMaxConcurrent: 2, providerMinIntervalMs: 400,
+    });
   });
 });
 
@@ -76,5 +138,16 @@ describe('loadLocalAiEnv', () => {
     expect(loadLocalAiEnv({ rootDir: root, env })).toBe(false);
     expect(env).toEqual({});
     expect(createAiClassifierFromEnv(env)).toBeUndefined();
+  });
+
+  it('AI_ROUTE fija una route Gemini aunque exista una key OpenAI legacy', () => {
+    const built = createAiClassifierFromEnv({
+      AI_ROUTE: 'gemini:gemma-4-31b-it',
+      AI_MAX_REQUESTS: '0',
+      GEMINI_API_KEY: 'gemini-test',
+      OPENAI_API_KEY: 'openai-test',
+    });
+    expect(built).toBeInstanceOf(GeminiClassifier);
+    expect((built as GeminiClassifier).routes.map((route) => route.routeId)).toEqual(['gemini:gemma-4-31b-it']);
   });
 });

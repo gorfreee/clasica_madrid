@@ -41,13 +41,13 @@
   ],
   "performers": [
     {
-      "name": "JULIA CRUZ",
+      "name": "Julia Cruz",
       "role": "conductor"
     }
   ],
   "composers": [
     {
-      "name": "MANUEL FERNÁNDEZ CABALLERO"
+      "name": "Manuel Fernández Caballero"
     }
   ],
   "works": [],
@@ -55,7 +55,7 @@
     "romantic"
   ],
   "formats": [
-    "opera"
+    "zarzuela"
   ],
   "kind": "established",
   "access": "paid",
@@ -63,10 +63,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-duo-de-la-africana",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-14",
       "externalId": "/es/temporada/lirica-2026-2027/el-duo-de-la-africana"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-14"
 }

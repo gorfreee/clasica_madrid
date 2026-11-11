@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_opera_company_salon_recital",
+  "origin": "phase1-smoke",
+  "sourceId": "discovery",
+  "sourceUrl": "https://www.example.org/musica/ciclo-de-salon-compania-opera-lirica-joven-canciones-romanticas",
+  "listingTitle": "Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas",
+  "observed": {
+    "title": "Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas",
+    "description": "Concierto a piano y voz. Recital de canciones y piezas para piano del romanticismo.",
+    "categoryText": "Música",
+    "venueText": "Centro cultural",
+    "accessText": "Entrada 8 euros",
+    "performers": [
+      {
+        "name": "Ana Pérez",
+        "roleText": "soprano"
+      },
+      {
+        "name": "Luis García",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Franz Schubert"
+      },
+      {
+        "name": "Robert Schumann"
+      }
+    ],
+    "works": [
+      {
+        "title": "Gretchen am Spinnrade",
+        "composerName": "Franz Schubert"
+      },
+      {
+        "title": "Widmung",
+        "composerName": "Robert Schumann"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "recital"
+    ],
+    "eras": [
+      "romantic"
+    ],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "Un nombre de compañía o proyecto que contiene «Ópera» no convierte un recital de piano y voz en ópera. La categoría no es Ópera; el detalle declara concierto/recital.",
+  "notes": "Regresión genérica: la palabra ópera en el título no debe congelar formats ni eligibility opera-event.",
+  "checkedAt": "2026-09-20"
+}

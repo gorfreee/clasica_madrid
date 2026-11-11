@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_atlantidachamberorchestra_com_las_cuatro_estaciones_de_vivaldi_teatro_real_aranjuez",
+  "slug": "las-cuatro-estaciones-de-vivaldi",
+  "title": "Las Cuatro Estaciones de Vivaldi",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_atlantidachamberorchestra_com_las_cuatro_estaciones_de_vivaldi_teatro_real_aranjuez_01",
+      "date": "2026-11-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Maria Solozobova",
+      "role": "soloist"
+    },
+    {
+      "name": "Atlántida Chamber Orchestra",
+      "role": "orchestra"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Primavera, RV 269",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El Verano, RV 315",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El Otoño, RV 293",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El Invierno, RV 297",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_atlantidachamberorchestra_com",
+      "url": "https://atlantidachamberorchestra.com/conciertos/las-cuatro-estaciones-de-vivaldi-teatro-real-aranjuez",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_atlantidachamberorchestra_com",
+  "lastVerifiedAt": "2026-10-17"
+}

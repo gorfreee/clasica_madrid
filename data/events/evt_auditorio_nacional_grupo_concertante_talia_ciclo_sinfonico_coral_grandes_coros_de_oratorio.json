@@ -27,15 +27,19 @@
       "role": "conductor"
     }
   ],
-  "composers": [
-    {
-      "name": "GRANDES COROS DE ORATORIOS"
-    }
-  ],
+  "composers": [],
   "works": [
     {
-      "title": "El Mesias, Paulus, La Pasión, Las estaciones…",
-      "composerName": "GRANDES COROS DE ORATORIOS"
+      "title": "El Mesías"
+    },
+    {
+      "title": "Paulus"
+    },
+    {
+      "title": "La Pasión"
+    },
+    {
+      "title": "Las estaciones"
     }
   ],
   "eras": [
@@ -53,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-grandes-coros-de-oratorio",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-grandes-coros-de-oratorio"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
-import { normalizeUrl, urlsEquivalent } from '../src/ingestion/urls.ts';
+import {
+  madridVgnextoid,
+  normalizeUrl,
+  sourceUrlKind,
+  urlEventIdentity,
+  urlIdentifiesSingleEvent,
+  urlPathIdentity,
+  urlsEquivalent,
+} from '../src/ingestion/urls.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('normalizeUrl', () => {
@@ -22,6 +30,155 @@ describe('normalizeUrl', () => {
     );
     expect(urlsEquivalent('https://example.org/evento?id=12', 'https://example.org/evento?id=13')).toBe(false);
   });
+
+  it('trata como la misma ficha de Madrid dos URLs con el mismo vgnextoid', () => {
+    const portal =
+      'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Retransmision-del-Pleno-en-directo/Actuacion-musica-Musica-clasica/?vgnextchannel=cd0a32e941f22610VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const listing =
+      'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    expect(urlsEquivalent(portal, listing)).toBe(true);
+    expect(madridVgnextoid(portal)).toBe('aab47760175ff910vgnvcm100000891ecb1arcrd');
+    expect(
+      urlsEquivalent(
+        listing,
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0c4c7760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe(false);
+  });
+});
+
+describe('sourceUrlKind', () => {
+  it('trata agendas permanentes, homepages y listados como listing', () => {
+    expect(sourceUrlKind('https://corofrancispoulenc.com/agenda')).toBe('listing');
+    expect(sourceUrlKind('https://corofrancispoulenc.com/agenda/')).toBe('listing');
+    expect(sourceUrlKind('https://corofrancispoulenc.com/')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/conciertos')).toBe('listing');
+    expect(sourceUrlKind('https://auditorionacional.inaem.gob.es/es/programacion')).toBe('listing');
+    expect(sourceUrlKind('https://caixaforum.org/es/madrid/agenda')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda?page=2')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda?page=2&utm_source=newsletter&lang=es')).toBe(
+      'listing',
+    );
+    expect(urlIdentifiesSingleEvent('https://corofrancispoulenc.com/agenda')).toBe(false);
+  });
+
+  it('trata slugs de colección multi-palabra como listing, no como ficha', () => {
+    expect(
+      sourceUrlKind('https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde'),
+    ).toBe('listing');
+    expect(sourceUrlKind('https://example.org/actividades/conciertos-de-tarde')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos-octubre')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos-madrid')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/actividades-culturales')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion-2026')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion-otono')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda-cultural')).toBe('listing');
+    expect(urlIdentifiesSingleEvent('https://example.org/actividades/conciertos-de-tarde')).toBe(
+      false,
+    );
+  });
+
+  it('no toma cualquier segmento de tres palabras como identificador de evento', () => {
+    expect(sourceUrlKind('https://example.org/musica-en-madrid')).toBe('event-detail');
+    expect(
+      sourceUrlKind('https://example.org/actividades/ciclo-de-camara/conciertos-de-tarde'),
+    ).toBe('listing');
+  });
+
+  it('trata fichas con id, slug largo o segmento no genérico como event-detail', () => {
+    expect(
+      sourceUrlKind(
+        'https://www.coiim.es/eventos/recital-de-violin-y-piano-de-bruch-a-rachmaninoff-paisajes-del-romanticismo',
+      ),
+    ).toBe('event-detail');
+    expect(sourceUrlKind('https://caixaforum.org/es/madrid/p/a-delta-trio-madrid')).toBe('event-detail');
+    expect(sourceUrlKind('https://www.teatroreal.es/es/espectaculo/demo')).toBe('event-detail');
+    expect(sourceUrlKind('https://cndm.inaem.gob.es/node/23846')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/eventos-12345')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/conciertos/recital-de-piano-schubert')).toBe(
+      'event-detail',
+    );
+    expect(sourceUrlKind('https://www.parroquia.example/conciertos/bach')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/evento?id=12')).toBe('event-detail');
+    expect(
+      sourceUrlKind(
+        'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_mvcPath=detalle&_notasprensa_notaId=52355&p_p_id=notasprensa&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal',
+      ),
+    ).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/noticias?_notasprensa_notaId=52355')).toBe(
+      'event-detail',
+    );
+    expect(
+      sourceUrlKind(
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe('event-detail');
+    expect(urlIdentifiesSingleEvent('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe(true);
+  });
+});
+
+describe('urlEventIdentity', () => {
+  it('conserva la identidad de path cuando el último segmento ya nombra el concierto', () => {
+    expect(urlEventIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe('bayreuth');
+    expect(
+      urlEventIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth?utm_source=agenda&lang=es'),
+    ).toBe('bayreuth');
+    expect(urlEventIdentity('https://cndm.inaem.gob.es/node/23846')).toBe('23846');
+    expect(urlPathIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe('bayreuth');
+  });
+
+  it('ignora query params de tracking, paginación e idioma', () => {
+    expect(urlEventIdentity('https://coro.example/conciertos/dido-y-eneas?page=2')).toBe(
+      'dido-y-eneas',
+    );
+    expect(
+      urlEventIdentity('https://coro.example/conciertos/dido-y-eneas?fbclid=abc123&utm_medium=email'),
+    ).toBe('dido-y-eneas');
+    expect(urlEventIdentity('https://example.org/agenda?page=2&utm_source=x')).toBe('agenda');
+  });
+
+  it('usa un identificador CMS/query inequívoco cuando el path no basta', () => {
+    expect(urlEventIdentity('https://example.org/evento?id=12')).toBe('12');
+    expect(
+      urlEventIdentity(
+        'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_mvcPath=detalle&_notasprensa_notaId=52355&p_p_id=notasprensa&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal',
+      ),
+    ).toBe('notas-de-prensa-52355');
+    expect(
+      urlEventIdentity(
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe('aab47760175ff910VgnVCM100000891ecb1aRCRD');
+  });
+
+  it('distingue fichas distintas bajo el mismo path y distintos IDs de query', () => {
+    const left =
+      'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_notaId=52355&p_p_id=notasprensa';
+    const right =
+      'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_notaId=52356&p_p_id=notasprensa';
+    expect(urlEventIdentity(left)).toBe('notas-de-prensa-52355');
+    expect(urlEventIdentity(right)).toBe('notas-de-prensa-52356');
+    expect(urlEventIdentity(left)).not.toBe(urlEventIdentity(right));
+    expect(urlPathIdentity(left)).toBe(urlPathIdentity(right));
+  });
+
+  it('usa idEvent de Giglon en vez del path genérico todos', () => {
+    const url =
+      'https://www.giglon.com/todos?idEvent=concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musik';
+    expect(sourceUrlKind(url)).toBe('event-detail');
+    expect(urlEventIdentity(url)).toBe(
+      'concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musik',
+    );
+  });
+
+  it('usa el id numérico del evento CalendarSuite y no el id de instancia del portlet', () => {
+    const url =
+      'https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/concierto-de-ano-nuevo-como-nunca-/10071535/vBxusUciXi0M';
+    expect(sourceUrlKind(url)).toBe('event-detail');
+    expect(urlEventIdentity(url)).toBe('10071535');
+  });
 });
 
 describe('normalización de URLs en hechos', () => {
@@ -39,5 +196,15 @@ describe('normalización de URLs en hechos', () => {
       },
     };
     expect(normalizeRawEvent(raw)?.sourceUrl).toBe('https://www.teatroreal.es/es/espectaculo/bayreuth');
+  });
+});
+
+describe('sourceUrlKind — Discovery regressions', () => {
+  it('trata el programa multimedia de Móstoles como listing, no como ficha individual', () => {
+    expect(
+      sourceUrlKind(
+        'https://www.mostoles.es/mostoles/cm/culturaenmostoles/images?idMmedia=1486150',
+      ),
+    ).toBe('listing');
   });
 });

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_eventbrite_es_gran_sinfonico_1_tickets_2000013526296",
+  "slug": "gran-sinfonico-1-otono-sinfonico",
+  "title": "Gran Sinfónico 1 — Otoño Sinfónico",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_del_conservatorio_profesional_de_musica_de_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_eventbrite_es_gran_sinfonico_1_tickets_2000013526296_01",
+      "date": "2026-11-14",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Bohème"
+    },
+    {
+      "name": "Samuel Jiménez",
+      "role": "soloist"
+    },
+    {
+      "name": "Luis Prades"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ferdinand David"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concertino para trombón y orquesta, op. 4",
+      "composerName": "Ferdinand David"
+    },
+    {
+      "title": "Sinfonía nº 3 en Fa mayor, op. 90",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_eventbrite_es",
+      "url": "https://www.eventbrite.es/e/gran-sinfonico-1-tickets-2000013526296",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_eventbrite_es",
+  "lastVerifiedAt": "2026-10-14"
+}

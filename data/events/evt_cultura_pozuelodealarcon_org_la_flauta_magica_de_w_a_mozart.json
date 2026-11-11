@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_pozuelodealarcon_org_la_flauta_magica_de_w_a_mozart",
+  "slug": "la-flauta-magica",
+  "title": "La flauta mágica",
+  "status": "scheduled",
+  "venueId": "ven_teatro_mira",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_la_flauta_magica_de_w_a_mozart_01",
+      "date": "2026-10-31",
+      "time": "19:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_la_flauta_magica_de_w_a_mozart_02",
+      "date": "2026-11-01",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ópera 2001 (solistas, orquesta y coros)"
+    },
+    {
+      "name": "Marlène Assayag"
+    },
+    {
+      "name": "Lucie Chartin"
+    },
+    {
+      "name": "Jiwon Song"
+    },
+    {
+      "name": "Dmytro Voronov"
+    },
+    {
+      "name": "Francesca Bruni"
+    },
+    {
+      "name": "Yeonjoo Park"
+    },
+    {
+      "name": "Haruo Kawakami"
+    },
+    {
+      "name": "Yuri Makhrov"
+    },
+    {
+      "name": "Olivier Gourdy"
+    },
+    {
+      "name": "Viacheslav Strelkov"
+    },
+    {
+      "name": "Mar Esteve Rodrigo"
+    },
+    {
+      "name": "Martin Mázik (dirección musical)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "La flauta mágica",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_pozuelodealarcon_org",
+      "url": "https://cultura.pozuelodealarcon.org/agenda/la-flauta-magica-de-w-a-mozart",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_pozuelodealarcon_org",
+  "lastVerifiedAt": "2026-09-28"
+}

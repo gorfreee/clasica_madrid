@@ -35,13 +35,13 @@
   ],
   "composers": [
     {
-      "name": "J.S. Bach"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Pasión según San Mateo, BWV 244",
-      "composerName": "J.S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [
@@ -56,10 +56,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-pasion-segun-san-mateo-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "excelentia-bach-pasion-segun-san-mateo-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

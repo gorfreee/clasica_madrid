@@ -26,29 +26,38 @@
   ],
   "composers": [
     {
-      "name": "Modest Músorgski"
+      "name": "Modest Mussorgski"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Alexander Borodin"
+    },
+    {
+      "name": "Serguéi Prokófiev"
     }
   ],
   "works": [
     {
       "title": "Cuadros de una exposición",
-      "composerName": "Modest Músorgski"
+      "composerName": "Modest Mussorgski"
     },
     {
       "title": "(Bilder einer Ausstellung)",
-      "composerName": "Modest Músorgski"
+      "composerName": "Modest Mussorgski"
     },
     {
       "title": "— Intermedio —",
-      "composerName": "Modest Músorgski"
+      "composerName": "Modest Mussorgski"
     },
     {
       "title": "Obras de Shostakóvich, Borodín, Prokófiev",
-      "composerName": "Modest Músorgski"
+      "composerName": "Modest Mussorgski"
     },
     {
       "title": "y otros compositores",
-      "composerName": "Modest Músorgski"
+      "composerName": "Modest Mussorgski"
     }
   ],
   "eras": [
@@ -63,10 +72,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-the-philharmonic-brass",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "hispania-concertalia-the-philharmonic-brass"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

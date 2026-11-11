@@ -89,11 +89,15 @@
   ],
   "performers": [
     {
-      "name": "JOSÉ MIGUEL PÉREZ-SIERRA/ JULIO CÉSAR PICOS",
+      "name": "José Miguel Pérez-Sierra/ Julio César Picos",
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Francisco Asenjo Barbieri"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -107,10 +111,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

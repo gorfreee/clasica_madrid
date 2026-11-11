@@ -22,34 +22,38 @@
     {
       "name": "Manuel Tévar",
       "role": "conductor"
+    },
+    {
+      "name": "Estrella Morente"
     }
   ],
   "composers": [
     {
-      "name": "FEDERICO GARCÍA LORCA (1898–1936)"
+      "name": "Constancio Hernáez"
     },
     {
-      "name": "VIII.Nana de Sevilla"
+      "name": "Federico García Lorca"
     },
     {
-      "name": "MANUEL DE FALLA (1876–1946)"
+      "name": "Manuel de Falla"
     }
   ],
   "works": [
     {
+      "title": "Reflejos de Córdoba",
+      "composerName": "Constancio Hernáez"
+    },
+    {
       "title": "Canciones españolas antiguas",
-      "composerName": "FEDERICO GARCÍA LORCA (1898–1936)"
-    },
-    {
-      "title": "IX. Los pelegrinitos",
-      "composerName": "VIII.Nana de Sevilla"
-    },
-    {
-      "title": "XII.Los reyes de la baraja"
+      "composerName": "Federico García Lorca"
     },
     {
       "title": "El amor brujo (versión 1914)",
-      "composerName": "MANUEL DE FALLA (1876–1946)"
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "7. A media noche: los sortilegios",
+      "composerName": "Manuel de Falla"
     }
   ],
   "eras": [
@@ -64,10 +68,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-estrella-morente-el-amor-brujo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "atlantida-chamber-orchestra-estrella-morente-el-amor-brujo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

@@ -1,0 +1,282 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "evt_adriansanchezballesteros_com_a_j_classical",
+    "slug": "a-j-classical-recital-de-clarinete-y-piano",
+    "title": "A & J classical — recital de clarinete y piano",
+    "status": "scheduled",
+    "venueId": "ven_casa_vacas_retiro",
+    "organizerIds": [],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_adriansanchezballesteros_com_a_j_classical_01",
+        "date": "2026-10-11",
+        "time": "19:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Adrián Sánchez Ballesteros"
+      },
+      {
+        "name": "Julio Juan Rodríguez Fernández"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Miguel Yuste"
+      },
+      {
+        "name": "Camille Saint-Saëns"
+      },
+      {
+        "name": "Francis Poulenc"
+      },
+      {
+        "name": "Johannes Brahms"
+      }
+    ],
+    "works": [
+      {
+        "title": "Capricho Pintoresco, op. 41",
+        "composerName": "Miguel Yuste"
+      },
+      {
+        "title": "Sonata para clarinete y piano en mi bemol mayor, op. 167",
+        "composerName": "Camille Saint-Saëns"
+      },
+      {
+        "title": "Sonata para clarinete y piano, FP 184",
+        "composerName": "Francis Poulenc"
+      },
+      {
+        "title": "Sonata para clarinete y piano n.º 1 en fa menor, op. 120 n.º 1",
+        "composerName": "Johannes Brahms"
+      }
+    ],
+    "eras": [
+      "romantic",
+      "twentieth"
+    ],
+    "formats": [
+      "recital"
+    ],
+    "kind": "alternative",
+    "access": "free",
+    "citations": [
+      {
+        "sourceId": "src_adriansanchezballesteros_com",
+        "url": "https://adriansanchezballesteros.com/a-j-classical",
+        "checkedAt": "2026-09-24"
+      }
+    ],
+    "primarySourceId": "src_adriansanchezballesteros_com",
+    "lastVerifiedAt": "2026-09-24"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "evt_madrid_datos_orquesta_de_camara_santa_cecilia_3ec336c2a53c0a10vgnvcm200000f921e388rcrd",
+    "slug": "orquesta-de-camara-santa-cecilia",
+    "title": "Orquesta de Cámara Santa Cecilia",
+    "status": "scheduled",
+    "venueId": "ven_parroquia_santa_maria_la_antigua",
+    "organizerIds": [],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_madrid_datos_orquesta_de_camara_santa_cecilia_3ec336c2a53c0a10vgnvcm200000f921e388rcrd_01",
+        "date": "2026-10-10",
+        "time": "20:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Orquesta de Cámara Santa Cecilia"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Jean-Baptiste Lully"
+      },
+      {
+        "name": "Carlo Pallavicino"
+      },
+      {
+        "name": "Jean-Philippe Rameau"
+      },
+      {
+        "name": "Henry Purcell"
+      },
+      {
+        "name": "Georg Friedrich Händel"
+      },
+      {
+        "name": "Jean-Marie Leclair"
+      }
+    ],
+    "works": [
+      {
+        "title": "Armide: obertura y passacaille",
+        "composerName": "Jean-Baptiste Lully"
+      },
+      {
+        "title": "L'Antiope: Vieni, corri, volami in braccio",
+        "composerName": "Carlo Pallavicino"
+      },
+      {
+        "title": "Six concerts transcrits en sextuor: movimientos de los conciertos primero y tercero",
+        "composerName": "Jean-Philippe Rameau"
+      },
+      {
+        "title": "Dido and Aeneas: Dido's Lament",
+        "composerName": "Henry Purcell"
+      },
+      {
+        "title": "Rinaldo: Lascia ch'io pianga",
+        "composerName": "Georg Friedrich Händel"
+      },
+      {
+        "title": "Concierto para violín en la menor, op. 7 n.º 5",
+        "composerName": "Jean-Marie Leclair"
+      }
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "formats": [
+      "chamber",
+      "early-music"
+    ],
+    "kind": "alternative",
+    "access": "free",
+    "citations": [
+      {
+        "sourceId": "src_ayuntamiento_madrid",
+        "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Moratalaz/Orquesta-de-Camara-Santa-Cecilia?vgnextchannel=7cb0ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=3ec336c2a53c0a10VgnVCM200000f921e388RCRD",
+        "checkedAt": "2026-10-01",
+        "externalId": "50427303"
+      }
+    ],
+    "primarySourceId": "src_ayuntamiento_madrid",
+    "lastVerifiedAt": "2026-10-01"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "evt_orquestafilarmonia_com_gala_de_ano_nuevo_2",
+    "slug": "gala-de-ano-nuevo-de-las-rozas",
+    "title": "Gala de Año Nuevo de Las Rozas",
+    "status": "scheduled",
+    "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+    "organizerIds": [],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_orquestafilarmonia_com_gala_de_ano_nuevo_2_01",
+        "date": "2027-01-02",
+        "time": "20:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Orquesta Filarmonía",
+        "role": "orchestra"
+      },
+      {
+        "name": "Compañía JAC de Ballet",
+        "role": "other"
+      },
+      {
+        "name": "Pascual Osa",
+        "role": "conductor"
+      },
+      {
+        "name": "José Antonio Checa",
+        "role": "other"
+      }
+    ],
+    "composers": [],
+    "works": [],
+    "eras": [
+      "romantic"
+    ],
+    "formats": [
+      "symphonic"
+    ],
+    "kind": "established",
+    "access": "unknown",
+    "citations": [
+      {
+        "sourceId": "src_orquestafilarmonia_com",
+        "url": "https://www.orquestafilarmonia.com/concierto/gala-de-ano-nuevo-2/",
+        "checkedAt": "2026-09-28"
+      }
+    ],
+    "primarySourceId": "src_orquestafilarmonia_com",
+    "lastVerifiedAt": "2026-09-28"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "evt_tala_producciones_1246",
+    "slug": "kebyart-quartet-punto-di-fuga",
+    "title": "Kebyart Quartet – ‘Punto di fuga’",
+    "status": "scheduled",
+    "venueId": "ven_ateneo_madrid",
+    "organizerIds": [],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_tala_producciones_1246_01",
+        "date": "2026-11-28",
+        "time": "19:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Kebyart Quartet"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Jean-Philippe Rameau"
+      },
+      {
+        "name": "César Franck"
+      },
+      {
+        "name": "Johann Sebastian Bach"
+      },
+      {
+        "name": "Franz Schubert"
+      },
+      {
+        "name": "György Ligeti"
+      }
+    ],
+    "works": [],
+    "eras": [
+      "baroque",
+      "romantic",
+      "twentieth"
+    ],
+    "formats": [
+      "chamber"
+    ],
+    "kind": "alternative",
+    "access": "unknown",
+    "citations": [
+      {
+        "sourceId": "src_tala_producciones_es",
+        "url": "https://www.tala-producciones.es/salon-del-ateneo/kebyart-quartet-punto-di-fuga",
+        "checkedAt": "2026-09-21",
+        "externalId": "1246"
+      }
+    ],
+    "primarySourceId": "src_tala_producciones_es",
+    "lastVerifiedAt": "2026-09-21"
+  }
+]

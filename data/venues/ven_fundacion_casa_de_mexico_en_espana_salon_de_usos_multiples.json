@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_fundacion_casa_de_mexico_en_espana_salon_de_usos_multiples",
+  "slug": "fundacion-casa-de-mexico-en-espana-salon-de-usos-multiples",
+  "name": "Fundación Casa de México en España — Salón de Usos Múltiples",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Alberto Aguilera, 20, 28015 Madrid",
+  "url": "https://www.casademexico.es/",
+  "parentVenueId": "ven_fundacion_casa_de_mexico_en_espana",
+  "spaceName": "Salón de Usos Múltiples",
+  "lastVerifiedAt": "2026-09-20"
+}

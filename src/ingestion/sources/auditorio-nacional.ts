@@ -1,8 +1,9 @@
+import { sourceConflict } from '../detail/conflicts.ts';
 import { parseAuditorioNacionalDetail } from '../detail/auditorio-nacional.ts';
 import { parseObservedDateTime, type IngestWindow } from '../dates.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { urlPathIdentity } from '../urls.ts';
-import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type RawEvent, type SourceAdapter, type SourceDefinition } from '../types.ts';
 
 type CalendarItem = {
   id?: unknown;
@@ -56,8 +57,20 @@ export const auditorioNacionalAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
-  hydrate(_event, body) {
-    return parseAuditorioNacionalDetail(body);
+  hydrate(event, body) {
+    const patch = parseAuditorioNacionalDetail(body);
+    if (patch.occurrences?.length && !patch.eventStatus && event.observed.occurrences.length) {
+      const listingDates = [...new Set(event.observed.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
+      const detailDates = [...new Set(patch.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
+      const dateConflict = JSON.stringify(listingDates) !== JSON.stringify(detailDates);
+      const timeConflict = detailDates.some(date => {
+        const before = [...new Set(event.observed.occurrences.filter(o => o.date === date).flatMap(o => o.time ? [o.time] : []))].sort();
+        const after = [...new Set(patch.occurrences!.filter(o => o.date === date).flatMap(o => o.time ? [o.time] : []))].sort();
+        return before.length > 0 && after.length > 0 && JSON.stringify(before) !== JSON.stringify(after);
+      });
+      if (dateConflict || timeConflict) throw sourceConflict('auditorio-nacional: calendario de ficha distinto del listado', dateConflict ? 'date' : 'time', [{ surface: 'listing:FullCalendar', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:rightcolumn', value: JSON.stringify(patch.occurrences) }]);
+    }
+    return patch;
   },
 };
 
@@ -67,9 +80,24 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const title = asNonEmptyString(item.title);
   const sourceUrl = asNonEmptyString(item.url);
   const start = asNonEmptyString(item.start);
-  if (!title || !sourceUrl || !start) return undefined;
+  if (!title && !sourceUrl) return undefined;
+  if (!title) {
+    reportAdapterDiscard(ctx, { reason: 'missing-title', sourceUrl });
+    return undefined;
+  }
+  if (!sourceUrl) {
+    reportAdapterDiscard(ctx, { reason: 'missing-url', title });
+    return undefined;
+  }
+  if (!start) {
+    reportAdapterDiscard(ctx, { reason: 'missing-date', title, sourceUrl });
+    return undefined;
+  }
   const parsed = parseObservedDateTime(start);
-  if (!parsed) return undefined;
+  if (!parsed) {
+    reportAdapterDiscard(ctx, { reason: 'invalid-date', title, sourceUrl });
+    return undefined;
+  }
   const className = asNonEmptyString(item.className);
   const id = asNonEmptyString(item.id);
   const description = asNonEmptyString(item.description);

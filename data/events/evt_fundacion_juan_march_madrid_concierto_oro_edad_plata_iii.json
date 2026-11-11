@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_oro_edad_plata_iii",
+  "slug": "oro-en-la-edad-de-plata-iii",
+  "title": "Oro en la Edad de Plata (III)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_oro_edad_plata_iii_01",
+      "date": "2027-04-21",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Seikilos",
+      "role": "ensemble"
+    },
+    {
+      "name": "Iván Görnemann"
+    },
+    {
+      "name": "Pablo Quintanilla"
+    },
+    {
+      "name": "Adrián Vázquez"
+    },
+    {
+      "name": "Lorenzo Meseguer"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bartolomé Pérez Casas"
+    },
+    {
+      "name": "Emilio Serrano"
+    },
+    {
+      "name": "Francisco Esbrí"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fuga real a tres motivos",
+      "composerName": "Bartolomé Pérez Casas"
+    },
+    {
+      "title": "Cuarteto en Re menor",
+      "composerName": "Emilio Serrano"
+    },
+    {
+      "title": "Cuarteto en Si bemol mayor",
+      "composerName": "Francisco Esbrí"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/oro-edad-plata-iii",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/oro-edad-plata-iii"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -1,17 +1,28 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
+import { planCalendar, combineCalendarEvidence, calendarObservationConflict } from './calendar-evidence.ts';
 import { madridToday } from '../lib/domain/dates.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import { canonicalValuesEqual } from '../lib/validation/promote.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Citation, Composer, Event, Occurrence, Performer, Venue, Work } from '../lib/schemas/index.ts';
-import { resolvePerformerRole } from './classification/performer-role.ts';
+import { canonicalizePerformerList } from './classification/performer-role.ts';
 import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { occurrenceIdFor, uniqueId } from './ids.ts';
 import { materialEventDiffs } from './material-diff.ts';
 import type { NormalizedEvent } from './normalize.ts';
-import { canonicalizeEventTitle } from './event-title.ts';
+import {
+  canonicalizeComposerList,
+  canonicalizeComposerName,
+  canonicalizeWorkList,
+  publishedComposerIdentity,
+  rewritePublishedComposerName,
+  rewritePublishedWorkComposer,
+  stripLeadingComposerCreditLabel,
+} from './composer-name.ts';
+import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
-import { normalizeUrl } from './urls.ts';
-import type { IngestWindow } from './dates.ts';
+import { normalizeUrl, urlsEquivalent } from './urls.ts';
+import { mergeObservedCalendars, resolveOccurrencePrecision, type IngestWindow } from './dates.ts';
 
 export type EventProposal = {
   title: string;
@@ -28,6 +39,7 @@ export type EventProposal = {
   access?: Event['access'];
   citations: Citation[];
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   eventStatus?: NormalizedEvent['eventStatus'];
 };
 
@@ -36,6 +48,8 @@ export type MergedEvent = {
   diffs: string[];
   /** Incoming values that were not applied to published canonical/enrichment fields. */
   diagnostics: string[];
+  /** The published event is returned untouched when occurrence IDs cannot be assigned. */
+  ambiguousReason?: string;
 };
 
 export function proposalFromObservation(
@@ -63,17 +77,14 @@ export function proposalFromObservation(
     title: canonicalizeEventTitle(event.title),
     status: observedStatus(event),
     venueId: options.venueId,
-    occurrences: observedSchedule(event, options.now, options.window),
-    performers: event.performers.map((item) => {
-      const role = resolvePerformerRole(item.roleText);
-      return role ? { name: item.name, role } : { name: item.name };
-    }),
-    composers: event.composers.map((item) => ({ name: item.name })),
-    works: event.works.map((item) => ({
-      title: item.title,
-      ...(item.composerName ? { composerName: item.composerName } : {}),
-    })),
+    occurrences: event.calendarEvidence
+      ? event.occurrences.filter(o => o.date >= verified)
+      : observedSchedule(event, options.now, options.window),
+    performers: canonicalizePerformerList(event.performers),
+    composers: canonicalizeComposerList(event.composers),
+    works: canonicalizeWorkList(event.works),
     citations: [citation],
+    ...(event.calendarEvidence ? { calendarEvidence: event.calendarEvidence } : {}),
     ...(event.dateFromDetail ? { dateFromDetail: true } : {}),
     ...(event.eventStatus ? { eventStatus: event.eventStatus } : {}),
   };
@@ -93,7 +104,7 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
     status: incoming.status ?? base.status,
     venueId: incoming.venueId ?? base.venueId,
     venue: incoming.venue ?? base.venue,
-    occurrences: unionOccurrences(base.occurrences, incoming.occurrences),
+    occurrences: mergeObservedCalendars(base, incoming),
     performers: preferNonEmpty(base.performers, incoming.performers),
     composers: preferNonEmpty(base.composers, incoming.composers),
     works: preferNonEmpty(base.works, incoming.works),
@@ -102,6 +113,7 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
     kind: incoming.kind ?? base.kind,
     access: mergeAccess(base.access, incoming.access),
     citations: mergeCitationLists(base.citations, incoming.citations),
+    calendarEvidence: combineCalendarEvidence(base.calendarEvidence, incoming.calendarEvidence),
     dateFromDetail: base.dateFromDetail || incoming.dateFromDetail,
     eventStatus: incoming.eventStatus ?? base.eventStatus,
   };
@@ -115,36 +127,50 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  *
  * Canonical/enrichment fields stay conservative: prefer the published value
  * over a later classifier or a thinner scrape. Empty incoming lists never
- * wipe published data. When both sides have values, keep the published ones
- * entirely (union/replace would drop `choral`, roles, or `composerName`).
+ * wipe published data. `title`, `kind` and `eras`/`formats` keep the published
+ * value when both sides have one (union/replace would drop `choral`).
+ * `performers`, `composers` and `works` grow monotonically: a later observation
+ * may append identities only when it is a compatible superset of everything
+ * already published. Matching items may still gain `role` / `composerName`;
+ * an incoming item without `role` never removes a published one. A later
+ * scrape of the same source that omits a heading-like name or a previously
+ * inferred role is not a compatible superset, so those corrections are not
+ * applied here.
+ * A Music/Música credit label is the same identity as the person it wraps, so
+ * a cleaner observation can replace `Music Gioachino Rossini` with
+ * `Gioachino Rossini` without dropping other published composers.
+ * A poorer or conflicting observation never deletes published identities.
  * Typographic title equivalents are not a disagreement.
  */
 export function mergeExistingEvent(existing: Event, proposal: EventProposal, now: Date): MergedEvent {
+  const planned = proposal.calendarEvidence ? planCalendar(existing.occurrences, proposal.occurrences, proposal.calendarEvidence, existing.id, madridToday(now)) : undefined;
+  const ambiguousReason = planned?.reason ?? occurrenceMergeConflict(existing, proposal);
+  if (ambiguousReason) return { event: existing, diffs: [], diagnostics: [ambiguousReason], ambiguousReason };
   const verified = madridToday(now);
   const status = mergeStatus(existing.status, proposal.status);
-  const occurrences = mergeOccurrences(existing, proposal, status);
+  const occurrences = planned?.occurrences?.map(item => withOccurrenceStatus(item, status === 'cancelled')) ?? mergeOccurrences(existing, proposal, status);
   const title = mergePublishedTitle(existing.title, proposal.title);
   const kind = mergePublishedKind(existing.kind, proposal.kind);
   const eras = mergePublishedTaxonomy('eras', existing.eras, proposal.eras);
   const formats = mergePublishedTaxonomy('formats', existing.formats, proposal.formats);
   const performers = mergePublishedList(
     'performers',
-    existing.performers,
-    proposal.performers,
+    existing.performers.map(withCanonicalPerformerName),
+    proposal.performers.map(withCanonicalPerformerName),
     (item) => normalizeText(item.name),
     enrichPerformer,
   );
   const composers = mergePublishedList(
     'composers',
-    existing.composers,
-    proposal.composers,
-    (item) => normalizeText(item.name),
-    (canonical: Composer) => canonical,
+    existing.composers.map(rewritePublishedComposerName),
+    canonicalizeComposerList(proposal.composers),
+    (item) => publishedComposerIdentity(item.name),
+    enrichComposer,
   );
   const works = mergePublishedList(
     'works',
-    existing.works,
-    proposal.works,
+    existing.works.map(rewritePublishedWorkComposer),
+    canonicalizeWorkList(proposal.works),
     (item) => normalizeText(item.title),
     enrichWork,
   );
@@ -152,6 +178,7 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
     schemaVersion: existing.schemaVersion,
     id: existing.id,
     slug: existing.slug,
+    ...(existing.slugAliases ? { slugAliases: existing.slugAliases } : {}),
     title: title.value,
     status,
     venueId: proposal.venueId ?? existing.venueId,
@@ -192,7 +219,7 @@ export function materialProposalConflict(left: EventProposal, right: EventPropos
   if (statuses.includes('cancelled') && statuses.some((status) => status && status !== 'cancelled')) {
     return 'status conflict: cancelled vs active';
   }
-  return undefined;
+  return calendarObservationConflict(left, right);
 }
 
 export function withCandidateEvent(event: Event, venue?: Venue): Candidate {
@@ -207,11 +234,7 @@ export function scheduleChangeOf(
 ): 'cancelled' | 'postponed' | undefined {
   if (event.eventStatus === 'cancelled') return 'cancelled';
   if (event.eventStatus === 'postponed') return 'postponed';
-  if (event.dateFromDetail && previous) {
-    const previousDate = previous.occurrences[0]?.date;
-    const nextDate = event.occurrences[0]?.date;
-    if (previousDate && nextDate && previousDate !== nextDate) return 'postponed';
-  }
+  if (event.calendarEvidence?.changes?.length && previous) return 'postponed';
   return undefined;
 }
 
@@ -303,11 +326,51 @@ function mergePublishedList<T>(
     return enrich(item, incoming[index]!);
   });
 
+  const compatibleSuperset = incomingCoversPublished(existing, incoming, identityOf);
+  if (compatibleSuperset) {
+    appendUnmatchedIncoming(value, incoming, used, identityOf);
+  }
+
   if (canonicalValuesEqual(value, incoming)) return { value };
+  if (compatibleSuperset && value.length > existing.length) return { value };
   return {
     value,
     diagnostic: `${field}: se conserva la información canónica; la observación difería`,
   };
+}
+
+function incomingCoversPublished<T>(
+  existing: T[],
+  incoming: T[],
+  identityOf: (item: T) => string,
+): boolean {
+  return existing.every((item) => {
+    const key = identityOf(item);
+    if (!key) return true;
+    return incoming.some((observed) => identityOf(observed) === key);
+  });
+}
+
+function appendUnmatchedIncoming<T>(
+  value: T[],
+  incoming: T[],
+  used: Set<number>,
+  identityOf: (item: T) => string,
+): void {
+  const seen = new Set(value.map(identityOf).filter(Boolean));
+  for (const [index, observed] of incoming.entries()) {
+    if (used.has(index)) continue;
+    const key = identityOf(observed);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    value.push(observed);
+  }
+}
+
+function withCanonicalPerformerName(performer: Performer): Performer {
+  const name = canonicalizePerformerName(performer.name);
+  if (name === performer.name) return performer;
+  return performer.role ? { name, role: performer.role } : { name };
 }
 
 function enrichPerformer(canonical: Performer, observed: Performer): Performer {
@@ -315,9 +378,30 @@ function enrichPerformer(canonical: Performer, observed: Performer): Performer {
   return { name: canonical.name, role: observed.role };
 }
 
+function enrichComposer(canonical: Composer, observed: Composer): Composer {
+  if (canonical.name === observed.name) return canonical;
+  if (!isCleanerComposerCredit(observed.name, canonical.name)) return canonical;
+  return { name: observed.name };
+}
+
+/**
+ * Same person, cleaner spelling: published still has a Music/Música wrapper
+ * that the incoming observation no longer carries.
+ */
+function isCleanerComposerCredit(observed: string, published: string): boolean {
+  if (publishedComposerIdentity(observed) !== publishedComposerIdentity(published)) return false;
+  const publishedStripped = stripLeadingComposerCreditLabel(published);
+  const observedStripped = stripLeadingComposerCreditLabel(observed);
+  const publishedHadLabel = publishedStripped !== published.trim();
+  const observedHadLabel = observedStripped !== observed.trim();
+  return publishedHadLabel && !observedHadLabel;
+}
+
 function enrichWork(canonical: Work, observed: Work): Work {
   if (canonical.composerName || !observed.composerName) return canonical;
-  return { title: canonical.title, composerName: observed.composerName };
+  const composerName = canonicalizeComposerName(observed.composerName);
+  if (!composerName) return canonical;
+  return { title: canonical.title, composerName };
 }
 
 function preferNonEmpty<T>(existing: T[], incoming: T[]): T[] {
@@ -330,29 +414,34 @@ function preferOptionalArray<T>(existing: T[] | undefined, incoming: T[] | undef
   return incoming ?? existing;
 }
 
-function unionOccurrences(
-  left: Array<{ date: string; time: string | null }>,
-  right: Array<{ date: string; time: string | null }>,
-): Array<{ date: string; time: string | null }> {
-  const seen = new Set<string>();
-  const result: Array<{ date: string; time: string | null }> = [];
-  for (const item of [...left, ...right]) {
-    const key = `${item.date}|${item.time ?? ''}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(item);
+/** A published unknown occurrence owns an ID; several new times cannot tell us which one. */
+export function occurrenceMergeConflict(existing: Event, proposal: EventProposal): string | undefined {
+  if (proposal.occurrences.length === 0) return undefined;
+  for (const current of existing.occurrences) {
+    if (current.time !== null) continue;
+    const observedTimes = proposal.occurrences
+      .filter(item => item.date === current.date && item.time !== null).map(item => item.time);
+    const times = new Set([...existing.occurrences, ...proposal.occurrences]
+      .filter(item => item.date === current.date && item.time !== null).map(item => item.time));
+    const replacingSingle = existing.occurrences.length === 1 && proposal.dateFromDetail &&
+      !proposal.occurrences.some(item => item.date === current.date);
+    if ((observedTimes.length > 0 && times.size > 1) ||
+      (replacingSingle && resolveOccurrencePrecision(proposal.occurrences).length > 1)) {
+      return `schedule-review: no se puede asignar ${current.id} sin hora a varias sesiones acreditadas`;
+    }
   }
-  return result.sort(compareOccurrence);
+  return undefined;
 }
 
 function mergeOccurrences(existing: Event, proposal: EventProposal, status: Event['status']): Occurrence[] {
-  const incoming = proposal.occurrences;
+  const incoming = resolveOccurrencePrecision(proposal.occurrences, existing.occurrences);
   const cancelled = status === 'cancelled';
   if (incoming.length === 0) {
     return existing.occurrences.map((item) => withOccurrenceStatus(item, cancelled));
   }
 
-  if (existing.occurrences.length === 1 && incoming.length === 1) {
+  if (existing.occurrences.length === 1 && incoming.length === 1 &&
+      (existing.status === 'postponed' || proposal.eventStatus === 'postponed')) {
     const current = existing.occurrences[0]!;
     const next = incoming[0]!;
     return [
@@ -360,7 +449,8 @@ function mergeOccurrences(existing: Event, proposal: EventProposal, status: Even
         {
           ...current,
           date: next.date,
-          time: next.time ?? current.time,
+          // Precision from a previous date is not evidence for a postponement.
+          time: next.time,
         },
         cancelled,
       ),
@@ -370,6 +460,11 @@ function mergeOccurrences(existing: Event, proposal: EventProposal, status: Even
   const used = new Set(existing.occurrences.map((item) => item.id));
   const unmatchedExisting = [...existing.occurrences];
   const result: Occurrence[] = [];
+  const calendar = resolveOccurrencePrecision([...existing.occurrences, ...incoming]);
+  const soleTimeOnDate = (date: string): string | undefined => {
+    const sameDate = calendar.filter(item => item.date === date);
+    return sameDate.length === 1 ? sameDate[0]!.time ?? undefined : undefined;
+  };
 
   for (const observed of incoming) {
     const exact = takeOccurrence(
@@ -380,7 +475,8 @@ function mergeOccurrences(existing: Event, proposal: EventProposal, status: Even
       exact ??
       takeOccurrence(
         unmatchedExisting,
-        (item) => item.date === observed.date && timesOpen(item.time, observed.time),
+        (item) => item.date === observed.date && item.time === null &&
+          observed.time !== null && soleTimeOnDate(observed.date) === observed.time,
       );
     if (byDate) {
       result.push(
@@ -425,29 +521,29 @@ function takeOccurrence(
   return items.splice(index, 1)[0];
 }
 
-function timesOpen(existing: string | null, incoming: string | null): boolean {
-  return !existing || !incoming || existing === incoming;
-}
-
 function withOccurrenceStatus(occurrence: Occurrence, cancelled: boolean): Occurrence {
   return cancelled ? { ...occurrence, status: 'cancelled' } : occurrence;
 }
 
-function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citation[] {
+/**
+ * Union citations without mixing identity across sources.
+ * Only the same source + equivalent URL collapses to one citation. Distinct
+ * URLs from one source and references from other sources retain their provenance.
+ */
+export function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citation[] {
   const result = [...existing];
   for (const citation of incoming) {
     const index = result.findIndex(
-      (item) => item.sourceId === citation.sourceId && urlsEquivalentish(item.url, citation.url),
+      (item) => item.sourceId === citation.sourceId && urlsEquivalent(item.url, citation.url),
     );
-    const sameSource = index < 0 ? result.findIndex((item) => item.sourceId === citation.sourceId) : index;
-    if (sameSource < 0) {
+    if (index < 0) {
       result.push(citation);
       continue;
     }
-    const current = result[sameSource]!;
-    result[sameSource] = {
+    const current = result[index]!;
+    result[index] = {
       sourceId: current.sourceId,
-      url: citation.url || current.url,
+      url: current.url,
       checkedAt: citation.checkedAt || current.checkedAt,
       ...(citation.externalId || current.externalId
         ? { externalId: citation.externalId ?? current.externalId }
@@ -455,10 +551,6 @@ function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citatio
     };
   }
   return result;
-}
-
-function urlsEquivalentish(left: string, right: string): boolean {
-  return normalizeUrl(left) === normalizeUrl(right);
 }
 
 function compareOccurrence(

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_concierto_de_camara_ii_de_la_escuela_superior_de_musica_forum_musikae",
+  "slug": "concierto-de-camara-ii-de-la-escuela-superior-de-musica-forum-musikae",
+  "title": "Concierto de Cámara II de la Escuela Superior de Música Forum Musikae",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_paco_de_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_concierto_de_camara_ii_de_la_escuela_superior_de_musica_forum_musikae_01",
+      "date": "2027-01-30",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de Cámara de la Escuela Superior de Música Forum Musikae"
+    },
+    {
+      "name": "Pablo Suárez",
+      "role": "conductor"
+    },
+    {
+      "name": "Paulo Pereira Lima",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo y orquesta nº 1 en do mayor, Hob. VII B1",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Souvenir de Florencia Op. 70",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/todos?idEvent=concierto-de-camara-ii-de-la-escuela-superior-de-musica-forum-musikae",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-10-08"
+}

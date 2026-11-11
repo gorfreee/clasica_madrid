@@ -1,0 +1,73 @@
+---
+title: "Pieza de prueba del sistema editorial"
+description: "Fixture interno para comprobar componentes, metadatos y maquetación. No es un artículo de Clásica Madrid."
+publishedAt: 2026-09-01
+updatedAt: 2026-09-20
+kind: guia
+heroImage: ../../assets/blog/fixture-hero.png
+heroAlt: "Composición geométrica en azul, crema y coral, sin motivo fotográfico, usada como imagen de prueba"
+heroCaption: "Imagen neutra generada para este fixture. No documenta una sala ni un concierto."
+heroCredit: "Clásica Madrid"
+tags:
+  - fixture
+  - prueba
+relatedVenues:
+  - teatro-real
+featured: true
+draft: true
+---
+
+import detailA from '../../assets/blog/fixture-detail-a.png';
+import detailB from '../../assets/blog/fixture-detail-b.png';
+
+Este archivo existe solo para ejercitar la infraestructura del blog. No analiza una temporada, una sala ni un concierto, y no debe publicarse mientras siga en borrador.
+
+Hay un enlace de prueba a la [agenda](/) y otro a la ficha del [Teatro Real](/lugares/teatro-real/).
+
+## Bloques de prueba
+
+Un párrafo corto, con una frase segunda para ver el ritmo del texto. La anchura de lectura no debería ocupar todo el ancho de la página.
+
+### Un subtítulo
+
+- Primera pieza del listado
+- Segunda pieza del listado
+- Tercera, para comprobar el espaciado
+
+> Una cita escrita en Markdown. No es una declaración de Clásica Madrid.
+
+<Quote attribution="Fixture interno">
+Otra cita, esta vez con atribución, para comprobar el componente editorial.
+</Quote>
+
+<Callout title="Esto no se publica">
+El archivo lleva `draft: true`. Si esta página tiene URL pública, el sistema ha fallado.
+</Callout>
+
+<Figure src={detailA} alt="Rectángulo azul y crema usado como imagen de prueba" caption="Figura de prueba, sin motivo real." credit="Clásica Madrid" />
+
+<Gallery>
+  <Figure src={detailA} alt="Primer recuadro geométrico de prueba" caption="Pieza A del fixture." credit="Clásica Madrid" />
+  <Figure src={detailB} alt="Segundo recuadro geométrico de prueba, oscuro en la mitad inferior" caption="Pieza B del fixture." credit="Clásica Madrid" />
+</Gallery>
+
+<YouTubeEmbed id="M7lc1UVf-VE" title="Vídeo de prueba del reproductor" />
+
+| Pieza | Estado |
+| --- | --- |
+| Tipo | Fixture interno |
+| Publicación | Borrador |
+
+## Otra sección
+
+Este segundo apartado existe para que el índice del artículo tenga más de un título. No añade información editorial.
+
+<ArticleCTA kind="whatsapp" />
+
+<ArticleCTA kind="agenda" />
+
+<ArticleCTA kind="internal" href="/lugares/teatro-real/" title="Ficha del Teatro Real" text="Enlace de prueba hacia un lugar que ya está en el catálogo." />
+
+<UpcomingEvents venue="teatro-real" limit={6} />
+
+<RelatedVenue slug="teatro-real" />

@@ -34,7 +34,7 @@
   ],
   "composers": [
     {
-      "name": "Leos Janácek"
+      "name": "Leoš Janáček"
     },
     {
       "name": "Germaine Tailleferre"
@@ -46,7 +46,7 @@
   "works": [
     {
       "title": "Cuarteto de cuerda núm. 1 «Sonata a Kreutzer»",
-      "composerName": "Leos Janácek"
+      "composerName": "Leoš Janáček"
     },
     {
       "title": "Cuarteto de cuerda",
@@ -69,10 +69,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-11-01",
       "externalId": "ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-11-01"
 }

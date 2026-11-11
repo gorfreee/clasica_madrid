@@ -1,0 +1,295 @@
+{
+  "runId": "38532659060",
+  "published": {
+    "schemaVersion": 1,
+    "id": "evt_auditorio_nacional_24018",
+    "slug": "barbara-hannigan-bertrand-chamayou",
+    "title": "Barbara Hannigan & Bertrand Chamayou",
+    "status": "scheduled",
+    "venueId": "ven_auditorio_nacional_sala_camara",
+    "organizerIds": [],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_auditorio_nacional_24018_01",
+        "date": "2027-04-11",
+        "time": "19:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Barbara Hannigan"
+      },
+      {
+        "name": "Bertrand Chamayou"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Olivier Messiaen"
+      },
+      {
+        "name": "Alexander Scriabin"
+      },
+      {
+        "name": "John Zorn"
+      }
+    ],
+    "works": [
+      {
+        "title": "Chants de terre et de ciel (1938)",
+        "composerName": "Olivier Messiaen"
+      },
+      {
+        "title": "Poème-nocturne , op. 61 (1911)",
+        "composerName": "Alexander Scriabin"
+      },
+      {
+        "title": "Vers la flamme , op. 72 (1914)",
+        "composerName": "Alexander Scriabin"
+      },
+      {
+        "title": "Jumalattaret ** (2012)",
+        "composerName": "John Zorn"
+      }
+    ],
+    "eras": [
+      "twentieth"
+    ],
+    "formats": [
+      "recital"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_auditorio_nacional",
+        "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+        "checkedAt": "2026-10-02",
+        "externalId": "3458720415294d028ad8af92e3777416"
+      },
+      {
+        "sourceId": "src_cndm",
+        "url": "https://cndm.inaem.gob.es/node/23814",
+        "checkedAt": "2026-10-02",
+        "externalId": "23814"
+      },
+      {
+        "sourceId": "src_cndm",
+        "url": "https://cndm.inaem.gob.es/node/24018",
+        "checkedAt": "2026-10-02",
+        "externalId": "24018"
+      }
+    ],
+    "primarySourceId": "src_auditorio_nacional",
+    "lastVerifiedAt": "2026-10-02"
+  },
+  "observations": [
+    {
+      "sourceId": "auditorio-nacional",
+      "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+      "externalId": "3458720415294d028ad8af92e3777416",
+      "observed": {
+        "title": "CNDM. Barbara Hannigan & Bertrand Chamayou",
+        "performers": [
+          {
+            "name": "BARBARA HANNIGAN",
+            "roleText": "soprano"
+          },
+          {
+            "name": "BERTRAND CHAMAYOU",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne, op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme, op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "raw": "CONCIERTO APLAZADO. AL 11 de ABRIL de 2027. BARBARA HANNIGAN soprano. BERTRAND CHAMAYOU piano. Olivier Messiaen (1908-1992). Chants de terre et de ciel (1938). Alexander Scriabin (1872-1915). Poème-nocturne, op. 61 (1911). Vers la flamme, op. 72 (1914). John Zorn (1953). Jumalattaret ** (2012). ** Estreno en España",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "venueText": "Sala de Cámara",
+        "accessText": "36, 27 y 18 € CONSULTAR ABONOS CNDM y ENTRADAS SUELTAS",
+        "programText": "Olivier Messiaen (1908-1992)\nChants de terre et de ciel (1938)\nAlexander Scriabin (1872-1915)\nPoème-nocturne, op. 61 (1911)\nVers la flamme, op. 72 (1914)\nJohn Zorn (1953)\nJumalattaret (2012)",
+        "eventStatus": "scheduled"
+      },
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+        "discrepancies": [
+          {
+            "field": "date",
+            "evidence": [
+              {
+                "surface": "listing",
+                "value": "[{\"raw\":\"2026-10-23T19:30:00+02:00\",\"date\":\"2026-10-23\",\"time\":\"19:30\"},{\"raw\":\"2027-04-11T19:30:00+02:00\",\"date\":\"2027-04-11\",\"time\":\"19:30\"}]"
+              },
+              {
+                "surface": "detail",
+                "value": "[{\"raw\":\"CONCIERTO APLAZADO. AL 11 de ABRIL de 2027. BARBARA HANNIGAN soprano. BERTRAND CHAMAYOU piano. Olivier Messiaen (1908-1992). Chants de terre et de ciel (1938). Alexander Scriabin (1872-1915). Poème-nocturne, op. 61 (1911). Vers la flamme, op. 72 (1914). John Zorn (1953). Jumalattaret ** (2012). ** Estreno en España\",\"date\":\"2027-04-11\"}]"
+              }
+            ],
+            "resolution": "detail-preferred"
+          }
+        ]
+      },
+      "dateFromDetail": true
+    },
+    {
+      "sourceId": "cndm",
+      "sourceUrl": "https://cndm.inaem.gob.es/node/23814",
+      "externalId": "23814",
+      "observed": {
+        "title": "[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+        "performers": [],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne , op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme , op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "raw": "aplazado al domingo 11/04/27",
+            "date": "2027-04-11"
+          }
+        ],
+        "description": "AVISO IMPORTANTE: Por motivos ajenos a la organización, el concierto de Barbara Hannigan y Bertrand Chamayou, programado en el ciclo Fronteras para el día viernes 23/10/26 ha sido aplazado al domingo 11/04/27 a la misma hora y en el mismo lugar.",
+        "venueText": "Auditorio Nacional (Cámara) | Madrid",
+        "seriesText": "Fronteras",
+        "accessText": "De 18 € a 36 €",
+        "programText": "Olivier Messiaen (1908-1992) Chants de terre et de ciel (1938) Alexander Scriabin (1872-1915) Poème-nocturne , op. 61 (1911) Vers la flamme , op. 72 (1914) John Zorn (1953) Jumalattaret ** (2012) ** Estreno en España",
+        "eventStatus": "scheduled"
+      },
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://cndm.inaem.gob.es/node/23814",
+        "discrepancies": [
+          {
+            "field": "date",
+            "evidence": [
+              {
+                "surface": "listing",
+                "value": "[{\"raw\":\"2026-10-23 19:30\",\"date\":\"2026-10-23\",\"time\":\"19:30\"}]"
+              },
+              {
+                "surface": "detail",
+                "value": "[{\"raw\":\"aplazado al domingo 11/04/27\",\"date\":\"2027-04-11\"}]"
+              }
+            ],
+            "resolution": "detail-preferred"
+          }
+        ]
+      },
+      "dateFromDetail": true
+    },
+    {
+      "sourceId": "cndm",
+      "sourceUrl": "https://cndm.inaem.gob.es/node/24018",
+      "externalId": "24018",
+      "observed": {
+        "title": "BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+        "performers": [],
+        "composers": [
+          {
+            "name": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "name": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "name": "John Zorn (1953)"
+          }
+        ],
+        "works": [
+          {
+            "title": "Chants de terre et de ciel (1938)",
+            "composerName": "Olivier Messiaen (1908-1992)"
+          },
+          {
+            "title": "Poème-nocturne , op. 61 (1911)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Vers la flamme , op. 72 (1914)",
+            "composerName": "Alexander Scriabin (1872-1915)"
+          },
+          {
+            "title": "Jumalattaret (2012)",
+            "composerName": "John Zorn (1953)"
+          }
+        ],
+        "occurrences": [
+          {
+            "raw": "19:30 Abril/27 Dom11",
+            "date": "2027-04-11",
+            "time": "19:30"
+          }
+        ],
+        "description": "El Centro Nacional de Difusión Musical (CNDM) abre el ciclo Fronteras en la Sala de Cámara con un recital de Barbara Hannigan y Bertrand Chamayou que reúne tres formas muy distintas de entender la modernidad musical. Los Chants de terre et de ciel de Olivier Messiaen, inspirados por la fe y la naturaleza, dialogan con las últimas obras para piano de Alexander Scriabin, escritas en la etapa final de un lenguaje cada vez más libre y visionario. Completa el programa Jumalattaret , de John Zorn, en su estreno en España, una obra concebida para voz y piano que incorpora referencias a la mitología finlandesa y amplía el universo expresivo de uno de los compositores más inquietos de nuestro tiempo. Intérpretes : Barbara Hannigan, soprano Bertrand Chamayou, piano",
+        "venueText": "Auditorio Nacional (Cámara) | Madrid",
+        "seriesText": "Fronteras",
+        "accessText": "De 18 € a 36 €",
+        "programText": "Olivier Messiaen (1908-1992) Chants de terre et de ciel (1938) Alexander Scriabin (1872-1915) Poème-nocturne , op. 61 (1911) Vers la flamme , op. 72 (1914) John Zorn (1953) Jumalattaret ** (2012) ** Estreno en España"
+      },
+      "hydration": {
+        "status": "succeeded",
+        "detailUrl": "https://cndm.inaem.gob.es/node/24018"
+      },
+      "dateFromDetail": true
+    }
+  ]
+}

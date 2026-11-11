@@ -1,0 +1,101 @@
+---
+import type { MarkdownHeading } from 'astro';
+import { tocTree } from '../../lib/presentation/blog.ts';
+import TocList from './TocList.astro';
+
+type Props = {
+  headings: MarkdownHeading[];
+};
+
+const tree = tocTree(Astro.props.headings);
+---
+
+{
+  tree.length > 0 && (
+    <div class="article-toc">
+      <details class="toc toc--mobile">
+        <summary>En este artículo</summary>
+        <TocList items={tree} />
+      </details>
+      <nav class="toc toc--desktop" aria-label="Contenido del artículo">
+        <p class="toc__label">En este artículo</p>
+        <TocList items={tree} />
+      </nav>
+    </div>
+  )
+}
+
+<style>
+  .toc {
+    font-size: .92rem;
+    line-height: 1.35;
+  }
+
+  .toc__label {
+    margin: 0 0 .7rem;
+    color: var(--color-text-muted);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .toc :global(ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .toc :global(li + li) {
+    margin-top: .45rem;
+  }
+
+  .toc :global(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .toc :global(a:hover) {
+    color: var(--color-accent);
+  }
+
+  .toc :global(.toc__children) {
+    margin-top: .3rem;
+    padding-left: .85rem;
+  }
+
+  .toc :global(.toc__children a) {
+    color: var(--color-text-muted);
+    font-size: .85rem;
+  }
+
+  .toc--mobile {
+    border: 1px solid var(--color-text);
+    background: var(--color-surface);
+  }
+
+  .toc--mobile summary {
+    padding: .8rem 1rem;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .toc--mobile :global(ol) {
+    padding: .15rem 1rem 1rem;
+  }
+
+  @media (max-width: 860px) {
+    .toc--desktop {
+      display: none;
+    }
+  }
+
+  @media (min-width: 861px) {
+    .toc--mobile {
+      display: none;
+    }
+  }
+</style>

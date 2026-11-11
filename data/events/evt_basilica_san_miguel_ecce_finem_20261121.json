@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_basilica_san_miguel_ecce_finem_20261121",
+  "slug": "ecce-finem-vetus-carmina-basilica-san-miguel",
+  "title": "Ecce finem — Vetus Carmina",
+  "status": "scheduled",
+  "venueId": "ven_basilica_pontificia_san_miguel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_basilica_san_miguel_ecce_finem_20261121_01",
+      "date": "2026-11-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vetus Carmina",
+      "role": "choir"
+    },
+    {
+      "name": "Arturo Moscoso",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Ockeghem"
+    },
+    {
+      "name": "Antoine Busnois"
+    },
+    {
+      "name": "Andrés Poncela"
+    },
+    {
+      "name": "Cristóbal de Morales"
+    },
+    {
+      "name": "Jakob Obrecht"
+    },
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "Nicolas Gombert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Kyrie de Fors seulement",
+      "composerName": "Johannes Ockeghem"
+    },
+    {
+      "title": "Gloria de L’homme armé",
+      "composerName": "Antoine Busnois"
+    },
+    {
+      "title": "Lamentaciones alrededor del fuego: I. Nos; II. Los sueños se enredan en nuestras gargantas; III. Hacia un cielo sin nombre",
+      "composerName": "Andrés Poncela"
+    },
+    {
+      "title": "Zain. Candidiores nazarei",
+      "composerName": "Cristóbal de Morales"
+    },
+    {
+      "title": "Mille quingentis",
+      "composerName": "Jakob Obrecht"
+    },
+    {
+      "title": "Sanctus de Ascendens Christus",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Tribulatio cordis mei",
+      "composerName": "Nicolas Gombert"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-ecce-finem/",
+      "checkedAt": "2026-11-10",
+      "externalId": "4871"
+    },
+    {
+      "sourceId": "src_vivaticket_es",
+      "url": "https://www.vivaticket.es/ticket/eccefinem/ECCE1126",
+      "checkedAt": "2026-11-10",
+      "externalId": "ECCE1126"
+    }
+  ],
+  "primarySourceId": "src_vivaticket_es",
+  "lastVerifiedAt": "2026-11-10"
+}

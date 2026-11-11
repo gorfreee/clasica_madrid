@@ -1,0 +1,133 @@
+---
+import { assertYouTubeId, youtubePosterUrl, youtubeWatchUrl } from '../../lib/presentation/youtube.ts';
+
+type Props = {
+  id: string;
+  title: string;
+};
+
+const id = assertYouTubeId(Astro.props.id);
+const title = Astro.props.title.trim();
+if (!title) throw new Error('YouTubeEmbed: title es obligatorio');
+const poster = youtubePosterUrl(id);
+const watch = youtubeWatchUrl(id);
+---
+
+<div class="youtube-facade" data-youtube-facade>
+  <button type="button" data-youtube-id={id} data-youtube-title={title} aria-label={`Reproducir: ${title}`}>
+    <img src={poster} alt="" width="480" height="360" loading="lazy" decoding="async" />
+    <span class="youtube-facade__play" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+        <path fill="currentColor" d="M8 5.5v13l11-6.5-11-6.5Z"></path>
+      </svg>
+    </span>
+    <span class="youtube-facade__title">{title}</span>
+  </button>
+  <noscript>
+    <a href={watch}>Ver «{title}» en YouTube</a>
+  </noscript>
+</div>
+
+<script>
+  import { youtubeEmbedUrl } from '../../lib/presentation/youtube.ts';
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-youtube-id]')) {
+    if (button.dataset.youtubeBound === 'true') continue;
+    button.dataset.youtubeBound = 'true';
+    button.addEventListener('click', () => {
+      const videoId = button.dataset.youtubeId;
+      if (!videoId) return;
+      let src: string;
+      try {
+        src = youtubeEmbedUrl(videoId);
+      } catch {
+        return;
+      }
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.title = button.dataset.youtubeTitle || 'Vídeo';
+      iframe.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      const frame = button.closest('[data-youtube-facade]');
+      if (frame) frame.replaceChildren(iframe);
+      else button.replaceWith(iframe);
+    });
+  }
+</script>
+
+<style>
+  .youtube-facade {
+    position: relative;
+    margin: 1.6rem 0;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-text);
+    color: var(--color-surface);
+  }
+
+  .youtube-facade button {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .youtube-facade img,
+  .youtube-facade iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+  }
+
+  .youtube-facade__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: 3.4rem;
+    height: 3.4rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-text);
+    transform: translate(-50%, -50%);
+  }
+
+  .youtube-facade__title {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: .7rem .9rem;
+    background: color-mix(in srgb, var(--color-text) 78%, transparent);
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  .youtube-facade button:hover .youtube-facade__play,
+  .youtube-facade button:focus-visible .youtube-facade__play {
+    background: var(--color-surface);
+  }
+
+  .youtube-facade noscript a {
+    position: absolute;
+    right: .8rem;
+    bottom: .8rem;
+    color: var(--color-surface);
+  }
+</style>

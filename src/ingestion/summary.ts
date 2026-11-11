@@ -1,6 +1,9 @@
-import type { IngestRunSummary } from './types.ts';
+import { temporalCoverageLabel } from './coverage.ts';
+import { formatProviderCountList } from './ai-provider-counts.ts';
+import { emptyIngestQualitySummary, type IngestAiRouteSummary, type IngestRunSummary } from './types.ts';
 
 export function formatRunSummary(summary: IngestRunSummary): string {
+  const quality = summary.quality ?? emptyIngestQualitySummary();
   const lines = [
     `Ventana: ${summary.window.from} → ${summary.window.to}`,
     `Salud: ${summary.health}`,
@@ -16,6 +19,8 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     lines.push(`  - ${failure.sourceId}: ${failure.message}`);
   }
   lines.push(
+    ...Object.entries(summary.sourceResults ?? {}).map(([id, r]) =>
+      `Fuente ${id}: extracción ${r.extraction.status}; cobertura ${temporalCoverageLabel(r.temporalCoverage)}; extraídos ${r.extractedEvents}; fichas necesarias ${r.hydrationRequired}, intentadas/correctas/fallidas ${r.hydrationAttempted}/${r.hydrationSucceeded}/${r.hydrationFailed}; severa ${r.hydrationSevere}; desapariciones ${r.disappearanceEligible ? 'evaluables' : 'no evaluables'}`),
     `RawEvents encontrados: ${summary.rawEvents}`,
     `Hidratación de fichas: intentadas ${summary.detailHydrationAttempted}, correctas ${summary.detailHydrationSucceeded}, fallidas ${summary.detailHydrationFailed}`,
     `Fichas no solicitadas: fuera de ventana ${summary.detailHydrationSkippedOutsideWindow ?? 0}, circuito abierto ${summary.detailHydrationSkippedCircuitOpen ?? 0}`,
@@ -39,16 +44,41 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  ai-error: ${summary.ai.error}`,
     `  taxonomy intentadas: ${summary.ai.taxonomyAttempted}`,
     `  taxonomy rellenadas: ${summary.ai.taxonomyFilled}`,
+    ...Object.entries(summary.ai.byPurpose).map(([purpose, counts]) =>
+      `  ${purpose}: intentadas ${counts.attempted}, resueltas ${counts.resolved}, sin resolver ${counts.unresolved}, errores ${counts.errors}`,
+    ),
     `  http: ${summary.ai.httpRequests}`,
+    `  llamadas lógicas: ${summary.ai.logicalCalls}`,
     `  caché: ${summary.ai.cacheHits}`,
     `  pendientes recuperables: ${summary.ai.deferred}`,
-    `  retries: ${summary.ai.retries}`,
-    `  fallbacks de modelo: ${summary.ai.modelFallbacks}`,
-    ...formatCountMap('requests por modelo', summary.ai.requestsByModel),
-    ...formatCountMap('clasificaciones por modelo', summary.ai.classificationsByModel),
-    ...formatCountMap('tokens de entrada medidos', summary.ai.inputTokensByModel),
-    ...formatCountMap('requests del día (local)', summary.ai.dailyRequestsByModel),
+    `  retries (misma route): ${summary.ai.sameRouteRetries}`,
+    `  HTTP de fallback: ${summary.ai.httpFallbacks}`,
+    `  llamadas con fallback: ${summary.ai.fallbackCalls}`,
+    `  circuitos abiertos: ${summary.ai.circuitOpenRoutes}`,
+    `  rate limits: ${summary.ai.rateLimits}`,
+    `  cuotas diarias agotadas: ${summary.ai.quotaExhausted}`,
+    `  concurrency-pressure: ${summary.ai.concurrencyPressure}`,
+    ...formatProviderCountMap('requests por provider', summary.ai.requestsByProvider, summary.ai.routes),
+    ...formatProviderCountMap('clasificaciones por provider', summary.ai.classificationsByProvider, summary.ai.routes),
+    ...formatCountMap('requests HTTP por purpose', summary.ai.requestsByPurpose),
+    ...formatCountMap('fallos técnicos por tipo', summary.ai.failuresByKind),
+    ...formatCountMap('rate limits por provider', summary.ai.rateLimitsByProvider),
+    ...formatCountMap('concurrency-pressure por provider', summary.ai.concurrencyPressureByProvider),
+    ...formatCountMap('presión por dimensión', summary.ai.pressureByKind),
+    ...formatAiRouteLines(summary.ai.routes),
+    ...formatCountMap('tokens de entrada medidos por route', summary.ai.inputTokensByRoute),
+    ...formatCountMap('tokens de salida medidos por route', summary.ai.outputTokensByRoute),
+    ...formatCountMap('tokens de razonamiento medidos por route', summary.ai.thoughtTokensByRoute),
+    ...formatCountMap('requests del día por route', summary.ai.dailyRequestsByRoute),
+    'Calidad de metadatos (candidatos de la run):',
+    `  composers: poblados ${quality.composers.populated}, sin resolver ${quality.composers.unresolved}, sin evidencia de programa ${quality.composers.unresolvedNoProgramEvidence}`,
+    `  eras: pobladas ${quality.eras.populated}, sin resolver ${quality.eras.unresolved}`,
+    `  formats: poblados ${quality.formats.populated}, sin resolver ${quality.formats.unresolved}`,
+    `  access: free ${quality.access.free}, paid ${quality.access.paid}, sin resolver ${quality.access.unresolved}, sin evidencia ${quality.access.unresolvedNoEvidence}, con texto ambiguo ${quality.access.unresolvedWithEvidence}`,
     `Descartados estructuralmente: ${summary.skippedUnusable}`,
+    `Descartes internos de adapters: ${summary.adapterDiscards?.total ?? 0}`,
+    ...formatCountMap('descartes por fuente', summary.adapterDiscards?.bySource ?? {}),
+    ...formatCountMap('descartes por motivo', summary.adapterDiscards?.byReason ?? {}),
     `Candidatos generados: ${summary.candidates}`,
     `Eventos nuevos: ${summary.newEvents}`,
     `Eventos actualizados: ${summary.updatedEvents}`,
@@ -56,6 +86,7 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `Ambiguos: ${summary.ambiguous}`,
     `Posiblemente desaparecidos: ${summary.possiblyMissing}`,
     `Duplicados del lote: ${summary.batchDuplicates}`,
+    `Corroboraciones entre fuentes: ${summary.crossSourceCorroborations}`,
   );
   if (summary.dryRun) {
     lines.push('Modo dry-run: no se ha escrito nada en el catálogo. La IA puede guardar caché, cuotas y pendientes locales.');
@@ -74,6 +105,39 @@ function formatCountMap(label: string, counts: Record<string, number>): string[]
   const entries = Object.entries(counts).filter(([, value]) => value > 0);
   if (entries.length === 0) return [];
   return [`  ${label}: ${entries.map(([name, value]) => `${name}=${value}`).join(', ')}`];
+}
+
+function formatProviderCountMap(
+  label: string,
+  counts: Record<string, number> | undefined,
+  routes: IngestAiRouteSummary[] | undefined,
+): string[] {
+  const formatted = formatProviderCountList(counts, routes, 'equals');
+  if (!formatted) return [];
+  return [`  ${label}: ${formatted}`];
+}
+
+function formatPressureKinds(counts: Record<string, number> | undefined): string | undefined {
+  const entries = Object.entries(counts ?? {}).filter(([, value]) => value > 0);
+  if (entries.length === 0) return undefined;
+  return `presión ${entries.map(([name, value]) => `${name} ${value}`).join(', ')}`;
+}
+
+function formatAiRouteLines(routes: IngestAiRouteSummary[]): string[] {
+  const active = routes.filter((route) => route.httpRequests > 0 || route.circuitOpen);
+  if (active.length === 0) return [];
+  return [
+    '  por route:',
+    ...active.map((route) => {
+      const extra = [
+        route.circuitOpen ? `circuito abierto${route.circuitReason ? ` (${route.circuitReason})` : ''}` : undefined,
+        route.rateLimits ? `rate-limit ${route.rateLimits}` : undefined,
+        route.concurrencyPressure ? `concurrency-pressure ${route.concurrencyPressure}` : undefined,
+        formatPressureKinds(route.pressureByKind),
+      ].filter(Boolean);
+      return `    ${route.routeId}: ${route.httpRequests} HTTP, ${route.valid} válidas${extra.length ? `; ${extra.join('; ')}` : ''}`;
+    }),
+  ];
 }
 
 function suffixList(ids: string[]): string {

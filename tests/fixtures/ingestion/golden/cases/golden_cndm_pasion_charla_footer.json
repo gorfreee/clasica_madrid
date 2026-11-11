@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cndm_pasion_charla_footer",
+  "origin": "published-catalog",
+  "sourceId": "cndm",
+  "sourceUrl": "https://cndm.inaem.gob.es/node/23804",
+  "listingTitle": "COLLEGIUM 1704: \"LA PASIÓN SEGÚN SAN MATEO\" (J. S. BACH)",
+  "observed": {
+    "title": "COLLEGIUM 1704: \"LA PASIÓN SEGÚN SAN MATEO\" (J. S. BACH)",
+    "description": "Václav Luks regresa con su orquesta y coro barrocos Collegium 1704 para interpretar La pasión según san Mateo, BWV 244, una de las mayores cimas de la música occidental. CONTEXTOS BARROCOS Charlas previas al ciclo de conciertos de Universo Barroco en la Sala Sinfónica. Sesiones de cuarenta y cinco minutos. 05/03/27 | 18:00 h Charla sobre el concierto de Collegium 1704.",
+    "seriesText": "Universo Barroco",
+    "venueText": "Auditorio Nacional (Sinfónica) | Madrid",
+    "accessText": "De 15 € a 50 €",
+    "programText": "Johann Sebastian Bach (1685-1750) La pasión según san Mateo, BWV 244 (1727)",
+    "performers": [
+      { "name": "Václav Luks", "roleText": "director" },
+      { "name": "Collegium 1704" },
+      { "name": "Collegium Vocale 1704" }
+    ],
+    "composers": [
+      { "name": "Johann Sebastian Bach (1685-1750)" }
+    ],
+    "works": [
+      {
+        "title": "La pasión según san Mateo, BWV 244 (1727)",
+        "composerName": "Johann Sebastian Bach (1685-1750)"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["early-music", "choral", "symphonic", "chamber"],
+    "eras": ["baroque"],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Pasión de Bach listada como programa de Universo Barroco. El pie de charlas previas al ciclo no convierte el concierto en actividad educativa ni en coprincipalidad.",
+  "notes": "El listing no trae compositor ni obra; la ficha sí. No decidir por el título del listing.",
+  "checkedAt": "2026-09-14"
+}

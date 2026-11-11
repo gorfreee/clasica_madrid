@@ -29,7 +29,7 @@
     "kind": "alternative",
     "access": "unknown"
   },
-  "reason": "Concierto de música antigua (ensemble Entrebescant) en un museo. El título y el grupo bastan para el ámbito; no se copian obras desde el catálogo publicado si la extracción de la ficha no las aisló de forma limpia.",
-  "notes": "El catálogo publicado sí lista cantigas y estampies. El golden set no las marca como observed aquí para no mezclar hechos de otra pasada editorial con lo extraído de esta consulta.",
+  "reason": "Concierto de música antigua (ensemble Entrebescant) en un museo. El título y el nombre del grupo no bastan por sí solos para un include automático: hace falta un ancla clásica/académica observada (repertorio, declaración o ciclo).",
+  "notes": "El catálogo publicado sí lista cantigas y estampies. El golden set no las marca como observed aquí para no mezclar hechos de otra pasada editorial con lo extraído de esta consulta. Un ai-include grounded sólo en el nombre del ensemble queda uncertain (ai-weak-include-evidence).",
   "checkedAt": "2026-08-29"
 }

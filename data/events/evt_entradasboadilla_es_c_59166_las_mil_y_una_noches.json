@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradasboadilla_es_c_59166_las_mil_y_una_noches",
+  "slug": "las-mil-y-una-noches",
+  "title": "Las mil y una noches",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_municipal_raphael",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradasboadilla_es_c_59166_las_mil_y_una_noches_01",
+      "date": "2026-10-31",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata da Vinci",
+      "role": "ensemble"
+    },
+    {
+      "name": "Martín Llade"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Nikolai Rimsky-Korsakov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sheherezade",
+      "composerName": "Nikolai Rimsky-Korsakov"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradasboadilla_es",
+      "url": "https://entradasboadilla.es/evento/c_59166-las-mil-y-una-noches",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_entradasboadilla_es",
+  "lastVerifiedAt": "2026-09-28"
+}

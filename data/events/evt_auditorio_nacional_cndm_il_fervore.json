@@ -17,46 +17,46 @@
   ],
   "performers": [
     {
-      "name": "IL FERVORE"
+      "name": "Il Fervore"
     },
     {
-      "name": "JESÚS MERINO"
+      "name": "Jesús Merino"
     },
     {
-      "name": "FRANCESCA LOMBARDI MAZZULLI"
+      "name": "Francesca Lombardi Mazzulli"
     },
     {
-      "name": "SOPHIE JUNKER"
+      "name": "Sophie Junker"
     },
     {
-      "name": "LUCÍA MARTÍN-CARTÓN"
+      "name": "Lucía Martín-Cartón"
     },
     {
-      "name": "AURORA PEÑA"
+      "name": "Aurora Peña"
     },
     {
-      "name": "LUCÍA CAIHUELA"
+      "name": "Lucía Caihuela"
     },
     {
-      "name": "PILAR ALVA"
+      "name": "Pilar Alva"
     },
     {
-      "name": "ALAIN DAMAS"
+      "name": "Alain Damas"
     }
   ],
   "composers": [
     {
-      "name": "Giovanni Battista Mele (ca. 1701-1752)"
+      "name": "Giovanni Battista Mele"
     }
   ],
   "works": [
     {
       "title": "Júpiter y Calisto, zarzuela barroca en dos jornadas ø+ (ca. 1736)",
-      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+      "composerName": "Giovanni Battista Mele"
     },
     {
       "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
-      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+      "composerName": "Giovanni Battista Mele"
     }
   ],
   "eras": [
@@ -72,7 +72,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-il-fervore",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-il-fervore"
     },
     {
@@ -83,5 +83,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

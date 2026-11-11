@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madridsinfonica_com_espana_sinfonica",
+  "slug": "espana-sinfonica",
+  "title": "España Sinfónica",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [
+    "org_madrid_sinfonica_msda"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madridsinfonica_com_espana_sinfonica_01",
+      "date": "2026-11-28",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Madrid Sinfónica MSDA",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Gustavo Gill"
+    },
+    {
+      "name": "Carlos Danés"
+    }
+  ],
+  "works": [
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Cantar de los Cantares",
+      "composerName": "Gustavo Gill"
+    },
+    {
+      "title": "Retratos de España",
+      "composerName": "Carlos Danés"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_madridsinfonica_com",
+      "url": "https://madridsinfonica.com/evento/espana-sinfonica",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_madridsinfonica_com",
+  "lastVerifiedAt": "2026-10-29"
+}

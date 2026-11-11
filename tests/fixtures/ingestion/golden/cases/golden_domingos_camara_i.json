@@ -21,11 +21,11 @@
   },
   "expected": {
     "eligibility": "include",
-    "formats": ["symphonic", "chamber"],
+    "formats": ["chamber"],
     "eras": [],
     "kind": "established",
     "access": "paid"
   },
-  "reason": "La ficha oficial describe una serie de conciertos de cámara de los solistas de la Orquesta Titular. No hay programa de esta sesión, pero hay evidencia suficiente de un concierto real dentro de un ciclo explícitamente de música de cámara. Los compositores citados son el eje de la temporada de ópera y no se copian como obras de este concierto. El classifier también asigna `symphonic` porque el nombre del intérprete contiene «orquesta»; el catálogo publicado conserva `chamber`.",
+  "reason": "La ficha oficial describe una serie de conciertos de cámara de los solistas de la Orquesta Titular. No hay programa de esta sesión, pero hay evidencia suficiente de un concierto real dentro de un ciclo explícitamente de música de cámara. Los compositores citados son el eje de la temporada de ópera y no se copian como obras de este concierto. «solistas de la Orquesta Titular» nombra a solistas, no a la orquesta como formación de este concierto: chamber, no symphonic.",
   "checkedAt": "2026-08-29"
 }

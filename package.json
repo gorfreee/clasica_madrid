@@ -17,22 +17,30 @@
     "ingest:source": "tsx src/cli/ingest.ts source",
     "ingest:discovery": "tsx src/cli/ingest.ts discovery",
     "ingest:discovery-context": "tsx src/cli/discovery-context.ts",
+    "ingest:discovery-automation": "tsx src/cli/discovery-automation.ts",
+    "ai:smoke": "tsx src/cli/smoke-ai-route.ts",
+    "ai:smoke:all": "tsx src/cli/smoke-ai-route.ts --all-routes",
+    "ai:qualify": "tsx src/cli/qualify-ai-route.ts",
     "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "architecture:render": "node scripts/render-architecture.mjs",
+    "architecture:check": "node scripts/render-architecture.mjs --check"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/mdx": "^8.0.2",
+    "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/vite": "^4.0.0",
-    "astro": "^7.2.9",
+    "astro": "^7.2.10",
     "tailwindcss": "^4.0.0",
-    "zod": "^4.5.1"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@playwright/test": "^1.62.1",
     "@types/node": "^22.10.0",
     "exceljs": "^4.4.0",
+    "playwright-core": "^1.62.1",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.11"

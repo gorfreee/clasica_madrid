@@ -1,3 +1,5 @@
+import type { BatchApplyResult } from './batch.ts';
+import type { ValidationIssue } from '../lib/validation/report.ts';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -12,8 +14,9 @@ import type { IdentityMethod } from './identity.ts';
 import type { ReconcileAction } from './reconcile.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { ObservedComposer, ObservedPerson, ObservedWork } from './observed.ts';
-import type { IngestRunSummary, RawEvent } from './types.ts';
-import { emptyIngestAiSummary } from './types.ts';
+import type { AdapterDiscard, IngestRunSummary, RawEvent } from './types.ts';
+import { emptyIngestAiSummary, emptyIngestQualitySummary } from './types.ts';
+import { deriveIngestOutcome, type IngestOutcome } from './outcome.ts';
 import type { IngestWindow } from './dates.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
 
@@ -108,6 +111,7 @@ export type IngestEventDecision = {
   eras?: FieldResolution<Era[]>;
   kind?: FieldResolution<EventKind>;
   access?: FieldResolution<AccessMode>;
+  composers?: FieldResolution<ObservedComposer[]>;
   publishable: boolean;
   candidateGenerated: boolean;
   identity?: {
@@ -147,6 +151,13 @@ export type IngestEventDecision = {
    * Present only when a Candidate exists. Not sent to the classifier.
    */
   candidate?: ReportCandidateSnapshot;
+  /**
+   * Single diagnostic result of this observation. Derived from the decision
+   * the pipeline already took. Not an editorial source of truth.
+   */
+  outcome?: IngestOutcome;
+  /** Canonical skip / eligibility / identity reason when the outcome has one. */
+  outcomeReason?: string;
 };
 
 /**
@@ -181,7 +192,14 @@ export type IngestReport = {
   summary: IngestRunSummary;
   events: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
+  /**
+   * Recognized adapter candidates dropped before RawEvent. Diagnostic only.
+   * Counts also live on `summary.adapterDiscards`.
+   */
+  adapterDiscards?: AdapterDiscard[];
   failure?: IngestFailureInfo;
+  /** Unexpected losses between reconciliation and publication, with canonical IDs. */
+  publicationIssues?: ValidationIssue[];
 };
 
 export type DecisionInput = {
@@ -234,7 +252,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.candidate) decision.candidate = snapshotCandidate(input.candidate);
   decision.observed = snapshotObservedFacts(input.raw);
   if (input.normalizedEvent) decision.normalized = snapshotNormalizedFacts(input.normalizedEvent);
-  if (input.listing && (input.raw.hydration?.status ?? 'not-requested') === 'succeeded') {
+  if (input.listing && (input.raw.hydration?.status ?? 'not-requested') !== 'not-requested') {
     decision.listing = snapshotObservedFacts(input.listing);
   }
 
@@ -254,7 +272,13 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
     if (kind) decision.kind = kind;
     const access = fieldOf(classification.access);
     if (access) decision.access = access;
+    const composers = fieldOf(classification.composers);
+    if (composers) decision.composers = composers;
   }
+
+  const derived = deriveIngestOutcome(decision);
+  decision.outcome = derived.outcome;
+  if (derived.reason) decision.outcomeReason = derived.reason;
 
   return decision;
 }
@@ -262,12 +286,14 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
 export function buildIngestReport(
   run: {
     summary: IngestRunSummary;
+    apply?: Pick<BatchApplyResult, 'report'>;
     decisions: IngestEventDecision[];
     possiblyMissing?: PossiblyMissingEvent[];
+    adapterDiscards?: AdapterDiscard[];
   },
   generatedAt: Date,
 ): IngestReport {
-  return {
+  const report: IngestReport = {
     schemaVersion: 1,
     generatedAt: generatedAt.toISOString(),
     dryRun: run.summary.dryRun,
@@ -279,6 +305,12 @@ export function buildIngestReport(
     events: run.decisions,
     possiblyMissing: run.possiblyMissing ?? [],
   };
+  const publicationIssues = run.apply?.report.issues.filter(issue => issue.code === 'publication-integrity') ?? [];
+  if (publicationIssues.length > 0) report.publicationIssues = publicationIssues;
+  if (run.adapterDiscards && run.adapterDiscards.length > 0) {
+    report.adapterDiscards = run.adapterDiscards;
+  }
+  return report;
 }
 
 export function buildFatalIngestReport(options: {
@@ -300,6 +332,7 @@ export function buildFatalIngestReport(options: {
     skippedUnusable: 0,
     eligibility: { include: 0, exclude: 0, uncertain: 0 },
     ai: emptyIngestAiSummary(),
+    quality: emptyIngestQualitySummary(),
     candidates: 0,
     newEvents: 0,
     updatedEvents: 0,
@@ -307,6 +340,7 @@ export function buildFatalIngestReport(options: {
     ambiguous: 0,
     possiblyMissing: 0,
     batchDuplicates: 0,
+    crossSourceCorroborations: 0,
     written: [],
     dryRun: options.dryRun,
     detailHydrationAttempted: 0,

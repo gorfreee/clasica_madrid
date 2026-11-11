@@ -1,9 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
+  canPairAsAuditorioComposer,
+  canPairAsLookaheadComposer,
+  extractStandaloneKnownComposers,
   findProgramStartIndex,
+  looksLikeComposerNameList,
+  looksLikeKnownComposerPairHeading,
+  looksLikeRoleOnlyLine,
   parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
+  parseComposerColonWork,
   parseComposerYearWork,
+  parseDashRoleCredit,
+  parseKnownComposerPrefixWork,
+  parseWorkThenPersonCredit,
   segmentAuditorioBlocks,
 } from '../src/ingestion/detail/auditorio-segments.ts';
 
@@ -13,6 +23,12 @@ describe('segmentación performer/programa del Auditorio', () => {
       ['Beatrice Rana, piano', 'Programa', 'Johann Sebastian Bach', 'Concierto italiano'],
     ]);
     expect(segments.performerLines).toEqual(['Beatrice Rana, piano']);
+    expect(parseAuditorioPersonLine('Beatrice Rana, piano')).toEqual({
+      name: 'Beatrice Rana',
+      roleText: 'piano',
+    });
+    expect(parseAuditorioPersonLine('Recital de, piano')).toBeUndefined();
+    expect(parseAuditorioPersonCredits('Camerata Musicalis').some((person) => person.name === 'Recital de')).toBe(false);
     expect(segments.programLines[0]).toBe('Programa');
   });
 
@@ -65,6 +81,24 @@ describe('segmentación performer/programa del Auditorio', () => {
     expect(parseAuditorioPersonLine('Pause')).toBeUndefined();
     expect(parseAuditorioPersonLine('Proyecto artístico y dirección')).toBeUndefined();
     expect(parseAuditorioPersonLine('Jesús De Monasterio, Léo Delibes')).toBeUndefined();
+    expect(parseAuditorioPersonLine('I PARTE')).toBeUndefined();
+    expect(parseAuditorioPersonLine('PARTE ÚNICA:')).toBeUndefined();
+    expect(parseAuditorioPersonLine('Matías Piñeira, Solista')).toEqual({
+      name: 'Matías Piñeira',
+      roleText: 'Solista',
+    });
+    expect(parseAuditorioPersonLine('Luca Guglielmi, asistente de dirección')).toEqual({
+      name: 'Luca Guglielmi',
+      roleText: 'asistente de dirección',
+    });
+    expect(parseAuditorioPersonLine('Lluís Vilamajó, preparación del conjunto vocal')).toEqual({
+      name: 'Lluís Vilamajó',
+      roleText: 'preparación del conjunto vocal',
+    });
+    expect(parseAuditorioPersonLine('Jose Antonio Checa, Coreógrafo')).toEqual({
+      name: 'Jose Antonio Checa',
+      roleText: 'Coreógrafo',
+    });
   });
 
   it('Obras de marca el inicio del programa', () => {
@@ -302,5 +336,273 @@ describe('segmentación performer/programa del Auditorio', () => {
         'KATRINA PENMAN (1982) To Andalusia and beyond',
       ]),
     ).toBe(1);
+  });
+
+  it('varios h4 consecutivos de intérpretes no abren el programa hasta el repertorio', () => {
+    const segments = segmentAuditorioBlocks([
+      ['CAMERATA LÍRICA', 'Guiomar Cantó, soprano'],
+      ['Programa', 'ÓPERA MADAMA BUTTERFLY de G. PUCCINI', '(Adaptación Escenificada)'],
+    ]);
+    expect(segments.performerLines).toEqual(['CAMERATA LÍRICA', 'Guiomar Cantó, soprano']);
+    expect(segments.programLines[0]).toBe('Programa');
+    expect(segments.programLines).toContain('ÓPERA MADAMA BUTTERFLY de G. PUCCINI');
+  });
+
+  it('I PARTE y Capella no son frontera de compositor; el repertorio empieza en el encabezado musical', () => {
+    expect(findProgramStartIndex(['Pascual Osa, Director', 'I PARTE', 'Carmina Burana (C. Orff)'])).toBe(1);
+    const savall = segmentAuditorioBlocks([
+      [
+        'LE CONCERT DES NATIONS',
+        'Lina Tur Bonet, concertino',
+        'Luca Guglielmi, asistente de dirección',
+        'LA CAPELLA NACIONAL DE CATALUNYA',
+        'Lluís Vilamajó, preparación del conjunto vocal',
+        'Johannes Brahms (1833-1897)',
+        'Schicksalslied (Canto del destino)',
+      ],
+    ]);
+    expect(savall.performerLines).toEqual([
+      'LE CONCERT DES NATIONS',
+      'Lina Tur Bonet, concertino',
+      'Luca Guglielmi, asistente de dirección',
+      'LA CAPELLA NACIONAL DE CATALUNYA',
+      'Lluís Vilamajó, preparación del conjunto vocal',
+    ]);
+    expect(savall.programLines[0]).toBe('Johannes Brahms (1833-1897)');
+  });
+
+  it('un h4 posterior no convierte el repertorio del bloque anterior en elenco', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Aulos Madrid',
+        'Álvaro Octavio Díaz',
+        'Flauta',
+        'Antonín Dvořák',
+        'Cuarteto «Americano», op. 96 (arr. David Walter)',
+      ],
+      ['Elliott Carter', 'Quinteto de viento'],
+    ]);
+    expect(segments.performerLines).toEqual(['Aulos Madrid', 'Álvaro Octavio Díaz', 'Flauta']);
+    expect(segments.programLines).toContain('Cuarteto «Americano», op. 96 (arr. David Walter)');
+    expect(segments.programLines).toContain('Quinteto de viento');
+    expect(parseAuditorioPersonLine('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBeUndefined();
+    expect(parseAuditorioPersonLine('Quinteto de viento')).toBeUndefined();
+  });
+
+  it('líneas con señales claras de obra no se publican como intérpretes', () => {
+    const titles = [
+      'Der Schwanendreher, para viola y pequeña orquesta',
+      'Stravinsky, El pájaro de fuego (música del ballet completo)',
+      'Cuarteto para oboe y cuerdas sobre Una cosa rara',
+      'Cuarteto para corno inglés,',
+      'Cuarteto «Americano», op. 96 (arr. David Walter)',
+      'Dona nobis pacem, Tres cánones a capella,',
+      'Quinteto para clarinete, op. 34',
+      'Respighi.- Pinos de Roma',
+    ];
+    for (const title of titles) {
+      expect(parseAuditorioPersonCredits(title), title).toEqual([]);
+    }
+  });
+
+  it('Composer.- Work y Composer, Work abren el programa', () => {
+    expect(parseComposerColonWork('Respighi.- Pinos de Roma')).toEqual({
+      composerName: 'Respighi',
+      title: 'Pinos de Roma',
+    });
+    expect(parseComposerColonWork('R.Strauss.- Don Juan, poema sinfónico')).toEqual({
+      composerName: 'R.Strauss',
+      title: 'Don Juan, poema sinfónico',
+    });
+    expect(parseComposerColonWork('Stravinsky, El pájaro de fuego (música del ballet completo)')).toEqual({
+      composerName: 'Stravinsky',
+      title: 'El pájaro de fuego (música del ballet completo)',
+    });
+    expect(parseComposerColonWork('Rachmáninov, Concierto para piano núm. 2')).toEqual({
+      composerName: 'Rachmáninov',
+      title: 'Concierto para piano núm. 2',
+    });
+    expect(parseComposerColonWork('Beatrice Rana, piano')).toBeUndefined();
+    expect(parseComposerColonWork('Mompou, Toldrà y Granados')).toBeUndefined();
+    expect(
+      parseComposerColonWork('José de Nebra, Vicente Rodríguez, Francisco Corselli y Antolí Sala'),
+    ).toBeUndefined();
+    expect(parseComposerColonWork('Astor Piazzolla – Oblivion')).toEqual({
+      composerName: 'Astor Piazzolla',
+      title: 'Oblivion',
+    });
+    expect(parseComposerColonWork('Johann Strauss II –Rosas del Sur, op. 388')).toEqual({
+      composerName: 'Johann Strauss II',
+      title: 'Rosas del Sur, op. 388',
+    });
+    expect(parseComposerColonWork('Camille Saint-Saëns –Danza macabra, op. 40')).toEqual({
+      composerName: 'Camille Saint-Saëns',
+      title: 'Danza macabra, op. 40',
+    });
+    expect(parseComposerColonWork('Johannes Brahms  – Danza húngara n.º 5')).toEqual({
+      composerName: 'Johannes Brahms',
+      title: 'Danza húngara n.º 5',
+    });
+    const excelentia = segmentAuditorioBlocks([
+      ['Orquesta Clásica Santa Cecilia'],
+      ['Christian Vasquez, director'],
+      ['R.Strauss.- Don Juan, poema sinfónico'],
+      ['Respighi.- Pinos de Roma'],
+      ['Beethoven.- Sinfonía núm 5'],
+    ]);
+    expect(excelentia.performerLines).toEqual([
+      'Orquesta Clásica Santa Cecilia',
+      'Christian Vasquez, director',
+    ]);
+    expect(excelentia.programLines).toEqual([
+      'R.Strauss.- Don Juan, poema sinfónico',
+      'Respighi.- Pinos de Roma',
+      'Beethoven.- Sinfonía núm 5',
+    ]);
+  });
+
+  it('Director Musical y Piano – Nombre no se traga el crédito como si fuera el apellido', () => {
+    expect(parseDashRoleCredit('Director Musical y Piano – Sergio Kuhlmann')).toEqual({
+      name: 'Sergio Kuhlmann',
+      roleText: 'Director Musical y Piano',
+    });
+    expect(parseAuditorioPersonLine('Director Musical y Piano – Sergio Kuhlmann')).toEqual({
+      name: 'Sergio Kuhlmann',
+      roleText: 'Director Musical y Piano',
+    });
+    expect(parseAuditorioPersonLine('Dir. Manuel Tévar')).toEqual({
+      name: 'Manuel Tévar',
+      roleText: 'director',
+    });
+    expect(parseAuditorioPersonLine('Luiz Felipe Coelho, violín I')).toEqual({
+      name: 'Luiz Felipe Coelho',
+      roleText: 'violín I',
+    });
+    expect(looksLikeRoleOnlyLine('Corno inglés')).toBe(true);
+    expect(looksLikeRoleOnlyLine('Clarinete bajo')).toBe(true);
+    expect(looksLikeRoleOnlyLine('Flautín')).toBe(true);
+  });
+
+  it('obra (compositor) persona, rol extrae el intérprete y deja la obra', () => {
+    expect(
+      parseWorkThenPersonCredit('Rhapsody in Blue (G. Gershwin) Susana Gómez Vázquez, piano'),
+    ).toEqual({
+      work: { title: 'Rhapsody in Blue', composerName: 'G. Gershwin' },
+      person: { name: 'Susana Gómez Vázquez', roleText: 'piano' },
+    });
+    expect(
+      parseWorkThenPersonCredit('Ciranda das Sete Notas (H. Villa-Lobos) Javier Sanz Pascual, fagot'),
+    ).toEqual({
+      work: { title: 'Ciranda das Sete Notas', composerName: 'H. Villa-Lobos' },
+      person: { name: 'Javier Sanz Pascual', roleText: 'fagot' },
+    });
+    expect(parseAuditorioPersonLine('Rhapsody in Blue (G. Gershwin) Susana Gómez Vázquez, piano')).toEqual({
+      name: 'Susana Gómez Vázquez',
+      roleText: 'piano',
+    });
+    expect(parseAuditorioPersonLine('Rhapsody in Blue (G. Gershwin)')).toBeUndefined();
+  });
+
+  it('Composer, Work exige evidencia musical y no interpreta una lista de nombres', () => {
+    expect(looksLikeComposerNameList('Mompou, Toldrà y Granados')).toBe(true);
+    expect(looksLikeComposerNameList('José de Nebra, Vicente Rodríguez, Francisco Corselli y Antolí Sala')).toBe(
+      true,
+    );
+    expect(looksLikeComposerNameList('Ana Morales, Rubén Mendoza y Marta Soler')).toBe(true);
+    expect(looksLikeComposerNameList('Stravinsky, El pájaro de fuego (música del ballet completo)')).toBe(
+      false,
+    );
+    expect(extractStandaloneKnownComposers('Schubert, Debussy y Ravel')).toEqual([
+      'Schubert',
+      'Debussy',
+      'Ravel',
+    ]);
+    expect(extractStandaloneKnownComposers('Mompou, Toldrà y Granados')).toEqual([]);
+    expect(extractStandaloneKnownComposers('Ana Morales, Rubén Mendoza y Marta Soler')).toEqual([]);
+    expect(extractStandaloneKnownComposers('Obras de Schubert, Debussy y Ravel')).toEqual([]);
+    expect(parseKnownComposerPrefixWork('Edward Elgar Variaciones', 'Enigma, op. 36')).toEqual({
+      composerName: 'Edward Elgar',
+      title: 'Variaciones Enigma, op. 36',
+      consumedNext: true,
+    });
+    expect(parseKnownComposerPrefixWork('Edvard Grieg – Danza de Anitra (de Peer Gynt)')).toEqual({
+      composerName: 'Edvard Grieg',
+      title: 'Danza de Anitra (de Peer Gynt)',
+    });
+    expect(parseKnownComposerPrefixWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
+    expect(looksLikeKnownComposerPairHeading('Monteverdi y Schütz: la huella veneciana')).toBe(true);
+    expect(looksLikeKnownComposerPairHeading('"Haydn vs Mozart"')).toBe(true);
+    expect(parseKnownComposerPrefixWork('"Haydn vs Mozart"')).toBeUndefined();
+    expect(looksLikeKnownComposerPairHeading('Mozart: Divertimento en Re mayor, K. 136')).toBe(false);
+    expect(parseComposerColonWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
+    expect(parseComposerColonWork('Mozart: Divertimento en Re mayor, K. 136')).toEqual({
+      composerName: 'Mozart',
+      title: 'Divertimento en Re mayor, K. 136',
+    });
+  });
+
+  it('un movimiento numerado con guion no es Composer – Work', () => {
+    expect(parseComposerColonWork('I. Adagio – Allegro molto')).toBeUndefined();
+    expect(parseComposerColonWork('II. Largo – Andante')).toBeUndefined();
+    expect(parseComposerColonWork('IV. Scherzo – Allegro con fuoco')).toBeUndefined();
+    expect(parseComposerColonWork('Astor Piazzolla – Oblivion')).toEqual({
+      composerName: 'Astor Piazzolla',
+      title: 'Oblivion',
+    });
+    expect(parseComposerColonWork('G. Puccini – Preludio Sinfónico')).toEqual({
+      composerName: 'G. Puccini',
+      title: 'Preludio Sinfónico',
+    });
+  });
+
+  it('canPairAsLookaheadComposer exige nombre de persona y obra siguiente, no cualquier dos palabras', () => {
+    expect(canPairAsLookaheadComposer('Héctor Eliel Márquez', 'Lorquiana')).toBe(true);
+    expect(canPairAsLookaheadComposer('Rodolphe Bruneau-Boulmier', 'Las VII tentaciones actuales')).toBe(
+      true,
+    );
+    expect(canPairAsLookaheadComposer('Marlos Nobre', 'Cancionero de Lampião')).toBe(true);
+    expect(canPairAsLookaheadComposer('Jeromita Linares', 'Cuatro canciones opulares argentinas')).toBe(
+      false,
+    );
+    expect(canPairAsLookaheadComposer('LIKE A BOHO', 'Suite Lorca')).toBe(false);
+    expect(canPairAsLookaheadComposer('Arr. Manuel Tévar', 'I. Anda, jaleo')).toBe(false);
+    expect(canPairAsLookaheadComposer('Tradicional de Venezuela', 'Que me entierren en un arpa (joropo llanero)')).toBe(
+      false,
+    );
+    expect(canPairAsLookaheadComposer('Anónimo (s. XVII)', 'Soberana María')).toBe(false);
+    expect(canPairAsAuditorioComposer('Héctor Eliel Márquez')).toBe(false);
+    expect(canPairAsAuditorioComposer('Marlos Nobre')).toBe(false);
+    expect(canPairAsAuditorioComposer('Rodolphe Bruneau-Boulmier')).toBe(false);
+  });
+
+  it('canPairAsAuditorioComposer exige evidencia fuerte, no un nombre capitalizado', () => {
+    expect(canPairAsAuditorioComposer('LIKE A BOHO')).toBe(false);
+    expect(canPairAsAuditorioComposer('BAILE Y ENSOÑACIÓN')).toBe(false);
+    expect(canPairAsAuditorioComposer('FIRST GROUPING')).toBe(false);
+    expect(canPairAsAuditorioComposer('I. Adagio')).toBe(false);
+    expect(canPairAsAuditorioComposer('de Friedrich Wilhelm Murnau (1888-1931)')).toBe(false);
+    expect(canPairAsAuditorioComposer('Improvisaciones sobre la película Amanecer (1927)')).toBe(false);
+    expect(canPairAsAuditorioComposer('La Bohème (1965)')).toBe(false);
+    expect(canPairAsAuditorioComposer('G. PUCCINI')).toBe(true);
+    expect(canPairAsAuditorioComposer('Marina Vespertilio (1991)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Christian Fritz (1988 -)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Sebastian Bartmann (*1979)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Johann Sebastian Bach')).toBe(true);
+  });
+
+  it('una frase con año y de Director no es una lista de compositores', () => {
+    expect(
+      extractStandaloneKnownComposers(
+        'Improvisaciones sobre la película Amanecer (1927), de Friedrich Wilhelm Murnau (1888-1931)',
+      ),
+    ).toEqual([]);
+    expect(
+      extractStandaloneKnownComposers('Variaciones sobre una película muda (1927), de Un Director De Cine (1888-1931)'),
+    ).toEqual([]);
+    expect(extractStandaloneKnownComposers('Schubert, Debussy y Ravel')).toEqual([
+      'Schubert',
+      'Debussy',
+      'Ravel',
+    ]);
   });
 });

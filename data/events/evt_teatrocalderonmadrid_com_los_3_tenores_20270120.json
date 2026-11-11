@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatrocalderonmadrid_com_los_3_tenores_20270120",
+  "slug": "los-3-tenores-una-historia-cantada",
+  "title": "Los 3 Tenores, una historia cantada",
+  "status": "scheduled",
+  "venueId": "ven_teatro_calderon_de_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatrocalderonmadrid_com_los_3_tenores_20270120_01",
+      "date": "2027-01-20",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alain Damas",
+      "role": "soloist"
+    },
+    {
+      "name": "Víctor Díaz",
+      "role": "soloist"
+    },
+    {
+      "name": "Francisco Ortiz",
+      "role": "soloist"
+    },
+    {
+      "name": "Takashi Koizumi"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatrocalderonmadrid_com",
+      "url": "https://teatrocalderonmadrid.com/es/los-3-tenores",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_teatrocalderonmadrid_com",
+  "lastVerifiedAt": "2026-10-17"
+}

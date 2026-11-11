@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_21distritos_es_compromisos_del_no_ver_2",
+  "slug": "compromisos-del-no-ver",
+  "title": "Compromisos del no ver",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_paco_de_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_21distritos_es_compromisos_del_no_ver_2_01",
+      "date": "2026-10-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "La Soubrette"
+    },
+    {
+      "name": "Sara Viñas"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Asenjo Barbieri"
+    }
+  ],
+  "works": [
+    {
+      "title": "Compromisos del no ver",
+      "composerName": "Francisco Asenjo Barbieri"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_21distritos_es",
+      "url": "https://21distritos.es/evento/compromisos-del-no-ver-2",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_21distritos_es",
+  "lastVerifiedAt": "2026-09-22"
+}

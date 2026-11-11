@@ -1,17 +1,20 @@
 import { madridToday } from '../lib/domain/dates.ts';
+import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event, Occurrence, Venue } from '../lib/schemas/index.ts';
-import { resolvePerformerRole } from './classification/performer-role.ts';
+import { canonicalizePerformerList } from './classification/performer-role.ts';
 import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
-import { normalizeUrl, urlPathIdentity } from './urls.ts';
+import { fallbackEventIdentity } from './observed-identity.ts';
+import { normalizeUrl } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
-import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
-import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
+import { hasSufficientNewVenueLocation, isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
+import { defaultIngestWindow, isDateInHarvestScope, resolveOccurrencePrecision, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
+import { canonicalizeComposerList, canonicalizeWorkList } from './composer-name.ts';
 import { canonicalizeEventTitle } from './event-title.ts';
 
 export type CandidateBuild = {
@@ -29,19 +32,9 @@ export function newEventPublicationSkip(
     return emptyScheduleSkipReason(event, now);
   }
   if (!matchVenue(venueHint(event), catalog)) {
-    return unrecognizedVenueReason(event);
+    return unrecognizedVenueReason(event, catalog);
   }
   return undefined;
-}
-
-export function structuralSkipReason(
-  event: NormalizedEvent,
-  catalog: Catalog,
-  now: Date,
-  window: IngestWindow = defaultIngestWindow(now),
-): string | undefined {
-  if (event.eventStatus === 'cancelled') return 'cancelado';
-  return newEventPublicationSkip(event, catalog, now, window);
 }
 
 export function toCandidate(
@@ -57,17 +50,17 @@ export function toCandidate(
   if (event.eventStatus === 'cancelled') {
     return { skippedReason: 'cancelado' };
   }
-  const publishableOccurrences = publicationOccurrences(event, now, { window });
+  const publishableOccurrences = resolveOccurrencePrecision(publicationOccurrences(event, now, { window }));
   if (publishableOccurrences.length === 0) {
     return { skippedReason: emptyScheduleSkipReason(event, now) };
   }
   const venueMatch = matchVenue(venueHint(event), catalog);
   if (!venueMatch) {
-    return { skippedReason: unrecognizedVenueReason(event) };
+    return { skippedReason: unrecognizedVenueReason(event, catalog) };
   }
 
   const catalogSource = resolveCatalogSource(source, catalog);
-  const identity = event.externalId ?? urlPathIdentity(event.sourceUrl);
+  const identity = fallbackEventIdentity(event);
   const eventId = uniqueId(eventIdFor(eventIdSourceKey(source), identity), usedIds);
   usedIds.add(eventId);
   const title = canonicalizeEventTitle(event.title);
@@ -91,15 +84,9 @@ export function toCandidate(
     organizerIds: [],
     seriesId: null,
     occurrences,
-    performers: event.performers.map((item) => {
-      const role = resolvePerformerRole(item.roleText);
-      return role ? { name: item.name, role } : { name: item.name };
-    }),
-    composers: event.composers.map((item) => ({ name: item.name })),
-    works: event.works.map((item) => ({
-      title: item.title,
-      ...(item.composerName ? { composerName: item.composerName } : {}),
-    })),
+    performers: canonicalizePerformerList(event.performers),
+    composers: canonicalizeComposerList(event.composers),
+    works: canonicalizeWorkList(event.works),
     eras: classification.eras?.value ?? [],
     formats: classification.formats?.value ?? [],
     kind: classification.kind.value,
@@ -168,9 +155,25 @@ function emptyScheduleSkipReason(event: NormalizedEvent, now: Date): string {
   return 'fuera de ventana';
 }
 
-function unrecognizedVenueReason(event: NormalizedEvent): string {
-  if (!event.proposedVenue) return 'lugar no reconocido';
+function unrecognizedVenueReason(event: NormalizedEvent, catalog: Catalog): string {
+  if (!event.proposedVenue) {
+    if (event.sourceId === 'madrid-datos' && event.venueFacilityId) {
+      return 'lugar nuevo con datos insuficientes';
+    }
+    return 'lugar no reconocido';
+  }
   if (!isSufficientProposedVenue(event.proposedVenue)) {
+    return 'lugar nuevo con datos insuficientes';
+  }
+  const needle = normalizeText(event.proposedVenue.name);
+  const named = catalog.venues.filter((venue) => normalizeText(venue.name) === needle);
+  const located = event.proposedVenue.municipality
+    ? named.filter(
+        (venue) => normalizeText(venue.municipality) === normalizeText(event.proposedVenue!.municipality!),
+      )
+    : named;
+  if (located.length > 1) return 'lugar ambiguo';
+  if (located.length === 0 && !hasSufficientNewVenueLocation(event.proposedVenue)) {
     return 'lugar nuevo con datos insuficientes';
   }
   return 'lugar ambiguo';
@@ -194,6 +197,7 @@ function venueHint(event: NormalizedEvent) {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    address: event.venueAddress,
     proposed: event.proposedVenue,
   };
 }

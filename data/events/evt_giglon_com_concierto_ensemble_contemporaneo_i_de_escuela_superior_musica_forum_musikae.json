@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_concierto_ensemble_contemporaneo_i_de_escuela_superior_musica_forum_musikae",
+  "slug": "concierto-ensemble-contemporaneo-i-de-la-escuela-superior-de-musica-forum-musikae",
+  "title": "Concierto Ensemble Contemporáneo I de la Escuela Superior de Música Forum Musikae",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_paco_de_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_concierto_ensemble_contemporaneo_i_de_escuela_superior_musica_forum_musikae_01",
+      "date": "2026-12-12",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Contemporáneo de Forum Musikae",
+      "role": "ensemble"
+    },
+    {
+      "name": "Diego Fortes",
+      "role": "conductor"
+    },
+    {
+      "name": "Enrique Hurraco Martín",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Friedrich Gulda"
+    },
+    {
+      "name": "Arturo Márquez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo y orquesta de vientos (1980)",
+      "composerName": "Friedrich Gulda"
+    },
+    {
+      "title": "Danzón n.º 2",
+      "composerName": "Arturo Márquez"
+    },
+    {
+      "title": "Conga del fuego nuevo",
+      "composerName": "Arturo Márquez"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/eu/todos?idEvent=concierto-ensemble-contemporaneo-i-de-escuela-superior-musica-forum-musikae",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-09-28"
+}

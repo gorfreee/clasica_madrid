@@ -7,7 +7,12 @@ import {
   isDateInWindow,
   defaultIngestWindow,
   parseIngestWindow,
+  seasonIngestWindow,
+  nextSeasonEnd,
   isDateInHarvestScope,
+  mergeObservedCalendars,
+  collapseOccurrences,
+  resolveOccurrencePrecision,
 } from '../src/ingestion/dates.ts';
 import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
@@ -16,6 +21,39 @@ import { TEST_NOW } from './helpers.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('parseo de fechas y horas', () => {
+  it('resuelve sin hora y hora explícita sólo al cerrar el calendario completo', () => {
+    const date = '2027-04-11';
+    const items = [{ date, time: null }, { date, time: '19:30' }];
+    expect(collapseOccurrences(items)).toEqual(items);
+    expect(resolveOccurrencePrecision(items)).toEqual([{ date, time: '19:30' }]);
+    expect(resolveOccurrencePrecision([...items].reverse())).toEqual([{ date, time: '19:30' }]);
+    expect(resolveOccurrencePrecision(resolveOccurrencePrecision(items))).toEqual([{ date, time: '19:30' }]);
+    const multiple = [...items, { date, time: '17:00' }];
+    expect(resolveOccurrencePrecision(multiple)).toEqual([
+      { date, time: '17:00' }, { date, time: '19:30' },
+    ]);
+  });
+
+  it('la corroboración aporta precisión sólo para la misma fecha, nunca nuevas sesiones', () => {
+    const items = [{ date: '2027-04-11', time: null }];
+    expect(resolveOccurrencePrecision(items, [{ date: '2026-10-23', time: '19:30' }])).toEqual(items);
+    expect(resolveOccurrencePrecision(items, [{ date: '2027-04-11', time: '19:30' }]))
+      .toEqual([{ date: '2027-04-11', time: '19:30' }]);
+    expect(resolveOccurrencePrecision(items, [
+      { date: '2027-04-11', time: '17:00' }, { date: '2027-04-11', time: '19:30' },
+    ])).toEqual([]);
+  });
+
+  it('dateFromDetail alone is partial; only scoped calendar evidence suppresses sessions', () => {
+    const listing = { occurrences: [{ date: '2026-10-23', time: '19:30' }, { date: '2027-04-11', time: '19:30' }] };
+    const detail = { occurrences: [{ date: '2027-04-11', time: '19:30' }], dateFromDetail: true };
+    expect(mergeObservedCalendars(detail, listing)).toEqual(listing.occurrences);
+    expect(mergeObservedCalendars(listing, detail)).toEqual(listing.occurrences);
+    const complete = { ...detail, calendarEvidence: { complete: { from: '2026-10-01', to: '2027-04-11' }, evidence: 'validated calendar' } };
+    expect(mergeObservedCalendars(complete, listing)).toEqual(detail.occurrences);
+    expect(mergeObservedCalendars(listing, complete)).toEqual(detail.occurrences);
+  });
+
   it('entiende ISO con offset de Madrid', () => {
     expect(parseObservedDateTime('2026-09-18T19:30:00+02:00')).toEqual({
       date: '2026-09-18',
@@ -47,7 +85,7 @@ describe('parseo de fechas y horas', () => {
 
   it('infiere aplazamiento y cancelación desde el texto de la ficha', () => {
     const postponed = inferScheduleFromText('CONCIERTO APLAZADO. AL 11 de ABRIL de 2027');
-    expect(postponed.eventStatus).toBe('scheduled');
+    expect(postponed.eventStatus).toBe('postponed');
     expect(postponed.occurrences?.[0]?.date).toBe('2027-04-11');
 
     const cancelled = inferScheduleFromText('CONCIERTO CANCELADO. No se celebrará.');
@@ -72,6 +110,36 @@ describe('parseo de fechas y horas', () => {
     expect(isDateInWindow('2026-08-31', window)).toBe(false);
     expect(isDateInWindow('2026-12-31', window)).toBe(false);
     expect(isDateInWindow('2027-01-01', window)).toBe(false);
+  });
+
+  it('la ventana de temporada va del día de ejecución al 31 de julio más cercano', () => {
+    expect(seasonIngestWindow(TEST_NOW)).toEqual({ from: '2026-09-01', to: '2027-07-31' });
+    expect(seasonIngestWindow(new Date('2026-07-31T10:00:00+02:00'))).toEqual({
+      from: '2026-07-31',
+      to: '2026-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2026-08-01T10:00:00+02:00'))).toEqual({
+      from: '2026-08-01',
+      to: '2027-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2027-01-11T10:00:00+01:00'))).toEqual({
+      from: '2027-01-11',
+      to: '2027-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2027-07-21T10:00:00+02:00'))).toEqual({
+      from: '2027-07-21',
+      to: '2027-07-31',
+    });
+    expect(nextSeasonEnd('2026-12-21')).toBe('2027-07-31');
+    expect(nextSeasonEnd('2027-07-01')).toBe('2027-07-31');
+    expect(seasonIngestWindow(new Date('2026-07-31T21:30:00Z'))).toEqual({
+      from: '2026-07-31',
+      to: '2026-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2026-07-31T22:30:00Z'))).toEqual({
+      from: '2026-08-01',
+      to: '2027-07-31',
+    });
   });
 
   it('acepta un rango manual más largo de 120 días y rechaza fechas inválidas', () => {

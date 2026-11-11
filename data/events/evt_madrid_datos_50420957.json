@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50420957",
+  "slug": "concierto-barroco",
+  "title": "Concierto barroco",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1980",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50420957_01",
+      "date": "2026-10-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Johann Pachelbel"
+    },
+    {
+      "name": "Alessandro Stradella"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Tomaso Albinoni"
+    }
+  ],
+  "works": [
+    {
+      "title": "Lascia ch’io pianga",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Ombra mai fu",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sarabanda",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Canon",
+      "composerName": "Johann Pachelbel"
+    },
+    {
+      "title": "Pietà, Signore",
+      "composerName": "Alessandro Stradella"
+    },
+    {
+      "title": "Aria suite en Re",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Preludio nº 1 en Do Mayor (Clave bien temperado)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Primavera",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Vieni, vieni",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Adagio",
+      "composerName": "Tomaso Albinoni"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=6fc13893f4ba0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-18",
+      "externalId": "50420957"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-18"
+}

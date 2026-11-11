@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_adriansanchezballesteros_com_a_j_classical",
+  "slug": "a-j-classical-recital-de-clarinete-y-piano",
+  "title": "A & J classical — recital de clarinete y piano",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_adriansanchezballesteros_com_a_j_classical_01",
+      "date": "2026-10-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Adrián Sánchez Ballesteros"
+    },
+    {
+      "name": "Julio Juan Rodríguez Fernández"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Miguel Yuste"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Capricho Pintoresco, op. 41",
+      "composerName": "Miguel Yuste"
+    },
+    {
+      "title": "Sonata para clarinete y piano en mi bemol mayor, op. 167",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Sonata para clarinete y piano, FP 184",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Sonata para clarinete y piano n.º 1 en fa menor, op. 120 n.º 1",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_adriansanchezballesteros_com",
+      "url": "https://adriansanchezballesteros.com/a-j-classical",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_adriansanchezballesteros_com",
+  "lastVerifiedAt": "2026-09-24"
+}

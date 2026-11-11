@@ -70,6 +70,13 @@
       "event-location": "Centro de Cultura Contemporánea CondeDuque",
       "relation": {
         "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1916-centro-cultura-contemporanea-condeduque.json"
+      },
+      "address": {
+        "area": {
+          "locality": "MADRID",
+          "postal-code": "28015",
+          "street-address": "CALLE CONDE DUQUE 9"
+        }
       }
     },
     {
@@ -84,6 +91,13 @@
       "event-location": "Sala Principal",
       "relation": {
         "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/8888-sala-principal.json"
+      },
+      "address": {
+        "area": {
+          "locality": "MADRID",
+          "postal-code": "28001",
+          "street-address": "CALLE MAYOR 1"
+        }
       }
     },
     {
@@ -98,6 +112,13 @@
       "event-location": "Centro Cultural Buenavista (Salamanca)",
       "relation": {
         "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/64851-centro-cultural-buenavista-salamanca-.json"
+      },
+      "address": {
+        "area": {
+          "locality": "MADRID",
+          "postal-code": "28028",
+          "street-address": "AVENIDA TOREROS 5"
+        }
       }
     },
     {
@@ -112,6 +133,13 @@
       "event-location": "Centro Cultural Buenavista",
       "relation": {
         "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/64851-centro-cultural-buenavista-salamanca-.json"
+      },
+      "address": {
+        "area": {
+          "locality": "MADRID",
+          "postal-code": "28028",
+          "street-address": "AVENIDA TOREROS 5"
+        }
       }
     },
     {

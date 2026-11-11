@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_lev_electronic_ambiguous",
+  "origin": "published-catalog",
+  "sourceId": "madrid-datos",
+  "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextoid=lev-electronic-example",
+  "listingTitle": "L.E.V. 2026: Conciertos. Síntesis modular",
+  "observed": {
+    "title": "L.E.V. 2026: Conciertos. Síntesis modular y cine experimental",
+    "description": "Un encuentro entre composición electroacústica y cine experimental en tiempo real. El compositor presenta un universo sonoro donde la síntesis modular, la composición electroacústica y los samples se entrelazan.",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Descriptores electrónicos/experimentales sin ancla clásica/académica observada. Conservar uncertain; no convertir en include.",
+  "missingEvidence": "Falta un ancla de tradición concertística/académica (ensemble contemporáneo, ciclo de música contemporánea clásica, compositor/obra de esa tradición).",
+  "checkedAt": "2026-09-14"
+}

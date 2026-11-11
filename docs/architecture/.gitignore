@@ -1,0 +1,5 @@
+# Archify per-machine delivery/provenance sidecars; portable provenance is in the manifest.
+architecture.delivery*.json
+architecture.finalize*.json
+architecture.browser-check.json
+.archify-*

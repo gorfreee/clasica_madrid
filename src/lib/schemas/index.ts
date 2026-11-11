@@ -48,7 +48,6 @@ export {
   type Area,
   type Era,
   type EventKind,
-  type EventStatus,
   type Format,
   type OccurrenceStatus,
   type PerformerRole,

@@ -17,39 +17,39 @@
   ],
   "performers": [
     {
-      "name": "JOVEN ORQUESTA NACIONAL DE ESPAÑA"
+      "name": "Joven Orquesta Nacional de España"
     },
     {
-      "name": "MIEMBROS DEL KLANGFORUM WIEN"
+      "name": "Miembros del Klangforum Wien"
     },
     {
-      "name": "JULIA CRUZ",
+      "name": "Julia Cruz",
       "role": "conductor"
     }
   ],
   "composers": [
     {
-      "name": "Tania León (1943)"
+      "name": "Tania León"
     },
     {
-      "name": "Elena Mendoza (1973)"
+      "name": "Elena Mendoza"
     },
     {
-      "name": "Olga Neuwirth (1968)"
+      "name": "Olga Neuwirth"
     }
   ],
   "works": [
     {
       "title": "Rítmicas ** (2019)",
-      "composerName": "Tania León (1943)"
+      "composerName": "Tania León"
     },
     {
       "title": "Zwei Szenen, para viola y grupo instrumental ** (2019)",
-      "composerName": "Elena Mendoza (1973)"
+      "composerName": "Elena Mendoza"
     },
     {
       "title": "… miramondo multiplo…, para trompeta y ensemble ** (2006)",
-      "composerName": "Olga Neuwirth (1968)"
+      "composerName": "Olga Neuwirth"
     }
   ],
   "eras": [
@@ -64,7 +64,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-joven-orquesta-nacional-de-espana-jonde-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-joven-orquesta-nacional-de-espana-jonde-1"
     },
     {
@@ -75,5 +75,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

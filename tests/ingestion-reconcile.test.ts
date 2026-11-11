@@ -10,6 +10,10 @@ import { matchEventIdentity, type EventIdentityAlias } from '../src/ingestion/id
 import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reconcile.ts';
 import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nacional.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 import { mergeExistingEvent, proposalFromObservation } from '../src/ingestion/merge.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -21,6 +25,81 @@ import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 const ocneDetailPath = path.join(fixtures, 'detail', 'auditorio-ocne-sinfonico-01.excerpt.html');
+
+describe('Hannigan detail calendar authority (PR #351)', () => {
+  it.each([false, true])('new Candidates preserve the detail replacement during overlay (reverse=%s)', async (reverse) => {
+    const source = getSourceDefinition('auditorio-nacional');
+    const window = { from: '2026-10-01', to: '2027-07-31' };
+    const url = 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou';
+    const ctx = { source, now: TEST_NOW, window, get: async () => readFile(path.join(fixtures, 'detail/auditorio-hannigan.excerpt.html'), 'utf8') };
+    const [listing] = await auditorioNacionalAdapter.extract(JSON.stringify(['2026-10-23', '2027-04-11'].map((date) => ({
+      title: 'CNDM. Barbara Hannigan & Bertrand Chamayou', url, className: 'camara', start: `${date}T19:30:00+02:00`,
+      description: 'Obras de Olivier Messiaen',
+    }))), source.urls[0]!, ctx);
+    const [hydrated] = await hydrateEvents([listing!], auditorioNacionalAdapter, ctx);
+    const items = reverse ? [listing!, hydrated!] : [hydrated!, listing!];
+    const result = reconcileHarvest({ catalog: emptyCatalog(), now: TEST_NOW, window, observations: items.map((raw, index) => ({
+      index, raw, source, event: normalizeRawEvent(raw)!, classification: classify(raw.observed), aiAttempted: false,
+    })) });
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0]!.event.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30', status: 'scheduled' })]);
+  });
+
+  it.each([['auditorio-nacional', 'cndm'], ['cndm', 'auditorio-nacional']])('withholds discrepant October/April calendars after CNDM hydration fails, order %s / %s', async (first, second) => {
+    const title = 'CNDM. Barbara Hannigan & Bertrand Chamayou';
+    const url = 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou';
+    const auditorio = getSourceDefinition('auditorio-nacional');
+    const cndm = getSourceDefinition('cndm');
+    const catalog = emptyCatalog();
+    catalog.sources = [auditorio.seedSource, cndm.seedSource];
+    catalog.venues = [makeVenue({ id: 'ven_auditorio_nacional_sala_camara', slug: 'auditorio-nacional-sala-camara', name: 'Auditorio Nacional — Sala de Cámara' })];
+    catalog.events = [makeEvent({
+      id: 'evt_auditorio_nacional_24018', title: 'Barbara Hannigan & Bertrand Chamayou', lastVerifiedAt: '2026-09-01',
+      // This fixture is about calendar authority, not an OCNE/Beethoven programme.
+      performers: [], composers: [], works: [],
+      venueId: catalog.venues[0]!.id, organizerIds: [], seriesId: null,
+      occurrences: [{ id: 'occ_hannigan', date: '2027-04-11', time: '19:30', status: 'scheduled' }],
+      citations: [
+        { sourceId: auditorio.catalogSourceId, url, externalId: '3458720415294d028ad8af92e3777416', checkedAt: '2026-09-01' },
+        { sourceId: cndm.catalogSourceId, url: 'https://cndm.inaem.gob.es/node/23814', externalId: '23814', checkedAt: '2026-09-01' },
+      ], primarySourceId: auditorio.catalogSourceId,
+    })];
+    const window = { from: '2026-10-01', to: '2027-07-31' };
+    const cndmMonth = (month: string) => {
+      const year = Number(month.slice(0, 4));
+      const number = Number(month.slice(4));
+      const names = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const days = new Date(Date.UTC(year, number, 0)).getUTCDate();
+      const cells = Array.from({ length: days }, (_, index) => {
+        const date = `${year}-${String(number).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`;
+        const card = date === '2026-10-23' ? '<div class="item"><div class="view-item"><div class="big-calendar__event"><a href="/node/23814">[APLAZADO] BARBARA HANNIGAN &amp; BERTRAND CHAMAYOU</a><br>19:30 - Auditorio Nacional (Cámara) | Madrid</div></div></div>' : '';
+        return `<td id="events_calendar-${date}-0" date-date="${date}"><div class="inner">${card}</div></td>`;
+      }).join('');
+      return `<div class="big-calendar"><header><h3>${names[number - 1]} ${year}</h3></header><div class="calendar-calendar"><table><tr>${cells}</tr></table></div></div>`;
+    };
+    const run = await runIngest({
+      now: TEST_NOW, window, dryRun: true, catalog, sourceIds: [first!, second!],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'hannigan-authority-')),
+      get: async (requested) => {
+        if (requested === url) return readFile(path.join(fixtures, 'detail/auditorio-hannigan.excerpt.html'), 'utf8');
+        if (requested.includes('front-page-events.json')) return JSON.stringify(['2026-10-23', '2027-04-11'].map((date, index) => ({ title, url, className: 'camara', start: `${date}T19:30:00+02:00`, id: `3458720415294d028ad8af92e3777416-${index}` })));
+        if (requested.endsWith('/node/23814')) throw new Error('tiempo agotado al pedir la ficha CNDM');
+        const month = /\/eventos\/(\d{6})$/.exec(requested)?.[1];
+        if (month) return cndmMonth(month);
+        throw new Error(`URL inesperada: ${requested}`);
+      },
+    });
+    const hydrated = run.rawEvents.find((item) => item.sourceId === auditorio.id)!;
+    expect(hydrated.dateFromDetail).toBe(true);
+    expect(hydrated.observed.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30' })]);
+    expect(run.rawEvents.find((item) => item.sourceId === cndm.id)?.hydration?.status).toBe('failed');
+    const candidate = run.decisions.find((item) => item.sourceId === auditorio.id)?.candidate;
+    expect(candidate).toBeUndefined();
+    expect(run.summary.ambiguous).toBe(2);
+    expect(run.apply.filesToWrite).toEqual([]);
+    expect(run.apply.proposed.events).toEqual(catalog.events);
+  });
+});
 
 type ListingItem = {
   title: string;
@@ -139,7 +218,7 @@ function publishedEvent(overrides: Parameters<typeof makeEvent>[0] = {}) {
 
 function baseCatalog(events = [publishedEvent()]): Catalog {
   const catalog = emptyCatalog();
-  catalog.venues.push(salaSinfonica());
+  catalog.venues.push(makeVenue(), salaSinfonica());
   catalog.sources.push(auditorioSource());
   catalog.events.push(...events);
   return catalog;
@@ -624,7 +703,10 @@ describe('identity matching', () => {
       venueId: 'ven_auditorio_nacional_sala_sinfonica',
     };
 
-    expect(matchEventIdentity(catalog, observed, { ...options, aliases: [] }).kind).toBe('unmatched');
+    expect(matchEventIdentity(catalog, observed, { ...options, aliases: [] })).toMatchObject({
+      kind: 'ambiguous',
+      methods: ['slot'],
+    });
     expect(matchEventIdentity(catalog, observed, options)).toMatchObject({
       kind: 'matched',
       method: 'alias',
@@ -651,6 +733,7 @@ describe('merge conservador', () => {
         sourceUrl: 'https://www.auditorionacional.mcu.es/eventos/matinees',
         title: 'Matinées de otoño (oficial)',
         occurrences: [{ date: '2026-09-16', time: '20:00' }],
+        calendarEvidence: { changes: [{ from: { date: '2026-09-15' }, to: { date: '2026-09-16', time: '20:00' } }], evidence: 'explicit correction' },
         performers: [],
         composers: [],
         works: [],
@@ -687,6 +770,25 @@ describe('merge conservador', () => {
     expect(merged.event.access).toBe('paid');
     expect(merged.diagnostics.some((diff) => diff.startsWith('title:'))).toBe(true);
     expect(merged.diffs.some((diff) => diff.startsWith('title:'))).toBe(false);
+  });
+
+  it('conserva slugAliases históricos al fusionar una observación', () => {
+    const existing = makeEvent({ slugAliases: ['matinees-antigua'] });
+    const proposal = proposalFromObservation(
+      {
+        sourceId: 'auditorio-nacional',
+        sourceUrl: 'https://www.auditorionacional.mcu.es/eventos/matinees',
+        title: 'Matinées de otoño',
+        occurrences: [{ date: '2026-09-15', time: '19:30' }],
+        performers: [{ name: 'OCNE' }],
+        composers: [{ name: 'Ludwig van Beethoven' }],
+        works: [{ title: 'Sinfonía n.º 7' }],
+      },
+      { catalogSourceId: 'src_auditorio', now: TEST_NOW, venueId: existing.venueId },
+    );
+    const merged = mergeExistingEvent(existing, proposal, TEST_NOW);
+    expect(merged.event.slug).toBe(existing.slug);
+    expect(merged.event.slugAliases).toEqual(['matinees-antigua']);
   });
 });
 
@@ -779,9 +881,10 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(run.decisions[0]!.identity?.action).not.toBe('new');
   });
 
-  it('actualiza fecha/hora y venue sin crear otro evento', async () => {
+  it('actualiza fecha/hora y venue de un evento aplazado sin crear otro evento', async () => {
     const catalog = baseCatalog([
       publishedEvent({
+        status: 'postponed',
         occurrences: [{ id: 'occ_ocne_existente_01', date: '2026-09-10', time: '18:00', status: 'scheduled' }],
         venueId: 'ven_auditorio_nacional_sala_sinfonica',
       }),
@@ -915,6 +1018,7 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(created.run.candidates).toEqual([]);
     expect(created.run.summary.newEvents).toBe(0);
     expect(created.run.decisions[0]?.structuralSkip?.reason).toBe('cancelado');
+    expect(created.run.decisions[0]?.outcome).toBe('cancelled-not-created');
   });
 
   it('no despublica un evento existente reclasificado como exclude o uncertain', async () => {
@@ -1107,6 +1211,9 @@ describe('pipeline — new, unchanged, updates', () => {
       expect(isTechnicalClassificationFailure(ruleId)).toBe(true);
     }
     expect(isTechnicalClassificationFailure('ai-uncertain')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-ungrounded-evidence')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-coprincipal-without-classical-block')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-ambiguous-contemporary')).toBe(false);
     expect(isTechnicalClassificationFailure('ai-exclude')).toBe(false);
     expect(isTechnicalClassificationFailure('jazz-event')).toBe(false);
   });
@@ -1123,7 +1230,8 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(duplicates.run.summary.newEvents).toBe(1);
     expect(duplicates.run.summary.batchDuplicates).toBe(1);
     expect(duplicates.run.candidates).toHaveLength(1);
-    expect(duplicates.run.candidates[0]!.event.citations.length).toBeGreaterThan(1);
+    expect(duplicates.run.candidates[0]!.event.citations).toHaveLength(2);
+    expect(duplicates.run.candidates[0]!.event.citations[0]?.sourceId).toBe('src_auditorio_nacional');
 
     const conflict = await runAuditorio({
       items: [
@@ -1137,6 +1245,7 @@ describe('pipeline — new, unchanged, updates', () => {
     });
     expect(conflict.run.summary.newEvents).toBe(0);
     expect(conflict.run.summary.ambiguous).toBeGreaterThan(0);
+    expect(conflict.run.decisions.every((item) => item.outcome === 'ambiguous')).toBe(true);
     expect(conflict.run.candidates).toEqual([]);
   });
 });

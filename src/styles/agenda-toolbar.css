@@ -1,0 +1,300 @@
+.filters {
+  margin-top: 2rem;
+}
+
+.filters .search-field input {
+  min-height: 4.15rem;
+  padding-inline: 1.15rem;
+}
+
+.filters .search-submit {
+  min-width: 8.25rem;
+}
+
+.filters .filters__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .55rem;
+  margin-top: .8rem;
+}
+
+/* The advanced panel is a sibling of the toolbar, not a flex item. Opening
+   it must not change the order or flex-basis of the toolbar controls. */
+
+.filters .shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  margin: 0;
+}
+
+.filters .shortcut,
+.filters .shortcut:last-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: .62rem .82rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-veil);
+  color: var(--color-text);
+  font-size: .72rem;
+  letter-spacing: .07em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filters .shortcut[aria-pressed="true"] {
+  border-color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: inset 0 -2px 0 var(--color-brand);
+}
+
+.filters .filters__toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 2.35rem;
+  padding: .58rem .78rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  line-height: 1;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filters .filters__toggle[aria-expanded="true"] {
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-surface);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filters .shortcut:hover {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
+  }
+
+  .filters .shortcut[aria-pressed="true"]:hover {
+    background: var(--color-text);
+    color: var(--color-surface);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+  }
+
+  .filters .filters__toggle:hover {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
+  }
+}
+
+/* Touch browsers keep :hover after a tap. Restore the resting/active styles
+   so the ink fill cannot stick, including against the global .shortcut:hover. */
+@media (hover: none), (pointer: coarse) {
+  .filters .shortcut:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-veil);
+    color: var(--color-text);
+    box-shadow: none;
+  }
+
+  .filters .shortcut[aria-pressed="true"]:hover {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: inset 0 -2px 0 var(--color-brand);
+  }
+
+  .filters .filters__toggle:hover {
+    border-color: var(--color-border);
+    background: transparent;
+    color: inherit;
+  }
+
+  .filters .filters__toggle[aria-expanded="true"]:hover {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
+  }
+}
+
+.filters .filters__toggle-mark {
+  display: inline-flex;
+  width: .65rem;
+  height: .4rem;
+  transition: transform 180ms ease;
+}
+
+.filters .filters__toggle-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.filters .filters__toggle[aria-expanded="true"] .filters__toggle-mark {
+  transform: rotate(180deg);
+}
+
+.filters .filters__panel {
+  width: 100%;
+  margin-top: .7rem;
+  padding: 1.25rem;
+  border: 0;
+  background: var(--color-surface-panel);
+}
+
+.filters .filters__grid {
+  gap: 1rem 1.2rem;
+}
+
+.filters .field input,
+.filters .field select {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.filters .field input:focus,
+.filters .field select:focus {
+  border-color: var(--color-text);
+}
+
+.filters .filters__actions {
+  margin-top: 1.1rem;
+}
+
+.filters .filters__actions button {
+  min-width: 10.5rem;
+}
+
+.filters .result-count {
+  margin: 0 0 0 auto;
+  color: var(--color-text-muted);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .035em;
+  white-space: nowrap;
+}
+
+.filters .filters__active-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem 1rem;
+}
+
+.filters .active-filters {
+  gap: .45rem;
+  margin-top: .7rem;
+}
+
+.filters .active-filter {
+  padding: .42rem .62rem;
+  border: 0;
+  background: var(--color-brand-tint);
+  font-size: .72rem;
+}
+
+.filters .active-filter:hover,
+.filters .active-filter:focus-visible {
+  background: var(--color-brand);
+  color: var(--color-surface);
+}
+
+.filters .filters__clear {
+  flex: 0 0 auto;
+  margin-top: .72rem;
+  color: var(--color-text-muted);
+  font-size: .75rem;
+  font-weight: 700;
+  text-underline-offset: .18em;
+}
+
+.filters .filters__clear:hover {
+  color: var(--color-text);
+}
+
+.agenda-root .agenda > .month-marker:first-child {
+  margin-top: 2.8rem;
+}
+
+@media (max-width: 620px) {
+  .filters {
+    margin-top: 1.5rem;
+  }
+
+  .filters .search-field input {
+    min-height: 3.65rem;
+    padding-inline: .75rem;
+  }
+
+  .filters .search-submit {
+    min-width: 3.8rem;
+    width: 3.8rem;
+  }
+
+  .filters .filters__toolbar {
+    gap: .5rem;
+    margin-top: .65rem;
+  }
+
+  .filters .shortcuts {
+    display: flex;
+    flex: 0 1 auto;
+    gap: .5rem;
+  }
+
+  .filters .shortcut,
+  .filters .shortcut:last-child {
+    min-width: 0;
+    padding: .58rem .68rem;
+    border-right-width: 1px;
+    font-size: .68rem;
+  }
+
+  .filters .shortcut:nth-child(n+3),
+  .filters .shortcut:nth-child(even) {
+    margin: 0;
+  }
+
+  .filters .filters__toggle {
+    min-height: 2.25rem;
+    padding: .55rem .65rem;
+    font-size: .68rem;
+  }
+
+  .filters .result-count {
+    order: 2;
+    flex: 0 0 100%;
+    margin: .05rem 0 0;
+    font-size: .7rem;
+  }
+
+  .filters .filters__panel {
+    margin-top: .6rem;
+    padding: 1rem .85rem;
+  }
+
+  .filters .filters__active-row {
+    flex-wrap: wrap;
+  }
+
+  .filters .filters__clear {
+    margin-left: auto;
+  }
+
+  .agenda-root .agenda > .month-marker:first-child {
+    margin-top: 2.25rem;
+  }
+}

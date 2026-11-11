@@ -21,8 +21,35 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "Manuel Hernández Silva",
+      "role": "conductor"
+    },
+    {
+      "name": "Ana Guijarro"
+    },
+    {
+      "name": "Beatriz Díaz"
+    },
+    {
+      "name": "Miguel Ariza"
+    },
+    {
+      "name": "Damián del Castillo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -36,10 +63,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-10",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "/eventos/concierto-sinfonico-b-10/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

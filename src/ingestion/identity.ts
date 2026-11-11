@@ -1,9 +1,11 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
-import { normalizeUrl, urlsEquivalent } from './urls.ts';
+import { normalizeUrl, urlIdentifiesSingleEvent, urlsEquivalent } from './urls.ts';
+import { compareRecyclableIdentity, compareSourceIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
@@ -24,10 +26,34 @@ export type EventIdentityAlias = {
  */
 export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
   {
+    eventId: 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje',
+    catalogSourceId: 'src_fundacion_orcam',
+    externalId: '4861',
+    url: 'https://fundacionorcam.org/conciertos/2026-27/final-del-viaje/',
+  },
+  {
     eventId: 'evt_excelentia_chaikovsky_sibelius_20260930',
     catalogSourceId: 'src_auditorio_nacional',
     externalId: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
     url: 'https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+  },
+  {
+    eventId: 'evt_auditorio_nacional_cndm_lucie_zakova',
+    catalogSourceId: 'src_cndm',
+    externalId: '23846',
+    url: 'https://cndm.inaem.gob.es/node/23846',
+  },
+  {
+    eventId: 'evt_madrid_tempo_inauguracion_20260901',
+    catalogSourceId: 'src_madrid_a_tempo',
+    externalId: 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',
+    url: 'https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguración',
+  },
+  {
+    eventId: 'evt_madrid_datos_50265531',
+    catalogSourceId: 'src_fundacionpiumosso_com',
+    externalId: '2187',
+    url: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
   },
 ];
 
@@ -39,6 +65,9 @@ export type IdentityFacts = {
   performers?: Array<{ name: string; role?: string }>;
   composers?: Array<{ name: string }>;
   works?: Array<{ title: string; composerName?: string }>;
+  dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
+  eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
 };
 
 export type SharedSourceAssignment = {
@@ -54,6 +83,8 @@ export type IdentityMatch =
       events: Event[];
       method: IdentityMethod;
       assigned: SharedSourceAssignment[];
+      /** Recycled identities cannot cancel all historical owners of a URL. */
+      scopeCancellationToAssignments?: boolean;
     }
   | { kind: 'ambiguous'; events: Event[]; methods: IdentityMethod[]; reason: string };
 
@@ -114,10 +145,92 @@ export function matchEventIdentity(
     }
   }
 
-  const precise = collapseHits(hits, observed);
+  const guarded = guardSourceHits(hits, observed, options, catalog);
+  if (guarded.kind === 'ambiguous') return guarded;
+  const precise = collapseHits(guarded.hits, observed);
+  if (precise.kind === 'matched-many' && guarded.recyclable) {
+    return { ...precise, scopeCancellationToAssignments: true };
+  }
   if (precise.kind !== 'unmatched') return precise;
   if (options.allowSlot === false) return { kind: 'unmatched' };
   return matchExclusiveSlot(catalog, observed, options.venueId);
+}
+
+function guardSourceHits(
+  hits: Array<{ event: Event; method: IdentityMethod }>,
+  observed: IdentityFacts,
+  options: { catalogSourceId: string; venueId?: string },
+  catalog: Catalog,
+): { kind: 'filtered'; hits: typeof hits; recyclable: boolean } | Extract<IdentityMatch, { kind: 'ambiguous' }> {
+  const accepted: typeof hits = [];
+  const reviews: typeof hits = [];
+  const rejected: typeof hits = [];
+  const guardedIds = new Set<string>();
+  let recyclableSource = false;
+  for (const hit of hits) {
+    // URL identity can cross sources (e.g. Discovery): use the provenance of
+    // the matching citation too, rather than just the incoming source.
+    const recyclable = sourceIdentityCanRecycle(options.catalogSourceId) || hit.event.citations.some((citation) =>
+      sourceIdentityCanRecycle(citation.sourceId) && urlsEquivalent(citation.url, observed.sourceUrl),
+    );
+    // Reviewed aliases retain their explicit mapping, except for known
+    // recyclable sources. Strong/slot hits already require independent facts.
+    if (!recyclable && hit.method !== 'url' && hit.method !== 'externalId') {
+      accepted.push(hit); continue;
+    }
+    recyclableSource ||= recyclable;
+    // Even for cancellations, an attested calendar owner must win over an
+    // unrelated older performance that happens to share the source identity.
+    guardedIds.add(hit.event.id);
+    const verdict = (recyclable ? compareRecyclableIdentity : compareSourceIdentity)(
+      observed, hit.event, options.venueId,
+      // Refining a published building to an explicit child room is not a
+      // relocation. Sibling rooms remain distinct venues.
+      catalog.venues.find(venue => venue.id === options.venueId)?.parentVenueId === hit.event.venueId
+        ? options.venueId : hit.event.venueId,
+    );
+    if (verdict === 'compatible') accepted.push(hit);
+    if (verdict === 'review') reviews.push(hit);
+    if (verdict === 'incompatible' && !recyclable) rejected.push(hit);
+  }
+  // A stale external ID competing with an independent strong match remains
+  // an explicit conflict, as before; do not silently repair published history.
+  const hasCurrentExternalOwner = accepted.some(hit => hit.method === 'externalId');
+  const competingIds = rejected.filter(hit => !hasCurrentExternalOwner && hit.method === 'externalId' &&
+    accepted.some(other => other.method === 'strong' && other.event.id !== hit.event.id));
+  if (competingIds.length > 0) {
+    const conflict = collapseHits([...competingIds, ...accepted.filter(hit => hit.method === 'strong')], observed);
+    if (conflict.kind === 'ambiguous') return conflict;
+  }
+  // Prefer a current calendar owner to plausible reprogramming of another
+  // edition with the same title/music and recycled ID. Never suppress a
+  // competing precise hit. General detail URLs also prefer an attested
+  // calendar owner over a merely plausible historical reprogramming.
+  const ownsObservedDate = (event: Event) => observed.occurrences.some((incoming) =>
+    event.occurrences.some((previous) => incoming.date === previous.date),
+  );
+  const hasCalendarOwner = accepted.some((hit) => guardedIds.has(hit.event.id) && ownsObservedDate(hit.event));
+  const compatible = hasCalendarOwner
+    ? accepted.filter((hit) => !guardedIds.has(hit.event.id) || ownsObservedDate(hit.event))
+    : accepted;
+  const unresolved = hasCalendarOwner
+    ? reviews.filter((hit) => ownsObservedDate(hit.event))
+    : reviews;
+  if (unresolved.length > 0) {
+    const byId = new Map<string, (typeof hits)[number]>();
+    for (const hit of [...compatible, ...unresolved]) {
+      const current = byId.get(hit.event.id);
+      if (!current || METHOD_RANK[hit.method] < METHOD_RANK[current.method]) byId.set(hit.event.id, hit);
+    }
+    const plausible = [...byId.values()];
+    return {
+      kind: 'ambiguous',
+      events: plausible.map((hit) => hit.event),
+      methods: plausible.map((hit) => hit.method),
+      reason: `source-identity-review: varios eventos plausibles o falta evidencia de continuidad/reprogramación (${plausible.map((hit) => hit.event.id).join(', ')})`,
+    };
+  }
+  return { kind: 'filtered', hits: compatible, recyclable: recyclableSource };
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {
@@ -126,12 +239,15 @@ export function eventMatchesExternalId(event: Event, catalogSourceId: string, ex
   );
 }
 
+/** Same-URL matching is only for event-detail URLs. Listing pages are citations, not identity. */
 export function eventMatchesUrl(
   event: Event,
   sourceUrl: string,
   options?: { catalogSourceId?: string; observedExternalId?: string },
 ): boolean {
+  if (!urlIdentifiesSingleEvent(sourceUrl)) return false;
   return event.citations.some((citation) => {
+    if (!urlIdentifiesSingleEvent(citation.url)) return false;
     if (!urlsEquivalent(citation.url, sourceUrl)) return false;
     if (
       options?.observedExternalId &&
@@ -146,6 +262,19 @@ export function eventMatchesUrl(
   });
 }
 
+/** Source hints shared by two observations, with the same provenance rules
+ * used against published citations. This is not an equivalence verdict. */
+export function sharesObservedSourceIdentity(
+  left: IdentityFacts, leftSourceId: string,
+  right: IdentityFacts, rightSourceId: string,
+): boolean {
+  if (leftSourceId === rightSourceId && left.externalId && right.externalId) {
+    return left.externalId === right.externalId;
+  }
+  return urlIdentifiesSingleEvent(left.sourceUrl) && urlIdentifiesSingleEvent(right.sourceUrl) &&
+    urlsEquivalent(left.sourceUrl, right.sourceUrl);
+}
+
 export function newObservationKeys(
   observed: IdentityFacts,
   catalogSourceId: string,
@@ -154,23 +283,39 @@ export function newObservationKeys(
   const keys: string[] = [];
   const url = normalizeUrl(observed.sourceUrl);
   const dated = observed.occurrences.filter((item) => item.date);
+  const recyclable = sourceIdentityCanRecycle(catalogSourceId);
   const urlKey = (suffix: string) =>
-    observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix;
-  if (dated.length === 0) {
-    keys.push(urlKey(`url:${url}`));
-  } else {
-    for (const occurrence of dated) {
-      keys.push(
-        urlKey(
-          venueId
-            ? `url:${url}:${occurrence.date}:${venueId}`
-            : `url:${url}:${occurrence.date}`,
-        ),
-      );
+    (observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix) +
+    (recyclable ? `:facts:${normalizeText(observed.title)}:${dated.map((item) => `${item.date}:${item.time ?? ''}`).join('|')}` : '');
+  if (urlIdentifiesSingleEvent(url)) {
+    if (dated.length === 0) {
+      keys.push(urlKey(`url:${url}`));
+    } else {
+      for (const occurrence of dated) {
+        keys.push(
+          urlKey(
+            venueId
+              ? `url:${url}:${occurrence.date}:${venueId}`
+              : `url:${url}:${occurrence.date}`,
+          ),
+        );
+      }
     }
-  }
-  if (observed.externalId) {
-    keys.push(`ext:${catalogSourceId}:${observed.externalId}`);
+  } else {
+    const title = normalizeText(observed.title);
+    if (dated.length === 0) {
+      keys.push(urlKey(`listing:${url}:${title}`));
+    } else {
+      for (const occurrence of dated) {
+        keys.push(
+          urlKey(
+            venueId
+              ? `listing:${url}:${occurrence.date}:${venueId}:${title}`
+              : `listing:${url}:${occurrence.date}:${title}`,
+          ),
+        );
+      }
+    }
   }
   if (venueId) {
     const title = normalizeText(observed.title);
@@ -185,16 +330,6 @@ export function newObservationKeys(
     }
   }
   return keys;
-}
-
-export function sharesExclusiveSlot(
-  left: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
-  right: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
-): boolean {
-  if (!left.venueId || left.venueId !== right.venueId) return false;
-  return exclusiveSlotKeys(left.venueId, left.occurrences).some((key) =>
-    exclusiveSlotKeys(right.venueId, right.occurrences).includes(key),
-  );
 }
 
 export function exclusiveSlotKeys(
@@ -239,6 +374,7 @@ function matchExclusiveSlot(
 
   const matches: Event[] = [];
   const conflicts: Array<{ event: Event; reasons: string[] }> = [];
+  const reviews: Event[] = [];
   for (const event of catalog.events) {
     if (event.venueId !== venueId) continue;
     if (event.status === 'cancelled') continue;
@@ -246,10 +382,11 @@ function matchExclusiveSlot(
     if (!eventKeys.some((key) => observedKeys.includes(key))) continue;
     const verdict = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(event));
     if (verdict.kind === 'match') matches.push(event);
-    if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
+    else if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
+    else reviews.push(event);
   }
 
-  const ids = [...new Set([...matches, ...conflicts.map((item) => item.event)].map((event) => event.id))];
+  const conflictIds = [...new Set([...matches, ...conflicts.map((item) => item.event)].map((event) => event.id))];
   if (conflicts.length > 0 && matches.length === 0) {
     const first = conflicts[0]!;
     return {
@@ -267,7 +404,16 @@ function matchExclusiveSlot(
       kind: 'ambiguous',
       events: [...matches, ...conflicts.map((item) => item.event)],
       methods: ['slot'],
-      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)}: varios eventos en el mismo hueco (${ids.join(', ')})`,
+      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)}: varios eventos en el mismo hueco (${conflictIds.join(', ')})`,
+    };
+  }
+  if (reviews.length > 0) {
+    const ids = reviews.map((event) => event.id).join(', ');
+    return {
+      kind: 'ambiguous',
+      events: reviews,
+      methods: ['slot'],
+      reason: `schedule-review: ${slotConflictLabel(venueId!, observed)}: evidencia insuficiente para fusionar o contradecir (${ids})`,
     };
   }
   return { kind: 'unmatched' };
@@ -280,11 +426,13 @@ function slotConflictLabel(venueId: string, observed: IdentityFacts): string {
 
 function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string, catalogSourceId: string): boolean {
   if (event.venueId !== venueId) return false;
+  if (compareMusicalFacts({ ...musicalFactsFrom(event), title: '' }, { ...musicalFactsFrom(observed), title: '' }).kind === 'conflict') return false;
   if (normalizeText(event.title) !== normalizeText(observed.title)) {
     const equivalent = [
       [orcamIdentityTitle(observed.title, catalogSourceId), orcamIdentityTitle(event.title, event.primarySourceId)],
       [cndmAuditorioIdentityTitle(observed.title, catalogSourceId), cndmAuditorioIdentityTitle(event.title, event.primarySourceId)],
       [cndmZarzuelaIdentityTitle(observed.title, catalogSourceId), cndmZarzuelaIdentityTitle(event.title, event.primarySourceId)],
+      [ateneoIdentityTitle(observed.title, catalogSourceId), ateneoIdentityTitle(event.title, event.primarySourceId)],
     ].some(([incoming, existing]) => Boolean(incoming) && incoming === existing);
     if (!equivalent) return false;
     // This source-specific title equivalence requires two explicit equal
@@ -330,6 +478,24 @@ function cndmZarzuelaIdentityTitle(title: string, catalogSourceId: string): stri
     return principal ? normalizeText(principal) || undefined : undefined;
   }
   return catalogSourceId === 'src_teatro_zarzuela' ? normalizeText(title) || undefined : undefined;
+}
+
+/**
+ * Ateneo prefixes partner listings with its cycle or the word "Concierto",
+ * and sometimes inserts the solo instrument between artist and programme.
+ * This equivalence remains gated by exact venue, date and explicit time.
+ */
+function ateneoIdentityTitle(title: string, catalogSourceId: string): string | undefined {
+  if (![
+    'src_ateneo_madrid',
+    'src_fundacionpiumosso_com',
+    'src_tala_producciones_es',
+  ].includes(catalogSourceId)) return undefined;
+  const comparable = title
+    .replace(/^[«“"']?Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo[»”"']?\.\s*/iu, '')
+    .replace(/^Concierto\s+/iu, '')
+    .replace(/\s+piano\s*[-–—]\s*/iu, '. ');
+  return normalizeText(comparable) || undefined;
 }
 
 function timesCompatible(left: string | null, right: string | null): boolean {

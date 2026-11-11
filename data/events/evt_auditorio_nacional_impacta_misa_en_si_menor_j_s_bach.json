@@ -29,13 +29,13 @@
   ],
   "composers": [
     {
-      "name": "J. S. Bach"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Misa en Si menor, BWV 232",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [
@@ -51,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-misa-en-si-menor-j-s-bach",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "impacta-misa-en-si-menor-j-s-bach"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

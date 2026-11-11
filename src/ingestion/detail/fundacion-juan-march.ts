@@ -1,5 +1,5 @@
 import { parseObservedDateTime, parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, normalizeWorkList, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -66,7 +66,7 @@ export function parseMarchDetail(event: RawEvent, body: string): ObservedFactPat
   const works: { title: string; composerName?: string }[] = [];
   // These are explicit CMS composer/work lists, not arbitrary bold names in prose.
   for (const pair of (program ?? '').matchAll(/<ol\b[^>]*class=["']lista-nexo compositores["'][^>]*>([\s\S]*?)<\/ol>\s*<ol\b[^>]*class=["']obras["'][^>]*>([\s\S]*?)<\/ol>/gi)) {
-    const names = [...pair[1]!.matchAll(/<strong\b[^>]*>([\s\S]*?)<\/strong>/gi)].map((m) => stripTags(m[1]!)).filter(Boolean);
+    const names = primaryMarchComposerNames(pair[1]!);
     composers.push(...names.map((name) => ({ name })));
     for (const work of pair[2]!.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)) {
       const title = stripTags(work[1]!);
@@ -81,16 +81,36 @@ export function parseMarchDetail(event: RawEvent, body: string): ObservedFactPat
   const format = /Formato:\s*(?:<[^>]+>\s*)*([^<\n]+)/i.exec(body)?.[1];
   return {
     occurrences: schedule,
+    calendarEvidence: { complete: { from: schedule[0]!.date!, to: schedule.at(-1)!.date! },
+      evidence: 'p-acto__fechas íntegro corroborado por todas las funciones JSON-LD de la URL canónica' },
     venueText: [...venues][0],
     eventStatus: [...statuses][0],
     description: text(first.description),
     organizerText: text(object(first.organizer).name),
     categoryText: format ? stripTags(format) : undefined,
-    programText: program ? stripTags(program) || undefined : undefined,
+    programText: program ? flattenHtmlBlocks(program) || undefined : undefined,
     performers,
     composers: normalizeComposerList(composers),
     works: normalizeWorkList(works),
   };
+}
+
+/**
+ * March can bold catalogue volumes, places and footnote sources inside the
+ * same composer `<li>`. Only its leading `<strong>` is the CMS composer field;
+ * later bold descendants are editorial markup, not additional people.
+ */
+function primaryMarchComposerNames(html: string): string[] {
+  const names: string[] = [];
+  for (const item of html.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)) {
+    const first = /<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(item[1]!);
+    if (!first?.[1]) continue;
+    const before = item[1]!.slice(0, first.index);
+    if (stripTags(before)) continue;
+    const name = stripTags(first[1]);
+    if (name) names.push(name);
+  }
+  return names;
 }
 
 function visibleSchedule(body: string): RawOccurrence[] {

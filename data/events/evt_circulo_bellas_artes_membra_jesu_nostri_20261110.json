@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_membra_jesu_nostri_20261110",
+  "slug": "membra-jesu-nostri-coro-artesonado",
+  "title": "Membra Jesu Nostri",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_salon_baile",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_membra_jesu_nostri_20261110_01",
+      "date": "2026-11-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro ArteSonado",
+      "role": "choir"
+    },
+    {
+      "name": "Rodrigo Guerrero",
+      "role": "conductor"
+    },
+    {
+      "name": "Antonia Castaño",
+      "role": "other"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Dieterich Buxtehude"
+    }
+  ],
+  "works": [
+    {
+      "title": "Membra Jesu Nostri",
+      "composerName": "Dieterich Buxtehude"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/espectaculos/membra-jesu-nostri/",
+      "checkedAt": "2026-11-01",
+      "externalId": "136255"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-11-01"
+}

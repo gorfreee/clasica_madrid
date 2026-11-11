@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83109",
+  "slug": "solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
+  "title": "Solistas del Siglo XXI. «Fantasmas de la forma»: recital de piano",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83109_01",
+      "date": "2026-10-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Uladzislau Khandohi"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano en si bemol menor op 35",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Réminiscences de Norma (Reminiscencias de Norma) de V. Bellini para dos pianos S 655 (versión para piano solo)",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Sonata para piano núm. 2 en si bemol menor op 36 (revisión de 1931)",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
+      "checkedAt": "2026-10-11",
+      "externalId": "83109"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-10-11"
+}

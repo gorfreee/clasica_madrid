@@ -19,17 +19,20 @@
     {
       "name": "Philippe Herreweghe",
       "role": "conductor"
+    },
+    {
+      "name": "Collegium Vocale Gent"
     }
   ],
   "composers": [
     {
-      "name": "Carlo Gesualdo (1566-1613)"
+      "name": "Carlo Gesualdo"
     }
   ],
   "works": [
     {
       "title": "Madrigali a cinque voci, libro V (1611)",
-      "composerName": "Carlo Gesualdo (1566-1613)"
+      "composerName": "Carlo Gesualdo"
     }
   ],
   "eras": [
@@ -45,16 +48,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-gent-1",
-      "checkedAt": "2026-09-03",
-      "externalId": "23829"
+      "checkedAt": "2026-11-01",
+      "externalId": "cndm-collegium-vocale-gent-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23829",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "23829"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

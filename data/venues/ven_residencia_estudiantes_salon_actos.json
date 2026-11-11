@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_residencia_estudiantes_salon_actos",
+  "slug": "residencia-estudiantes-salon-actos",
+  "name": "Residencia de Estudiantes — Salón de actos",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_residencia_estudiantes",
+  "spaceName": "Salón de actos",
+  "lastVerifiedAt": "2026-10-21"
+}

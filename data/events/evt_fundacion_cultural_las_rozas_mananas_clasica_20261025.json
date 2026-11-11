@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_cultural_las_rozas_mananas_clasica_20261025",
+  "slug": "mananas-de-clasica",
+  "title": "Mañanas de Clásica: María Soldado Bermúdez y Alejandro de Castro García",
+  "status": "scheduled",
+  "venueId": "ven_escuela_musica_joaquin_rodrigo_las_rozas_sala_polivalente",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_cultural_las_rozas_mananas_clasica_20261025_01",
+      "date": "2026-10-25",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "María Soldado Bermúdez",
+      "role": "soloist"
+    },
+    {
+      "name": "Alejandro de Castro García",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Frederic Mompou"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    },
+    {
+      "name": "Fritz Kreisler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonatina del Guadalquivir",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "Sonata n.º 21, D. 960: III. Scherzo",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Canciones y danzas n.º 1 y n.º 6",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "Sonata n.º 22, op. 54",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sonata n.º 1, op. 28: I. Allegro moderato",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Liebesleid y Liebesfreud (arreglos de Serguéi Rajmáninov)",
+      "composerName": "Fritz Kreisler"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/mananas-de-clasica-2/",
+      "checkedAt": "2026-10-21",
+      "externalId": "6856"
+    }
+  ],
+  "primarySourceId": "src_fundacion_cultural_las_rozas",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -17,6 +17,69 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['auditorio joaquin rodrigo'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_joaquin_rodrigo_las_rozas',
+      slug: 'auditorio-joaquin-rodrigo-las-rozas',
+      name: 'Auditorio Joaquín Rodrigo',
+      municipality: 'Las Rozas de Madrid',
+      area: 'nearby',
+      address: 'Avenida del Polideportivo, 18, Las Rozas de Madrid',
+      url: 'https://www.lasrozas.es/contacto/direcciones-y-telefonos/FichaAuditorio',
+    },
+  },
+  {
+    keys: ['c.c. perez de la riva', 'centro cultural perez de la riva'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_centro_cultural_perez_de_la_riva',
+      slug: 'centro-cultural-perez-de-la-riva',
+      name: 'Centro Cultural Pérez de la Riva',
+      municipality: 'Las Rozas de Madrid',
+      area: 'nearby',
+      address: 'Calle Principado de Asturias, 28, Las Rozas de Madrid',
+      url: 'https://www.lasrozas.es/contacto/direcciones-y-telefonos/FichaCentroCulturalPerezdelaRiva',
+    },
+  },
+  {
+    keys: ['teatro auditorio de san lorenzo de el escorial', 'teatro auditorio escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatro_auditorio_escorial',
+      slug: 'teatro-auditorio-de-san-lorenzo-de-el-escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Parque Felipe II, s/n, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.teatroauditorioescorial.es/',
+    },
+  },
+  {
+    keys: ['residencia de estudiantes'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_residencia_estudiantes',
+      slug: 'residencia-de-estudiantes',
+      name: 'Residencia de Estudiantes',
+      ...MADRID,
+      address: 'Calle del Pinar, 21-23, 28006 Madrid',
+      url: 'https://residenciadeestudiantes.com/',
+    },
+  },
+  {
+    keys: ['institucion libre de ensenanza'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_institucion_libre_ensenanza',
+      slug: 'institucion-libre-de-ensenanza',
+      name: 'Institución Libre de Enseñanza',
+      ...MADRID,
+      address: 'Paseo del General Martínez Campos, 14, 28010 Madrid',
+      url: 'https://www.fundacionginer.org/',
+    },
+  },
+  {
     keys: ['teatro monumental', 'teatro monumental de madrid'],
     venue: {
       schemaVersion: 1,
@@ -41,7 +104,11 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
-    keys: ['fundacion juan march auditorio'],
+    keys: [
+      'fundacion juan march auditorio',
+      'auditorio de la fundacion juan march',
+      'auditorio fundacion juan march',
+    ],
     venue: {
       schemaVersion: 1,
       id: 'ven_fundacion_juan_march_auditorio',
@@ -84,6 +151,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.fundacioncanal.com/',
       parentVenueId: 'ven_fundacion_canal',
       spaceName: 'Auditorio',
+    },
+  },
+  {
+    keys: ['auditorio mutua', 'auditorio mutua madrilena'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_mutua_madrilena',
+      slug: 'auditorio-mutua-madrilena',
+      name: 'Auditorio Mutua Madrileña',
+      ...MADRID,
+      address: 'Paseo de Eduardo Dato, 20, 28010 Madrid',
+      url: 'https://www.fundacionmutua.es/cultura/conciertos/',
     },
   },
   {
@@ -183,6 +262,40 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: [
+      'sala principal real teatro de retiro',
+      'real teatro de retiro sala principal',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_teatro_retiro_sala_principal',
+      slug: 'real-teatro-de-retiro-sala-principal',
+      name: 'Real Teatro de Retiro — Sala Principal',
+      ...MADRID,
+      address: 'Plaza Daoíz y Velarde, 4, 28007 Madrid',
+      url: 'https://www.realteatroderetiro.es/',
+      parentVenueId: 'ven_real_teatro_retiro',
+      spaceName: 'Sala Principal',
+    },
+  },
+  {
+    keys: [
+      'sala pacifico real teatro de retiro',
+      'real teatro de retiro sala pacifico',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_teatro_retiro_sala_pacifico',
+      slug: 'real-teatro-de-retiro-sala-pacifico',
+      name: 'Real Teatro de Retiro — Sala Pacífico',
+      ...MADRID,
+      address: 'Plaza Daoíz y Velarde, 4, 28007 Madrid',
+      url: 'https://www.realteatroderetiro.es/',
+      parentVenueId: 'ven_real_teatro_retiro',
+      spaceName: 'Sala Pacífico',
+    },
+  },
+  {
     keys: ['teatro de la zarzuela', 'teatro zarzuela'],
     venue: {
       schemaVersion: 1,
@@ -195,7 +308,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
-    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor'],
+    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor', 'cafe central ateneo'],
     venue: {
       schemaVersion: 1,
       id: 'ven_ateneo_madrid',
@@ -456,7 +569,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
       slug: 'casa-de-america',
       name: 'Casa de América',
       ...MADRID,
-      address: 'acceso por C/ Marqués del Duero, 2',
+      address: 'Calle del Marqués del Duero, 2, 28014 Madrid',
       url: 'https://www.casamerica.es/',
     },
   },
@@ -485,9 +598,199 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['palacio real de madrid'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid',
+      slug: 'palacio-real-de-madrid',
+      name: 'Palacio Real de Madrid',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+    },
+  },
+  {
+    keys: [
+      'capilla palacio real de madrid',
+      'capilla real de madrid',
+      'palacio real de madrid capilla',
+      'palacio real de madrid capilla real',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid_capilla_real',
+      slug: 'palacio-real-de-madrid-capilla-real',
+      name: 'Palacio Real de Madrid — Capilla Real',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+      parentVenueId: 'ven_palacio_real_madrid',
+      spaceName: 'Capilla Real',
+    },
+  },
+  {
+    keys: [
+      'salon de columnas palacio real de madrid',
+      'palacio real de madrid salon de columnas',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid_salon_columnas',
+      slug: 'palacio-real-de-madrid-salon-de-columnas',
+      name: 'Palacio Real de Madrid — Salón de Columnas',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+      parentVenueId: 'ven_palacio_real_madrid',
+      spaceName: 'Salón de Columnas',
+    },
+  },
+  {
+    keys: ['real monasterio de santa isabel', 'monasterio de santa isabel'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_monasterio_santa_isabel',
+      slug: 'real-monasterio-de-santa-isabel',
+      name: 'Real Monasterio de Santa Isabel',
+      ...MADRID,
+      address: 'Calle de Santa Isabel, 46, 28012 Madrid',
+    },
+  },
+  {
+    keys: ['palacio real de el pardo', 'palacio de el pardo'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_el_pardo',
+      slug: 'palacio-real-de-el-pardo',
+      name: 'Palacio Real de El Pardo',
+      ...MADRID,
+      address: 'Calle de Manuel Alonso, s/n, 28048 Madrid',
+    },
+  },
+  {
+    keys: ['escuela superior de musica reina sofia'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_escuela_superior_musica_reina_sofia',
+      slug: 'escuela-superior-musica-reina-sofia',
+      name: 'Escuela Superior de Música Reina Sofía',
+      ...MADRID,
+      address: 'Calle de Requena, 1, 28013 Madrid',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/',
+    },
+  },
+  {
+    keys: [
+      'escuela superior de musica reina sofia auditorio sony',
+      'auditorio sony escuela superior de musica reina sofia',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+      slug: 'escuela-superior-musica-reina-sofia-auditorio-sony',
+      name: 'Escuela Superior de Música Reina Sofía — Auditorio Sony',
+      ...MADRID,
+      address: 'Calle de Requena, 1, 28013 Madrid',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/auditorio-sony/',
+      parentVenueId: 'ven_escuela_superior_musica_reina_sofia',
+      spaceName: 'Auditorio Sony',
+    },
+  },
+  {
+    keys: [
+      'conservatorio profesional de musica de getafe',
+      'conservatorio de getafe',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_conservatorio_profesional_de_musica_de_getafe',
+      slug: 'conservatorio-profesional-de-musica-de-getafe',
+      name: 'Conservatorio Profesional de Música de Getafe',
+      municipality: 'Getafe',
+      area: 'nearby',
+      address: 'Avenida de Arcas del Agua, 1, 28905 Getafe',
+      url: 'https://getafe.es/placemarks/conservatorio-profesional-de-musica/',
+    },
+  },
+  {
+    keys: [
+      'auditorio del conservatorio profesional de musica de getafe',
+      'conservatorio profesional de musica de getafe auditorio',
+      'conservatorio profesional de musica de getafe - auditorio',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_del_conservatorio_profesional_de_musica_de_getafe',
+      slug: 'auditorio-del-conservatorio-profesional-de-musica-de-getafe',
+      name: 'Conservatorio Profesional de Música de Getafe — Auditorio',
+      municipality: 'Getafe',
+      area: 'nearby',
+      address: 'Avenida de Arcas del Agua, 1, 28905 Getafe',
+      url: 'https://getafe.es/placemarks/conservatorio-profesional-de-musica/',
+      parentVenueId: 'ven_conservatorio_profesional_de_musica_de_getafe',
+      spaceName: 'Auditorio',
+    },
+  },
+  {
+    keys: [
+      'real conservatorio superior de musica de madrid',
+      'real conservatorio superior de musica madrid',
+      'rcsmm',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_rcsmm',
+      slug: 'real-conservatorio-superior-musica-madrid',
+      name: 'Real Conservatorio Superior de Música de Madrid',
+      ...MADRID,
+      address: 'Calle del Doctor Mata, 2, 28012 Madrid',
+      url: 'https://rcsmm.eu/',
+    },
+  },
+  {
+    keys: ['real coliseo carlos iii'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_coliseo_carlos_iii',
+      slug: 'real-coliseo-carlos-iii',
+      name: 'Real Coliseo Carlos III',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Calle Floridablanca, 20, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.comunidad.madrid/centros/real-coliseo-carlos-iii-san-lorenzo-escorial',
+    },
+  },
+  {
+    keys: ['basilica del real monasterio san lorenzo de el escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_basilica_monasterio_san_lorenzo_escorial',
+      slug: 'basilica-monasterio-san-lorenzo-escorial',
+      name: 'Basílica del Real Monasterio de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Avenida de Juan de Borbón y Battenberg, s/n, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.patrimonionacional.es/visita/real-monasterio-de-san-lorenzo-de-el-escorial/espacios/basilica',
+    },
+  },
+  {
+    keys: ['casa de cultura de san lorenzo de el escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_cultura_san_lorenzo_escorial',
+      slug: 'casa-cultura-san-lorenzo-escorial',
+      name: 'Casa de Cultura de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Calle Floridablanca, 3, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.aytosanlorenzo.es/servicios/casa-de-cultura/',
+    },
+  },
+  {
     keys: [
       'shigeru kawai center',
       'shigeru kawai center madrid',
+      'shigerukawaicentermadrid',
       'shigeru kawai center de madrid',
       'eutherpe madrid',
       'eutherpemadrid',
@@ -499,7 +802,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
       slug: 'shigeru-kawai-center',
       name: 'Shigeru Kawai Center',
       ...MADRID,
-      address: 'Plaza Francisco Morano, 3, 28003 Madrid',
+      address: 'Plaza Francisco Morano, 3, 28005 Madrid',
       url: 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid',
     },
   },
@@ -510,8 +813,20 @@ export const KNOWN_VENUES: KnownVenue[] = [
  * Generic hall names such as "Sala Principal" must never be global aliases.
  */
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
+  'ayto-san-lorenzo': {
+    'casa de cultura': 'ven_casa_cultura_san_lorenzo_escorial',
+  },
+  condeduque: {
+    auditorio: 'ven_condeduque_auditorio',
+    // The ficha prints the bare hall name. "Teatro" is ambiguous outside this source.
+    teatro: 'ven_condeduque_teatro',
+  },
   'fundacion-juan-march': {
     'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
+  },
+  'teatro-zarzuela': {
+    'auditorio de la fundacion juan march': 'ven_fundacion_juan_march_auditorio',
+    'fundacion juan march': 'ven_fundacion_juan_march',
   },
   'fundacion-canal': {
     'auditorio mateo inurria 2': 'ven_auditorio_fundacion_canal',
@@ -519,9 +834,11 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   },
   'teatro-real': {
     'sala principal': 'ven_teatro_real',
-    'sala principal real teatro de retiro': 'ven_real_teatro_retiro',
+    'sala principal real teatro de retiro': 'ven_real_teatro_retiro_sala_principal',
+    'real teatro de retiro sala principal': 'ven_real_teatro_retiro_sala_principal',
     'hall real teatro de retiro': 'ven_real_teatro_retiro',
-    'sala pacifico real teatro de retiro': 'ven_real_teatro_retiro',
+    'sala pacifico real teatro de retiro': 'ven_real_teatro_retiro_sala_pacifico',
+    'real teatro de retiro sala pacifico': 'ven_real_teatro_retiro_sala_pacifico',
     'teatro de la abadia': 'ven_teatro_abadia',
   },
   'madrid-datos': {
@@ -557,6 +874,47 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     eutherpemadrid: 'ven_shigeru_kawai_center',
     'sala eutherpe madrid': 'ven_shigeru_kawai_center',
   },
+  'madrid-a-tempo': {
+    'ateneo de madrid': 'ven_ateneo_madrid',
+    'centro cultural casa de vacas del parque del retiro madrid': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas del parque del retiro': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas parque del retiro madrid': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas parque del retiro': 'ven_casa_vacas_retiro',
+    'casa de vacas del parque del retiro': 'ven_casa_vacas_retiro',
+  },
+  'patrimonio-nacional': {
+    'capilla palacio real de madrid': 'ven_palacio_real_madrid_capilla_real',
+    'palacio real de madrid capilla': 'ven_palacio_real_madrid_capilla_real',
+    'salon de columnas palacio real de madrid': 'ven_palacio_real_madrid_salon_columnas',
+    'palacio real de madrid salon de columnas': 'ven_palacio_real_madrid_salon_columnas',
+  },
+  'ateneo-madrid': {
+    'catedra mayor': 'ven_ateneo_madrid',
+    cacharreria: 'ven_ateneo_madrid',
+    'la cacharreria': 'ven_ateneo_madrid',
+    'sala la cacharreria': 'ven_ateneo_madrid',
+    caharreria: 'ven_ateneo_madrid',
+    'la caharreria': 'ven_ateneo_madrid',
+    'sala la caharreria': 'ven_ateneo_madrid',
+    'sala perez galdos': 'ven_ateneo_madrid',
+    'sala ramon y cajal': 'ven_ateneo_madrid',
+    'sala ciudad ubeda': 'ven_ateneo_madrid',
+    'sala ciudad de ubeda': 'ven_ateneo_madrid',
+    'sala laffon': 'ven_ateneo_madrid',
+    'sala anselma': 'ven_ateneo_madrid',
+    'cafe central ateneo': 'ven_ateneo_madrid',
+  },
+  'escuela-reina-sofia': {
+    'auditorio sony madrid': 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+    'sala sinfonica auditorio nacional de musica': 'ven_auditorio_nacional_sala_sinfonica',
+  },
+  'fundacion-mutua': {
+    'auditorio mutua': 'ven_auditorio_mutua_madrilena',
+    'fundacion albeniz': 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+    'teatro monumental calle atocha 65 28012 madrid': 'ven_teatro_monumental',
+    'sala de camara auditorio nacional principe de vergara 146 28002 madrid': 'ven_auditorio_nacional_sala_camara',
+    'auditorio del centro de cultura contemporanea condeduque c conde duque 11 28005 madrid': 'ven_condeduque_auditorio',
+  },
 };
 
 /**
@@ -590,6 +948,8 @@ export type VenueMatchInput = {
   venueText?: string;
   sourceId?: string;
   facilityId?: string;
+  /** Physical address observed on the source listing, when present. */
+  address?: string;
   proposed?: ProposedVenueFacts;
 };
 
@@ -633,7 +993,7 @@ export function matchVenue(
   }
 
   if (input.sourceId === 'madrid-datos' && input.facilityId && input.venueText) {
-    const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog);
+    const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog, input.address);
     if (proposed) return { kind: 'new', venue: proposed };
   }
 
@@ -678,21 +1038,30 @@ export function isSufficientProposedVenue(
   return true;
 }
 
+/** A new root venue needs a physical address. Existing catalog matches do not. */
+export function hasSufficientNewVenueLocation(proposed: ProposedVenueFacts | undefined): boolean {
+  return Boolean(proposed?.address?.trim());
+}
+
 /**
  * Official municipal installation that is not yet in the catalog.
  * Identity is the facility id. Name comes from `event-location` (district
  * suffix stripped). municipality/area are inherent to this City of Madrid
- * source; address and URL are omitted because the listing does not publish
- * them reliably.
+ * source. A new root is only proposed when the listing already carries a
+ * physical address; existing catalog venues are resolved by facility id
+ * without requiring the observation to repeat it.
  */
 export function proposeMadridDatosVenue(
   facilityId: string,
   venueText: string,
   catalog: Catalog,
+  address?: string,
 ): Venue | undefined {
   if (!/^\d+$/.test(facilityId)) return undefined;
   const name = stripTrailingParenthetical(venueText);
   if (!name) return undefined;
+  const location = address?.trim();
+  if (!location) return undefined;
   const id = madridDatosFacilityVenueId(facilityId);
   const slug = madridDatosFacilitySlug(name, facilityId, id, catalog);
   if (!slug) return undefined;
@@ -703,7 +1072,78 @@ export function proposeMadridDatosVenue(
     name,
     municipality: 'Madrid',
     area: 'madrid',
+    address: location,
   };
+}
+
+/**
+ * Human-readable address from Madrid Datos listing `address.area`.
+ * Uses the official street/number/postal fields; does not geocode or invent.
+ */
+export function formatMadridDatosAddress(input: {
+  streetAddress?: string;
+  postalCode?: string;
+  locality?: string;
+}): string | undefined {
+  const street = formatMadridDatosStreet(input.streetAddress);
+  if (!street) return undefined;
+  const postal = input.postalCode?.trim();
+  const locality = formatMadridDatosLocality(input.locality);
+  const tail = [postal, locality].filter(Boolean).join(' ');
+  return tail ? `${street}, ${tail}` : street;
+}
+
+function formatMadridDatosStreet(raw: string | undefined): string | undefined {
+  const value = raw?.trim().replace(/\s+/g, ' ');
+  if (!value) return undefined;
+  const match = /^(.*?)(?:\s+(\d+(?:\s*[-–]\s*\d+)?|S\/?N))$/i.exec(value);
+  const streetPart = (match?.[1] ?? value).trim();
+  const numberPart = match?.[2];
+  const street = titleCaseMadridDatosStreet(streetPart);
+  if (!street) return undefined;
+  if (!numberPart) return street;
+  const number = /^s\/?n$/i.test(numberPart.replace(/\s+/g, '')) ? 's/n' : numberPart.replace(/\s+/g, '');
+  return `${street}, ${number}`;
+}
+
+function titleCaseMadridDatosStreet(value: string): string {
+  return value
+    .split(/\s+/u)
+    .filter(Boolean)
+    .map((part, index) => {
+      const lower = part.toLocaleLowerCase('es');
+      if (index === 0) return STREET_TYPE_LABEL[lower] ?? capitalizeMadridDatosWord(part);
+      if (SMALL_STREET_WORDS.has(lower)) return lower;
+      return capitalizeMadridDatosWord(part);
+    })
+    .join(' ');
+}
+
+const STREET_TYPE_LABEL: Record<string, string> = {
+  calle: 'Calle',
+  avenida: 'Avenida',
+  plaza: 'Plaza',
+  paseo: 'Paseo',
+  glorieta: 'Glorieta',
+  ronda: 'Ronda',
+  carretera: 'Carretera',
+  camino: 'Camino',
+  travesia: 'Travesía',
+  'travesía': 'Travesía',
+};
+
+const SMALL_STREET_WORDS = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y']);
+
+function capitalizeMadridDatosWord(value: string): string {
+  const lower = value.toLocaleLowerCase('es');
+  return lower.charAt(0).toLocaleUpperCase('es') + lower.slice(1);
+}
+
+function formatMadridDatosLocality(raw: string | undefined): string | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  if (isMadridMunicipality(value) || value.toLocaleUpperCase('es') === 'MADRID') return 'Madrid';
+  return titleCaseMadridDatosStreet(value);
 }
 
 function madridDatosFacilitySlug(
@@ -712,9 +1152,10 @@ function madridDatosFacilitySlug(
   venueId: string,
   catalog: Catalog,
 ): string | undefined {
-  const preferred = toSlug(`${name} ${facilityId}`);
+  const preferred = toSlug(name);
+  const withFacility = toSlug(`${name} ${facilityId}`);
   const fallback = toSlug(`md fac ${facilityId}`);
-  for (const slug of [preferred, fallback]) {
+  for (const slug of [preferred, withFacility, fallback]) {
     if (!slug || slug === 'evento') continue;
     const taken = catalog.venues.some((venue) => venue.slug === slug && venue.id !== venueId);
     if (!taken) return slug;
@@ -773,10 +1214,12 @@ function knownVenueCompatible(known: KnownVenue, proposed: ProposedVenueFacts): 
 
 /**
  * Discovery venue not yet in the catalog. Identity is the observed name;
- * there is no fuzzy match. municipality/area must already be sufficient.
+ * there is no fuzzy match. A new root needs municipality/area and a
+ * physical address; existing catalog venues may resolve without one.
  */
 export function proposeDiscoveryVenue(proposed: ProposedVenueFacts, catalog: Catalog): Venue | undefined {
   if (!isSufficientProposedVenue(proposed) || !proposed.municipality || !proposed.area) return undefined;
+  if (!hasSufficientNewVenueLocation(proposed)) return undefined;
   const usedIds = new Set(catalog.venues.map((venue) => venue.id));
   const usedSlugs = new Set(catalog.venues.map((venue) => venue.slug));
   const id = uniqueId(venueIdFor(proposed.name), usedIds);
@@ -789,8 +1232,8 @@ export function proposeDiscoveryVenue(proposed: ProposedVenueFacts, catalog: Cat
     name: proposed.name.trim(),
     municipality: proposed.municipality.trim(),
     area: proposed.area,
+    address: proposed.address!.trim(),
   };
-  if (proposed.address) venue.address = proposed.address;
   if (proposed.url) venue.url = proposed.url;
   return venue;
 }
@@ -803,6 +1246,7 @@ function toInput(venueTextOrInput: string | VenueMatchInput | undefined, sourceI
     venueText: venueTextOrInput.venueText,
     sourceId: venueTextOrInput.sourceId ?? sourceId,
     facilityId: venueTextOrInput.facilityId,
+    address: venueTextOrInput.address,
     proposed: venueTextOrInput.proposed,
   };
 }

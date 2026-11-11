@@ -17,15 +17,51 @@
   ],
   "performers": [
     {
-      "name": "ORQUESTA SINFÓNICA UPM"
+      "name": "Orquesta Sinfónica UPM"
     },
     {
       "name": "Marcos Enrique Romero Gil",
       "role": "conductor"
+    },
+    {
+      "name": "Susana Gómez Vázquez"
+    },
+    {
+      "name": "Javier Sanz Pascual"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Alberto Ginastera"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Leonard Bernstein"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ballet La Estancia, Op. 8",
+      "composerName": "Alberto Ginastera"
+    },
+    {
+      "title": "Rhapsody in Blue",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Ciranda das Sete Notas",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "Mambo (West Side Story)",
+      "composerName": "Leonard Bernstein"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -38,10 +74,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-america-tradicion-identidad-y-nuevo-mundo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "upm-america-tradicion-identidad-y-nuevo-mundo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

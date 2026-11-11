@@ -1,4 +1,12 @@
-import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
+import { teatroRealCalendar } from './teatro-real-calendar.ts';
+import { explicitAccessText } from './access-evidence.ts';
+import { stripLeadingComposerCreditLabel } from '../composer-name.ts';
+import {
+  isObviousNonPerformer,
+  looksLikeCatalogOnlyLine,
+  looksLikeEnsembleName,
+} from '../observed-cleanup.ts';
+import { allCaptures, collapseWhitespace, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   composersFromWorks,
@@ -9,6 +17,7 @@ import {
   type ObservedPerson,
   type ObservedWork,
 } from '../observed.ts';
+import { normalizeText } from '../../lib/domain/normalize.ts';
 
 /**
  * Parse a Teatro Real `/es/espectaculo/…` page or the structural excerpt fixture.
@@ -55,7 +64,8 @@ function parseProduction(html: string): ObservedFactPatch {
   const description = paragraphs[0]?.text;
   const peopleParagraph = paragraphs.find(looksLikeCastParagraph);
   const introPerformers = peopleParagraph
-    ? splitBreaks(peopleParagraph.html).map(parsePersonLine)
+    ? introCreditLines(peopleParagraph.html).flatMap((line) =>
+      splitInlineIntroCredits(line).filter(isMusicalIntroCredit).map(parseIntroPersonLine))
     : [];
   const performers = normalizePersonList([
     ...parseMusicalTeam(html),
@@ -64,9 +74,10 @@ function parseProduction(html: string): ObservedFactPatch {
   ]);
 
   const programText = collapseIntro(paragraphs.map((item) => item.text));
-  const venueText = stripTags(
-    firstMatch(html, /functions-show__block--item-space[\s\S]*?<p>([\s\S]*?)<\/p>/i) ?? '',
-  );
+  const functionsHtml = firstMatch(html, /class="functions-show"[\s\S]{0,20000}/i) ?? '';
+  const venueText =
+    extractRetiroRoomVenueText(`${introHtml}\n${functionsHtml}`) ??
+    stripTags(firstMatch(html, /functions-show__block--item-space[\s\S]*?<p>([\s\S]*?)<\/p>/i) ?? '');
 
   const listItems = allCaptures(introHtml, /<li\b[^>]*>([\s\S]*?)<\/li>/gi)
     .map((part) => stripTags(part))
@@ -74,15 +85,18 @@ function parseProduction(html: string): ObservedFactPatch {
   const works = normalizeWorkList(listItems.map(parseTitleComposerWork));
   const declaredComposers = parseDeclaredComposers(introHtml);
   const schedule = inferScheduleFromText([programText, description].filter(Boolean).join(' '));
+  const accessText = teatroRealAccessText(html, introHtml);
 
   return {
     ...(description ? { description } : {}),
     ...(categoryText ? { categoryText } : {}),
     ...(organizerText ? { organizerText } : {}),
     ...(venueText ? { venueText } : {}),
+    ...(accessText ? { accessText } : {}),
     ...(programText ? { programText } : {}),
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
     ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
+    ...teatroRealCalendar(html, introHtml),
     performers,
     works,
     composers: normalizeComposerList([
@@ -230,19 +244,55 @@ function parseCast(html: string): ObservedPerson[] {
   });
 }
 
+const MUSIC_CREDIT_ES = /^(?:m[úu]sica)\s+(?:de|:)\s*(.+)$/i;
+const MUSIC_CREDIT_EN = /^(?:music)(?:\s+by\b|:)?\s+(.+)$/i;
+const MUSIC_GENRE_VALUE =
+  /^(?:c[áa]mara|cl[áa]sica|vocal|instrumental|antigua|contempor[áa]nea|barroca|sinf[oó]nica|l[íi]rica|y\s+danza)\b/i;
+const INLINE_NEXT_CREDIT =
+  /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|orquestaci[oó]n\b|premio\b|coproducci[oó]n\b|producci[oó]n\b)/i;
+const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
+
 function parseDeclaredComposers(html: string): string[] {
   const names: string[] = [];
   for (const paragraph of allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi).map((part) => stripTags(part))) {
-    const declared = /^Música\s+de\s+(.+)$/i.exec(paragraph);
+    const declared = MUSIC_CREDIT_ES.exec(paragraph) ?? MUSIC_CREDIT_EN.exec(paragraph);
     if (!declared?.[1]) continue;
-    const name = declared[1]
-      .replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
-      .replace(/[.,;]+$/u, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (name) names.push(name);
+    const credit = stripLeadingComposerCreditLabel(
+      declared[1]
+        .split(INLINE_NEXT_CREDIT)[0]
+        ?.replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
+        .replace(/[.,;]+$/u, '')
+        .replace(/\s+/g, ' ')
+        .trim() ?? '',
+    );
+    if (!credit || MUSIC_GENRE_VALUE.test(credit) || /^(?:y|e)\s+/i.test(credit)) continue;
+    names.push(...splitDeclaredComposerCredit(credit));
   }
   return names;
+}
+
+/**
+ * One music-credit paragraph may list several people (`A, B y C`) or trail
+ * into a libretto/version credit. Do not keep those fused into a single name.
+ */
+function splitDeclaredComposerCredit(credit: string): string[] {
+  const parts = credit
+    .split(NAME_LIST_SPLIT)
+    .map((part) => part.replace(/\s+/g, ' ').trim())
+    .filter((part) => part.length >= 3 && part.length <= 80);
+  if (parts.length >= 2 && parts.every((part) => looksLikeDeclaredPersonName(part))) {
+    return parts;
+  }
+  return credit ? [credit] : [];
+}
+
+function looksLikeDeclaredPersonName(value: string): boolean {
+  const words = value.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 8) return false;
+  return words.every((word, index) => {
+    if (/^(de|del|des|van|von|di|da|el|la)$/i.test(word) && index > 0) return true;
+    return /^\p{Lu}/u.test(word);
+  });
 }
 
 function foldTeamLabel(value: string): string {
@@ -252,6 +302,32 @@ function foldTeamLabel(value: string): string {
     .toLowerCase()
     .replace(/[^a-z]+/g, ' ')
     .trim();
+}
+
+function precioParagraphs(scope: string): string | undefined {
+  for (const paragraph of allCaptures(scope, /<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const text = collapseWhitespace(stripTags(paragraph));
+    if (!/^precio\b/i.test(text)) continue;
+    const evidence = explicitAccessText(text);
+    if (evidence) return evidence;
+  }
+  return undefined;
+}
+
+/**
+ * Observed access copy only: intro `<p>` headed Precio, or `.ticket-col-2`
+ * ("Desde 15 euros"). `.ticket-col-1` ("Compra tus entradas") and Abonos
+ * letters in `.functions-show__block--item-prices` are not evidence.
+ */
+function teatroRealAccessText(html: string, introHtml: string): string | undefined {
+  const fromPrecio = precioParagraphs(introHtml);
+  if (fromPrecio) return fromPrecio;
+
+  const ticketCol2 = firstMatch(
+    html,
+    /<span[^>]*class="[^"]*\bticket-col-2\b[^"]*"[^>]*>([\s\S]*?)<\/span>/i,
+  );
+  return explicitAccessText(ticketCol2 ? stripTags(ticketCol2) : undefined);
 }
 
 function parsePersonLine(text: string): ObservedPerson {
@@ -265,18 +341,83 @@ function parsePersonLine(text: string): ObservedPerson {
   return { name: cleaned };
 }
 
+function parseIntroPersonLine(text: string): ObservedPerson {
+  const person = parsePersonLine(text);
+  if (person.roleText) return person;
+  const name = normalizeText(person.name);
+  const mixedEnsemble =
+    (/\bcoro\b/.test(name) && /\borquesta\b/.test(name)) ||
+    (/\bchoir\b/.test(name) && /\borchestra\b/.test(name));
+  if (mixedEnsemble) return person;
+  if (/^orquesta\b/.test(name)) return { ...person, roleText: 'orquesta' };
+  if (/^coro\b/.test(name)) return { ...person, roleText: 'coro' };
+  return person;
+}
+
+function splitInlineIntroCredits(line: string): string[] {
+  const expanded = line.replace(
+    /\s+(?=(?!(?:Soprano|Tenor|Mezzo)\b)\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+,\s*(?:[Ss]oprano|[Mm]ezzosoprano|[Mm]ezzo|[Tt]enor|[Bb]ajo|[Bb]ar[ií]tono)\b)/gu,
+    '; ',
+  );
+  return expanded.split(/\s*;\s*/).flatMap((part) => {
+    part = part.replace(/^Director,\s*/iu, 'Director: ');
+    const director = /^(?:director|direcci[oó]n(?: musical)?)[,:]\s*(\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+)(?=\s|$)/iu.exec(part);
+    if (!director?.[1] || director[0].length === part.length) return [part];
+    return [director[0], part.slice(director[0].length).trim()].filter(Boolean);
+  });
+}
+
+function isMusicalIntroCredit(line: string): boolean {
+  const person = parseIntroPersonLine(line);
+  if (/^(?:orquesta|coro)\b/i.test(person.name)) return true;
+  if (!person.roleText) return looksLikeUnlabelledMusicalIntroCredit(person.name);
+  if (/[.!?]\s|\d/.test(person.name)) return false;
+  if (!/^[\p{Lu}][\p{L}'’-]+(?:\s+[\p{Lu}][\p{L}'’-]+){1,5}$/u.test(person.name)) return false;
+  return /^(?:director(?:a)?|direcci[oó]n(?: musical| del coro| de coro)?|soprano|mezzosoprano|mezzo|tenor|bajo|bar[ií]tono|contralto|viol[ií]n|piano)$/i.test(person.roleText);
+}
+
+function looksLikeUnlabelledMusicalIntroCredit(name: string): boolean {
+  const cleaned = collapseWhitespace(name);
+  if (!cleaned || cleaned.length > 80 || /\d|[.!?;:]/u.test(cleaned)) return false;
+  if (isObviousNonPerformer(cleaned)) return false;
+  if (/^(?:m[úu]sica|libreto|texto|letra|estrenad[ao]|dramma|programa|producci[oó]n|presentad[oa]|sala|teatro|auditorio|precio)\b/iu.test(cleaned)) {
+    return false;
+  }
+  if (looksLikeEnsembleName(cleaned)) return true;
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 6) return false;
+  return words.every((word, index) => {
+    if (index > 0 && /^(?:de|del|la|las|los|y|e)$/iu.test(word)) return true;
+    return /^\p{Lu}[\p{L}'’.-]*$/u.test(word) || /^[A-ZÁÉÍÓÚÜÑ]{2,}$/u.test(word);
+  });
+}
+
 function parseTitleComposerWork(text: string): ObservedWork {
-  const parens = /^(.+?)\s+\(([^)]+)\)\s*$/.exec(text);
-  if (parens?.[1] && parens[2]) return { title: parens[1].trim(), composerName: parens[2].trim() };
-  return { title: text.trim() };
+  const trimmed = text.trim();
+  const parens = /^(.+?)\s+\(([^)]+)\)\s*$/.exec(trimmed);
+  if (parens?.[1] && parens[2] && !looksLikeCatalogOnlyLine(parens[2])) {
+    return { title: parens[1].trim(), composerName: parens[2].trim() };
+  }
+  return { title: trimmed };
 }
 
 function looksLikeProse(text: string): boolean {
   return /[.!?]/.test(text) || text.length > 80;
 }
 
-function looksLikeCastParagraph(paragraph: { text: string }): boolean {
-  return /director\s*:/i.test(paragraph.text);
+function looksLikeCastParagraph(paragraph: { html: string }): boolean {
+  const lines = introCreditLines(paragraph.html);
+  if (lines.length < 2) return false;
+  return lines.some((line) =>
+    /(?:^director\s*:|,\s*(?:direcci[oó]n musical|director(?:a)?(?:\s+musical)?|soprano|mezzosoprano|contralto|tenor|bar[íi]tono|bajo)\b|^(?:orquesta|coro)\b)/i.test(line),
+  );
+}
+
+function introCreditLines(html: string): string[] {
+  const paragraphs = allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi)
+    .map((part) => stripTags(part))
+    .filter(Boolean);
+  return paragraphs.length > 1 ? paragraphs : splitBreaks(html);
 }
 
 function splitIntroParagraphs(html: string): Array<{ html: string; text: string }> {
@@ -303,3 +444,51 @@ function sliceBetween(html: string, start: string, end: string): string | undefi
   return html.slice(from, endAt);
 }
 
+const RETIRO_BUILDING = new Set(['real teatro de retiro', 'teatro real de retiro']);
+const RETIRO_ROOMS: Record<string, string> = {
+  'sala principal': 'Sala Principal',
+  'sala pacifico': 'Sala Pacífico',
+  hall: 'HALL',
+};
+const RETIRO_ROOM_PHRASE = /\b(SALA PRINCIPAL|SALA PAC[IÍ]FICO|HALL)\s+Real Teatro de Retiro\b/giu;
+
+/**
+ * Keep the concrete Retiro hall when the ficha names it. "Sala Principal"
+ * alone remains the coliseo; only the explicit Retiro phrase is composed.
+ */
+export function composeTeatroRealVenueText(
+  listing?: string,
+  detail?: string,
+): string | undefined {
+  const named = canonicalRetiroRoomVenueText(detail);
+  if (named) return named;
+  const listingFolded = listing ? normalizeText(listing) : '';
+  const detailFolded = detail ? normalizeText(detail) : '';
+  const room = RETIRO_ROOMS[detailFolded];
+  if (RETIRO_BUILDING.has(listingFolded) && room) {
+    return `${room} Real Teatro de Retiro`;
+  }
+  return detail || listing;
+}
+
+function extractRetiroRoomVenueText(html: string): string | undefined {
+  const phrases = [...stripTags(html).matchAll(new RegExp(RETIRO_ROOM_PHRASE.source, 'giu'))]
+    .map((match) => canonicalRetiroRoomVenueText(match[0]))
+    .filter((item): item is string => Boolean(item));
+  const unique = [...new Set(phrases)];
+  return unique.length === 1 ? unique[0] : undefined;
+}
+
+function canonicalRetiroRoomVenueText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const folded = normalizeText(value);
+  for (const [roomKey, roomLabel] of Object.entries(RETIRO_ROOMS)) {
+    if (
+      folded === `${roomKey} real teatro de retiro` ||
+      folded === `real teatro de retiro ${roomKey}`
+    ) {
+      return `${roomLabel} Real Teatro de Retiro`;
+    }
+  }
+  return undefined;
+}

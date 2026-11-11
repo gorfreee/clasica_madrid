@@ -1,7 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AgendaItem from '../../components/AgendaItem.astro';
+import ExternalAction from '../../components/ExternalAction.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import PlaceAddress from '../../components/PlaceAddress.astro';
+import ShareAction from '../../components/ShareAction.astro';
+import { buildVenueShare } from '../../lib/presentation/share.ts';
 import { loadVenuePage, loadVenueSlugs } from '../../lib/presentation/site.ts';
+import { VENUES_INDEX_PATH } from '../../lib/presentation/urls.ts';
 
 export async function getStaticPaths() {
   const slugs = await loadVenueSlugs();
@@ -16,39 +22,67 @@ const model = await loadVenuePage(slug);
 if (!model) {
   throw new Error(`Lugar público no encontrado: ${slug}`);
 }
-const mapQuery = encodeURIComponent([model.address, model.municipality].filter(Boolean).join(', '));
+const share = buildVenueShare({
+  name: model.name,
+  municipality: model.municipality,
+  path: model.canonicalPath,
+});
+const showArchive = model.upcoming.length === 0 && model.hasHistory;
+const programmeTitleId = showArchive ? 'anteriores-titulo' : 'proximos-titulo';
+const programme = showArchive ? model.previous : model.upcoming.map((item) => ({ ...item, statusLabel: null }));
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+<Layout
+  title={model.title}
+  description={model.description}
+  canonicalPath={model.canonicalPath}
+  indexable={model.indexable}
+  jsonLd={model.jsonLd}
+  analytics={{ page_type: 'venue', venue_id: model.id, venue_name: model.name }}
+>
   <article class="detail venue-detail">
-    <header class="detail-hero detail-hero--venue">
-      <p class="eyebrow">Lugar / {model.areaLabel}</p>
+    <header class="page-hero page-hero--detail">
+      <Eyebrow label="Lugares" href={VENUES_INDEX_PATH} />
       <h1>{model.name}</h1>
       <div class="venue-detail__practical">
-        <p>{model.address ?? model.municipality}{model.showMunicipality && model.address ? `, ${model.municipality}` : ''}</p>
-        <div class="button-row">
-          {model.address && <a class="button-link" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} rel="noopener noreferrer">Cómo llegar ↗</a>}
-          {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web del espacio ↗</a>}
-        </div>
+        {model.placeAddress ? (
+          <PlaceAddress address={model.placeAddress} variant="hero" />
+        ) : (
+          <p class="venue-detail__locality">{model.municipality}</p>
+        )}
+        {
+          model.officialWeb && (
+            <ExternalAction
+              variant="utility"
+              href={model.officialWeb.href}
+              label={model.officialWeb.label}
+              accessibleLabel={model.officialWeb.accessibleLabel}
+            />
+          )
+        }
+        <ShareAction title={share.title} text={share.text} path={share.path} contentType="venue" />
       </div>
-      <span class="detail-hero__shape" aria-hidden="true"></span>
     </header>
 
-    <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
+    <section class="detail-section venue-programme" aria-labelledby={programmeTitleId}>
       <div class="section-heading">
-        <p>Programación</p>
-        <h2 id="proximos-titulo">Próximos conciertos</h2>
-        <span>{model.upcoming.length}</span>
+        <h2 id={programmeTitleId}>{showArchive ? 'Conciertos anteriores' : 'Próximos conciertos'}</h2>
       </div>
       {
-        model.upcoming.length === 0 ? (
-          <p class="quiet-state">No hay conciertos próximos publicados en este espacio.</p>
+        programme.length === 0 ? (
+          <p class="quiet-state">No hay conciertos próximos publicados en este espacio</p>
         ) : (
-          <div class="agenda-day__list">
-            {model.upcoming.map((item) => <AgendaItem item={item} />)}
+          <div class="agenda-day__list" data-results-surface="venue">
+            {programme.map((item) => <AgendaItem item={item} statusLabel={item.statusLabel} />)}
           </div>
         )
       }
     </section>
   </article>
+  <script>
+    import { initVenueAnalytics } from '../../lib/analytics/browser.ts';
+    import { initMarkedResultsLists } from '../../lib/analytics/list-end.ts';
+    initVenueAnalytics();
+    initMarkedResultsLists();
+  </script>
 </Layout>

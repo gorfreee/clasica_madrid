@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_eventbrite_es_2_petite_messe_solennelle_g_rossini_tickets_2003777776269",
+  "slug": "petite-messe-solennelle-g-rossini",
+  "title": "Petite Messe Solennelle - G. Rossini",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_la_universidad_pontificia_comillas",
+  "organizerIds": [
+    "org_sociedad_coral_de_madrid"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_eventbrite_es_2_petite_messe_solennelle_g_rossini_tickets_2003777776269_01",
+      "date": "2026-11-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sara Matarranz",
+      "role": "soloist"
+    },
+    {
+      "name": "Laura Cobos",
+      "role": "soloist"
+    },
+    {
+      "name": "Alain Damas",
+      "role": "soloist"
+    },
+    {
+      "name": "Isidro Anaya",
+      "role": "soloist"
+    },
+    {
+      "name": "Manuel Pachecho",
+      "role": "soloist"
+    },
+    {
+      "name": "Jesús Mozo",
+      "role": "soloist"
+    },
+    {
+      "name": "Coro de la Sociedad Coral de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "José Mena Polo",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gioachino Rossini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Petite Messe Solennelle",
+      "composerName": "Gioachino Rossini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_eventbrite_es_2",
+      "url": "https://www.eventbrite.es/e/petite-messe-solennelle-g-rossini-tickets-2003777776269",
+      "checkedAt": "2026-10-29",
+      "externalId": "2003777776269"
+    }
+  ],
+  "primarySourceId": "src_eventbrite_es_2",
+  "lastVerifiedAt": "2026-10-29"
+}

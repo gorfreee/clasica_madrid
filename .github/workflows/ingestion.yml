@@ -19,6 +19,11 @@ on:
         type: string
         default: all
         required: true
+      exclude_sources:
+        description: "IDs a excluir, separados por coma"
+        type: string
+        default: ""
+        required: false
       from:
         description: Fecha inicial YYYY-MM-DD (requiere to)
         type: string
@@ -51,9 +56,83 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
-      AI_PROVIDER: gemini
+      AI_PROVIDER: pool
+      AI_ZERO_COST_ONLY: 'true'
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_STATE_DIR: ${{ github.workspace }}/.local/ai
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}
+      GROQ_MODELS: ${{ vars.GROQ_MODELS }}
+      GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}
+      GROQ_MODEL_TPM: ${{ vars.GROQ_MODEL_TPM }}
+      GROQ_MODEL_RPD: ${{ vars.GROQ_MODEL_RPD }}
+      GROQ_MODEL_MAX_CONCURRENT: ${{ vars.GROQ_MODEL_MAX_CONCURRENT }}
+      GROQ_MODEL_MIN_INTERVAL_MS: ${{ vars.GROQ_MODEL_MIN_INTERVAL_MS }}
+      GROQ_MAX_CONCURRENT: ${{ vars.GROQ_MAX_CONCURRENT }}
+      GROQ_MIN_INTERVAL_MS: ${{ vars.GROQ_MIN_INTERVAL_MS }}
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}
+      MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}
+      MISTRAL_MODEL_RPM: ${{ vars.MISTRAL_MODEL_RPM }}
+      MISTRAL_MODEL_TPM: ${{ vars.MISTRAL_MODEL_TPM }}
+      MISTRAL_MODEL_RPD: ${{ vars.MISTRAL_MODEL_RPD }}
+      MISTRAL_MODEL_MAX_CONCURRENT: ${{ vars.MISTRAL_MODEL_MAX_CONCURRENT }}
+      MISTRAL_MODEL_MIN_INTERVAL_MS: ${{ vars.MISTRAL_MODEL_MIN_INTERVAL_MS }}
+      MISTRAL_MAX_CONCURRENT: ${{ vars.MISTRAL_MAX_CONCURRENT }}
+      MISTRAL_MIN_INTERVAL_MS: ${{ vars.MISTRAL_MIN_INTERVAL_MS }}
+      ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+      ZAI_MODELS: ${{ vars.ZAI_MODELS }}
+      ZAI_MODEL_RPM: ${{ vars.ZAI_MODEL_RPM }}
+      ZAI_MODEL_TPM: ${{ vars.ZAI_MODEL_TPM }}
+      ZAI_MODEL_RPD: ${{ vars.ZAI_MODEL_RPD }}
+      ZAI_MODEL_MAX_CONCURRENT: ${{ vars.ZAI_MODEL_MAX_CONCURRENT }}
+      ZAI_MODEL_MIN_INTERVAL_MS: ${{ vars.ZAI_MODEL_MIN_INTERVAL_MS }}
+      ZAI_MAX_CONCURRENT: ${{ vars.ZAI_MAX_CONCURRENT }}
+      ZAI_MIN_INTERVAL_MS: ${{ vars.ZAI_MIN_INTERVAL_MS }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}
+      CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}
+      CLOUDFLARE_MODEL_RPM: ${{ vars.CLOUDFLARE_MODEL_RPM }}
+      CLOUDFLARE_MODEL_TPM: ${{ vars.CLOUDFLARE_MODEL_TPM }}
+      CLOUDFLARE_MODEL_RPD: ${{ vars.CLOUDFLARE_MODEL_RPD }}
+      CLOUDFLARE_MODEL_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MODEL_MAX_CONCURRENT }}
+      CLOUDFLARE_MODEL_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MODEL_MIN_INTERVAL_MS }}
+      CLOUDFLARE_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MAX_CONCURRENT }}
+      CLOUDFLARE_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MIN_INTERVAL_MS }}
+      VERCEL_AI_GATEWAY_API_KEY: ${{ secrets.VERCEL_AI_GATEWAY_API_KEY }}
+      VERCEL_FREE_TIER_CONFIRMED: ${{ vars.VERCEL_FREE_TIER_CONFIRMED }}
+      VERCEL_MODELS: ${{ vars.VERCEL_MODELS }}
+      VERCEL_MODEL_RPM: ${{ vars.VERCEL_MODEL_RPM }}
+      VERCEL_MODEL_TPM: ${{ vars.VERCEL_MODEL_TPM }}
+      VERCEL_MODEL_RPD: ${{ vars.VERCEL_MODEL_RPD }}
+      VERCEL_MODEL_MAX_CONCURRENT: ${{ vars.VERCEL_MODEL_MAX_CONCURRENT }}
+      VERCEL_MODEL_MIN_INTERVAL_MS: ${{ vars.VERCEL_MODEL_MIN_INTERVAL_MS }}
+      VERCEL_MAX_CONCURRENT: ${{ vars.VERCEL_MAX_CONCURRENT }}
+      VERCEL_MIN_INTERVAL_MS: ${{ vars.VERCEL_MIN_INTERVAL_MS }}
+      VERCEL_RPD: ${{ vars.VERCEL_RPD }}
+      KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+      KILO_FREE_TIER_CONFIRMED: ${{ vars.KILO_FREE_TIER_CONFIRMED }}
+      KILO_MODELS: ${{ vars.KILO_MODELS }}
+      KILO_MODEL_RPM: ${{ vars.KILO_MODEL_RPM }}
+      KILO_MODEL_TPM: ${{ vars.KILO_MODEL_TPM }}
+      KILO_MODEL_RPD: ${{ vars.KILO_MODEL_RPD }}
+      KILO_MODEL_MAX_CONCURRENT: ${{ vars.KILO_MODEL_MAX_CONCURRENT }}
+      KILO_MODEL_MIN_INTERVAL_MS: ${{ vars.KILO_MODEL_MIN_INTERVAL_MS }}
+      KILO_MAX_CONCURRENT: ${{ vars.KILO_MAX_CONCURRENT }}
+      KILO_MIN_INTERVAL_MS: ${{ vars.KILO_MIN_INTERVAL_MS }}
+      KILO_RPD: ${{ vars.KILO_RPD }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_FREE_TIER_CONFIRMED: ${{ vars.OPENROUTER_FREE_TIER_CONFIRMED }}
+      OPENROUTER_MODELS: ${{ vars.OPENROUTER_MODELS }}
+      OPENROUTER_MODEL_RPM: ${{ vars.OPENROUTER_MODEL_RPM }}
+      OPENROUTER_MODEL_TPM: ${{ vars.OPENROUTER_MODEL_TPM }}
+      OPENROUTER_MODEL_RPD: ${{ vars.OPENROUTER_MODEL_RPD }}
+      OPENROUTER_MODEL_MAX_CONCURRENT: ${{ vars.OPENROUTER_MODEL_MAX_CONCURRENT }}
+      OPENROUTER_MODEL_MIN_INTERVAL_MS: ${{ vars.OPENROUTER_MODEL_MIN_INTERVAL_MS }}
+      OPENROUTER_MAX_CONCURRENT: ${{ vars.OPENROUTER_MAX_CONCURRENT }}
+      OPENROUTER_MIN_INTERVAL_MS: ${{ vars.OPENROUTER_MIN_INTERVAL_MS }}
+      OPENROUTER_RPD: ${{ vars.OPENROUTER_RPD }}
+      AI_STATE_DIR: ${{ github.workspace }}/.local/ai
       REPORT_PATH: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}/report.json
       OBS_DIR: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
       ARTIFACT_NAME: ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
@@ -74,6 +153,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           DISPATCH_MODE: ${{ inputs.mode }}
           DISPATCH_SOURCES: ${{ inputs.sources }}
+          DISPATCH_EXCLUDE_SOURCES: ${{ inputs.exclude_sources }}
           DISPATCH_FROM: ${{ inputs.from }}
           DISPATCH_TO: ${{ inputs.to }}
           DISPATCH_AUTO_MERGE: ${{ inputs.auto_merge }}
@@ -84,15 +164,19 @@ jobs:
           if [[ "$EVENT_NAME" == "schedule" ]]; then
             mode="publish"
             sources="all"
+            exclude_sources=""
             from=""
             to=""
+            season_window="true"
             auto_merge_requested="true"
             ai_max_requests=""
           else
             mode="$DISPATCH_MODE"
             sources="$DISPATCH_SOURCES"
+            exclude_sources="$DISPATCH_EXCLUDE_SOURCES"
             from="$DISPATCH_FROM"
             to="$DISPATCH_TO"
+            season_window="false"
             auto_merge_requested="$DISPATCH_AUTO_MERGE"
             ai_max_requests="$DISPATCH_AI_MAX_REQUESTS"
           fi
@@ -107,6 +191,14 @@ jobs:
           fi
           if [[ "$sources" == *$'\n'* || "$sources" == *$'\r'* ]]; then
             echo "sources debe ser una lista de una sola línea" >&2
+            exit 1
+          fi
+          if [[ "$exclude_sources" == *$'\n'* || "$exclude_sources" == *$'\r'* ]]; then
+            echo "exclude_sources debe ser una lista de una sola línea" >&2
+            exit 1
+          fi
+          if [[ "$season_window" == "true" && ( -n "$from" || -n "$to" ) ]]; then
+            echo "el job programado no admite from/to; usa --season-window" >&2
             exit 1
           fi
           if [[ ( -n "$from" && -z "$to" ) || ( -z "$from" && -n "$to" ) ]]; then
@@ -130,8 +222,10 @@ jobs:
           {
             echo "mode=$mode"
             echo "sources=$sources"
+            echo "exclude_sources=$exclude_sources"
             echo "from=$from"
             echo "to=$to"
+            echo "season_window=$season_window"
             echo "auto_merge_requested=$auto_merge_requested"
             echo "ai_max_requests=$ai_max_requests"
             echo "code_sha=$code_sha"
@@ -143,15 +237,16 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Restore persistent Gemini state
+      - name: Restore persistent AI pool state
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             .local/ai/quota.json
             .local/ai/cache/**
             .local/ai/pending/**
-          key: ingestion-gemini-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            ingestion-ai-${{ runner.os }}-
             ingestion-gemini-${{ runner.os }}-
 
       - name: Install
@@ -161,8 +256,10 @@ jobs:
         env:
           MODE: ${{ steps.config.outputs.mode }}
           SOURCES: ${{ steps.config.outputs.sources }}
+          EXCLUDE_SOURCES: ${{ steps.config.outputs.exclude_sources }}
           FROM_DATE: ${{ steps.config.outputs.from }}
           TO_DATE: ${{ steps.config.outputs.to }}
+          SEASON_WINDOW: ${{ steps.config.outputs.season_window }}
           AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
           GITHUB_SHA: ${{ steps.config.outputs.code_sha }}
           INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}
@@ -177,6 +274,12 @@ jobs:
           fi
           if [[ "$SOURCES" != "all" ]]; then
             args+=(--sources "$SOURCES")
+          fi
+          if [[ -n "$EXCLUDE_SOURCES" ]]; then
+            args+=(--exclude-sources "$EXCLUDE_SOURCES")
+          fi
+          if [[ "$SEASON_WINDOW" == "true" ]]; then
+            args+=(--season-window)
           fi
           if [[ -n "$FROM_DATE" && -n "$TO_DATE" ]]; then
             args+=(--from "$FROM_DATE" --to "$TO_DATE")
@@ -326,28 +429,65 @@ jobs:
             exit 1
           fi
           git commit -m "Update catalog from automated ingestion"
+          commit_sha=$(git rev-parse HEAD)
           gh auth setup-git
           git push --set-upstream origin "$branch"
+
+          {
+            echo
+            echo "### Publicación"
+            echo "Branch publicada: [\`$branch\`](https://github.com/${GITHUB_REPOSITORY}/tree/${branch})"
+            echo "Commit: \`$commit_sha\`"
+            echo
+            echo "Los cambios de \`data/**\` ya están en el remoto. Si la creación de la PR falla a continuación, la ingestión no se ha perdido."
+          } >> "$GITHUB_STEP_SUMMARY"
 
           draft_args=()
           if [[ "$HEALTH" == "review" ]]; then
             draft_args+=(--draft)
           fi
+
+          pr_create_err=$(mktemp)
+          set +e
           pr_url=$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
             --title "Automated catalog ingestion" \
             --body-file "$PR_BODY_PATH" \
-            "${draft_args[@]}")
-          if [[ "$pr_url" == *$'\n'* || "$pr_url" != https://github.com/*/pull/* ]]; then
-            echo "gh pr create no devolvió una URL de PR válida" >&2
+            "${draft_args[@]}" 2>"$pr_create_err")
+          pr_create_status=$?
+          set -e
+          pr_create_message=$(cat "$pr_create_err")
+          rm -f "$pr_create_err"
+
+          if [[ "$pr_create_status" -ne 0 || "$pr_url" == *$'\n'* || "$pr_url" != https://github.com/*/pull/* ]]; then
+            echo "::error::Falló la creación de la PR de ingestión tras publicar \`$branch\` ($commit_sha). La ingestión no se perdió; falta abrir la PR. ${pr_create_message}"
+            {
+              echo
+              echo "> [!CAUTION]"
+              echo "> No se pudo crear la PR automática. Branch y commit ya están en el remoto."
+              echo
+              echo "Error: ${pr_create_message}"
+              echo
+              echo "Recuperación manual:"
+              echo
+              echo "1. Abrir https://github.com/${GITHUB_REPOSITORY}/pull/new/${branch}"
+              echo "2. O crear la PR con un body corto que enlace a esta ejecución:"
+              echo
+              echo "\`\`\`bash"
+              echo "gh pr create --repo $GITHUB_REPOSITORY --base main --head $branch --title \"Automated catalog ingestion\" --body \"Ingestión automática. Detalle en $RUN_URL\""
+              echo "\`\`\`"
+              if [[ "$HEALTH" == "review" ]]; then
+                echo
+                echo "Health es \`review\`: crea la PR como draft (\`--draft\`)."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
           {
             echo
-            echo "### Publicación"
             echo "PR creada: $pr_url"
             if [[ "$HEALTH" == "review" ]]; then
               echo "Se creó como draft por health review; auto-merge deshabilitado."

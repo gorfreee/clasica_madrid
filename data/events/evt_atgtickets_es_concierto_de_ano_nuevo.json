@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_atgtickets_es_concierto_de_ano_nuevo",
+  "slug": "concierto-de-ano-nuevo-l-operamore",
+  "title": "Concierto de Año Nuevo — L’Operamore",
+  "status": "scheduled",
+  "venueId": "ven_nuevo_teatro_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_atgtickets_es_concierto_de_ano_nuevo_01",
+      "date": "2027-01-02",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta L’Operamore"
+    },
+    {
+      "name": "Javier Corcuera",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "zarzuela",
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_atgtickets_es",
+      "url": "https://atgtickets.es/espectaculo/concierto-de-ano-nuevo",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_atgtickets_es",
+  "lastVerifiedAt": "2026-10-14"
+}

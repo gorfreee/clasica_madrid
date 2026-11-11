@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_56556",
+  "slug": "opera-insieme",
+  "title": "Ópera Insieme",
+  "status": "scheduled",
+  "venueId": "ven_corral_comedias_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_56556_01",
+      "date": "2026-10-28",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alexandra Zamfira",
+      "role": "soloist"
+    },
+    {
+      "name": "Carolina Hernández",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/opera-insieme",
+      "checkedAt": "2026-10-02",
+      "externalId": "56556"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-10-02"
+}

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_donde_nace_la_voz_20270324",
+  "slug": "estibaliz-martyn-sergio-kuhlmann",
+  "title": "Donde nace la voz — Estíbaliz Martyn y Sergio Kuhlmann",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_verde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_donde_nace_la_voz_20270324_01",
+      "date": "2027-03-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Estíbaliz Martyn",
+      "role": "soloist"
+    },
+    {
+      "name": "Sergio Kuhlmann",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Vicente Lleó"
+    },
+    {
+      "name": "Francisco Asenjo Barbieri"
+    },
+    {
+      "name": "Ennio Morricone"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Harold Arlen"
+    },
+    {
+      "name": "Michael Nyman"
+    },
+    {
+      "name": "Henry Mancini"
+    },
+    {
+      "name": "Amadeo Vives"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Luiz Bonfá"
+    },
+    {
+      "name": "Gonzalo Roig"
+    }
+  ],
+  "works": [
+    {
+      "title": "Con te partirò"
+    },
+    {
+      "title": "La traviata: Libiamo ne’ lieti calici",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Gianni Schicchi: O mio babbino caro",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "La corte de Faraón: ¡Ay, ba! (paráfrasis de Sergio Kuhlmann)",
+      "composerName": "Vicente Lleó"
+    },
+    {
+      "title": "El barberillo de Lavapiés: Como nací en la calle de la Paloma",
+      "composerName": "Francisco Asenjo Barbieri"
+    },
+    {
+      "title": "Nella fantasia",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "Porgy and Bess: Summertime",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Fantaisie-Impromptu, op. 66",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Somewhere Over the Rainbow",
+      "composerName": "Harold Arlen"
+    },
+    {
+      "title": "The Heart Asks Pleasure First",
+      "composerName": "Michael Nyman"
+    },
+    {
+      "title": "Moon River",
+      "composerName": "Henry Mancini"
+    },
+    {
+      "title": "Mátushka Golúbushka (tradicional rusa)"
+    },
+    {
+      "title": "La generala: Canción del Arlequín",
+      "composerName": "Amadeo Vives"
+    },
+    {
+      "title": "Adiós Nonino (arreglo de Sergio Kuhlmann)",
+      "composerName": "Astor Piazzolla"
+    },
+    {
+      "title": "Turandot: Nessun dorma",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Manhã de Carnaval (arreglo de Sergio Kuhlmann)",
+      "composerName": "Luiz Bonfá"
+    },
+    {
+      "title": "Romanza de Cecilia Valdés",
+      "composerName": "Gonzalo Roig"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "opera",
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/estibaliz-martyn-sergio-kuhlmann-donde-nace-la-voz",
+      "checkedAt": "2026-10-21",
+      "externalId": "99069"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-10-21"
+}

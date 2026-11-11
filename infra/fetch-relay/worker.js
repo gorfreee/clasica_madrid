@@ -16,6 +16,10 @@ const BLOCKED_HOST_SUFFIXES = ['.localhost', '.local', '.internal', '.invalid', 
 const RELAY_COOKIE_HEADER = 'x-relay-origin-cookie';
 const MAX_RELAY_COOKIE_CHARS = 4096;
 const COOKIE_CHALLENGE_STATUSES = new Set([403, 408, 429, 500, 502, 503, 504]);
+const MAX_CHALLENGE_RETRIES = 2;
+const CHALLENGE_BACKOFF_MS = [400, 1_200];
+const MAX_CHALLENGE_BODY_CHARS = 8_192;
+const RELAY_RECOVERIES_HEADER = 'x-relay-recoveries';
 
 /** Isolate-scoped same-origin cookies. Sequential ingest hops often reuse it. */
 const isolateCookies = new Map();
@@ -44,10 +48,10 @@ export async function handleRelayRequest(request, env) {
   }
   const inbound = parseRelayCookies(request.headers.get(RELAY_COOKIE_HEADER));
   try {
-    const html = await fetchOrigin(target, inbound);
-    return new Response(html, {
+    const { body, recoveries } = await fetchOrigin(target, inbound);
+    return new Response(body, {
       status: 200,
-      headers: relayResponseHeaders(isolateCookies.get(target.origin)),
+      headers: relayResponseHeaders(isolateCookies.get(target.origin), recoveries),
     });
   } catch (error) {
     if (error instanceof OriginHttpError) {
@@ -127,6 +131,8 @@ async function fetchOrigin(initial, inboundCookies) {
   if (seeded) cookiesByOrigin.set(startOrigin, seeded);
   let current = initial.href;
   let cookieChallengeUsed = false;
+  let challengeRetries = 0;
+  let recoveries = 0;
   for (let hop = 0; hop < MAX_REDIRECTS; hop += 1) {
     const origin = new URL(current).origin;
     const headers = {
@@ -149,22 +155,61 @@ async function fetchOrigin(initial, inboundCookies) {
     }
     if (response.status === 202 || !response.ok) {
       const after = cookiesByOrigin.get(origin);
-      const canChallenge =
-        !cookieChallengeUsed &&
-        COOKIE_CHALLENGE_STATUSES.has(response.status) &&
-        Boolean(after) &&
-        after !== before;
-      await response.body?.cancel();
-      if (canChallenge) {
+      const cookiesChanged = Boolean(after) && after !== before;
+      const challengeBody = response.status === 202 ? await peekBoundedText(response) : '';
+      if (response.status !== 202) await response.body?.cancel();
+      const recoverable202 =
+        response.status === 202 && (cookiesChanged || isSiteGroundChallenge(challengeBody));
+      const recoverableCookieStatus =
+        COOKIE_CHALLENGE_STATUSES.has(response.status) && cookiesChanged && !cookieChallengeUsed;
+      if (recoverableCookieStatus) {
         cookieChallengeUsed = true;
+        recoveries += 1;
+        continue;
+      }
+      if (recoverable202 && challengeRetries < MAX_CHALLENGE_RETRIES) {
+        challengeRetries += 1;
+        recoveries += 1;
+        await delay(CHALLENGE_BACKOFF_MS[Math.min(challengeRetries - 1, CHALLENGE_BACKOFF_MS.length - 1)]);
         continue;
       }
       throw new OriginHttpError(response.status, after);
     }
     persistIsolateCookies(origin, cookiesByOrigin);
-    return await response.text();
+    return { body: await response.text(), recoveries };
   }
   throw new Error('too many redirects');
+}
+
+function isSiteGroundChallenge(body) {
+  return /\/\.well-known\/sgcaptcha\/|\bsgcaptcha\b/i.test(body);
+}
+
+async function peekBoundedText(response) {
+  const reader = response.body?.getReader();
+  if (!reader) return '';
+  const decoder = new TextDecoder();
+  let acc = '';
+  try {
+    while (acc.length < MAX_CHALLENGE_BODY_CHARS) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      acc += decoder.decode(value, { stream: true });
+    }
+    acc += decoder.decode();
+  } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      // already closed
+    }
+  }
+  return acc.slice(0, MAX_CHALLENGE_BODY_CHARS);
+}
+
+function delay(ms) {
+  if (!ms || ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function persistIsolateCookies(origin, jar) {
@@ -238,12 +283,13 @@ function setCookieValues(response) {
   return single ? [single] : [];
 }
 
-function relayResponseHeaders(cookies) {
+function relayResponseHeaders(cookies, recoveries) {
   const headers = {
     'content-type': 'text/html; charset=utf-8',
     'cache-control': 'no-store',
   };
   if (cookies) headers[RELAY_COOKIE_HEADER] = cookies;
+  if (recoveries > 0) headers[RELAY_RECOVERIES_HEADER] = String(recoveries);
   return headers;
 }
 

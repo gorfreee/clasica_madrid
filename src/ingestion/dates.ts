@@ -1,3 +1,4 @@
+import { inCalendarScope, type CalendarEvidence } from './calendar-evidence.ts';
 import { isRealIsoDate } from '../lib/util/iso-date.ts';
 import { madridNowTime, madridToday } from '../lib/domain/dates.ts';
 
@@ -37,13 +38,29 @@ export function addIsoDays(date: string, days: number): string {
   return utc.toISOString().slice(0, 10);
 }
 
-export function windowEnd(now: Date, days = DEFAULT_WINDOW_DAYS): string {
-  return addIsoDays(madridToday(now), days);
-}
-
 export function defaultIngestWindow(now: Date): IngestWindow {
   const from = madridToday(now);
   return { from, to: addIsoDays(from, DEFAULT_WINDOW_DAYS) };
+}
+
+/**
+ * Production scheduled harvest: from the run date in Europe/Madrid through
+ * the nearest 31 July (this year if it has not passed yet; otherwise next).
+ * Inclusive on both ends. 31 July itself is a one-day window.
+ */
+export function seasonIngestWindow(now: Date): IngestWindow {
+  const from = madridToday(now);
+  return { from, to: nextSeasonEnd(from) };
+}
+
+export function nextSeasonEnd(from: string): string {
+  const year = Number(from.slice(0, 4));
+  const month = Number(from.slice(5, 7));
+  if (!ISO_DATE.test(from) || !Number.isInteger(year) || !Number.isInteger(month)) {
+    throw new Error(`fecha inválida: ${from}`);
+  }
+  if (month >= 8) return `${year + 1}-07-31`;
+  return `${year}-07-31`;
 }
 
 /**
@@ -65,6 +82,29 @@ export function parseIngestWindow(from: string, to: string): IngestWindowParse {
 
 export function isDateInWindow(date: string, window: IngestWindow): boolean {
   return date >= window.from && date <= window.to;
+}
+
+/** Inclusive civil months (`YYYY-MM`) that intersect an ingest window. */
+export function civilMonthsInWindow(window: IngestWindow): string[] {
+  const from = ISO_DATE.exec(window.from);
+  const to = ISO_DATE.exec(window.to);
+  if (!from || !to) {
+    throw new Error(`ventana inválida: ${window.from} → ${window.to}`);
+  }
+  const months: string[] = [];
+  let year = Number(from[1]);
+  let month = Number(from[2]);
+  const endYear = Number(to[1]);
+  const endMonth = Number(to[2]);
+  while (year < endYear || (year === endYear && month <= endMonth)) {
+    months.push(`${year}-${String(month).padStart(2, '0')}`);
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+  return months;
 }
 
 /**
@@ -152,9 +192,8 @@ const SPANISH_CALENDAR_DATE = new RegExp(
   `(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\s+(?:de\\s+)?(\\d{4})`,
   'i',
 );
-const POSTPONED_TO_DATE = new RegExp(
-  `(?:aplazad\\w*|pospuest\\w*)[\\s\\S]{0,80}?\\bal\\s+${SPANISH_CALENDAR_DATE.source}`,
-  'i',
+const OPTIONAL_YEAR_DATE = new RegExp(
+  `(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\b(?:\\s+(?:de\\s+)?(\\d{4})\\b)?`, 'i',
 );
 
 /**
@@ -167,17 +206,53 @@ export function parseSpanishCalendarDate(raw: string): string | null {
 
 /**
  * New date of an explicit postponement (`pospuesto al …`, `APLAZADO. AL …`).
- * If several calendar dates appear, the target after `al` wins. If that cue
- * is missing and more than one date is present, return null (keep the listing).
+ * A missing year needs a unique matching day/month in the source calendar.
+ * Never infer it from the run clock, season, or an unrelated date in the page.
  */
-export function parsePostponementDate(raw: string): string | null {
+export function parsePostponementDate(raw: string, contextDates: readonly string[] = []): string | null {
+  return parsePostponementDateTime(raw, contextDates)?.date ?? null;
+}
+
+/** Keep the target date and its adjacent clock together, away from the old date. */
+export function parsePostponementDateTime(
+  raw: string, contextDates: readonly string[] = [],
+): { date: string; time?: string } | null {
   const text = foldSpanishDateText(raw);
-  const targeted = POSTPONED_TO_DATE.exec(text);
-  if (targeted) return calendarFromMatch(targeted);
-  const dates = [...text.matchAll(new RegExp(SPANISH_CALENDAR_DATE.source, 'gi'))]
-    .map((match) => calendarFromMatch(match))
-    .filter((item): item is string => Boolean(item));
-  return dates.length === 1 ? dates[0]! : null;
+  const cues = [...text.matchAll(/(?:aplazad\w*|pospuest\w*)[\s\S]{0,80}?\bal\s+/gi)];
+  const targets = cues.length
+    ? cues.map(cue => text.slice(cue.index + cue[0].length))
+    : [text];
+  const resolved: Array<{ date: string; time?: string }> = [];
+  for (const target of targets) {
+    const matches = [...target.matchAll(new RegExp(OPTIONAL_YEAR_DATE.source, 'gi'))];
+    const match = matches[0];
+    // A targeted but unreadable date must not fall back to the old date.
+    if (!match || (cues.length ? match.index !== 0 : matches.length !== 1)) return null;
+    let date = calendarFromMatch(match);
+    if (!match[3]) {
+      const month = SPANISH_MONTHS[match[2]!.toLowerCase()];
+      const suffix = `-${month}-${match[1]!.padStart(2, '0')}`;
+      const candidates = [...new Set(contextDates.filter(item => isRealIsoDate(item) && item.endsWith(suffix)))];
+      if (candidates.length !== 1) return null;
+      date = candidates[0]!;
+    }
+    if (!date) return null;
+    const tail = target.slice(match.index + match[0].length);
+    const clock = /^[\s,.]*(?:a\s+las?\s+)([^\s,;]+)/i.exec(tail);
+    // Extra targets/clocks in the same clause require review, including
+    // parenthesized alternatives. A later sentence may recall the old date.
+    const clause = tail.split(/[.!?]/, 1)[0]!;
+    if (OPTIONAL_YEAR_DATE.test(clause) || [...clause.matchAll(/\ba\s+las?\s+/gi)].length > 1) return null;
+    if (!clock) {
+      resolved.push({ date });
+      continue;
+    }
+    const time = parseObservedTime(clock[1]!.replace(/(?:h(?:oras?)?\.?)[.!?]?$/i, '').replace(/[.!?]$/, ''));
+    if (!time) return null;
+    resolved.push({ date, time });
+  }
+  const unique = new Map(resolved.map(item => [JSON.stringify(item), item]));
+  return unique.size === 1 ? [...unique.values()][0]! : null;
 }
 
 function foldSpanishDateText(raw: string): string {
@@ -201,6 +276,7 @@ export function parseObservedTime(raw: string): string | null {
   return `${match[1].padStart(2, '0')}:${match[2]}`;
 }
 
+/** Exact union of evidence. Keep unknown times until the whole group is available. */
 export function collapseOccurrences(
   items: ParsedDateTime[],
 ): Array<{ date: string; time: string | null }> {
@@ -217,6 +293,52 @@ export function collapseOccurrences(
     result.push(item);
   }
   return result;
+}
+
+/**
+ * Resolve precision only at publication, after all calendars have been merged.
+ * A date-only observation corroborates a single explicit time on that date.
+ * With several times it only corroborates the date; it is not an extra session.
+ * `corroboration` can supply precision, but cannot add dates or performances.
+ * Resolving during a pairwise fold would lose the unknown observation before
+ * a later calendar supplies a second time, making the result order-dependent.
+ */
+export function resolveOccurrencePrecision(
+  items: ParsedDateTime[],
+  corroboration: ParsedDateTime[] = [],
+): ParsedDateTime[] {
+  const timesByDate = new Map<string, Set<string>>();
+  for (const item of [...items, ...corroboration]) {
+    if (item.time === null) continue;
+    const times = timesByDate.get(item.date) ?? new Set<string>();
+    times.add(item.time);
+    timesByDate.set(item.date, times);
+  }
+  return collapseOccurrences(items.flatMap(item => {
+    const times = timesByDate.get(item.date);
+    if (item.time !== null || !times?.size) return [item];
+    if (times.size > 1) return [];
+    return [{ date: item.date, time: [...times][0]! }];
+  }));
+}
+
+/** Merge observations; date provenance alone never grants replacement authority. */
+export function mergeObservedCalendars(
+  base: { occurrences: ParsedDateTime[]; dateFromDetail?: boolean; calendarEvidence?: CalendarEvidence; eventStatus?: string },
+  incoming: { occurrences: ParsedDateTime[]; dateFromDetail?: boolean; calendarEvidence?: CalendarEvidence; eventStatus?: string },
+): Array<{ date: string; time: string | null }> {
+  // Only explicit scoped evidence can suppress another observation's sessions.
+  const keep = (s: ParsedDateTime, other: typeof base) =>
+    !inCalendarScope(s.date, other.calendarEvidence?.complete) &&
+    !other.calendarEvidence?.changes?.some(c => c.from.date === s.date && (!c.from.time || c.from.time === s.time));
+  if (base.calendarEvidence || incoming.calendarEvidence) return collapseOccurrences([
+    ...base.occurrences.filter(s => keep(s, incoming) || incoming.occurrences.some(o => o.date === s.date && o.time === s.time)),
+    ...incoming.occurrences.filter(s => keep(s, base) || base.occurrences.some(o => o.date === s.date && o.time === s.time)),
+  ]);
+  // Existing singular postponement parsers attest replacement, unlike dateFromDetail.
+  if (base.eventStatus === 'postponed' && incoming.eventStatus !== 'postponed') return collapseOccurrences(base.occurrences);
+  if (incoming.eventStatus === 'postponed' && base.eventStatus !== 'postponed') return collapseOccurrences(incoming.occurrences);
+  return collapseOccurrences([...base.occurrences, ...incoming.occurrences]);
 }
 
 function isRealClockTime(hour: string, minute: string, second: string): boolean {

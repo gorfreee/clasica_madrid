@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonioactual_com_la_luz_de_suecia_santa_lucia_20261218",
+  "slug": "la-luz-de-suecia-concierto-de-santa-lucia-prado",
+  "title": "La Luz de Suecia — Concierto de Santa Lucía",
+  "status": "scheduled",
+  "venueId": "ven_museo_prado",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonioactual_com_la_luz_de_suecia_santa_lucia_20261218_01",
+      "date": "2026-12-18",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Damkören SALT",
+      "role": "choir"
+    },
+    {
+      "name": "Coro de la Orquesta Juvenil Europea de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "Orquesta Sinfónica Contemporánea de España",
+      "role": "orchestra"
+    },
+    {
+      "name": "Juan Antonio Simarro",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonioactual_com",
+      "url": "https://patrimonioactual.com/page/la-embajada-sueca-en-espana-y-el-museo-nacional-del-prado-se-unen/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_patrimonioactual_com",
+  "lastVerifiedAt": "2026-10-14"
+}

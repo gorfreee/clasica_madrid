@@ -68,6 +68,16 @@ describe('kind — circuito del venue, no calidad', () => {
     expect(kindOf('Fundación Juan March Auditorio').value).toBe('established');
   });
 
+  it('el Teatro de Condeduque es circuito establecido por su id, no sólo por la palabra Teatro', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Teatro' }), {
+      id: 'ven_condeduque_teatro',
+      name: 'Contemporánea Condeduque — Teatro',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+  });
+
   it('iglesia, parroquia o basílica → alternative', () => {
     expect(kindOf('Iglesia de San Ginés').value).toBe('alternative');
     expect(kindOf('Parroquia de Santa María').value).toBe('alternative');
@@ -86,6 +96,54 @@ describe('kind — circuito del venue, no calidad', () => {
   it('parque u otro espacio abierto no concertístico → alternative', () => {
     expect(kindOf('Parque Lineal de Palomeras').value).toBe('alternative');
     expect(kindOf('Puente de Toledo').value).toBe('alternative');
+  });
+
+  it('Real Coliseo Carlos III es circuito establecido por su id', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Real Coliseo Carlos III' }), {
+      id: 'ven_real_coliseo_carlos_iii',
+      name: 'Real Coliseo Carlos III',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+    expect(kindOf('Real Coliseo Carlos III').value).toBe('established');
+  });
+
+  it('el Corral de Comedias de Alcalá es established por su id, no por la palabra corral', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Corral de Comedias' }), {
+      id: 'ven_corral_comedias_alcala',
+      name: 'Corral de Comedias',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+    expect(kindOf('Corral de Comedias').value).toBe('alternative');
+    expect(kindOf('Centro Cultural').value).toBe('alternative');
+  });
+
+  it('Teatro Auditorio de San Lorenzo de El Escorial es established por nombre y por id', () => {
+    expect(kindOf('Teatro Auditorio de San Lorenzo de El Escorial').value).toBe('established');
+    const result = resolveKind(facts({ title: 'Concierto' }), {
+      id: 'ven_teatro_auditorio_escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+  });
+
+  it('la Basílica del Real Monasterio sigue siendo alternative', () => {
+    const result = resolveKind(
+      facts({
+        title: 'Concierto de órgano: Pedro Alberto Sánchez',
+        performers: [{ name: 'Pedro Alberto Sánchez', roleText: 'órgano' }],
+      }),
+      {
+        id: 'ven_basilica_monasterio_san_lorenzo_escorial',
+        name: 'Basílica del Real Monasterio de San Lorenzo de El Escorial',
+      },
+    );
+    expect(result.value).toBe('alternative');
+    expect(kindOf('Basílica del Real Monasterio de San Lorenzo de El Escorial').value).toBe('alternative');
   });
 
   it('una orquesta internacional en una iglesia sigue siendo alternative', () => {

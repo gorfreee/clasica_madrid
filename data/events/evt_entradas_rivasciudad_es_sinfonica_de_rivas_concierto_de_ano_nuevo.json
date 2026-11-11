@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradas_rivasciudad_es_sinfonica_de_rivas_concierto_de_ano_nuevo",
+  "slug": "concierto-de-ano-nuevo-de-la-sinfonica-de-rivas",
+  "title": "Concierto de Año Nuevo de la Sinfónica de Rivas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_pilar_bardem",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradas_rivasciudad_es_sinfonica_de_rivas_concierto_de_ano_nuevo_01",
+      "date": "2027-01-01",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sinfónica de Rivas Alma Mahler",
+      "role": "orchestra"
+    },
+    {
+      "name": "Jorge García Cuenllas",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Zoltán Kodály"
+    },
+    {
+      "name": "Augusta Holmès"
+    },
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Johann Strauss I"
+    }
+  ],
+  "works": [
+    {
+      "title": "Danzas de Galanta",
+      "composerName": "Zoltán Kodály"
+    },
+    {
+      "title": "La nuit et l'amour",
+      "composerName": "Augusta Holmès"
+    },
+    {
+      "title": "El Danubio azul",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Marcha Radetzky",
+      "composerName": "Johann Strauss I"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradas_rivasciudad_es",
+      "url": "https://www.giglon.com/todos?idEvent=sinfonica-de-rivas--concierto-de-ano-nuevo",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_entradas_rivasciudad_es",
+  "lastVerifiedAt": "2026-09-29"
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_bandamusicagetafe_es_concierto_de_santa_cecilia_repertorio_de_lo_abstracto_a_lo_narrativo_2026_11_21_teatro_federico",
+  "slug": "concierto-de-santa-cecilia-repertorio-de-lo-abstracto-a-lo-narrativo",
+  "title": "Concierto de Santa Cecilia: repertorio, de lo abstracto a lo narrativo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_bandamusicagetafe_es_concierto_de_santa_cecilia_repertorio_de_lo_abstracto_a_lo_narrativo_2026_11_21_teatro_federico",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda de Música de Getafe"
+    },
+    {
+      "name": "José Luis Bueno Cardeñosa",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_bandamusicagetafe_es",
+      "url": "https://bandamusicagetafe.es/programacion",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_bandamusicagetafe_es",
+  "lastVerifiedAt": "2026-09-27"
+}

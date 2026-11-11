@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_caixaforum_org_a_delta_trio_madrid",
+  "slug": "a-delta-trio",
+  "title": "A-Delta Trio",
+  "status": "scheduled",
+  "venueId": "ven_caixaforum_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_caixaforum_org_a_delta_trio_madrid_01",
+      "date": "2026-11-22",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_caixaforum_org_a_delta_trio_madrid_02",
+      "date": "2026-11-22",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Álvaro Rodríguez Cabezas"
+    },
+    {
+      "name": "Miguel R. Fernández"
+    },
+    {
+      "name": "María Chamizo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jacques Ibert"
+    },
+    {
+      "name": "Alexander Tansman"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_caixaforum_org",
+      "url": "https://caixaforum.org/es/madrid/p/a-delta-trio-madrid",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_caixaforum_org",
+  "lastVerifiedAt": "2026-09-15"
+}

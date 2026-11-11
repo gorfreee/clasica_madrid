@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_64383",
+  "slug": "all-bach-iii-silva-de-sirenas-festival-encuentro-de-musica-antigua-de-madrid",
+  "title": "All Bach (III) – Silva de Sirenas Festival. Encuentro de Música Antigua de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_64383_01",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Hiro Kurosaki"
+    },
+    {
+      "name": "Ignacio Prego"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/all-bach-iii-silva-de-sirenas-festival-encuentro-de-musica-antigua-de-madrid",
+      "checkedAt": "2026-09-24",
+      "externalId": "64383"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-09-24"
+}

@@ -202,12 +202,16 @@ describe('publication gate — pipeline completo', () => {
           formats: ['chamber'],
           eras: ['baroque'],
           kind: 'alternative',
-          evidence: ['fake include'],
+          evidence: ['Concierto extraordinario'],
         };
       },
     });
     const run = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'concierto-extraordinario' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'concierto-extraordinario',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
@@ -215,12 +219,12 @@ describe('publication gate — pipeline completo', () => {
     expect(run.summary.ai).toEqual(expect.objectContaining({ attempted: 1, resolved: 1, unresolved: 0, include: 1 }));
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.formats).toEqual(['chamber']);
-    expect(run.candidates[0]!.event.eras).toEqual(['baroque']);
+    expect(run.candidates[0]!.event.eras).toEqual([]);
     expect(run.candidates[0]!.event.kind).toBe('established');
   });
 
   it('E. uncertain + fake AI exclude: no Candidate', async () => {
-    const ai = countingAi({ async classify() { return { eligibility: 'exclude' }; } });
+    const ai = countingAi({ async classify() { return { eligibility: 'exclude', evidence: ['Concierto extraordinario'] }; } });
     const run = await runAuditorio({
       items: [{ title: 'Concierto extraordinario', slug: 'gala-exclude' }],
       ai,
@@ -292,11 +296,15 @@ describe('publication gate — pipeline completo', () => {
   it('I. include con eras vacías sigue generando Candidate', async () => {
     const ai = countingAi({
       async classify() {
-        return { eligibility: 'include', kind: 'alternative', formats: [], eras: [] };
+        return { eligibility: 'include', kind: 'alternative', formats: [], eras: [], evidence: ['Concierto extraordinario'] };
       },
     });
     const run = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'include-vacio' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'include-vacio',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
@@ -306,6 +314,25 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates[0]!.event.kind).toBe('established');
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
     expect(run.summary.healthReasons).toContain('unresolved-taxonomy');
+    expect(run.summary.autoMergeEligible).toBe(true);
+  });
+
+  it('un AI include débil sobre un título genérico no genera Candidate', async () => {
+    const ai = countingAi({
+      async classify() {
+        return { eligibility: 'include', formats: ['chamber'], evidence: ['Concierto extraordinario'] };
+      },
+    });
+    const run = await runAuditorio({
+      items: [{ title: 'Concierto extraordinario', slug: 'titulo-generico' }],
+      ai,
+    });
+
+    expect(ai.calls).toBe(1);
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.eligibility.include).toBe(0);
+    expect(run.summary.eligibility.uncertain).toBe(1);
+    expect(run.decisions[0]?.eligibility?.ruleId).toBe('ai-weak-include-evidence');
     expect(run.summary.autoMergeEligible).toBe(true);
   });
 
@@ -448,10 +475,23 @@ describe('resolvePerformerRole', () => {
     expect(resolvePerformerRole('director')).toBe('conductor');
     expect(resolvePerformerRole('directora')).toBe('conductor');
     expect(resolvePerformerRole('dirección musical')).toBe('conductor');
+    expect(resolvePerformerRole('director musical')).toBe('conductor');
     expect(resolvePerformerRole('conductor')).toBe('conductor');
+    expect(resolvePerformerRole('director de orquesta')).toBe('conductor');
+    expect(resolvePerformerRole('directora de orquesta y académica electo de la Sección de Música')).toBe(
+      'conductor',
+    );
+    expect(resolvePerformerRole('director de orquesta y académico electo de la Sección de Música de la RABASF')).toBe(
+      'conductor',
+    );
+    expect(resolvePerformerRole('director artístico y musical')).toBe('conductor');
+    expect(resolvePerformerRole('director titular')).toBe('conductor');
+    expect(resolvePerformerRole('director invitado')).toBe('conductor');
     expect(resolvePerformerRole('ensemble')).toBe('ensemble');
     expect(resolvePerformerRole('solista')).toBe('soloist');
     expect(resolvePerformerRole('soloist')).toBe('soloist');
+    expect(resolvePerformerRole('solista, flauta de pico')).toBe('soloist');
+    expect(resolvePerformerRole('solista, viola da gamba')).toBe('soloist');
 
     expect(resolvePerformerRole('piano')).toBeUndefined();
     expect(resolvePerformerRole('violín')).toBeUndefined();
@@ -459,5 +499,17 @@ describe('resolvePerformerRole', () => {
     expect(resolvePerformerRole('mezzosoprano')).toBeUndefined();
     expect(resolvePerformerRole('other')).toBeUndefined();
     expect(resolvePerformerRole(undefined)).toBeUndefined();
+    expect(
+      resolvePerformerRole(
+        'director de la Fundación Alhambra Guitarras y codirector del Festival Joaquín Rodrigo de Madrid',
+      ),
+    ).toBeUndefined();
+    expect(resolvePerformerRole('codirector del Festival Joaquín Rodrigo de Madrid')).toBeUndefined();
+    expect(resolvePerformerRole('director del Festival de Música Española de León')).toBeUndefined();
+    expect(resolvePerformerRole('violinista y director del Festival de Música Española de León')).toBeUndefined();
+    expect(resolvePerformerRole('productor y director del sello IBS Classical')).toBeUndefined();
+    expect(resolvePerformerRole('director artístico')).toBeUndefined();
+    expect(resolvePerformerRole('directora artística del ciclo')).toBeUndefined();
+    expect(resolvePerformerRole('gerente de la Orquesta de Extremadura')).toBeUndefined();
   });
 });

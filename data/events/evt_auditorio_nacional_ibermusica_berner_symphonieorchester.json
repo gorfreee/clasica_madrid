@@ -26,8 +26,31 @@
       "name": "Sol Gabetta"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Modest Mussorgski"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Una noche en Monte pelado",
+      "composerName": "Modest Mussorgski"
+    },
+    {
+      "title": "Concierto para violonchelo núm. 1",
+      "composerName": "Dmitri Shostakóvich"
+    },
+    {
+      "title": "Pájaro de fuego (1945)",
+      "composerName": "Ígor Stravinski"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -36,15 +59,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-berner-symphonieorchester",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-14",
       "externalId": "ibermusica-berner-symphonieorchester"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-14"
 }

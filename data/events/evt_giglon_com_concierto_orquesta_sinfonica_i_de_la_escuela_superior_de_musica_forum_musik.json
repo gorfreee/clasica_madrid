@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_concierto_orquesta_sinfonica_i_de_la_escuela_superior_de_musica_forum_musik",
+  "slug": "concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musikae",
+  "title": "Concierto Orquesta Sinfónica I de la Escuela Superior de Música Forum Musikae",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_paco_de_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_concierto_orquesta_sinfonica_i_de_la_escuela_superior_de_musica_forum_musik_01",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de la Escuela Superior de Música Forum Musikae",
+      "role": "orchestra"
+    },
+    {
+      "name": "Diego Fortes",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Anton Bruckner"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 4 en mi bemol mayor, WAB 104, «Romántica»",
+      "composerName": "Anton Bruckner"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/fr/todos?idEvent=concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musik",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-09-28"
+}

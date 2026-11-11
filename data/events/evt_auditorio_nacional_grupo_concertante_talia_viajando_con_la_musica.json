@@ -24,15 +24,31 @@
       "role": "conductor"
     }
   ],
-  "composers": [
-    {
-      "name": "VIAJANDO CON LA MÚSICA"
-    }
-  ],
+  "composers": [],
   "works": [
     {
-      "title": "Un americano en París, Pinos de Roma, España, Lawrence de Arabia, Indiana Jones. La Conga del fuego nuevo, Baba Yetu, En las estepas del Asia central.",
-      "composerName": "VIAJANDO CON LA MÚSICA"
+      "title": "Un americano en París"
+    },
+    {
+      "title": "Pinos de Roma"
+    },
+    {
+      "title": "España"
+    },
+    {
+      "title": "Lawrence de Arabia"
+    },
+    {
+      "title": "Indiana Jones"
+    },
+    {
+      "title": "La Conga del fuego nuevo"
+    },
+    {
+      "title": "Baba Yetu"
+    },
+    {
+      "title": "En las estepas del Asia central"
     }
   ],
   "eras": [
@@ -49,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-viajando-con-la-musica",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "grupo-concertante-talia-viajando-con-la-musica"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

@@ -1,3 +1,5 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
+import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import { z } from 'zod';
 import { collapseWhitespace } from './html.ts';
 import {
@@ -55,7 +57,8 @@ export type ObservedFacts = z.infer<typeof observedFactsSchema>;
 export type DetailOccurrence = {
   raw: string;
   date?: string;
-  time?: string;
+  /** null explicitly rejects a listing clock; undefined may inherit it. */
+  time?: string | null;
 };
 
 export type ObservedEventStatus = 'scheduled' | 'cancelled' | 'postponed';
@@ -67,6 +70,9 @@ export type ObservedEventStatus = 'scheduled' | 'cancelled' | 'postponed';
 export type ObservedFactPatch = Partial<Omit<ObservedFacts, 'title'>> & {
   occurrences?: DetailOccurrence[];
   eventStatus?: ObservedEventStatus;
+  /** Diagnostic only; mergeObserved never copies this into observed/classification facts. */
+  hydrationDiscrepancies?: HydrationDiscrepancy[];
+  calendarEvidence?: CalendarEvidence;
 };
 
 export function emptyObservedLists(): Pick<ObservedFacts, 'performers' | 'composers' | 'works'> {

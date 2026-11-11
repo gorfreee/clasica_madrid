@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { teatrosCanalAdapter as adapter } from '../src/ingestion/sources/teatros-canal.ts';
-import { canalEventUrl, expandTeatrosCanalEvent, parseCanalProgrammeConcerts, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
+import { canalEventUrl, expandTeatrosCanalEvent, parseCanalProgrammeConcerts, parseListingDateTime, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -74,6 +74,45 @@ describe('Teatros del Canal discovery', () => {
       .replace(/"total":\s*5/, '"total": 0');
     await expect(adapter.extract(noFacts, listingUrl, ctx)).rejects.toThrow(/no contiene eventos/);
     expect(await adapter.extract('{"events":[],"total":0,"total_pages":0}', listingUrl, ctx)).toEqual([]);
+  });
+
+  it('reports adapter discards for recognized TEC items without changing extracted events', async () => {
+    const sample = JSON.parse(await fixture('listing-sample.json')) as {
+      events: unknown[];
+      total: number;
+      total_pages: number;
+    };
+    const discards: Array<{ reason: string; title?: string }> = [];
+    const baseline = await adapter.extract(JSON.stringify(sample), listingUrl, ctx);
+    const withJunk = {
+      ...sample,
+      total: sample.events.length + 2,
+      events: [
+        ...sample.events,
+        {
+          id: 9,
+          status: 'draft',
+          url: 'https://www.teatroscanal.com/espectaculo/borrador/',
+          title: 'Borrador',
+          start_date: '2026-09-10 00:00:00',
+          end_date: '2026-09-10 23:59:59',
+        },
+        {
+          id: 10,
+          status: 'publish',
+          url: 'https://www.teatroscanal.com/espectaculo/sin-fecha/',
+          title: 'Sin fecha',
+        },
+      ],
+    };
+    const events = await adapter.extract(JSON.stringify(withJunk), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events.map((event) => event.externalId)).toEqual(baseline.map((event) => event.externalId));
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-date', 'unpublished']);
+    expect(discards.find((item) => item.reason === 'unpublished')?.title).toBe('Borrador');
+    expect(discards.find((item) => item.reason === 'missing-date')?.title).toBe('Sin fecha');
   });
 
   it('follows extra TEC pages and rejects a declared total that does not match', async () => {
@@ -158,6 +197,45 @@ describe('Teatros del Canal ficha', () => {
     expect(coma.venueText).toMatch(/Roja[\s\S]*Verde[\s\S]*Negra/);
     expect(coma.accessText).toMatch(/entrada libre/i);
 
+    const comaConcerts = parseCanalProgrammeConcerts(await fixture('detail-coma.html'), {
+      from: '2026-09-22',
+      to: '2026-10-27',
+    });
+    expect(
+      comaConcerts.map((item) => `${item.date} ${item.time} ${item.venueText} ${item.name}`),
+    ).toEqual([
+      '2026-09-22 20:00 Sala Verde ATLÁNTIDA CHAMBER ORCHESTRA',
+      '2026-09-26 12:00 Sala Roja Concha Velasco CORO DE LA COMUNIDAD DE MADRID',
+      '2026-09-30 18:30 Sala Negra SPANISH BRASS',
+      '2026-10-06 19:00 Sala Negra JOAN CASTELLÓ Y GENI UÑÓN, percusión',
+      '2026-10-13 19:00 Sala Roja Concha Velasco SONOR ENSEMBLE Y ANNA CABRERA',
+      '2026-10-27 19:30 Sala Verde CUARTETO ASCOT',
+    ]);
+    const comaExpanded = expandTeatrosCanalEvent(
+      await sample('festival-coma-2026'),
+      await fixture('detail-coma.html'),
+    );
+    expect(comaExpanded).toHaveLength(6);
+    expect(comaExpanded?.map((item) => item.externalId)).toEqual([
+      '71611:2026-09-22',
+      '71611:2026-09-26',
+      '71611:2026-09-30',
+      '71611:2026-10-06',
+      '71611:2026-10-13',
+      '71611:2026-10-27',
+    ]);
+    expect(comaExpanded?.map((item) => item.observed.occurrences[0]?.time)).toEqual([
+      '20:00',
+      '12:00',
+      '18:30',
+      '19:00',
+      '19:00',
+      '19:30',
+    ]);
+    expect(comaExpanded?.[0]?.observed.occurrences[0]?.raw).toMatch(/22 de septiembre/);
+    expect(comaExpanded?.[0]?.observed.occurrences[0]?.raw).toMatch(/20\.00 h/);
+    expect(new Set(comaExpanded?.map((item) => item.observed.title)).size).toBe(6);
+
     const ensembles = parseTeatrosCanalDetail(
       await sample('xvii-festival-de-ensembles-2026'),
       await fixture('detail-ensembles.html'),
@@ -192,6 +270,24 @@ describe('Teatros del Canal ficha', () => {
       'Sala Negra',
     ]);
     expect(expanded?.every((item) => item.observed.occurrences.length === 1)).toBe(true);
+    expect(expanded?.every((item) => item.observed.occurrences[0]?.time === undefined)).toBe(true);
+    expect(expanded?.map((item) => item.externalId)).toEqual([
+      '100116:2026-10-07',
+      '100116:2026-10-25',
+      '100116:2026-12-02',
+      '100116:2026-12-05',
+    ]);
+  });
+
+  it('captures a concert hour only when it is local to that programme block', () => {
+    const html = `<div class="tab-content" id="tabs1-info"><p>El festival abre a las 20.00 h en otro recinto.</p><p><b>CON HORA</b><br />Sala Verde – 22 de septiembre<br />20.00 h</p><p><b>SIN HORA</b><br />Sala Negra – 30 de septiembre<br />Duración: 1 h 30 min (sin intermedio)</p><p><b>CON HORA TRAS DURACIÓN</b><br />Sala Roja Concha Velasco – 6 de octubre<br />Duración: 1 h 30 min (sin intermedio)<br />19:30 h</p></div>`;
+    const concerts = parseCanalProgrammeConcerts(html, { from: '2026-09-22', to: '2026-10-06' });
+    expect(concerts.map((item) => `${item.date}|${item.time ?? ''}|${item.name}`)).toEqual([
+      '2026-09-22|20:00|CON HORA',
+      '2026-09-30||SIN HORA',
+      '2026-10-06|19:30|CON HORA TRAS DURACIÓN',
+    ]);
+    expect(concerts[1]?.time).toBeUndefined();
   });
 
   it('keeps a dated concert without inventing a time the ficha has not published', async () => {
@@ -203,6 +299,25 @@ describe('Teatros del Canal ficha', () => {
     expect(n9.occurrences?.[0]?.time).toBeUndefined();
     expect(n9.venueText).toBe('Sala Roja Concha Velasco');
     expect(n9.programText).toMatch(/Beethoven/);
+    expect(n9.accessText).toBeUndefined();
+  });
+
+  it('does not treat unpublished horario y precio copy as access evidence', async () => {
+    const event: RawEvent = {
+      sourceId: source.id,
+      sourceUrl: 'https://www.teatroscanal.com/espectaculo/joven-camerata-de-la-orcam-concierto-fin-de-curso',
+      externalId: '105999',
+      listingDateText: '2027-06-22',
+      observed: {
+        title: 'Joven Camerata de la ORCAM',
+        occurrences: [{ raw: '2027-06-22 00:00:00', date: '2027-06-22' }],
+        performers: [],
+        composers: [],
+        works: [],
+      },
+    };
+    const patch = parseTeatrosCanalDetail(event, await fixture('detail-orcam-joven.html'));
+    expect(patch.accessText).toBeUndefined();
   });
 
   it('maps the fourth Canal room when the ficha names Sala de Cristal', async () => {
@@ -240,6 +355,20 @@ describe('Teatros del Canal ficha', () => {
         to: '2026-10-27',
       }).map((item) => item.date),
     ).toEqual(['2026-09-22', '2026-09-26', '2026-09-30', '2026-10-06', '2026-10-13', '2026-10-27']);
+  });
+
+  it('keeps an explicit source year even when the listing range is a different year', () => {
+    expect(
+      parseScheduleDates('23 de septiembre de 2025, a las 19:30 h', {
+        from: '2026-09-01',
+        to: '2026-12-31',
+      }),
+    ).toEqual([{ raw: '23 de septiembre de 2025, a las 19:30', date: '2025-09-23', time: '19:30' }]);
+    expect(parseListingDateTime('2025-09-23 19:30:00', false)).toEqual({
+      raw: '2025-09-23 19:30:00',
+      date: '2025-09-23',
+      time: '19:30',
+    });
   });
 
   it('fails locally for a missing identity and keeps listing facts when hydration fails', async () => {
@@ -327,7 +456,7 @@ describe('Teatros del Canal pipeline safety', () => {
     expect(failed.summary.updatedEvents).toBe(0);
   });
 
-  it('matches already published COMA concerts by URL without duplicating them', async () => {
+  it('reconcilia COMA por sus hechos: conserva identidades, retiene salas contradictorias y publica conciertos nuevos', async () => {
     const published: Catalog = emptyCatalog();
     published.venues.push({
       schemaVersion: 1,
@@ -428,15 +557,39 @@ describe('Teatros del Canal pipeline safety', () => {
     const result = await run(published, false, { from: '2026-09-01', to: '2026-12-30' });
     expect(result.summary.sourcesFailed).toEqual([]);
     const comaUrl = 'https://www.teatroscanal.com/espectaculo/festival-coma-2026';
-    const publishedIds = new Set(published.events.map((event) => event.id));
-    expect(
-      result.candidates
-        .filter((item) => item.event.citations.some((citation) => citation.url === comaUrl))
-        .every((item) => publishedIds.has(item.event.id)),
-    ).toBe(true);
+    const comaCandidates = result.candidates.filter(item => item.event.citations.some(citation => citation.url === comaUrl));
+    expect(comaCandidates.map(item => item.event.id).sort()).toEqual([
+      'evt_coma_atlantida_20260922',
+      'evt_teatros_canal_71611_2026_10_06',
+      'evt_teatros_canal_71611_2026_10_13',
+      'evt_teatros_canal_71611_2026_10_27',
+    ]);
+    // These two historical fichas name Sala Verde; the official calendar
+    // now names Sala Roja / Sala Negra. A shared URL cannot authorize a move.
+    const held = result.decisions.filter(item => item.identity?.action === 'ambiguous');
+    expect(held.map(item => item.identity?.eventId).sort()).toEqual([
+      'evt_coma_coro_cam_20260926', 'evt_coma_spanish_brass_20260930',
+    ]);
+    expect(held.every(item => item.identity?.reason?.includes('source-identity-review'))).toBe(true);
+    expect(result.summary.health).toBe('review');
+    expect(result.apply.report.ok).toBe(true);
     const coma = result.rawEvents.filter((event) => event.sourceUrl.includes('festival-coma-2026'));
     expect(coma).toHaveLength(6);
     expect(coma.every((event) => event.observed.occurrences.length === 1)).toBe(true);
+    expect(
+      coma.map((event) => `${event.externalId}:${event.observed.occurrences[0]?.time}:${event.observed.venueText}`).sort(),
+    ).toEqual([
+      '71611:2026-09-22:20:00:Sala Verde',
+      '71611:2026-09-26:12:00:Sala Roja Concha Velasco',
+      '71611:2026-09-30:18:30:Sala Negra',
+      '71611:2026-10-06:19:00:Sala Negra',
+      '71611:2026-10-13:19:00:Sala Roja Concha Velasco',
+      '71611:2026-10-27:19:30:Sala Verde',
+    ]);
+    const atlántida = result.candidates.find((item) => item.event.id === 'evt_coma_atlantida_20260922');
+    expect(atlántida?.event.occurrences).toEqual([
+      expect.objectContaining({ date: '2026-09-22', time: '20:00' }),
+    ]);
   });
 
   it('publishes each Festival de Ensembles concert into its named room', async () => {
@@ -452,6 +605,7 @@ describe('Teatros del Canal pipeline safety', () => {
       '2026-12-05:Sala Negra',
     ]);
     expect(concerts.every((event) => event.observed.venueText !== 'Sala Verde y Negra')).toBe(true);
+    expect(concerts.every((event) => event.observed.occurrences[0]?.time === undefined)).toBe(true);
     const published = result.candidates.filter((item) =>
       item.event.citations.some((citation) => citation.url.includes('xvii-festival-de-ensembles-2026')),
     );

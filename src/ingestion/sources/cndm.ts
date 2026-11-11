@@ -1,8 +1,9 @@
 import { addIsoDays, parseObservedTime, type IngestWindow } from '../dates.ts';
 import { cndmDiv, cndmDivs, cndmEventUrl, parseCndmDetail } from '../detail/cndm.ts';
+import { createListingGet } from '../listing-retry.ts';
 import { stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
-import { IncompleteListingError, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
+import { IncompleteListingError, reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
 
 const MONTH_NAMES = [
   'Enero',
@@ -29,6 +30,20 @@ export const cndmAdapter: SourceAdapter = {
     // Months are fetched inside extract and isolated like Zarzuela sections.
     return [cndmHomepageUrl(source.urls[0])];
   },
+  /**
+   * The homepage URL from `resolveFetchUrls` is a syntactic seed, not a
+   * listing document. `extract()` builds `/eventos/YYYYMM` itself and fetches
+   * each month with isolated failures. Fetching `/` here would make a timeout
+   * on the homepage abort the source before that monthly logic runs.
+   *
+   * Only the expected CNDM homepage seed is skipped. Any other URL — including
+   * a monthly calendar if `resolveFetchUrls` ever returned one — still uses
+   * `ctx.get`.
+   */
+  fetchListing(url, ctx) {
+    if (isCndmHomepage(url)) return Promise.resolve('');
+    return ctx.get(url);
+  },
   async extract(body, url, ctx) {
     const urls = cndmMonthUrls(ctx.source.urls[0], ctx.window);
     if (!urls[0]) throw new Error('cndm: la ventana no contiene meses');
@@ -45,20 +60,19 @@ export const cndmAdapter: SourceAdapter = {
       }
     };
 
+    const get = createListingGet(ctx.get);
     for (const monthUrl of urls) {
       try {
-        const html = monthUrl === url ? body : await ctx.get(monthUrl);
+        const html = monthUrl === url ? body : await get(monthUrl);
         absorb(html, monthUrl);
       } catch (error) {
         if (!isIsolatedCndmMonthFailure(error)) throw error;
-        failedMonths.push(monthUrl);
+        failedMonths.push(`${monthUrl}: ${error instanceof Error ? error.message : String(error)}`);
         lastIsolated = error;
       }
     }
 
-    const collected = [...events.values()]
-      .filter((event) => !event.observed.venueText || isMadridVenue(event.observed.venueText))
-      .sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    const collected = keepMadridEvents(events, ctx);
     if (failedMonths.length && collected.length) {
       throw new IncompleteListingError(
         `cndm: meses no disponibles (${failedMonths.join(', ')})`,
@@ -261,6 +275,23 @@ function nextMonth(firstOfMonth: string): string {
   const [year, month] = firstOfMonth.split('-').map(Number);
   const next = new Date(Date.UTC(year!, month!, 1));
   return next.toISOString().slice(0, 10);
+}
+
+function keepMadridEvents(events: Map<string, RawEvent>, ctx: AdapterContext): RawEvent[] {
+  const collected: RawEvent[] = [];
+  for (const event of events.values()) {
+    if (event.observed.venueText && !isMadridVenue(event.observed.venueText)) {
+      reportAdapterDiscard(ctx, {
+        reason: 'venue-outside-madrid',
+        title: event.observed.title,
+        sourceUrl: event.sourceUrl,
+        ...(event.externalId ? { externalId: event.externalId } : {}),
+      });
+      continue;
+    }
+    collected.push(event);
+  }
+  return collected.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
 function isMadridVenue(venueText: string): boolean {

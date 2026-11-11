@@ -2,12 +2,12 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Página no encontrada" description="Esa página no existe en Clásica Madrid." indexable={false}>
+<Layout title="Página no encontrada" description="Esa página no existe en Clásica Madrid." indexable={false} analytics={{ page_type: 'not_found' }}>
   <header class="error-page">
     <p class="eyebrow">Fuera de programa</p>
     <div class="error-page__code" aria-hidden="true">404</div>
-    <h1>Esta página<br />no está en cartel.</h1>
-    <p>Puede que el enlace esté incompleto o que la página haya cambiado.</p>
+    <h1>Esta página<br />no está en cartel</h1>
+    <p>Puede que el enlace esté incompleto o que la página haya cambiado</p>
     <a class="button-link" href="/">Volver a la agenda</a>
   </header>
 </Layout>

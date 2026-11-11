@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_circulo_bellas_artes_salon_baile",
+  "slug": "circulo-de-bellas-artes-salon-de-baile",
+  "name": "Círculo de Bellas Artes — Salón de Baile",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_circulo_bellas_artes",
+  "spaceName": "Salón de Baile",
+  "url": "https://www.circulobellasartes.com/",
+  "lastVerifiedAt": "2026-11-01"
+}

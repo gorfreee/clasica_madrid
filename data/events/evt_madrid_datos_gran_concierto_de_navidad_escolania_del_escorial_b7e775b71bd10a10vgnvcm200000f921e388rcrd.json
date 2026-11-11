@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_gran_concierto_de_navidad_escolania_del_escorial_b7e775b71bd10a10vgnvcm200000f921e388rcrd",
+  "slug": "gran-concierto-de-navidad-escolania-del-escorial",
+  "title": "Gran concierto de Navidad — Escolanía del Escorial",
+  "status": "scheduled",
+  "venueId": "ven_teatro_fernan_gomez_sala_guirau",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_gran_concierto_de_navidad_escolania_del_escorial_b7e775b71bd10a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-12-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Escolanía del Escorial"
+    },
+    {
+      "name": "José María Abad Bolufer"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Medio-ambiente/Parques-y-jardines/Gestiones-y-tramites/Gran-concierto-de-Navidad-Escolania-del-Escorial?vgnextchannel=2ee679ed268fe410VgnVCM1000000b205a0aRCRD&vgnextfmt=default&vgnextoid=b7e775b71bd10a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

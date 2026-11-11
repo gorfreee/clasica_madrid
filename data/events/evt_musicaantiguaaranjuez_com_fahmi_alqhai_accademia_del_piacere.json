@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_fahmi_alqhai_accademia_del_piacere",
+  "slug": "fahmi-alqhai-accademia-del-piacere-in-dulci-jubilo",
+  "title": "Fahmi Alqhai & Accademia del Piacere — In Dulci Jubilo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_fahmi_alqhai_accademia_del_piacere_01",
+      "date": "2026-10-18",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Accademia del Piacere"
+    },
+    {
+      "name": "Fahmi Alqhai",
+      "role": "conductor"
+    },
+    {
+      "name": "Johanna Rose"
+    },
+    {
+      "name": "Rodney Prada"
+    },
+    {
+      "name": "Rami Alqhai"
+    },
+    {
+      "name": "Javier Núñez"
+    },
+    {
+      "name": "Coral Infantil de la Escuela Municipal de Música J. Rodrigo de Aranjuez",
+      "role": "choir"
+    },
+    {
+      "name": "Judyth Borrás",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Johann Michael Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Nun komm, der Heiden Heiland, BWV 659",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Liebster Jesu, wir sind hier, BWV 731",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "In dir ist Freude, BWV 615",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "In dulci jubilo, BWV 368",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "In dulci jubilo, BWV 751",
+      "composerName": "Johann Michael Bach"
+    },
+    {
+      "title": "Contrapunctus I y VIII y IV, y Canon per augmentationem in contrario motu, de El arte de la fuga, BWV 1080",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Preludio, BWV 700",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Fughetta, BWV 701",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Canone alla settima, de Variaciones canónicas, BWV 769",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Movimiento de Magnificat, BWV 243a",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Ich ruf’ zu dir, Herr Jesu Christ, BWV 639",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Trío en sol menor, BWV 584",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Wachet auf, ruft uns die Stimme, BWV 645",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/fahmi-alqhai-accademia-del-piacere",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

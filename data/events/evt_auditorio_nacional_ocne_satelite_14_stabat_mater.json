@@ -43,16 +43,19 @@
   ],
   "composers": [
     {
-      "name": "Joseph Haydn"
+      "name": "Franz Joseph Haydn"
     },
     {
       "name": "Nicolás Ledesma"
+    },
+    {
+      "name": "Anton Webern"
     }
   ],
   "works": [
     {
       "title": "Las siete últimas palabras de Cristo en la cruz, op. 51, Hob. III:50-56",
-      "composerName": "Joseph Haydn"
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "Stabat Mater, para tres voces y cuarteto de cuerda",
@@ -71,10 +74,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-14-stabat-mater",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "ocne-satelite-14-stabat-mater"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

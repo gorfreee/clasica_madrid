@@ -35,28 +35,30 @@
   ],
   "composers": [
     {
-      "name": "A. Petrovic"
+      "name": "Albena Petrovic"
     },
     {
-      "name": "Johannes Brahms (1833–1897)"
+      "name": "He Zhanhao"
+    },
+    {
+      "name": "Chen Gang"
+    },
+    {
+      "name": "Johannes Brahms"
     }
   ],
   "works": [
     {
       "title": "Obra a determinar (estreno absoluto)",
-      "composerName": "A. Petrovic"
+      "composerName": "Albena Petrovic"
     },
     {
-      "title": "He Zhanhao / Chen Gang",
-      "composerName": "A. Petrovic"
+      "title": "Butterfly Lovers’ Violin Concerto",
+      "composerName": "He Zhanhao"
     },
     {
-      "title": "Ein deutsches Requiem, Op. 45",
-      "composerName": "Johannes Brahms (1833–1897)"
-    },
-    {
-      "title": "(Un Réquiem Alemán)",
-      "composerName": "Johannes Brahms (1833–1897)"
+      "title": "Ein deutsches Requiem, op. 45",
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [
@@ -71,10 +73,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-requiem-aleman-de-brahms",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "atlantida-chamber-orchestra-requiem-aleman-de-brahms"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

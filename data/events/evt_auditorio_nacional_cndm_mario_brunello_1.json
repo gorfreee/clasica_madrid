@@ -17,39 +17,33 @@
   ],
   "performers": [
     {
-      "name": "MARIO BRUNELLO"
+      "name": "Mario Brunello"
     }
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Mieczysław Weinberg (1919-1996)"
-    },
-    {
-      "name": "J. S. Bach"
-    },
-    {
-      "name": "M. Weinberg"
+      "name": "Mieczysław Weinberg"
     }
   ],
   "works": [
     {
       "title": "Suite para violonchelo n.º 3 en do mayor, BWV 1009 (1717-1723)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sonata para violonchelo n.º 2, op. 121 (1977)",
-      "composerName": "Mieczysław Weinberg (1919-1996)"
+      "composerName": "Mieczysław Weinberg"
     },
     {
       "title": "Suite para violonchelo n.º 4 en mi bemol mayor, BWV 1010 (1717-1723)",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sonata para violonchelo n.º 4, op. 140bis (1986)",
-      "composerName": "M. Weinberg"
+      "composerName": "Mieczysław Weinberg"
     }
   ],
   "eras": [
@@ -64,7 +58,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-mario-brunello-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-mario-brunello-1"
     },
     {
@@ -75,5 +69,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

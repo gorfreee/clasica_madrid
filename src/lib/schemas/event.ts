@@ -66,6 +66,11 @@ export const eventSchema = z
     schemaVersion: schemaVersionSchema,
     id: eventIdSchema,
     slug: slugSchema,
+    /**
+     * Historical public slugs that still resolve to this event after a
+     * reviewed consolidation. Not a general alias store: never rename `slug`.
+     */
+    slugAliases: z.array(slugSchema).min(1).optional(),
     title: nonEmptyStringSchema,
     status: z.enum(EVENT_STATUSES),
     venueId: venueIdSchema,

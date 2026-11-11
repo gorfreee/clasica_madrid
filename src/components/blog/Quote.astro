@@ -1,0 +1,47 @@
+---
+type Props = {
+  attribution?: string;
+};
+
+const { attribution } = Astro.props;
+---
+
+<blockquote class="article-quote">
+  <div class="article-quote__body">
+    <slot />
+  </div>
+  {
+    attribution && (
+      <footer>
+        <cite>{attribution}</cite>
+      </footer>
+    )
+  }
+</blockquote>
+
+<style>
+  .article-quote {
+    margin: 1.5rem 0;
+    padding: .15rem 0 .15rem 1rem;
+    border-left: 2px solid var(--color-accent);
+  }
+
+  .article-quote__body :global(p) {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+
+  .article-quote footer {
+    margin-top: .55rem;
+    color: var(--color-text-muted);
+    font-size: .82rem;
+    font-style: normal;
+  }
+
+  .article-quote cite {
+    font-style: normal;
+  }
+</style>

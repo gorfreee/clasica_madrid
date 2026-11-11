@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_polifonicagetafe_es_concierto_de_navidad_2026_12_19_catedral_de_santa_maria_magdalena_de_getafe",
+  "slug": "concierto-de-navidad-3",
+  "title": "Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_catedral_de_santa_maria_magdalena_de_getafe",
+  "organizerIds": [
+    "org_coral_polifonica_de_getafe"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_polifonicagetafe_es_concierto_de_navidad_2026_12_19_catedral_de_santa_maria_magdalena_de_getafe_01",
+      "date": "2026-12-19",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coral Polifónica de Getafe",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Gloria, RV 589",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Villancicos populares"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_polifonicagetafe_es",
+      "url": "https://www.polifonicagetafe.es/conciertos-2",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_polifonicagetafe_es",
+  "lastVerifiedAt": "2026-10-29"
+}

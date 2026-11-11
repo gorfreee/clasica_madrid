@@ -15,8 +15,15 @@ export function foldName(value: string): string {
     .trim();
 }
 
-export function compactName(value: string): string {
-  return foldName(value).replace(/\s+/g, '');
+/**
+ * Conservative literal-span check: Unicode, case and trivial punctuation
+ * collapse, but a paraphrase does not match. Shared by access, composer
+ * extraction and eligibility grounding.
+ */
+export function containsNormalizedSpan(container: string, span: string): boolean {
+  const haystack = foldName(container);
+  const needle = foldName(span);
+  return Boolean(needle && (` ${haystack} `).includes(` ${needle} `));
 }
 
 export function hasWord(haystack: string, word: string): boolean {
@@ -48,16 +55,69 @@ export function identityHaystack(facts: ObservedFacts): string {
   ]);
 }
 
-export function formatHaystack(facts: ObservedFacts): string {
-  return joinFolded([
-    facts.title,
-    facts.categoryText,
-    facts.description,
-    facts.programText,
-    facts.seriesText,
-    ...facts.performers.map((item) => [item.name, item.roleText].filter(Boolean).join(' ')),
-    ...facts.works.map((item) => item.title),
-  ]);
+/** Named text surfaces for activity/repertoire rules; credits are not event identity.
+ * Keep the original field and literal value for diagnostic evidence.
+ */
+export function eligibilityTextFields(facts: ObservedFacts) {
+  return (['title', 'categoryText', 'seriesText', 'programText', 'description'] as const)
+    .flatMap((field) => facts[field] ? [{ field, value: facts[field]! }] : []);
+}
+
+/** Narrative clauses retain literal spans while keeping CV asides local. */
+export function narrativeClauses(value: string): string[] {
+  return value.split(/(?<=[.!?;])\s+|\n+/u).map((part) => part.trim()).filter(Boolean);
+}
+
+/** A CV/history clause is not a declaration about the programme of this event. */
+export function isBiographicalClause(value: string): boolean {
+  return /\b(?:debuto|ha (?:actuado|colaborado|trabajado|interpretado|impartido|dirigido|estudiado)|su carrera|su trayectoria|se formo|mayor proyeccion|en su juventud)\b/.test(foldText(value));
+}
+
+/** Explicit popular repertoire, not the bare words songbook/swing or an author. */
+export function popularSongbookRepertoire(text: string, identity: boolean): boolean {
+  const repertoire = /\b(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\b/;
+  if (identity && repertoire.test(text)) return true;
+  if (identity && /^(?:swing|jazz standards)$/.test(text.trim())) return true;
+  return (
+    /\b(?:canciones|temas|repertorio|seleccion|clasicos)\b[^.!?;\n]{0,70}\b(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\b/.test(text)
+    || /\b(?:interpreta(?:n|ra|ran)?|interpretacion de|recital de|concierto de|programa de|repertorio de|noche de|velada de)\s+(?:el |los |un |una |del? )?(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz)|swing)\b/.test(text)
+    || (!identity && /^(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\s*(?:[:.]|$)/.test(text))
+  );
+}
+
+/**
+ * Format evidence grouped by field, so generic formation words are not
+ * matched in performer biographies sitting in `description`.
+ *
+ * - `identity`: title, official category, series — names this event.
+ * - `performers`: structured names/roles of who is performing this concert.
+ * - `program`: program listing and work titles of this concert.
+ * - `narrative`: editorial description; often includes CVs and historical asides.
+ */
+export type FormatEvidence = {
+  identity: string;
+  performers: string[];
+  program: string;
+  narrative: string;
+};
+
+export function formatEvidence(facts: ObservedFacts): FormatEvidence {
+  return {
+    identity: joinFolded([facts.title, facts.categoryText, facts.seriesText]),
+    performers: facts.performers.map((item) =>
+      foldText([item.name, item.roleText].filter(Boolean).join(' ')),
+    ),
+    program: joinFolded([facts.programText, ...facts.works.map((item) => item.title)]),
+    narrative: fieldFolded(facts.description),
+  };
+}
+
+export function evidenceHasWord(fields: Array<string | undefined>, word: string): boolean {
+  return fields.some((field) => Boolean(field) && hasWord(field!, word));
+}
+
+export function evidenceHasPhrase(fields: Array<string | undefined>, phrase: string): boolean {
+  return fields.some((field) => Boolean(field) && hasPhrase(field!, phrase));
 }
 
 function joinFolded(parts: Array<string | undefined>): string {

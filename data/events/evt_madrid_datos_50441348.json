@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50441348",
+  "slug": "escenario-joven-3",
+  "title": "Escenario Joven",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1921",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50441348_01",
+      "date": "2026-11-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=abc2ece578cf0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50441348"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

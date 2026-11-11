@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_majadahonda_org_informacion_cultural_3210070",
+  "slug": "tosca",
+  "title": "Tosca",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_cultura_carmen_conde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_majadahonda_org_informacion_cultural_3210070_01",
+      "date": "2026-10-24",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Martín i Soler"
+    },
+    {
+      "name": "Gema Scabal"
+    },
+    {
+      "name": "Helena Gallardo"
+    },
+    {
+      "name": "Gabriel Blanco"
+    },
+    {
+      "name": "Alberto Herranz"
+    },
+    {
+      "name": "Santos Ariño"
+    },
+    {
+      "name": "Sadot Llorca"
+    },
+    {
+      "name": "Carlos London"
+    },
+    {
+      "name": "José Manuel Velasco"
+    },
+    {
+      "name": "Ángel Walter Ardisana"
+    },
+    {
+      "name": "Jesús Ortega Minguito"
+    },
+    {
+      "name": "Salvador Requena (dirección musical)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tosca",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_majadahonda_org",
+      "url": "https://cultura.majadahonda.org/informacion-cultural?p_p_id=CalendarSuite_INSTANCE_STa3SHI1sEeH&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal&p_r_p_calendarBookingId=3210070&p_r_p_calendarPath=%2Fhtml%2Fsuite%2Fdisplays%2Fdetail.jsp",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_majadahonda_org",
+  "lastVerifiedAt": "2026-09-28"
+}

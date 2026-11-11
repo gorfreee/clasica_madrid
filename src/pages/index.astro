@@ -3,6 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import FilterForm from '../components/FilterForm.astro';
 import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import PageHero from '../components/PageHero.astro';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
@@ -10,47 +12,60 @@ const model = await loadAgendaPage(Astro.url);
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <header class="agenda-intro">
-    <div class="agenda-intro__copy">
-      <p class="eyebrow">Agenda abierta / Madrid</p>
-      <h1>La clásica<br />que está sonando.</h1>
-      <p class="lede">Conciertos de todos los tamaños, reunidos en una agenda y comprobados en su fuente original.</p>
-    </div>
-    <div class="agenda-intro__graphic" aria-hidden="true"><span>HOY</span></div>
-  </header>
+  <PageHero motif="agenda">
+    <Eyebrow label="Agenda" />
+    <h1>
+      <span>Toda la</span>
+      <span>música clásica</span>
+      <span>en Madrid</span>
+    </h1>
+    <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
+  </PageHero>
 
   {
     model.isEmptyCatalog ? (
       <EmptyState
         title="Todavía no hay conciertos publicados"
-        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
+        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico"
       />
     ) : !model.hasUpcoming ? (
       <EmptyState
         title="No hay conciertos próximos"
-        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda."
+        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda"
       />
     ) : (
       <>
         <FilterForm model={model} />
-        <div class="agenda-status">
-          <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
-          <span aria-hidden="true">CM / 01</span>
-        </div>
-        <AgendaList days={model.days} />
-        {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
-        <div data-no-results hidden>
-          <EmptyState
-            title="Ningún concierto coincide con esos filtros"
-            body="Prueba a quitar algún filtro o ampliar las fechas."
+        <div
+          class="agenda-root"
+          data-agenda-root
+          data-upcoming-count={model.upcomingCount}
+          data-agenda-complete={model.hasMoreOccurrences ? undefined : ''}
+        >
+          <AgendaList days={model.days} inlineChannel />
+          {
+            model.hasMoreOccurrences && (
+              <div class="agenda-more" data-agenda-more>
+                <p data-agenda-showing>{model.showingCountLabel}</p>
+                <p data-agenda-load-error hidden role="alert">{model.fullAgendaLoadErrorMessage}</p>
+                <button type="button" data-load-full-agenda>{model.showAllLabel}</button>
+              </div>
+            )
+          }
+          {/* data-no-results: contrato de agenda-client.ts */}
+          <div data-no-results hidden>
+            <EmptyState
+              title="No hay conciertos con estos filtros"
+              body="Prueba a quitar alguno o ampliar el intervalo de fechas"
+            />
+          </div>
+          <script
+            id="agenda-filter-data"
+            type="application/json"
+            is:inline
+            set:html={serializeJsonForScript(model.filterIndex)}
           />
         </div>
-        <script
-          id="agenda-filter-data"
-          type="application/json"
-          is:inline
-          set:html={serializeJsonForScript(model.filterIndex)}
-        />
         {/* #agenda-filter-data: contrato de agenda-client.ts; no eliminar en un rediseño */}
         <script>
           import { initAgendaFilters } from '../lib/presentation/agenda-client.ts';

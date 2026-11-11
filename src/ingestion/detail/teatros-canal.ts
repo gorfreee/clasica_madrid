@@ -83,6 +83,7 @@ export type CanalProgrammeConcert = {
   name: string;
   venueText: string;
   date: string;
+  time?: string;
   raw: string;
 };
 
@@ -119,7 +120,13 @@ export function expandTeatrosCanalEvent(event: RawEvent, body: string): RawEvent
       ...event.observed,
       title: `${event.observed.title}: ${concert.name}`,
       venueText: concert.venueText,
-      occurrences: [{ raw: concert.raw, date: concert.date }],
+      occurrences: [
+        {
+          raw: concert.raw,
+          date: concert.date,
+          ...(concert.time ? { time: concert.time } : {}),
+        },
+      ],
       performers: [{ name: concert.name }],
     },
   }));
@@ -139,7 +146,18 @@ function concertFromParagraph(
   const date = resolveDate(match[2]!, match[3]!, undefined, range);
   const name = concertHeading(lines.slice(0, roomIndex));
   if (!venueText || !date || !name) return undefined;
-  return { name, venueText, date, raw: roomLine };
+  const localLines = lines.slice(roomIndex);
+  const clockLine = localLines.find((line) => parseProgrammeClock(line));
+  const time = clockLine ? parseProgrammeClock(clockLine) : undefined;
+  const raw =
+    time && clockLine && clockLine !== roomLine ? `${roomLine} ${clockLine}` : roomLine;
+  return { name, venueText, date, ...(time ? { time } : {}), raw };
+}
+
+function parseProgrammeClock(text: string): string | undefined {
+  const match = /\b(\d{1,2})[.:](\d{2})\s*h\b/i.exec(text);
+  if (!match) return undefined;
+  return parseObservedTime(`${match[1]}:${match[2]}`) ?? undefined;
 }
 
 function concertHeading(lines: string[]): string | undefined {

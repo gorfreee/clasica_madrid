@@ -1,13 +1,46 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
+import {
+  BRAND_BLUE,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_SOCIAL_IMAGE_ALT,
+  DEFAULT_SOCIAL_IMAGE_PATH,
+  DEFAULT_TITLE,
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  pageDocumentTitle,
+  SITE_BACKGROUND,
+  SITE_NAME,
+} from '../src/lib/presentation/constants.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
-import { sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
-import { eventPath, publicPath, publicUrl, venuePath } from '../src/lib/presentation/urls.ts';
+import { buildSocialImageMetadata } from '../src/lib/presentation/social.ts';
+import { serializeSitemapItem, sitemapCatalogPaths, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
+import {
+  eventPath,
+  publicAssetUrl,
+  publicPath,
+  publicUrl,
+  venuePath,
+  agendaLandingPath,
+} from '../src/lib/presentation/urls.ts';
 import { buildVenuePageModel, buildVenuesIndexModel } from '../src/lib/presentation/venue.ts';
-import { richCatalog, testClock } from './helpers.ts';
+import { defaultDataDir } from '../src/lib/repository/fs.ts';
+import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
+import { blogContentDir, blogLastmodsFromDirectory } from '../src/lib/blog/files.ts';
+import { makeCatalog, makeVenue, richCatalog, testClock } from './helpers.ts';
 
 function musicEvents(jsonLd: Record<string, unknown>[]) {
   return jsonLd.filter((item) => item['@type'] === 'MusicEvent');
+}
+
+const publicDir = path.join(import.meta.dirname, '..', 'public');
+
+function pngDimensions(relativePath: string): { width: number; height: number } {
+  const png = readFileSync(path.join(publicDir, relativePath));
+  expect(png.subarray(1, 4).toString('ascii')).toBe('PNG');
+  return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
 }
 
 describe('URLs públicas', () => {
@@ -17,7 +50,110 @@ describe('URLs públicas', () => {
     expect(publicPath('/lugares/')).toBe('/lugares/');
     expect(eventPath('carmen')).toBe('/eventos/carmen/');
     expect(venuePath('auditorio-nacional')).toBe('/lugares/auditorio-nacional/');
+    expect(agendaLandingPath('gratis')).toBe('/agenda/gratis/');
+    expect(agendaLandingPath('fin-de-semana')).toBe('/agenda/fin-de-semana/');
     expect(publicUrl('/eventos/carmen')).toBe('https://clasicamadrid.com/eventos/carmen/');
+    expect(publicAssetUrl('/brand/card.png')).toBe('https://clasicamadrid.com/brand/card.png');
+  });
+});
+
+describe('social sharing e identidad', () => {
+  it('usa por defecto la social card global con URL pública absoluta', () => {
+    expect(buildSocialImageMetadata()).toEqual({
+      url: `https://clasicamadrid.com${DEFAULT_SOCIAL_IMAGE_PATH}`,
+      alt: DEFAULT_SOCIAL_IMAGE_ALT,
+    });
+  });
+
+  it('respeta una socialImage alternativa y la convierte en URL pública absoluta', () => {
+    expect(buildSocialImageMetadata('/brand/evento-especial.png', 'Evento especial')).toEqual({
+      url: 'https://clasicamadrid.com/brand/evento-especial.png',
+      alt: 'Evento especial',
+    });
+  });
+
+  it('publica el manifest mínimo con colores e iconos reales', () => {
+    const manifest = JSON.parse(readFileSync(path.join(publicDir, 'site.webmanifest'), 'utf8'));
+    expect(manifest).toMatchObject({
+      name: 'Clásica Madrid',
+      short_name: 'Clásica Madrid',
+      start_url: '/',
+      scope: '/',
+      display: 'browser',
+      theme_color: BRAND_BLUE,
+      background_color: SITE_BACKGROUND,
+    });
+    expect(manifest.icons).toEqual([
+      { src: '/brand/clasica-madrid-icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/brand/clasica-madrid-icon-512.png', sizes: '512x512', type: 'image/png' },
+    ]);
+  });
+
+  it('mantiene las dimensiones requeridas de todos los PNG declarados', () => {
+    expect(pngDimensions('brand/clasica-madrid-social-card.png')).toEqual({
+      width: 1200,
+      height: 630,
+    });
+    expect(pngDimensions('apple-touch-icon.png')).toEqual({ width: 180, height: 180 });
+    expect(pngDimensions('brand/clasica-madrid-icon-192.png')).toEqual({
+      width: 192,
+      height: 192,
+    });
+    expect(pngDimensions('brand/clasica-madrid-icon-512.png')).toEqual({
+      width: 512,
+      height: 512,
+    });
+  });
+});
+
+describe('metadata de la home', () => {
+  it('expone title y description de la agenda sin duplicar la marca', () => {
+    const page = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(page.title).toBe(HOME_TITLE);
+    expect(page.title).toBe('Conciertos de música clásica en Madrid');
+    expect(page.title).not.toContain(SITE_NAME);
+    expect(page.description).toBe(HOME_DESCRIPTION);
+    expect(page.description).toBe(
+      'Agenda de conciertos de música clásica en Madrid, de las grandes salas a los pequeños espacios. Fechas, lugares, intérpretes, compositores y conciertos gratuitos.',
+    );
+    expect(page.canonicalPath).toBe('/');
+  });
+
+  it('las URLs filtradas de la home conservan el canonical de /', () => {
+    const page = buildAgendaPageModel(
+      richCatalog(),
+      new URL('https://clasicamadrid.com/?access=free&from=2026-09-04&to=2026-09-06'),
+      testClock,
+    );
+    expect(page.canonicalPath).toBe('/');
+    expect(page.title).toBe(HOME_TITLE);
+  });
+
+  it('el title final de la home añade la marca una sola vez', () => {
+    const page = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(pageDocumentTitle(page.title)).toBe(
+      'Conciertos de música clásica en Madrid — Clásica Madrid',
+    );
+    expect(pageDocumentTitle(page.title)).not.toMatch(/Clásica Madrid.*Clásica Madrid/);
+    expect(pageDocumentTitle(`${HOME_TITLE} — ${SITE_NAME}`)).toBe(
+      'Conciertos de música clásica en Madrid — Clásica Madrid',
+    );
+  });
+});
+
+describe('title de documento', () => {
+  it('añade la marca cuando el title de página todavía no la incluye', () => {
+    expect(pageDocumentTitle('Lugares de conciertos en Madrid')).toBe(
+      'Lugares de conciertos en Madrid — Clásica Madrid',
+    );
+    expect(pageDocumentTitle('Carmen · Auditorio Nacional de Música')).toBe(
+      'Carmen · Auditorio Nacional de Música — Clásica Madrid',
+    );
+  });
+
+  it('no duplica la marca si el title ya la contiene o es el fallback', () => {
+    expect(pageDocumentTitle(DEFAULT_TITLE)).toBe(DEFAULT_TITLE);
+    expect(pageDocumentTitle(`Acerca de — ${SITE_NAME}`)).toBe('Acerca de — Clásica Madrid');
   });
 });
 
@@ -26,6 +162,9 @@ describe('títulos y canonicals de ficha', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     expect(page?.title).toBe('Carmen');
     expect(page?.documentTitle).toBe('Carmen · Auditorio Nacional de Música');
+    expect(pageDocumentTitle(page?.documentTitle ?? '')).toBe(
+      'Carmen · Auditorio Nacional de Música — Clásica Madrid',
+    );
     expect(page?.canonicalPath).toBe('/eventos/carmen/');
     expect(page?.venueHref).toBe('/lugares/auditorio-nacional/');
     expect(page?.description).toContain('Ópera');
@@ -40,12 +179,85 @@ describe('títulos y canonicals de ficha', () => {
   it('el índice de lugares canoniciza con barra final', () => {
     const index = buildVenuesIndexModel(richCatalog(), testClock);
     expect(index.canonicalPath).toBe('/lugares/');
-    expect(index.title).toContain('Madrid');
+    expect(index.title).toBe('Lugares de conciertos en Madrid');
+    expect(index.title).not.toMatch(/^Conciertos en /);
+  });
+
+  it('la ficha de lugar usa un title SEO genérico y deja el nombre canónico para el h1', () => {
+    const page = buildVenuePageModel(richCatalog(), 'auditorio-nacional', testClock);
+    expect(page?.name).toBe('Auditorio Nacional de Música');
+    expect(page?.title).toBe('Conciertos en Auditorio Nacional de Música');
+    expect(pageDocumentTitle(page?.title ?? '')).toBe(
+      'Conciertos en Auditorio Nacional de Música — Clásica Madrid',
+    );
+    expect(pageDocumentTitle(page?.title ?? '')).not.toMatch(/Clásica Madrid.*Clásica Madrid/);
+    expect(page?.description).toBe(
+      'Próximos conciertos de música clásica en Auditorio Nacional de Música.',
+    );
+    expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional/');
+    expect(page?.jsonLd[0]).toMatchObject({
+      '@type': 'MusicVenue',
+      name: 'Auditorio Nacional de Música',
+    });
+  });
+
+  it('aplica el mismo prefijo SEO a cualquier ficha de lugar, también sin próximos conciertos', () => {
+    const teatro = buildVenuePageModel(
+      makeCatalog({
+        venues: [makeVenue({ id: 'ven_teatro_real', slug: 'teatro-real', name: 'Teatro Real' })],
+        events: [],
+      }),
+      'teatro-real',
+      testClock,
+    );
+    expect(teatro?.name).toBe('Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en Teatro Real');
+    expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
+      'Conciertos en Teatro Real — Clásica Madrid',
+    );
+    expect(teatro?.description).toBe('Conciertos de música clásica en Teatro Real.');
+    expect(teatro?.canonicalPath).toBe('/lugares/teatro-real/');
+  });
+
+  it('el catálogo publicado genera el title SEO de Teatro Real y del Auditorio', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const teatro = buildVenuePageModel(catalog, 'teatro-real', testClock);
+    expect(teatro?.name).toBe('Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en Teatro Real');
+    expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
+      'Conciertos en Teatro Real — Clásica Madrid',
+    );
+
+    const auditorio = buildVenuePageModel(catalog, 'auditorio-nacional-de-musica', testClock);
+    expect(auditorio?.name).toBe('Auditorio Nacional de Música');
+    expect(auditorio?.title).toBe('Conciertos en Auditorio Nacional de Música');
+    expect(pageDocumentTitle(auditorio?.title ?? '')).toBe(
+      'Conciertos en Auditorio Nacional de Música — Clásica Madrid',
+    );
+  });
+
+  it('no infiere artículo: el mismo prefijo vale para nombres femeninos', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const basilica = buildVenuePageModel(catalog, 'basilica-pontificia-de-san-miguel', testClock);
+    expect(basilica?.name).toBe('Basílica Pontificia de San Miguel');
+    expect(basilica?.title).toBe('Conciertos en Basílica Pontificia de San Miguel');
+    expect(basilica?.title).not.toMatch(/\ben el\b|\ben la\b/);
+    expect(pageDocumentTitle(basilica?.title ?? '')).toBe(
+      'Conciertos en Basílica Pontificia de San Miguel — Clásica Madrid',
+    );
+
+    const sala = buildVenuePageModel(catalog, 'sala-manuel-de-falla-sgae', testClock);
+    expect(sala?.name).toBe('Sala Manuel de Falla — SGAE');
+    expect(sala?.title).toBe('Conciertos en Sala Manuel de Falla — SGAE');
+    expect(sala?.title).not.toMatch(/\ben el\b|\ben la\b/);
+    expect(pageDocumentTitle(sala?.title ?? '')).toBe(
+      'Conciertos en Sala Manuel de Falla — SGAE — Clásica Madrid',
+    );
   });
 });
 
 describe('JSON-LD de presentación', () => {
-  it('añade @id, description, offers y Person para solistas', () => {
+  it('añade @id, description, gratuidad y Person para solistas sin inventar ofertas', () => {
     const page = buildEventPageModel(richCatalog(), 'recital-de-organo', testClock);
     const [event] = musicEvents(page?.jsonLd ?? []);
     expect(event?.['@id']).toBe('https://clasicamadrid.com/eventos/recital-de-organo/#occ_organo_1');
@@ -53,27 +265,20 @@ describe('JSON-LD de presentación', () => {
     expect(event?.description).toMatch(/Órgano/);
     expect(event?.description).toMatch(/Ana Ruiz/);
     expect(event?.isAccessibleForFree).toBe(true);
-    expect(event?.offers).toMatchObject({
-      '@type': 'Offer',
-      url: 'https://example.org/san-manuel/organo',
-      price: 0,
-      priceCurrency: 'EUR',
-    });
+    expect(event).not.toHaveProperty('offers');
     expect(event?.performer).toEqual([{ '@type': 'Person', name: 'Ana Ruiz' }]);
     expect(page?.jsonLd.some((item) => item['@type'] === 'BreadcrumbList')).toBe(true);
   });
 
-  it('tipa orquesta y coro como PerformingGroup y enlaza la oferta oficial', () => {
+  it('tipa orquesta y coro como PerformingGroup sin convertir la fuente oficial en oferta', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     const [event] = musicEvents(page?.jsonLd ?? []);
     expect(event?.performer).toEqual([
       { '@type': 'PerformingGroup', name: 'Coro del Teatro' },
       { '@type': 'PerformingGroup', name: 'Orquesta titular' },
     ]);
-    expect(event?.offers).toEqual({
-      '@type': 'Offer',
-      url: 'https://www.auditorionacional.mcu.es/eventos/carmen',
-    });
+    expect(event?.isAccessibleForFree).toBe(false);
+    expect(event).not.toHaveProperty('offers');
   });
 
   it('describe el lugar con MusicVenue y migas', () => {
@@ -93,20 +298,71 @@ describe('JSON-LD de presentación', () => {
       '@type': 'WebSite',
       name: 'Clásica Madrid',
       url: 'https://clasicamadrid.com/',
+      description: DEFAULT_DESCRIPTION,
     });
+    expect(page.jsonLd[0]?.description).not.toBe(HOME_DESCRIPTION);
   });
 });
 
 describe('sitemap', () => {
-  it('excluye la URL de 404', () => {
+  it('excluye la URL de 404 y la agenda completa interna', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/404')).toBe(false);
+    expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/contacto/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/gratis/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/fin-de-semana/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/opera/')).toBe(false);
   });
 
-  it('añade lastmod a partir de lastVerifiedAt', () => {
-    const map = sitemapLastmodMap(richCatalog());
-    expect(map.get('/eventos/carmen/')).toBe('2026-08-20');
-    expect(map.get('/')).toBe('2026-08-21');
-    expect(map.get('/lugares/auditorio-nacional/')).toBe('2026-08-20');
+  it('incluye eventos canónicos sin depender de lastVerifiedAt y excluye aliases', () => {
+    const catalog = richCatalog();
+    catalog.events[0] = { ...catalog.events[0]!, slugAliases: ['carmen-antigua'] };
+    const paths = sitemapCatalogPaths(catalog, testClock);
+    expect(paths.has('/eventos/carmen/')).toBe(true);
+    expect(paths.has('/eventos/concierto-de-verano/')).toBe(true);
+    expect(paths.has('/eventos/carmen-antigua/')).toBe(false);
+  });
+
+  it('serializa los eventos publicados sin lastmod y omite todos sus redirects históricos', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const aliasedEvents = catalog.events.filter((event) => event.slugAliases?.length);
+    expect(aliasedEvents.length).toBeGreaterThan(0);
+    for (const event of aliasedEvents) {
+      const canonical = { url: publicUrl(eventPath(event.slug)) };
+      expect(await serializeSitemapItem(canonical)).toEqual(canonical);
+      expect(await serializeSitemapItem({ ...canonical, lastmod: event.lastVerifiedAt })).toEqual(canonical);
+      for (const alias of event.slugAliases ?? []) {
+        expect(await serializeSitemapItem({ url: publicUrl(eventPath(alias)) })).toBeUndefined();
+      }
+    }
+    expect(await serializeSitemapItem({ url: publicUrl('/contacto/') })).toEqual({
+      url: publicUrl('/contacto/'),
+    });
+  });
+
+  it('omite lastmod en home, lugares y landings aunque reciba una fecha de verificación', async () => {
+    for (const path of ['/', '/lugares/', '/agenda/gratis/', '/agenda/fin-de-semana/']) {
+      const url = publicUrl(path);
+      expect(await serializeSitemapItem({ url, lastmod: '2026-09-30' })).toEqual({ url });
+    }
+  });
+
+  it('serializa lugares según indexabilidad explícita, sin lastmod', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    for (const venue of catalog.venues) {
+      const model = buildVenuePageModel(catalog, venue.slug)!;
+      const item = { url: publicUrl(model.canonicalPath), lastmod: '2026-09-30' };
+      expect(await serializeSitemapItem(item), venue.slug).toEqual(model.indexable ? { url: item.url } : undefined);
+    }
+  });
+
+  it('conserva las fechas publicadas/actualizadas del blog al serializar', async () => {
+    const lastmods = blogLastmodsFromDirectory(blogContentDir());
+    expect(lastmods.size).toBeGreaterThan(0);
+    for (const [path, lastmod] of lastmods) {
+      const url = publicUrl(path);
+      expect(await serializeSitemapItem({ url })).toEqual({ url, lastmod });
+    }
   });
 });

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_lina_tur_bonet_palacio_real",
+  "slug": "lina-tur-bonet-el-violin-infinito-del-laberinto-a-la-ascension",
+  "title": "Lina Tur Bonet — El violín infinito: del laberinto a la Ascensión",
+  "status": "scheduled",
+  "venueId": "ven_capilla_del_palacio_real_de_aranjuez",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_lina_tur_bonet_palacio_real_01",
+      "date": "2026-10-04",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lina Tur Bonet"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Nicola Matteis"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Heinrich Ignaz Franz von Biber"
+    }
+  ],
+  "works": [
+    {
+      "title": "Passaggio Rotto e Fantasia, de Ayres for the violin en la menor",
+      "composerName": "Nicola Matteis"
+    },
+    {
+      "title": "Sonata en la menor, BWV 1003",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Passacaglia, de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz von Biber"
+    },
+    {
+      "title": "Partita en re menor, BWV 1004",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/lina-tur-bonet-palacio-real",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

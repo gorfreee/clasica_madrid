@@ -1,0 +1,131 @@
+---
+type Variant = 'agenda' | 'venues';
+
+type Props = {
+  variant: Variant;
+  class?: string;
+};
+
+type MotifConfig = {
+  center: { x: number; y: number };
+  radii: readonly [number, number, number];
+  rotation: number;
+  dashes: readonly [string, string, string];
+  offsets: readonly [number, number, number];
+  score: readonly string[];
+  accent: { x: number; y: number; radius: number };
+  echo: { x: number; y: number; radius: number };
+};
+
+const motifs: Record<Variant, MotifConfig> = {
+  agenda: {
+    center: { x: 171, y: 95 },
+    radii: [72, 49, 27],
+    rotation: -38,
+    dashes: ['83 17', '76 24', '68 32'],
+    offsets: [0, 2, 4],
+    score: ['M18 95H238', 'M30 69H91', 'M48 121H108'],
+    accent: { x: 65, y: 95, radius: 4 },
+    echo: { x: 218, y: 45, radius: 3.5 },
+  },
+  venues: {
+    center: { x: 168, y: 101 },
+    radii: [70, 48, 26],
+    rotation: 24,
+    dashes: ['78 22', '72 28', '64 36'],
+    offsets: [0, 3, 6],
+    score: ['M20 138H240', 'M60 138V103H103', 'M168 25V52'],
+    accent: { x: 60, y: 138, radius: 4 },
+    echo: { x: 168, y: 31, radius: 3.5 },
+  },
+};
+
+const { variant, class: className } = Astro.props;
+const motif = motifs[variant];
+---
+
+<svg
+  class:list={['hero-motif', className]}
+  viewBox="0 0 260 190"
+  width="260"
+  height="190"
+  aria-hidden="true"
+  focusable="false"
+  data-hero-motif={variant}
+>
+  <g
+    class="hero-motif__rings"
+    transform={`rotate(${motif.rotation} ${motif.center.x} ${motif.center.y})`}
+  >
+    {
+      motif.radii.map((radius, index) => (
+        <circle
+          class:list={['hero-motif__resonance', `hero-motif__resonance--${index + 1}`]}
+          cx={motif.center.x}
+          cy={motif.center.y}
+          r={radius}
+          pathLength="100"
+          stroke-dasharray={motif.dashes[index]}
+          stroke-dashoffset={motif.offsets[index]}
+        />
+      ))
+    }
+  </g>
+
+  {motif.score.map((path) => <path class="hero-motif__score" d={path} />)}
+
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--primary"
+    cx={motif.center.x}
+    cy={motif.center.y}
+    r="5.5"
+  />
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--accent"
+    cx={motif.accent.x}
+    cy={motif.accent.y}
+    r={motif.accent.radius}
+  />
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--echo"
+    cx={motif.echo.x}
+    cy={motif.echo.y}
+    r={motif.echo.radius}
+  />
+</svg>
+
+<style>
+  .hero-motif {
+    display: block;
+    color: var(--color-brand);
+    pointer-events: none;
+  }
+
+  .hero-motif__resonance,
+  .hero-motif__score {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hero-motif__resonance {
+    stroke: currentColor;
+    stroke-linecap: butt;
+  }
+
+  .hero-motif__resonance--1 { stroke-width: 2.6; }
+  .hero-motif__resonance--2 { stroke-width: 2.05; }
+  .hero-motif__resonance--3 { stroke-width: 1.55; }
+
+  .hero-motif__score {
+    stroke: var(--color-text);
+    stroke-width: 1.1;
+    opacity: .44;
+  }
+
+  .hero-motif__pulse { fill: var(--color-accent); }
+  .hero-motif__pulse--accent { opacity: .82; }
+  .hero-motif__pulse--echo {
+    fill: var(--color-text);
+    opacity: .48;
+  }
+</style>

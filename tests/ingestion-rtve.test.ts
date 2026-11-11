@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { orquestaCoroRtveAdapter as adapter } from '../src/ingestion/sources/orquesta-coro-rtve.ts';
+import { canonicalizePerformerList } from '../src/ingestion/classification/performer-role.ts';
 import { parseRtveDetail, rtveBlocks, rtveConcertUrl } from '../src/ingestion/detail/orquesta-coro-rtve.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
@@ -68,6 +69,17 @@ describe('RTVE / Monumental discovery', () => {
 });
 
 describe('RTVE / Monumental ficha', () => {
+  it('conserva la prosa editorial fuera del programa y separa una lista explícita de violistas', async () => {
+    const base = await fixture('detail-symphonic');
+    const prose = 'Una propuesta entre bolero, tango, chanson, zarzuela, ópera y música de cine. «La música puede dar nombre a lo innombrable», Leonard Bernstein.';
+    const html = base.replace(/<div>Johannes Brahms \(1833-1897\)<\/div>[\s\S]*?<div style="padding-left: 40px;"><strong>Carol García<\/strong>, mezzosoprano<\/div>/, `<p>${prose}</p><p>María Cámara, Álvaro Gallego, Alicia García-Arroba, Vicent Nogués, Paula Romero y Blanca Sellers (Grupo de violas de Orquesta y Coro de RTVE).</p>`);
+    const patch = parseRtveDetail(await sample(), html);
+    expect(patch.description).toContain('Leonard Bernstein');
+    expect(patch.programText).toBeUndefined();
+    expect(patch.performers?.map((item) => item.name)).toEqual(expect.arrayContaining([
+      'María Cámara', 'Álvaro Gallego', 'Alicia García-Arroba', 'Vicent Nogués', 'Paula Romero', 'Blanca Sellers',
+    ]));
+  });
   it('reads complete local schedules and price facts, leaving musical interpretation to the pipeline', async () => {
     const patch = parseRtveDetail(await sample(), await fixture('detail-symphonic'));
     expect(patch.occurrences).toEqual([
@@ -78,8 +90,14 @@ describe('RTVE / Monumental ficha', () => {
     expect(patch.accessText).toBe('Precio desde: 20€');
     expect(patch.programText).toContain('Johannes Brahms (1833-1897) Im Herbst');
     expect(patch.programText).toContain('Carol García');
+    expect(patch.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Alexandre Bloch', roleText: 'director' },
+      { name: 'Elena Sancho-Pèreg', roleText: 'soprano' },
+      { name: 'Carol García', roleText: 'mezzosoprano' },
+    ]);
+    expect(patch.performers?.some((item) => /brahms|mahler/i.test(item.name))).toBe(false);
     expect(patch).not.toHaveProperty('composers');
-    expect(patch).not.toHaveProperty('performers');
     expect(patch).not.toHaveProperty('eligibility');
     expect(patch).not.toHaveProperty('eventStatus');
   });
@@ -94,9 +112,74 @@ describe('RTVE / Monumental ficha', () => {
     const patch = parseRtveDetail(await sample(slug), await fixture(`detail-${slug}`));
     expect(patch.occurrences).toHaveLength(1);
     expect(patch.occurrences![0]?.time).toMatch(/^\d{2}:\d{2}$/);
-    if (slug === 'traffic-strings') expect(patch.programText).toBeUndefined();
+    if (slug === 'traffic-strings' || slug === 'siempre-abba') expect(patch.programText).toBeUndefined();
     else expect(patch.programText).toBeTruthy();
     expect(patch.programText ?? '').not.toContain('Comprar entradas');
+    const canonical = canonicalizePerformerList(patch.performers ?? []);
+    expect(canonical.map((item) => `${item.name}|${item.role ?? ''}`)).toEqual([
+      ...new Set(canonical.map((item) => `${item.name}|${item.role ?? ''}`)),
+    ]);
+  });
+
+  it('extracts explicit Monumental credits for Fuego y Duende without mining programme titles', async () => {
+    const patch = parseRtveDetail(await sample('fuego-y-duende'), await fixture('detail-fuego-y-duende'));
+    expect(patch.performers).toEqual([
+      { name: 'Orquesta Sinfónica y Coro RTVE' },
+      { name: 'Marc Korovitch', roleText: 'director' },
+      { name: 'Juan Manuel Cañizares', roleText: 'guitarra' },
+      { name: 'Antonio Najarro', roleText: 'bailarín' },
+      { name: 'Bailarines de la compañía de Antonio Najarro' },
+    ]);
+    expect(patch.performers?.some((item) => /rimski|verdi|albéniz|falla|soutullo|vives|bizet/i.test(item.name))).toBe(
+      false,
+    );
+    expect(patch.programText).toContain('PROGRAMA');
+    expect(patch).not.toHaveProperty('composers');
+  });
+
+  it('keeps two observed voice credits for the same singer in Concierto Sinfónico B/2', async () => {
+    const patch = parseRtveDetail(await sample('concierto-sinfonico-b-2'), await fixture('detail-concierto-sinfonico-b-2'));
+    expect(patch.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Thomas Herzog', roleText: 'director' },
+      { name: 'Damián del Castillo', roleText: 'barítono' },
+      { name: 'Esmeralda Espinosa', roleText: 'mezzosoprano' },
+      { name: 'Ekaterina Antipova', roleText: 'alto' },
+      { name: 'Damián del Castillo', roleText: 'bajo' },
+    ]);
+  });
+
+  it('extracts the Gala de Ópera & Zarzuela orchestra, conductor and labelled singers', async () => {
+    const patch = parseRtveDetail(await sample('gala-de-opera-zarzuela'), await fixture('detail-gala-de-opera-zarzuela'));
+    expect(patch.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta y Coro RTVE' },
+        { name: 'Miquel Ortega', roleText: 'director' },
+        { name: 'Ana Lucrecia García', roleText: 'soprano' },
+        { name: 'Aquiles Machado', roleText: 'tenor' },
+        { name: 'José Bros', roleText: 'tenor' },
+        { name: 'Borja Quiza', roleText: 'barítono' },
+        { name: 'Mónica Redondo', roleText: 'mezzo' },
+      ]),
+    );
+    expect(patch.performers?.some((item) => /todos los cantantes/i.test(item.name))).toBe(false);
+    expect(patch.performers?.some((item) => /giordano|puccini|verdi|donizetti/i.test(item.name))).toBe(false);
+    expect(new Set(patch.performers?.map((item) => `${item.name}|${item.roleText ?? ''}`)).size).toBe(
+      patch.performers?.length,
+    );
+  });
+
+  it('does not treat unlabelled programme names or song titles as performers', async () => {
+    const abba = parseRtveDetail(await sample('siempre-abba'), await fixture('detail-siempre-abba'));
+    expect(abba.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Raúl Benavent', roleText: 'director' },
+    ]);
+    expect(abba.performers?.some((item) => /nogales|mallagarai|ambrosini|santos|chiquitita/i.test(item.name))).toBe(
+      false,
+    );
+    const empty = parseRtveDetail(await sample('traffic-strings'), await fixture('detail-traffic-strings'));
+    expect(empty.performers).toEqual([]);
   });
 
   it('prefers the full text over a read-more preview and excludes footer hours', async () => {
@@ -139,6 +222,24 @@ describe('RTVE pipeline safety', () => {
       },
     });
   }
+
+  it('publishes Concierto Sinfónico B/2 with one canonical credit for the doubled singer', async () => {
+    const first = await run(emptyCatalog(), false, TEST_WINDOW, 'concierto-sinfonico-b-2');
+    expect(first.summary.candidates).toBe(1);
+    const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
+    const event = catalog.events[0]!;
+    expect(event.title).toBe('Concierto Sinfónico B/2');
+    expect(event.performers).toEqual([
+      { name: 'Orquesta y Coro RTVE' },
+      { name: 'Thomas Herzog', role: 'conductor' },
+      { name: 'Damián del Castillo' },
+      { name: 'Esmeralda Espinosa' },
+      { name: 'Ekaterina Antipova' },
+    ]);
+    expect(event.performers.map((item) => item.name)).toEqual([
+      ...new Set(event.performers.map((item) => item.name)),
+    ]);
+  });
 
   it('publishes a classical concert with both dates, seeds provenance and venue, then remains idempotent', async () => {
     const first = await run();

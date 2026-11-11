@@ -1,5 +1,16 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
+import {
+  isUnreliableComposerName,
+  looksLikeCatalogOnlyLine,
+  looksLikeEnsembleName,
+  looksLikeMovementLine,
+  looksLikeNonWorkCredit,
+  looksLikeAdministrativeMetadata,
+  looksLikeRepertoireDescriptor,
+  looksLikeUnequivocalWorkLine,
+  looksLikeWorkLine,
+} from '../observed-cleanup.ts';
 import {
   emptyObservedLists,
   normalizeComposerList,
@@ -19,7 +30,18 @@ const LISTING_DATES = new RegExp(
 const TIME = /^(\d{1,2}):(\d{2})\s*horas?$/i;
 const ACCESS_ITEM =
   /reserva|entrada|acceso|gratuit|aforo|normas|cancel|eventbrite|si, hecha la reserva/i;
-const COMPOSER_YEARS = /\(\s*(?:ca\.?\s*)?\d{3,4}(?:\s*[–—-]\s*(?:ca\.?\s*)?\d{3,4})?\s*\)/g;
+const COMPOSER_YEARS =
+  /\(\s*(?:¿\??\s*[–—-]\s*)?(?:ca\.?|h\.?)?\s*\d{3,4}(?:\s*[–—-]\s*(?:ca\.?|h\.?)?\s*\d{3,4})?\s*\)/g;
+const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
+/** `X de <em>colección</em>` outside parens is a source, not a second work. */
+const SOURCE_PREPOSITION_TAIL = /(?:^|[\s,;:*])(?:de las|de los|de la|del|de)\s*$/iu;
+const WORK_FROM_CITATION = /^(?:de las|de los|de la|del|de)\s*$/iu;
+const QUOTE_CLOSE: Record<string, string> = { '“': '”', '«': '»', '"': '"' };
+const PUBLICATION_MARK =
+  /\b(?:Ms\.?|s\.f\.|vol\.?|Biblioteca|edici[oó]n(?:es)?|New Edition|edition)\b/iu;
+const PUBLICATION_PLACE =
+  /\b(?:Londres|London|Par[ií]s|Paris|Madrid|Boston|Nueva York|New York|La Habana|Oaxaca|M[eé]xico|Mexico|Viena|Vienna|Venecia|Amsterdam|Lisboa|Roma|Berl[ií]n|Leipzig)\b/iu;
+const PUBLICATION_YEAR = /\b(?:h\.?\s*)?(?:1[5-9]\d{2}|20\d{2})\b/u;
 
 /** The public REST API is authenticated-only. Ficha facts live in the custom
  * `wrapper-rcf` sidebar and Gutenberg blocks of `actividad_post_type`. */
@@ -229,25 +251,56 @@ function parseProgram(html: string): {
   const before = programHeading ? html.slice(0, programHeading.index) : html;
   const after = programHeading ? html.slice(programHeading.index + programHeading[0].length) : '';
   const performers = parsePerformers(before);
+  const programHtml = after || programmeTail(html);
   const composers: { name: string }[] = [];
   const works: { title: string; composerName?: string }[] = [];
   let composerName: string | undefined;
-  for (const paragraph of after.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+  let unattributedRepertoire = false;
+  let awaitingWork = false;
+  // Gutenberg may put several composer+work blocks in one <p>, split by <br>,
+  // or one composer per paragraph. Walk every segment in order so a later
+  // heading updates the active composer instead of inheriting the previous one.
+  for (const paragraph of programHtml.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    if (/\bnota-pie\b/i.test(paragraph[0]!)) continue;
     const raw = paragraph[1]!;
-    const text = stripTags(raw);
-    if (!text) continue;
-    const strong = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(raw)?.[1] ?? '').replace(COMPOSER_YEARS, '').trim();
-    if (strong) {
-      composerName = strong || undefined;
-      if (composerName) composers.push({ name: composerName });
-    }
-    for (const work of raw.matchAll(/<em\b[^>]*>([\s\S]*?)<\/em>/gi)) {
-      const title = stripTags(work[1]!);
-      if (title) works.push({ title, ...(composerName ? { composerName } : {}) });
+    if (!stripTags(raw)) continue;
+    for (const segment of programmeSegments(raw)) {
+      const text = stripTags(segment);
+      if (looksLikeRepertoireDescriptor(text)) {
+        composerName = undefined;
+        unattributedRepertoire = true;
+        awaitingWork = true;
+        continue;
+      }
+      const heading = composerHeadingFromSegment(segment);
+      if (heading) {
+        composerName = heading;
+        unattributedRepertoire = false;
+        awaitingWork = true;
+        composers.push({ name: heading });
+        continue;
+      }
+      if (looksLikeMovementLine(text) && !/<em\b/i.test(segment)) continue;
+      // An unrecognized bold heading or a credit terminates the previous
+      // composer's block. Keep the fact in programText, not as their work.
+      if (looksLikeNonWorkCredit(text) || looksLikeAdministrativeMetadata(text) ||
+          (/<strong\b/i.test(segment) && !/<em\b/i.test(segment)) ||
+          (!awaitingWork && !/<em\b/i.test(segment) && !/[«“"]/.test(text) &&
+            !looksLikeUnequivocalWorkLine(text) && !/\([^)]*\)/u.test(text))) {
+        composerName = undefined;
+        unattributedRepertoire = false;
+        awaitingWork = false;
+        continue;
+      }
+      if (!composerName && !unattributedRepertoire) continue;
+      for (const title of programmeTitlesFromLine(segment)) {
+        works.push({ title, ...(composerName ? { composerName } : {}) });
+        awaitingWork = false;
+      }
     }
   }
   const description = firstParagraphs(before);
-  const programText = stripTags(after) || undefined;
+  const programText = flattenHtmlBlocks(programHtml) || undefined;
   return {
     ...(description ? { description } : {}),
     ...(programText ? { programText } : {}),
@@ -257,12 +310,203 @@ function parseProgram(html: string): {
   };
 }
 
+function programmeTail(html: string): string {
+  for (const paragraph of html.matchAll(/<p\b[^>]*>[\s\S]*?<\/p>/gi)) {
+    if (paragraph.index === undefined) continue;
+    if (composerHeadingFromParagraph(paragraph[0]!)) return html.slice(paragraph.index);
+  }
+  return '';
+}
+
+function programmeSegments(html: string): string[] {
+  return html.split(/<br\s*\/?>/i).filter((part) => stripTags(part));
+}
+
+function composerHeadingFromParagraph(html: string): string | undefined {
+  return composerHeadingFromSegment(programmeSegments(html)[0] ?? '');
+}
+
+function composerHeadingFromSegment(html: string): string | undefined {
+  const text = stripTags(html);
+  if (!text) return undefined;
+  const cleaned = stripEditorialAsterisks(text);
+  if (looksLikeNonWorkCredit(cleaned)) return undefined;
+  if (!hasComposerYears(cleaned) && !hasComposerYears(text)) return undefined;
+  const name = stripEditorialAsterisks(collapseComposerHeading(cleaned));
+  if (!name || isUnreliableComposerName(name) || !looksLikeCompleteComposerName(name)) return undefined;
+  return name;
+}
+
+function stripEditorialAsterisks(text: string): string {
+  return text.replace(/^\*+\s*/u, '').replace(/\s*\*+\s*$/u, '');
+}
+
+function hasComposerYears(text: string): boolean {
+  return new RegExp(COMPOSER_YEARS.source, 'u').test(text);
+}
+
+function collapseComposerHeading(line: string): string {
+  return line.replace(new RegExp(COMPOSER_YEARS.source, 'gu'), '').replace(/[.,;:]+$/u, '').trim();
+}
+
+function looksLikeCompleteComposerName(name: string): boolean {
+  const words = name.split(/\s+/).filter(Boolean);
+  const content = words.filter((word) => !NAME_PARTICLE.test(word));
+  if (content.length < 2 || content.length > 8) return false;
+  return words.every((word, index) => {
+    if (NAME_PARTICLE.test(word) && index > 0) return true;
+    return /^[\p{Lu}\p{Lt}][\p{L}.'’\-]*$/u.test(word) || /^[dD][’'][\p{Lu}\p{Lt}]/u.test(word);
+  });
+}
+
+/**
+ * Programme items after a composer heading. RABASF mixes three conventions:
+ * italic work titles, typographic quotes, and a plain line before a
+ * bibliographic parenthetical. Italics after `de`/`del`/`de la` at depth 0
+ * name the collection or book, not a second performed work. Italics inside
+ * a parenthetical are kept only when they name the work (`del Cuarteto…`).
+ * Publication citations stay in programText.
+ */
+function programmeTitlesFromLine(html: string): string[] {
+  if (!stripTags(html)) return [];
+  const quoted = quotedTitlesOutsideParens(html).flatMap(usableWorkTitle);
+  const italics = italicProgrammeTitles(html).flatMap(usableWorkTitle);
+  if (quoted.length > 0 || italics.length > 0) return [...quoted, ...italics];
+  const fallback = usableWorkTitle(stripTrailingBibliographicParens(stripTags(html)))[0];
+  return fallback ? [fallback] : [];
+}
+
+function quotedTitlesOutsideParens(html: string): string[] {
+  const text = stripTags(html);
+  const titles: string[] = [];
+  let depth = 0;
+  let index = 0;
+  while (index < text.length) {
+    const char = text[index]!;
+    if (char === '(') {
+      depth += 1;
+      index += 1;
+      continue;
+    }
+    if (char === ')') {
+      depth -= 1;
+      index += 1;
+      continue;
+    }
+    const close = QUOTE_CLOSE[char];
+    if (!close || depth > 0) {
+      index += 1;
+      continue;
+    }
+    const end = text.indexOf(close, index + 1);
+    if (end < 0) {
+      index += 1;
+      continue;
+    }
+    const title = collapseWhitespace(text.slice(index + 1, end));
+    if (title) titles.push(title);
+    index = end + 1;
+  }
+  return titles;
+}
+
+function italicProgrammeTitles(html: string): string[] {
+  const titles: string[] = [];
+  let depth = 0;
+  let sinceParen = '';
+  let index = 0;
+  while (index < html.length) {
+    const open = /<em\b[^>]*>/i.exec(html.slice(index));
+    const next = open?.index !== undefined ? index + open.index : html.length;
+    const between = stripTags(html.slice(index, next));
+    ({ depth, sinceParen } = consumeParens(between, depth, sinceParen));
+    if (open?.index === undefined) break;
+    const innerStart = next + open[0].length;
+    const close = /<\/em>/i.exec(html.slice(innerStart));
+    if (close?.index === undefined) break;
+    const title = stripTags(html.slice(innerStart, innerStart + close.index));
+    const workFromCitation = WORK_FROM_CITATION.test(sinceParen);
+    const collectionSource = depth <= 0 && SOURCE_PREPOSITION_TAIL.test(between);
+    if (title && !/^\(/.test(title) && (depth <= 0 || workFromCitation) && !collectionSource) {
+      titles.push(title);
+    }
+    ({ depth, sinceParen } = consumeParens(title, depth, sinceParen));
+    index = innerStart + close.index + close[0].length;
+  }
+  return titles;
+}
+
+function usableWorkTitle(title: string): string[] {
+  const cleaned = cleanProgrammeTitle(title);
+  if (!cleaned || cleaned.length < 3 || /^\(/.test(cleaned)) return [];
+  if (composerHeadingFromSegment(cleaned)) return [];
+  if (looksLikeCatalogOnlyLine(cleaned) || looksLikeMovementLine(cleaned)) return [];
+  if (isBibliographicCitation(cleaned) || !looksLikeWorkLine(cleaned)) return [];
+  return [cleaned];
+}
+
+function cleanProgrammeTitle(title: string): string {
+  return collapseWhitespace(
+    title.replace(/\*+\s*$/u, '').replace(/\s*\[(?:selecci[oó]n|texto de [^\]]+)\]/giu, ''),
+  ).replace(/[.,;:]+$/u, '');
+}
+
+function stripTrailingBibliographicParens(text: string): string {
+  let result = collapseWhitespace(text);
+  while (result.endsWith(')')) {
+    let depth = 0;
+    let start = -1;
+    for (let index = result.length - 1; index >= 0; index -= 1) {
+      const char = result[index];
+      if (char === ')') depth += 1;
+      else if (char === '(') {
+        depth -= 1;
+        if (depth === 0) {
+          start = index;
+          break;
+        }
+      }
+    }
+    if (start < 0) break;
+    const inner = result.slice(start + 1, -1);
+    if (!isBibliographicCitation(inner)) break;
+    result = collapseWhitespace(result.slice(0, start));
+  }
+  return result;
+}
+
+function isBibliographicCitation(text: string): boolean {
+  const inner = collapseWhitespace(text.replace(/^[()]+|[()]+$/gu, ''));
+  if (!inner) return false;
+  if (PUBLICATION_MARK.test(inner)) return true;
+  return PUBLICATION_YEAR.test(inner) && PUBLICATION_PLACE.test(inner);
+}
+
+function consumeParens(
+  text: string,
+  depth: number,
+  sinceParen: string,
+): { depth: number; sinceParen: string } {
+  for (const char of text) {
+    if (char === '(') {
+      depth += 1;
+      sinceParen = '';
+    } else if (char === ')') {
+      depth -= 1;
+      sinceParen = '';
+    } else if (depth > 0) {
+      sinceParen += char;
+    }
+  }
+  return { depth, sinceParen };
+}
+
 function parsePerformers(html: string): { name: string; roleText?: string }[] {
   const performers: { name: string; roleText?: string }[] = [];
   for (const heading of html.matchAll(/<h4\b[^>]*>([\s\S]*?)<\/h4>/gi)) {
     const label = stripTags(heading[1]!);
     if (!label || /^programa$/i.test(label)) continue;
-    if (!/^int[eé]rpretes?$/i.test(label)) performers.push({ name: label });
+    if (looksLikeEnsembleName(label)) performers.push({ name: label });
     const rest = html.slice(heading.index! + heading[0].length);
     const until = /<h4\b/i.exec(rest);
     const block = until ? rest.slice(0, until.index) : rest;
@@ -270,10 +514,14 @@ function parsePerformers(html: string): { name: string; roleText?: string }[] {
       performers.push(...credits(paragraph[1]!));
     }
   }
+  for (const row of html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)) {
+    performers.push(...creditsFromTableRow(row[1]!));
+  }
   return performers;
 }
 
 function credits(html: string): { name: string; roleText?: string }[] {
+  if (composerHeadingFromParagraph(html)) return [];
   const items: { name: string; roleText?: string }[] = [];
   for (const chunk of html.split(/<br\s*\/?>/i)) {
     const name = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(chunk)?.[1] ?? '').replace(/,$/, '');
@@ -281,6 +529,17 @@ function credits(html: string): { name: string; roleText?: string }[] {
     if (name) items.push({ name, ...(roleText ? { roleText } : {}) });
   }
   return items;
+}
+
+function creditsFromTableRow(html: string): { name: string; roleText?: string }[] {
+  const cells = [...html.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map((cell) => cell[1]!);
+  if (!cells[0]) return [];
+  const name = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(cells[0])?.[1] ?? '').replace(/,$/, '');
+  const roleText = cells[1]
+    ? stripTags(/<em\b[^>]*>([\s\S]*?)<\/em>/i.exec(cells[1])?.[1] ?? '') || undefined
+    : undefined;
+  if (!name) return [];
+  return [{ name, ...(roleText ? { roleText } : {}) }];
 }
 
 function firstParagraphs(html: string): string | undefined {

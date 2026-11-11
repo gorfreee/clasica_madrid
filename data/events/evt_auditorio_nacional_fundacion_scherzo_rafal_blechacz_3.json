@@ -28,7 +28,7 @@
       "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Fryderyk Chopin"
+      "name": "Frédéric Chopin"
     }
   ],
   "works": [
@@ -46,15 +46,15 @@
     },
     {
       "title": "Cuatro mazurcas, Op. 33",
-      "composerName": "Fryderyk Chopin"
+      "composerName": "Frédéric Chopin"
     },
     {
       "title": "Scherzo n.º 1 en si menor, Op. 20",
-      "composerName": "Fryderyk Chopin"
+      "composerName": "Frédéric Chopin"
     },
     {
       "title": "Sonata para piano n.º 2 en si bemol menor, Op. 35",
-      "composerName": "Fryderyk Chopin"
+      "composerName": "Frédéric Chopin"
     }
   ],
   "eras": [
@@ -71,10 +71,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-rafal-blechacz-3",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-24",
       "externalId": "fundacion-scherzo-rafal-blechacz-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-24"
 }

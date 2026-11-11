@@ -4,48 +4,111 @@ Puerta de entrada operativa: qué hay implementado y cómo ejecutarlo.
 
 | Qué necesitas | Dónde |
 |---|---|
-| Diseño objetivo (hacia dónde evolucionar) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
+| Diseño objetivo / capacidades pendientes | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Política editorial de clasificación | [`docs/classification-policy.md`](classification-policy.md) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Código del pipeline | `src/ingestion/` |
 | Registry de fuentes | `src/ingestion/registry.ts` |
 | Prompt del fallback de IA | `src/ingestion/classification/ai-prompt.ts` |
 | Golden evaluation set | `tests/fixtures/ingestion/golden/` |
+| Qualification benchmark (calidad de models, no smoke) | `tests/fixtures/ingestion/ai-qualification/` · `npm run ai:qualify` |
+| Discovery: playbook para un agente externo | [`run-discovery-agent.md`](run-discovery-agent.md) |
+| Discovery: pistas de búsqueda (no es un registry) | [`discovery-search-hints.md`](discovery-search-hints.md) |
 | Variables de entorno de IA | `.env.example` |
+| Pool gratuito multi-provider y setup | [`ai-providers.md`](ai-providers.md) |
 | Histórico (no es requisito vigente) | [`docs/archive/`](archive/) |
 
 La web no escribe datos. Todo lo publicado entra por Git, pasa validación determinista y CI, y entonces se fusiona.
 
 ## Qué hay implementado
 
-Harvesting de fuentes conocidas y automatización de producción (fases 1–4 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
+Harvesting de fuentes conocidas y automatización de producción: extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
 
-Discovery v1 (fase 6, dos piezas): un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados y el mismo pipeline lo normaliza, clasifica y reconcilia. No hay búsqueda web, scheduling ni promoción a adapters dentro de esta repo.
+Discovery v1: un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados. El mismo pipeline lo normaliza, clasifica y reconcilia. Un workflow manual de GitHub Actions (`Manual discovery`) importa ese batch usando **código de `main`** y el AI pool de producción. No hay búsqueda web dentro de esta repo, ni scheduling de Discovery, ni promoción a adapters.
 
 ```text
-registry → extract → hydrate → normalize → identity → classify → publication gate → reconcile → validate → write
+registry → extract → hydrate → normalize → deterministic enrich → identity → classify/enrich → publication gate → reconcile → validate → write
 ```
 
-- Un fallo de listing aísla esa fuente; el resto continúa. Teatros Canal y Fundación Canal reintentan una vez el listing ante errores transitorios de transporte (`fetch failed`, timeout, HTTP 408/429/5xx). En Zarzuela, un fallo HTTP persistente de una sección de temporada no descarta las demás: se hidratan las secciones disponibles y no se evalúan desapariciones. Las fichas de lírica, teatro musical de cámara, danza y nuevos públicos se hidratan antes que conciertos y lied, de modo que un circuito 403 no se come la temporada.
-- Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing.
-- La incorporación de March y el acceso HTTP vía fetch relay están en [validación de March](march-validation.md). GitHub-hosted Actions no alcanza de forma fiable `www.march.es`, `teatrodelazarzuela.inaem.gob.es` ni `auditorionacional.inaem.gob.es` en directo; `cndm.inaem.gob.es` y `realhermandaddelrefugio.org` usan el mismo relay. `getText` sale por un fetch relay de Cloudflare (`vars.INGEST_FETCH_RELAY_URL` / `INGEST_FETCH_RELAY_TOKEN`) sólo para fuentes con `useFetchRelay` en el registry. Las URLs lógicas siguen siendo las oficiales. Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
-- En CNDM, un fallo HTTP persistente de un mes no descarta los demás: se conservan los meses disponibles y no se evalúan desapariciones.
-- En Zarzuela, las fichas son necesarias para el calendario y la sede: una cobertura severamente incompleta también marca fallo de source (etapa `hydration`), bloqueando auto-merge. Cualquier ficha necesaria fallida/no solicitada por circuito suprime las desapariciones de esa source; el report y el summary explicitan que no son evaluables. Las fechas del listing sólo sirven como hint para evitar hidratar obras enteramente fuera de ventana, nunca para generar funciones. Véase [validación del hardening de Zarzuela](zarzuela-hardening-validation.md).
-- Clasificación: reglas deterministas y knowledge. El fallback de IA **sólo** decide eligibility si el determinista deja `uncertain`; un `include` o `exclude` determinista no se reabre. Si el resultado final es `include` y `eras`/`formats` siguen sin resolver, una segunda llamada puede completar esa taxonomía sin cambiar eligibility. Una respuesta de taxonomía sin `formats` no cuenta como resolución del formato: se reutiliza el fallback de modelos. Si tras reglas, IA y fallback sigue vacío, el evento permanece publicable y health registra `unresolved-taxonomy`. Un fallo técnico de taxonomía conserva el include.
-- Identidad (sin fuzzy ni IA): `externalId` de la misma source → URL equivalente → alias explícito → coincidencia fuerte única (fecha, venue, título normalizado o equivalencia source-specific de título). Si eso no basta, un hueco exclusivo de sala precisa + fecha + hora explícitas se compara con hechos musicales (obra, intérprete, compositor + título): coincidencia → misma identidad; hechos incompatibles → `ambiguous` (`schedule-conflict`); evidencia insuficiente → no se fusiona. Un lugar principal con salas hijas no es un hueco exclusivo. Varios eventos publicados que comparten esa URL o `externalId` se tratan como una observación 1→N: se reparte el calendario si las fechas no solapan; si no hay asignación inequívoca se marcan todos como vistos sin escribir occurrences no asignables. `ambiguous` queda para colisiones reales (p. ej. coincidencia fuerte hacia eventos distintos, fechas solapadas, o conflicto de programación en el mismo hueco): no se crea ni se modifica.
-- Publicación de eventos **nuevos**: sólo `include` se convierte en Candidate. `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con los descartes estructurales. La fecha definitiva después de hidratar la ficha debe quedar dentro de la ventana de esa ejecución (por defecto hoy en Europe/Madrid → +120 días); si el listing parecía estar dentro y el detail produce una fecha fuera, es `fuera de ventana` y no se crea Candidate. Una ventana manual (`--from`/`--to`) no crea eventos históricos: la fecha sigue teniendo que ser ≥ hoy.
+- Un `IncompleteListingError` sigue siendo un fallo técnico: conserva las observaciones válidas, suprime desapariciones y conserva el motivo en `sourcesFailed`; nunca permite auto-merge. La cobertura exclusivamente temporal se declara por separado, tras validar el listado (véase abajo). Sin fuentes realmente utilizables para la ventana, harvesting sigue siendo `fatal`, aunque haya respuestas HTTP correctas.
+- Un fallo de listing aísla esa fuente; el resto continúa. CNDM reintenta una vez cada mes ante errores transitorios antes de aislarlo; un mes no disponible mantiene URL y motivo HTTP en el diagnóstico. El calendario se valida incluso después de recuperar el transporte. Teatros Canal y Fundación Canal reintentan una vez el listing ante errores transitorios de transporte (`fetch failed`, timeout, HTTP 408/429/5xx). En Zarzuela, un fallo HTTP persistente de una sección de temporada no descarta las demás: se hidratan las secciones disponibles y no se evalúan desapariciones. Las fichas de lírica, teatro musical de cámara, danza y nuevos públicos se hidratan antes que conciertos y lied. Listing e hydration de Zarzuela comparten el pacing/cooldown del origen (`teatrodelazarzuela.inaem.gob.es`); el circuito cuenta fichas distintas que siguen bloqueadas tras la política de recuperación, no cada intento HTTP. Refugio lee primero el archivo oficial `/categoria-eventos/conciertos/` (directo, y el fetch relay sólo si ese hop se bloquea); las fichas enriquecen y un fallo de ficha no tumba un concierto cuyo calendario ya estaba en el listing.
+- Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing. Refugio requiere cobertura de fichas para observaciones REST, que no exponen los campos JetEngine de fecha/lugar; un fallo suprime desapariciones y una cobertura severamente incompleta marca fallo de fuente. Las tarjetas HTML con calendario propio siguen siendo utilizables aunque falle su ficha.
+- Un adapter puede descartar un candidato ya reconocido (p. ej. Madrid Datos: recurrence no soportada, falta título/URL/id/fecha/lugar; CNDM: sede fuera de Madrid; Madrid a Tempo: fecha de listing anterior a la ventana). Esos descartes son diagnóstico (`adapterDiscards` en el summary, lista en `report.json` y, si hay observabilidad, journal `adapter-discard`): no cambian eligibility, health ni publicación. No se cuentan objetos fuera de ámbito (p. ej. exposiciones en Madrid Datos, índices de ciclo). La hora ausente en Madrid Datos ya no descarta: la occurrence conserva la fecha y `time` queda `null`.
+- Madrid a Tempo: sólo el feed oficial Wix Blog `ALL_POSTS` con request/metadata y `pagingMetaData` coherentes demuestra cobertura del listing. Un `wix-warmup-data: {}` con HTTP 200 es un shell SSR sin agenda: se intenta una única recuperación con `cm_listing_retry=1`, validando la misma página. Si sigue incompleto o falla una página posterior por HTTP, se conservan las observaciones de páginas ya verificadas mediante `IncompleteListingError`, la source queda fallida y se suprimen desapariciones. No se acepta HTML arbitrario como agenda vacía; contradicciones estructurales siguen siendo errores. Evidencia y dry-run: [fixtures Madrid a Tempo](../tests/fixtures/ingestion/madrid-a-tempo/README.md#production-run-38532659060-regression--captured-live-2026-10-14).
+- Reina Sofía: las tarjetas válidas se conservan mediante `IncompleteListingError` cuando la paginación no acredita cobertura (incluido su bloque vacío). No se infiere una única página por ausencia de enlaces ni por pocas tarjetas; sigue siendo un fallo técnico, con desapariciones suprimidas. Un fallo posterior conserva las páginas ya verificadas. [Evidencia del 01/11/2026](../tests/fixtures/ingestion/escuela-reina-sofia/README.md#regression-396--captured-2026-11-01).
+- San Lorenzo: sólo la vista indicada por `mecListView` aporta tarjetas y señales de paginación/vacío. Las URLs oficiales admiten slugs Unicode y percent-encoding válido, con validación de origen y de un único segmento de ruta antes de resolverlo; se normalizan a NFC y percent-encoding estable. Un fallo de página posterior conserva progreso validado sin permitir desapariciones ni auto-merge. No se ignoran artículos reales incompletos. [Fixtures y dry-runs](../tests/fixtures/ingestion/ayto-san-lorenzo/README.md).
+- Fundación Eutherpe lee la página oficial del ciclo Shigeru Kawai de Madrid, que también incrusta el calendario de León. Sólo las etiquetas visibles de sede/ciclo de cada concierto acreditan Madrid; se ignoran los placeholders ocultos de Webflow. Valida meses completos y directorio antes de filtrar; las tarjetas sin año dependen de la ficha y usan la protección común de cobertura de hidratación. Los seis alias CMS comprobados se agrupan sólo con calendario/sede compatibles; el programa se extrae por filas autor–obras, sin biografías. [Casos reales, aliases y dry-run](../tests/fixtures/ingestion/eutherpe/README.md).
+- Madrid Datos: un facility municipal nuevo sólo se publica si el listing trae dirección física (`address.area`). El `id` es `ven_md_fac_{facilityId}` (estable). El slug público de un alta nueva se deriva del nombre; el facility id sólo se añade si hay colisión. Los slugs ya publicados no se renombran (Venue no tiene `slugAliases`). Un venue ya en el catálogo no se sobrescribe con la forma autoformateada del listing.
+- GitHub-hosted Actions no alcanza de forma fiable `www.march.es`, `teatrodelazarzuela.inaem.gob.es` ni `auditorionacional.inaem.gob.es` en directo; `cndm.inaem.gob.es` usa el mismo relay como primer transporte y prueba el origen directo una vez si ese hop falla de forma recuperable; ambos hops conservan URL, status y duración. `getText` sale por un fetch relay de Cloudflare (`vars.INGEST_FETCH_RELAY_URL` / `INGEST_FETCH_RELAY_TOKEN`) sólo para fuentes con `useFetchRelay` en el registry. Refugio no usa el relay: un GET HTTP directo del archivo oficial y, si SiteGround responde 202/captcha, Chrome headless del runner. Si ambos están bloqueados, se consulta el REST oficial de WordPress filtrado por categoría de conciertos, con envelope de totales, paginación e identidades validadas. Un archivo JetEngine vacío sin totales exige corroboración REST directamente. Chrome espera tanto el grid paginado como el estado `jet-listing-not-found`; este último no prueba cobertura. REST reintenta una vez errores transitorios y exige siempre totales, paginación e identidades coherentes. Las fichas individuales reutilizan ese mismo fallback HTTP→Chrome. Las URLs lógicas siguen siendo las oficiales. Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas. La evidencia original del relay de March está en [`docs/archive/march-validation.md`](archive/march-validation.md).
+- En CNDM, la homepage es un seed sintáctico: no se pide por HTTP. Cada mes de la ventana se solicita dentro de `extract()`; un fallo HTTP persistente de un mes no descarta los demás, se conservan los meses disponibles y no se evalúan desapariciones.
+- En Zarzuela, las fichas son necesarias para el calendario y la sede: una cobertura severamente incompleta también marca fallo de source (etapa `hydration`), bloqueando auto-merge. Cualquier ficha necesaria fallida/no solicitada por circuito suprime las desapariciones de esa source; el report y el summary explicitan que no son evaluables. Los rangos del listing sólo sirven como hint para evitar hidratar obras enteramente fuera de ventana, nunca para generar funciones. Una ficha K2 válida sin calendario propio aporta sus metadatos y conserva cualquier calendario explícito del listing; sin fechas explícitas, la cobertura sigue incompleta. Las notas reconocidas sobre emisiones de Radio Clásica no forman parte del calendario. La evidencia original está en [`docs/archive/zarzuela-hardening-validation.md`](archive/zarzuela-hardening-validation.md).
+- Clasificación/enrichment: reglas deterministas y knowledge siempre preceden a la IA, pero no como un simple «si el determinista falla, IA». Se usa determinismo cuando la respuesta es prácticamente inequívoca y IA cuando hace falta interpretar. Los purposes son `eligibility`, `composer-extraction`, `access-classification` y `taxonomy`, cada uno con schema e input propios. Eligibility sólo usa IA si el determinista deja `uncertain`; un `include` o `exclude` determinista no se reabre. En un `include`, composers y access sólo usan fallback si siguen sin resolver y existe texto observado suficiente. Después se recalculan `eras` por knowledge a partir de compositores/obras observados. Taxonomy puede completar `formats` unresolved, corregir heurísticas débiles de formato, y completar `eras` de repertorio observado que la knowledge no resuelve; no reabre eligibility ni pisa una era determinista fuerte. Una respuesta de taxonomía sin `formats` no cuenta como resolución del formato cuando se pedían: se reutiliza el fallback de modelos. Los vacíos/`unknown` siguen siendo resultados válidos y cualquier fallo técnico conserva el include y los valores deterministas.
+- Identidad (sin fuzzy ni IA): `externalId` de la misma source → URL de **ficha** equivalente (no una agenda/listado reutilizable) → alias explícito → coincidencia fuerte única (fecha, venue, título normalizado o equivalencia source-specific de título). Una URL genérica (`/agenda`, `/eventos`, homepage, …) se cita como evidencia pero no fusiona eventos distintos. El id de un evento nuevo sin `externalId` y con URL de listing se deriva de título + fecha (+ venue observado), de forma determinista. Si la URL no basta, un hueco exclusivo de sala precisa + fecha + hora explícitas se compara con hechos musicales (obra, intérprete, compositor + título): coincidencia → misma identidad; hechos incompatibles → `ambiguous` (`schedule-conflict`); evidencia insuficiente en ese mismo hueco → `ambiguous` (`schedule-review`), sin candidato nuevo. Un lugar principal con salas hijas no es un hueco exclusivo. Varios eventos publicados que comparten una URL de ficha o `externalId` se tratan como una observación 1→N: se reparte el calendario si las fechas no solapan; si no hay asignación inequívoca se marcan todos como vistos sin escribir occurrences no asignables. `ambiguous` queda para colisiones reales (p. ej. coincidencia fuerte hacia eventos distintos, fechas solapadas, conflicto de programación o revisión de hueco exclusivo): no se crea ni se modifica.
+- Publicación de eventos **nuevos**: sólo `include` se convierte en Candidate. `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con los descartes estructurales. La fecha definitiva después de hidratar la ficha debe quedar dentro de la ventana de esa ejecución (por defecto hoy en Europe/Madrid → +120 días); si el listing parecía estar dentro y el detail produce una fecha fuera, es `fuera de ventana` y no se crea Candidate. Una ventana manual (`--from`/`--to`) no crea eventos históricos: la fecha sigue teniendo que ser ≥ hoy. `composers[]` y `works[].composerName` se canonicalizan en esa frontera (`toCandidate`; las actualizaciones, en `proposalFromObservation`): alias conocidos → `COMPOSERS.canonicalName`, sin anotación vital, sin atribuciones que no son persona. Los parsers pueden seguir usando `(1685-1750)` como señal de encabezado.
 - Eventos **ya publicados**: se conservan `id` y `slug`. Una reclasificación posterior `exclude`/`uncertain` editorial no despublica; se registra como `classificationDrift`. Un `uncertain` por error técnico de IA (`ai-error`, timeout, rate-limit, output inválido, deferred o equivalente) no es drift: el caso queda `degraded`. Los hechos objetivos de la fuente (fecha, venue, status, citas, `lastVerifiedAt`) sí pueden actualizarse, incluida una reprogramación explícita fuera de la ventana.
-- Merge de eventos publicados: `status`, `occurrences`, `venueId` (si hay match explícito) y citas se actualizan. `title`, `kind`, `eras`/`formats`, `performers`/`composers`/`works` se conservan si ya hay valor canónico; un incoming no vacío no sustituye esa información. `eras`/`formats` vacíos en el catálogo sí pueden rellenarse. Ante conflicto se preserva el valor publicado por completo. Un título solo tipográficamente equivalente no se considera desacuerdo. `organizerIds: []`, `seriesId: null` o `access: unknown` no borran. El desacuerdo se registra en `mergeDiagnostics` del report, no se aplica.
-- Cancelación/aplazamiento: un evento nuevo ya cancelado no se crea; uno existente se actualiza. Un aplazamiento de una única representación conserva el occurrence ID.
+- Calendarios de un evento: `calendarEvidence` es metadata interna (no cambia Event ni llega al clasificador). Sin ella, una observación es parcial: ni `dateFromDetail`, ni `checkedAt`, ni el orden de las fuentes autorizan a retirar funciones por ausencia. `complete: {from,to}` acredita un intervalo civil inclusivo concreto; sólo puede sustituir funciones futuras dentro de ese intervalo. `changes: [{from,to}]` acredita correspondencias explícitas de una función; el origen puede omitir la hora sólo cuando selecciona una única función publicada. Se reservan primero los IDs exactos; un cambio de hora bajo calendario completo conserva el ID sólo con correspondencia única en ese día. No se emparejan fechas distintas por posición, proximidad ni cardinalidad. Si hay varias asignaciones posibles, se retiene el evento publicado y se requiere revisión. Los históricos y fechas fuera del alcance se conservan; `possiblyMissing` sigue siendo diagnóstico. Las observaciones de fuentes distintas necesitan un calendario observado que acredite su conjunto, y una discrepancia con un calendario completo o traslado explícito se retiene para revisión. En observaciones 1→N se retira la autoridad de sustitución antes de aplicar cada partición.
+- March declara el intervalo mínimo–máximo de las funciones de su URL canónica sólo tras validar todo el bloque visible y corroborar fechas/número de sesiones con JSON-LD (se conserva la regla existente de hora de concierto frente a entrevista). Teatro Real lee la tabla completa `functions-show` y aplica su aviso singular de adelanto con origen y destino dentro del contexto de esa obra; sólo el traslado explícito retira la función antigua, no la ausencia en la tabla. Un aviso no asignable se retiene como `source-conflict`. El parser genérico de aplazamientos permanece acotado; sus aplazamientos singulares acreditados conservan la compatibilidad 1→1. Las regresiones con HTML oficial y catálogo previo están en `tests/fixtures/ingestion/calendar-updates-20261101/`.
+- Merge de eventos publicados: `status`, `occurrences`, `venueId` (si hay match explícito) y citas se actualizan. `title`, `kind` y `eras`/`formats` se conservan si ya hay valor canónico; un incoming no vacío no sustituye esa información. `eras`/`formats` vacíos en el catálogo sí pueden rellenarse. `performers`, `composers` y `works` crecen de forma **monotónica**: una observación posterior puede añadir elementos sólo si es un superconjunto compatible de lo ya publicado (toda la identidad canónica —nombre, compositor conocido o título normalizado— sigue presente). Los elementos publicados conservan su orden; los nuevos se añaden al final en el orden de la fuente. Un performer existente puede seguir ganando `role` y una obra `composerName` cuando antes faltaban. Una observación más pobre, incompleta o en conflicto no elimina ni sustituye identidades canónicas. Ante conflicto de título/kind/taxonomía se preserva el valor publicado por completo. Un título solo tipográficamente equivalente no se considera desacuerdo. `organizerIds: []`, `seriesId: null` o `access: unknown` no borran. El desacuerdo se registra en `mergeDiagnostics` del report, no se aplica.
+- Precisión del calendario: la unión de observaciones conserva la evidencia sin hora hasta cerrar el grupo, respetando la autoridad del detalle. Antes de asignar occurrence IDs, una fecha sin hora corrobora una única hora explícita de esa misma fecha. Si existen varias sesiones acreditadas, esa observación sólo corrobora el evento: no crea una función adicional ni recibe arbitrariamente una hora. En actualizaciones, el calendario publicado puede aportar precisión para la misma fecha. Si un ID publicado sin hora no puede vincularse inequívocamente a varias sesiones nuevas, el evento queda `ambiguous` (`schedule-review`) sin cambios. Horarios explícitos distintos de varias fuentes sólo se tratan como sesiones separadas cuando un calendario observado o el calendario publicado acredita el conjunto; en caso contrario, se retienen como `schedule-conflict` para revisión. Las observaciones originales y sus discrepancias permanecen en el report.
+- Cancelación/aplazamiento: un evento nuevo ya cancelado no se crea; uno existente se actualiza. Un aplazamiento de una única representación conserva el occurrence ID. La hora de la fecha original no se traslada a una nueva fecha sin evidencia para esa fecha.
 - Desapariciones: `possiblyMissing` es sólo diagnóstico. Requiere source sana, evento futuro dentro de la ventana de esa ejecución y ningún match. Una source fallida no marca sus eventos. Los históricos no desaparecen.
-- Deduplicación del lote: varias observaciones de la misma identidad se combinan; un conflicto material irresoluble no se escribe.
+- Deduplicación del lote: varias observaciones de la misma source y la misma identidad se combinan y cuentan como `batchDuplicates` (health `review`). Observaciones **compatibles de distintas `catalogSourceId`** que se reconcilian inequívocamente con el mismo Event son corroboración cross-source: se fusionan, conservan las citas de ambas fuentes, incrementan `crossSourceCorroborations` y **no** disparan `batch-duplicates`. Un conflicto material irresoluble no se escribe.
 - Escritura atómica de creates y updates. Un fallo de prepare o commit restaura byte a byte cualquier archivo ya sustituido y no deja archivos nuevos a medias.
-- Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` se trata como `unchanged` y **no** reescribe el JSON. La frescura queda en el report (`unchangedEvents`, `window`, `health`). Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales.
+- Identidad de páginas aparentemente individuales: una URL de ficha o un `externalId` localizan candidatos, pero no prueban equivalencia por sí solos. Para cualquier fuente se contrastan calendario, lugar, título e identidad musical (intérpretes/obras explícitos y señales del título). Fechas y sedes distintas acreditan actuaciones independientes; una continuidad plausible en otra fecha sin aviso de aplazamiento ni calendario solapado queda en `source-identity-review`. `dateFromDetail` por sí solo no prueba una reprogramación en fuentes sin política específica. Se conservan los avisos explícitos de aplazamiento, la precisión de sala padre→hija y el reparto 1→N de funciones publicadas. En un lote nuevo se contrastan las mismas pistas antes de agrupar; no hay una key de deduplicación universal basada sólo en `externalId`.
+- Contrato de publicación: `reconcileHarvest()` emite un `publicationPlan` por ID canónico (`new` / `updated` / `unchanged`). La aplicación respeta esos IDs y no vuelve a resolver la identidad de los candidatos reconciliados. Antes del I/O, `validatePublicationIntegrity()` comprueba destinos, candidatos y escrituras materiales; corroboraciones y reverificaciones sin cambios no requieren fichero. Una discrepancia bloquea atómicamente el lote, devuelve cero altas/actualizaciones aplicadas, aparece como `publication-integrity` en los logs y `report.json.publicationIssues`, y hace el health `fatal` (sin auto-merge). Los callers antiguos sin plan deben reconciliar una colisión explícitamente: ya no pueden descartarla como `unchanged`.
+- Fuentes con identidades reciclables: `src_ayuntamiento_madrid` está declarada explícitamente en `src/ingestion/source-identity-policy.ts`; el resto utiliza la comprobación general de evidencia descrita arriba. Para estas fuentes, un `externalId`, `vgnextoid`, URL de ficha o alias sólo localiza candidatos: se comprueban fecha/hora, lugar, título y hechos musicales antes de reconciliar. Un mismo hueco/lugar corrobora títulos municipales de categoría si no hay hechos musicales explícitos incompatibles. Cambios de hora en la misma fecha requieren continuidad; cambios de fecha/lugar requieren además evidencia de corrección de ficha (`dateFromDetail`) o aplazamiento. Una continuidad plausible sin esa evidencia queda en `source-identity-review`; hechos incompatibles descartan la identidad de fuente y permiten buscar el evento canónico por otros métodos o crear uno nuevo, sujeto a las mismas puertas de clasificación/publicación y validación. Entre varios propietarios históricos se prefiere el compatible con el calendario observado; una cancelación no se propaga a propietarios sin occurrences asignadas. No hay alias municipal eterno ni keys de deduplicación de batch basadas únicamente en el ID reciclable: las keys incluyen los hechos de la observación, y se revisan conflictos musicales dentro del grupo. Las citations históricas siguen conservándose.
+- Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` **no** es un cambio material (`materialEventDiffs` ignora esos timestamps) y **no** reescribe el JSON en cada ejecución. La frescura cotidiana queda en el report (`unchangedEvents`, `window`, `health`). Excepción operativa: si la reverificación es correcta, no hay cambio material y el `lastVerifiedAt` publicado tiene **30 días o más** de antigüedad respecto a la fecha civil de la ejecución en `Europe/Madrid`, se escribe el evento para refrescar `lastVerifiedAt` y los `checkedAt` de las citas realmente reverificadas. Ese caso cuenta como `updatedEvents` porque hay escritura; no genera `fieldDiffs` editoriales. El umbral está centralizado en `VERIFICATION_REFRESH_AFTER_DAYS`. Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales, aunque no se haya alcanzado el umbral. `--dry-run` reporta esa escritura prevista sin tocar `data/**`.
 - Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. El workflow de producción consume exclusivamente estos campos machine-readable para decidir si falla, crea draft o permite auto-merge.
 
-No están implementados (no los añadas salvo que una tarea pida esa fase): búsqueda web de discovery, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera ni consume `DiscoveryContext`.
+No están implementados (no los añadas salvo que una tarea pida esa capacidad): búsqueda web de discovery dentro del repo, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera `DiscoveryContext` ni navega la web. El workflow manual **Manual discovery** sí consume un `DiscoveryBatch` ya producido por un agente, siempre con código de `main`.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
+
+## Resultados por fuente: extracción, cobertura e hidratación
+
+El contrato tipado vive en [`types.ts`](../src/ingestion/types.ts): `SourceTemporalCoverage` y `SourceIngestResult`. Los adapters pueden declarar **una vez por fuente**, mediante `ctx.reportTemporalCoverage`, los límites oficiales tras validar el listado entero. No se deducen estados del mensaje de error, del status HTTP ni de la última fecha de concierto. Los adapters que aún no declaran cobertura conservan sus garantías y bloqueos anteriores; no se reinterpretan sus `IncompleteListingError`.
+
+| Dimensión | Valores / evidencia |
+|---|---|
+| Extracción | `succeeded`, `incomplete` con observaciones recuperadas, `failed` técnico/estructural |
+| Cobertura | `complete`: intervalo que contiene toda la ventana; `partial`: intervalo delimitado que no la contiene; `stale`: intervalo terminado antes de la ventana; `unknown`: listado validado sin horizonte acreditado |
+| Hidratación | Contadores existentes de intentadas/correctas/fallidas, más fichas necesarias e incompletitud/severidad del calendario obligatorio |
+
+Coro de Cámara usa el encabezado oficial de temporada (agosto–julio); un mero solapamiento no certifica toda la ventana. Culturalcalá usa ambos parámetros de EventON (`focus_start_date_range` / `focus_end_date_range`); los fallos de detalle son independientes del horizonte del widget. Sus tarjetas requieren identidad y fecha válidas antes de hidratar. Fundación Cultural Las Rozas valida la estructura JetEngine y registra `unknown`: que exista una tarjeta posterior a la ventana tampoco demuestra exhaustividad. No se certifican intervalos en ausencia de evidencia.
+
+`disappearanceEligible` requiere integridad técnica, cobertura completa y ausencia de detalles necesarios fallidos/conflictos. En `partial`, `unknown` o `stale` se suprimen desapariciones de **toda la fuente**; no hay reconciliación temporal granular. `possiblyMissing` sigue siendo diagnóstico y nunca elimina ni cancela eventos. Los RawEvents recuperados continúan por el pipeline habitual y los conflictos siguen retenidos.
+
+| Resultado | Health mínimo / auto-merge |
+|---|---|
+| Extracción correcta y cobertura completa | Comportamiento anterior |
+| Sólo cobertura parcial/desconocida, con fuente utilizable | `degraded`; elegible si no hay otros bloqueos |
+| Temporada caducada | `degraded` si otras fuentes son utilizables; no cuenta como cobertura actual |
+| Fallo técnico de listing, incluso parcial | `review`; nunca auto-merge |
+| Calendario obligatorio severamente incompleto | `review`; nunca auto-merge |
+| Ninguna fuente utilizable | `fatal`; nunca auto-merge |
+
+Una fuente parcial es utilizable si su intervalo oficial intersecta la ventana (también un calendario vacío validado). Una fuente de horizonte desconocido necesita observaciones fechadas dentro de ventana. Los fallos técnicos/severos no cuentan como fuentes utilizables. Los demás bloqueos (`source-conflict`, identidad ambigua, `publication-integrity`, lote inválido) mantienen su precedencia.
+
+`report.json` contiene `summary.sourceResults[sourceId]`; `run.json` reutiliza esos mismos campos y contadores en `timings.sources[sourceId]`. Son adiciones opcionales a los contratos v1: los reports antiguos y Discovery siguen admitidos. Job Summary, PR automática y consola presentan extracción, cobertura/intervalo verificable y contadores por fuente, separando fallos técnicos de programación caducada o insuficiente. Ejemplo abreviado de Culturalcalá, con dos detalles fallidos:
+
+```json
+{
+  "extraction": { "status": "succeeded" },
+  "temporalCoverage": {
+    "status": "partial",
+    "interval": { "from": "2026-10-01", "to": "2027-05-31" },
+    "evidence": "EventON focus_start_date_range / focus_end_date_range"
+  },
+  "extractedEvents": 18,
+  "hydrationAttempted": 18,
+  "hydrationSucceeded": 16,
+  "hydrationFailed": 2,
+  "hydrationRequired": 0,
+  "hydrationSevere": false,
+  "disappearanceEligible": false,
+  "usable": true
+}
+```
 
 ## Cómo ejecutarlo
 
@@ -54,6 +117,9 @@ npm run ingest:sync
 npm run ingest:sync -- --dry-run
 npm run ingest:sync -- --dry-run --report ingestion/reports/sync.json
 npm run ingest:sync -- --from 2026-09-01 --to 2027-06-01 --sources auditorio-nacional,teatro-real
+npm run ingest:sync -- --dry-run --exclude-sources auditorio-nacional,cndm
+npm run ingest:sync -- --sources auditorio-nacional,cndm,teatro-real --exclude-sources cndm
+npm run ingest:sync -- --season-window --dry-run
 npm run ingest:source -- auditorio-nacional
 npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
 npm run ingest:discovery -- ingestion/work/discovery-batch.json --dry-run
@@ -64,24 +130,26 @@ npm run ingest:discovery-context -- --from 2026-09-01 --to 2027-01-01 --output i
 
 `--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
-Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
+Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. `--season-window` (el job programado) usa hoy → el 31 de julio más cercano y no se combina con `--from`/`--to`. Si se indica uno de `--from`/`--to`, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo. `--exclude-sources fuente-a,fuente-b` resta IDs de ese conjunto base (el default o la selección explícita), conserva el orden, elimina duplicados y rechaza IDs desconocidos. Si no queda ninguna fuente, la ejecución falla. No hace falta una sintaxis especial dentro de `--sources`.
 
 ## Discovery v1
 
 El harvesting cubre fuentes del registry. Discovery cubre lo que todavía no tiene adapter: una parroquia, un conservatorio, un concierto puntual. Un agente (Cursor, ChatGPT u otro, con web search) busca fuera; el código de ingestión no navega la web.
 
-Hay dos piezas, y sólo esas:
+Hay tres piezas:
 
 1. **Contexto.** `npm run ingest:discovery-context` vuelca un `DiscoveryContext` JSON compacto: ventana (por defecto la misma de Ingestion v3: hoy en Europe/Madrid → +120 días), sources harvesteadas y canónicas ya conocidas, venues, fingerprints de eventos cuya representación intersecta la ventana, un resumen editorial estable, reglas breves de evidencia y el contrato de output (`DiscoveryBatch` schemaVersion 1, derivado del schema ejecutable). El alcance geográfico del resumen es el municipio de Madrid, con `nearby` sólo para municipios muy próximos; no cubre toda la Comunidad de Madrid. Sirve para que el agente evite rebuscar Teatro Real / Auditorio / March y reconozca un redescubrimiento. No es la Classification Policy ejecutable ni un volcado del catálogo.
-2. **Import.** El agente escribe un `DiscoveryBatch` de **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. `npm run ingest:discovery` lo pasa al pipeline común, que clasifica y publica exactamente como en harvesting.
+2. **Import local.** El agente escribe un `DiscoveryBatch` de **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. `npm run ingest:discovery` lo pasa al pipeline común, que clasifica y publica exactamente como en harvesting.
+3. **Import en producción.** El playbook [`run-discovery-agent.md`](run-discovery-agent.md) describe cómo publicar el batch en una rama `discovery-request/…` y lanzar **Actions → Manual discovery** contra `main`. El job hace checkout de `main`, lee sólo el JSON anclado a un SHA, ejecuta `ingest:discovery` una vez con el AI pool, y abre una PR de `data/**` si hay cambios. No ejecuta código de la rama de petición. No hay auto-merge.
 
 El `DiscoveryContext` es input del agente. El `DiscoveryBatch` es output del agente, no una cola de producción. Forma conceptual:
 
 ```text
 npm run ingest:discovery-context → DiscoveryContext JSON
         → agente externo (web search)
-        → DiscoveryBatch JSON
-        → npm run ingest:discovery → normalize → classify → reconcile → Candidate → data/**
+        → DiscoveryBatch JSON (observaciones + research diagnóstico opcional)
+        → rama discovery-request/… (sólo el JSON) + workflow Manual discovery en main
+        → npm run ingest:discovery (código de main + AI pool) → normalize → classify → reconcile → PR de data/**
 ```
 
 `--output` escribe el contexto donde se indique (p. ej. `ingestion/work/`, gitignorado). Sin `--output`, el JSON va a stdout. El comando no escribe en `data/**`.
@@ -90,32 +158,41 @@ npm run ingest:discovery-context → DiscoveryContext JSON
 - `foundVia` (p. ej. una URL de búsqueda) es trazabilidad interna: no es source canónica ni `primarySource`;
 - una source descubierta no entra en el registry ni recibe adapter; si el Candidate se publica y esa source no está en `data/sources`, el batch existente la incorpora;
 - en un host compartido (red social, plataforma de eventos) la identidad de la source es el perfil/`homepage`, no el origin de la plataforma; sin perfil identificable no se importa;
-- un venue nuevo sólo se crea con name + municipality + area coherentes; se reutiliza un lugar del catálogo con el mismo nombre exacto y municipio compatible, y una dirección explícita sólo para desambiguar homónimos; si varios encajan, no se publica; no hay fuzzy matching;
+- un venue nuevo sólo se crea con name + municipality + area coherentes **y una dirección física suficiente**; se reutiliza un lugar del catálogo con el mismo nombre exacto y municipio compatible, y una dirección explícita también para desambiguar homónimos; si el lugar es identificable pero no se puede localizar con confianza, no se publica un registro incompleto; si varios encajan, no se publica; no hay fuzzy matching;
 - discovery no evalúa `possiblyMissing`: una observación puntual no demuestra la cobertura de una source.
 
 `ingest:promote` sigue siendo el import manual de Candidates ya interpretados. Discovery no lo usa: el agente no debe saltarse classification.
 
-CI no llama a un LLM ni lanza web search. Tests inyectan fakes. No hay workflow de GitHub Actions que genere el contexto, busque en la web ni importe un batch de discovery de forma programada.
+CI de sitio no llama a un LLM ni lanza web search. Tests inyectan fakes. El workflow **Manual discovery** sí usa el AI pool de producción, con secrets, sobre código de `main`; no genera el contexto ni busca en la web. No está programado.
 
 ## IA
 
-El fallback es opcional y provider-agnóstico. La CLI crea como máximo un classifier por ejecución (`createAiClassifierFromEnv()`). Sin credenciales, timeout o respuesta inválida, el caso permanece `uncertain` y el lote continúa.
+El fallback es opcional y provider-agnóstico. La CLI crea como máximo un classifier por ejecución (`createAiClassifierFromEnv()`). Todos los purposes comparten providers, concurrencia, retries, cache y el límite global `--ai-max-requests`. Sin credenciales, timeout o respuesta inválida, el caso conserva su resultado seguro (`uncertain`, `unknown` o lista vacía) y el lote continúa.
+
+Principio común: la IA puede interpretar hechos ya observados, pero no inventar hechos que la fuente no aportó. No navega la web ni consulta información externa durante enrichment.
+
+- `eligibility`: sólo para casos deterministas `uncertain`. Schema `{eligibility, formats, evidence}`. No pide `eras`, `kind` ni `rationale`. El input omite venue, organizer y access.
+- `composer-extraction`: sólo cuando structured composers, `works[].composerName` y knowledge no resolvieron menciones con cues de programa. El modelo propone nombre + span; el código exige que ambos aparezcan en el texto, rechaza performers/roles y deduplica/canonicaliza antes de aceptar. El evento enriquecido vuelve a pasar por el resolver determinista de `eras`.
+- `access-classification`: sólo para `accessText` presente que `resolveAccess()` dejó `unknown`. El prompt recibe únicamente ese texto; no recibe venue, source ni organizer. La evidencia devuelta debe aparecer en `accessText`.
+- `taxonomy`: para un include cuyos `formats` están unresolved o salen de una heurística débil, o cuyas `eras` siguen unresolved habiendo compositores/obras observados. No reabre eligibility. Una era determinista fuerte no se sustituye. El parser acepta temporalmente campos legacy (`kind`, `rationale`, `eligibility` en taxonomy) y los ignora; los requests nuevos no los piden.
+
+Los reports incluyen cobertura final de composers, eras, formats y access (incluida la distinción entre falta de evidencia y texto no resuelto), además de intentadas/resueltas/sin resolver/errores por purpose. Nada de esta evidencia diagnóstica se publica como dato canónico.
 
 `ingest:sync` / `ingest:source` / `ingest:discovery` cargan `.local/ai.env` (gitignorado) si existe; el entorno del proceso gana. Plantilla y variables: `.env.example`. No commits ni imprimas la clave.
 
-El estado local (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por defecto, fuera de Git y de `data/`. `--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar ese estado. No hay rotación de claves ni coordinación entre máquinas: Google limita por proyecto y modelo.
+El estado local v2 (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por defecto, fuera de Git y de `data/`, e indexa cuotas por `routeId` (`provider:model`). Al leer un `quota.json` v1, los contadores por modelo se migran a routes Gemini; un fichero corrupto sigue fallando sin reset silencioso. La caché v2 incluye purpose, prompt/schema efectivos, hechos observados, provider/model y configuración relevante del transport, por lo que las entradas v1 se invalidan de forma segura. `--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar ese estado.
 
-Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acotadas. Requieren Gemini. Los tests ordinarios no las necesitan.
+Flags `--ai-*` existen para pruebas acotadas: `--ai-route provider:model`, `--ai-no-cache` y el presupuesto HTTP global `--ai-max-requests`. `--ai-model` se conserva como alias legacy de una route Gemini. Los tests ordinarios no las necesitan.
 
 ## Automatización en GitHub Actions
 
-`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state de Gemini.
+`.github/workflows/ingestion.yml` serializa las ejecuciones de harvesting en el concurrency group `ingestion-production`. `.github/workflows/discovery.yml` (**Manual discovery**) comparte el mismo group para no solapar cuota ni state del pool. Producción usa `AI_PROVIDER=pool` y `AI_ZERO_COST_ONLY=true`; Gemini conserva la prioridad y los providers adicionales sólo se habilitan con credenciales y guardias gratuitas válidas. Véase [`ai-providers.md`](ai-providers.md).
 
-`auditorio-nacional`, `fundacion-juan-march`, `teatro-zarzuela`, `cndm` y `real-hermandad-refugio` forman parte del `all` programado y salen por el fetch relay (`useFetchRelay`). Ver [validación de March](march-validation.md) e [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. El hardening de Zarzuela (pacing, retry, circuito, cobertura) permanece; el relay reutiliza cookies de sesión del origen (p. ej. Imperva) entre páginas y no cambia el User-Agent. Las peticiones a `/wp-json/` envían `Accept: application/json` sin `text/html` ni `*/*` (SiteGround en Refugio responde 202 HTML si el cliente admite HTML). Un HTTP 202 de captcha no se trata como documento: se propaga y no se parsea como JSON.
+`auditorio-nacional`, `fundacion-juan-march`, `teatro-zarzuela`, `cndm` y `real-hermandad-refugio` forman parte del `all` programado. March, Zarzuela, Auditorio y CNDM salen por el fetch relay (`useFetchRelay`; CNDM: relay→direct si falla el relay). Ver [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. Las peticiones a `/wp-json/` envían `Accept: application/json` sin `text/html` ni `*/*`. Un HTTP 202 de captcha no se acepta como documento; el Worker puede reintentarlo si hay cookie nueva o cuerpo `sgcaptcha`. Refugio pide el archivo oficial `/categoria-eventos/conciertos/` (no `/conciertos/` ni REST) por HTTP directo; si SiteGround responde 202/SG-Captcha, el mismo archivo se carga en Chrome del runner y las páginas extra reutilizan esa sesión. Las fichas individuales (`/calendario-de-eventos/{slug}/`) usan el mismo GET directo y, si hace falta, una sesión Chrome compartida del bucle de hydration; un fallo de ficha conserva los hechos del listing. Zarzuela mantiene pacing de origen, `Retry-After` y un circuito por fichas distintas.
 
 ### Scheduled
 
-Se ejecuta los días 1, 11 y 21 de cada mes a las 09:17 de `Europe/Madrid`, siempre en modo publish, contra todas las sources y con la ventana por defecto de hoy a +120 días.
+Se ejecuta los días 1, 11 y 21 de cada mes a las 09:17 de `Europe/Madrid`, siempre en modo publish, contra todas las sources. La ventana es el día de la ejecución (civil en `Europe/Madrid`) hasta el 31 de julio más cercano: el de este año si aún no ha pasado; si la run cae en agosto o después, el 31 de julio siguiente. El CLI local y el dispatch manual sin `from`/`to` siguen usando hoy → +120 días.
 
 ### Manual
 
@@ -123,21 +200,38 @@ En **Actions → Production ingestion → Run workflow**:
 
 - `mode`: `dry-run` (default) o `publish`;
 - `sources`: `all` o uno o varios IDs separados por coma;
+- `exclude_sources`: IDs a excluir, separados por coma (opcional; vacío por defecto);
 - `from` y `to`: rango opcional; deben informarse juntos;
 - `auto_merge`: opt-in adicional para un publish manual;
-- `ai_max_requests`: presupuesto HTTP opcional para Gemini.
+- `ai_max_requests`: presupuesto HTTP global opcional para el pool de IA.
+
+`sources=all` con `exclude_sources=auditorio-nacional,cndm` ejecuta el conjunto normal de `all` menos esas dos fuentes. Una selección explícita también admite exclusiones (`sources=auditorio-nacional,cndm,teatro-real` y `exclude_sources=cndm` deja auditorio-nacional y teatro-real). El job programado no pasa exclusiones: con `exclude_sources` vacío sigue ejecutando exactamente las mismas fuentes que hoy.
 
 El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
+
+### Manual discovery
+
+En **Actions → Manual discovery → Run workflow**, siempre contra `main` (el job aborta si el workflow no se disparó desde `main`):
+
+- `batch_ref`: rama de petición `discovery-request/…`;
+- `batch_sha`: SHA completo que debe ser **exactamente el tip** actual de esa rama;
+- `batch_path`: por defecto `ingestion/requests/discovery-batch.json`;
+- `from` y `to`: la ventana del `DiscoveryContext`; deben informarse juntos;
+- `ai_max_requests`: presupuesto HTTP global opcional.
+
+El job hace checkout de `main` con `persist-credentials: false` (el `GITHUB_TOKEN` de solo lectura del job no queda grabado en Git). Extrae **sólo** el JSON (dato no confiable): fetch autenticado de `refs/heads/<batch_ref>` hacia un ref local temporal con el token de la run (`github.token`), comprueba que ese tip es `batch_sha` y lee `<batch_sha>:<batch_path>`. Un SHA existente que no sea el tip de esa rama se rechaza. Valida el schema `DiscoveryBatch` y ejecuta **una** pasada de `ingest:discovery` con el mismo AI pool que Production ingestion. La PR de `data/**` se publica con `INGESTION_BOT_TOKEN` (mismo patrón que Production ingestion: `gh auth setup-git` en el paso de publicación). No hay `schedule`. No hay dry-run + publish duplicados. Un no-op no crea PR. `fatal` no publica. `review` crea draft. `clean`/`degraded` crean PR normal **sin** auto-merge. Playbook: [`run-discovery-agent.md`](run-discovery-agent.md).
+
+El artifact `discovery-run-<run_id>-<attempt>` incluye el batch exacto, `batch-meta.json` (SHA/ref/path, hash, research y diagnóstico de evidencia), `research-manifest.json` si el agente lo envió, `evidence-diagnostics.json`, `report.json`, `run.json`, `events.jsonl` y `run.log`. El `DiscoveryResearchManifest` es diagnóstico de la búsqueda previa al batch: no se escribe en `data/**` ni cambia eligibility. `listingReviews` y `windowMonthsSearched` son opcionales y también diagnósticos: sirven para auditar listings multi-evento y la cobertura mensual de la ventana.
 
 ### Secrets, variables y permisos
 
 - secret `GEMINI_API_KEY`: key del proyecto de Google AI Studio;
-- secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Se usa para push, creación de PR y auto-merge, de modo que el evento `pull_request` dispare CI;
+- secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Production ingestion lo usa para push, creación de PR y auto-merge; Manual discovery lo usa **sólo** para push y creación de PR (nunca auto-merge). En ambos casos el checkout de código confiable usa `persist-credentials: false` y el token del bot no se inyecta hasta el paso de publicación, de modo que el evento `pull_request` dispare CI;
 - secret `INGEST_FETCH_RELAY_TOKEN`: Bearer del Worker de Cloudflare usado como egress;
 - repository variable `INGEST_FETCH_RELAY_URL`: URL del Worker (no es sensible). El pipeline sólo la usa para fuentes con `useFetchRelay` en el registry. Ausentes, el resto de fuentes no cambia; las fuentes con `useFetchRelay` fallan de forma visible, también dentro del `all` programado;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
 
-El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente de Gemini (`.local/ai/`) no forma parte del artifact.
+El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente, incluido el prefijo legacy de Gemini durante la transición; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente del pool (`.local/ai/`) no forma parte del artifact.
 
 ### Dónde está una run
 
@@ -154,13 +248,17 @@ El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `
 
 `report.json` es el resumen final. `events.jsonl` es la evidencia forense incremental: no es event sourcing ni trazas `STARTED`/`FINISHED`.
 
-El Job Summary no es un dashboard. El detalle por evento vive en el artifact.
+Cada RawEvent termina en exactamente un `outcome` diagnóstico (`created`, `updated`, `unchanged`, `excluded`, `uncertain`, `structural-skip`, `ambiguous`, `cancelled-not-created`). Se deriva de la decisión ya tomada; no es una fuente de verdad editorial. Flags como `batchDuplicate`, `classificationDrift` o fallos de hydration siguen siendo flags. Un `adapter-discard` es un candidato que el adapter reconoció y tiró **antes** de RawEvent: no entra en el funnel de observaciones.
+
+El Job Summary muestra el diagnóstico razonable de la ejecución: resumen, funnel por source, observabilidad, health, IA, casos que requieren atención y bloques plegables de eventos no publicados. El cuerpo de la PR de datos es un resumen compacto (ventana, health, contadores, muestra corta de incidencias y enlaces al run/artifact); no vuelca tablas enormes. `report.json` y `events.jsonl` siguen siendo la fuente completa para debugging.
+
+La hydratación que expande una ficha en varios conciertos (`expand`) puede hacer que el número de RawEvents hidratados no coincida con el listing extraído. El cierre `RawEvents = suma de outcomes` se evalúa **después** de hydrate/expand. `extracted + adapterDiscards` sólo es un invariante cuando el adapter define con claridad los candidatos reconocidos (p. ej. ítems Musica de Madrid Datos, tarjetas CNDM antes del filtro de sede).
 
 ### Cómo investigar una run fallida
 
 Empieza por el Job Summary (estado, último stage, motivo conciso) y descarga el artifact. `run.json` dice si fue `failed` o `interrupted` y en qué stage. `events.jsonl` conserva lo ya procesado. `report.json` está cuando el proceso pudo escribirlo. Los logs de Actions siguen siendo la interfaz inmediata; `run.log` hace que el artifact sea autocontenido para un agente.
 
-`SIGINT`/`SIGTERM` (cancelación o timeout de Actions) se tratan como `interrupted`: se flushea el journal, se actualiza `run.json`, se libera el lock de Gemini y se sale 130/143. **`SIGKILL` no es interceptable**; si el runner mata el proceso, el journal puede perder las últimas líneas no flusheadas.
+`SIGINT`/`SIGTERM` (cancelación o timeout de Actions) se tratan como `interrupted`: se flushea el journal, se actualiza `run.json`, se libera el lock del pool de IA y se sale 130/143. **`SIGKILL` no es interceptable**; si el runner mata el proceso, el journal puede perder las últimas líneas no flusheadas.
 
 Preguntas útiles para un agente con el bundle:
 
@@ -178,14 +276,14 @@ Compara dos run artifacts e identifica regresiones.
 
 La trazabilidad por evento en `report.json` sigue `listing → observed → normalized → classification → identity → candidate`. Sirve para distinguir si un performer salió del adapter, de la hidratación de ficha, de la normalización o del merge.
 
-### Observabilidad frente a estado persistente de Gemini
+### Observabilidad frente a estado persistente del pool de IA
 
 | Qué | Dónde | Para qué |
 |---|---|---|
 | Artifact de la run | Actions artifact, 90 días | Entender esa ejecución |
-| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar Gemini en la siguiente run |
+| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar el pool de IA en la siguiente run |
 
-No conviertas el state de Gemini en historial de runs ni lo metas en el artifact.
+No conviertas el state del pool en historial de runs ni lo metas en el artifact.
 
 `--observability-dir` (o, si sólo hay `--report`, el directorio del report) escribe `run.json` y `events.jsonl` en local. El flag no cambia clasificación ni publicación.
 
@@ -196,7 +294,7 @@ No conviertas el state de Gemini en historial de runs ni lo metas en el artifact
 - `clean` / `degraded`: con cambios crea una PR normal. El scheduled solicita auto-merge si el kill switch está activo; el manual publish necesita además `auto_merge=true`;
 - antes de solicitar squash auto-merge, el workflow espera la ejecución `pull_request` real de `ci.yml` para el SHA publicado y exige que termine verde.
 
-Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
+Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si el push de `data/**` llegó al remoto pero `gh pr create` falló, el Job Summary deja branch, commit y un recetario de recuperación manual; no se crea una segunda PR automática si ya hay una de ingestión abierta. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
 
 ## Candidatos JSON (legacy)
 
@@ -208,7 +306,7 @@ npm run ingest:promote -- ingestion/inbox/evento.json
 
 El candidato usa el esquema de `src/lib/schemas/candidate.ts`. El script valida, fusiona en memoria con `data/` y, si todo es correcto, escribe ficheros nuevos. No sobrescribe un evento existente. Si el candidato trae una entidad cuyo ID ya está en el catálogo, debe coincidir campo a campo.
 
-Directorios de trabajo gitignorados: `ingestion/inbox/`, `ingestion/work/`, `ingestion/rejected/`, `ingestion/reports/`.
+Directorios de trabajo gitignorados: `ingestion/inbox/`, `ingestion/work/`, `ingestion/rejected/`, `ingestion/reports/`, `ingestion/requests/`.
 
 En el diseño v3 los candidatos del flujo automático existen en memoria. `ingestion/inbox/` queda para imports manuales, debugging y casos excepcionales.
 

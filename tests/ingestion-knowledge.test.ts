@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import type { Era } from '../src/lib/schemas/taxonomies.ts';
 import { classify, resolveEras } from '../src/ingestion/classification/classify.ts';
-import { findKnownComposersInText, matchComposer, buildIndex } from '../src/ingestion/knowledge/composers.ts';
+import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
+import { resolveFormats } from '../src/ingestion/classification/formats.ts';
+import { findKnownComposersInText, matchComposer, matchComposerPrefix, buildIndex } from '../src/ingestion/knowledge/composers.ts';
 import {
   isObviousNonPerformer,
   looksLikeComposerLine,
+  looksLikeEnsembleName,
+  looksLikeNonWorkCredit,
+  looksLikeProgramHeader,
   looksLikeWorkLine,
+  isEditorialNoteLegend,
+  parseExplicitTitleAuthorWork,
+  stripEditorialNoteMarkers,
 } from '../src/ingestion/observed-cleanup.ts';
 import {
   normalizeComposerList,
@@ -18,7 +26,26 @@ function facts(overrides: Partial<ObservedFacts>): ObservedFacts {
   return { title: 'Concierto de temporada', performers: [], composers: [], works: [], ...overrides };
 }
 
+function expectCanonicalNames(text: string, expected: string[]): void {
+  expect(findKnownComposersInText(text).map((item) => item.canonicalName).sort()).toEqual(
+    [...expected].sort(),
+  );
+}
+
 describe('composer knowledge base', () => {
+  it('una descripción editorial de géneros y una cita no constituyen repertorio de Viola Romántica', () => {
+    const observed = facts({
+      title: 'VIOLA ROMÁNTICA', categoryText: 'Las Noches del Monumental',
+      description: 'Concebido para grupo de violas, este programa transita por el bolero, tango, chanson, zarzuela, ópera y música de cine. «La música puede dar nombre a lo innombrable» , Leonard Bernstein.',
+    });
+    expect(resolveEligibility(observed).value).not.toBe('include');
+    expect(resolveFormats(observed).value).toEqual([]);
+    expect(resolveEras(observed).value).toEqual([]);
+  });
+  it('no confunde a una ponente de apellido coincidente con el compositor', () => {
+    expectCanonicalNames('Presenta: Isabel Peñalosa.', []);
+    expectCanonicalNames('Obras de Peñalosa', ['Francisco de Peñalosa']);
+  });
   it('resuelve Bach, Mozart y Mahler a las épocas canónicas', () => {
     expect(matchComposer('Johann Sebastian Bach')?.eras).toEqual(['baroque']);
     expect(matchComposer('J. S. Bach')?.eras).toEqual(['baroque']);
@@ -26,12 +53,30 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Wolfgang Amadeus Mozart')?.eras).toEqual(['classical']);
     expect(matchComposer('Mozart')?.eras).toEqual(['classical']);
     expect(matchComposer('Gustav Mahler')?.eras).toEqual(['romantic']);
+    expect(matchComposerPrefix('Edward Elgar Variaciones')).toEqual({
+      knowledge: expect.objectContaining({ canonicalName: 'Edward Elgar' }),
+      matchedText: 'Edward Elgar',
+      rest: 'Variaciones',
+    });
+    expect(matchComposerPrefix('Bachianas Brasileiras')).toBeUndefined();
+    expect(matchComposerPrefix('Caroline Shaw')).toEqual({
+      knowledge: expect.objectContaining({ canonicalName: 'Caroline Shaw' }),
+      matchedText: 'Caroline Shaw',
+      rest: '',
+    });
     expect(matchComposer('Mahler')?.eras).toEqual(['romantic']);
   });
 
   it('acepta variantes de Handel y Puccini observadas en el golden set', () => {
     expect(matchComposer('Georg Friedrich Händel')?.canonicalName).toBe('Georg Friedrich Händel');
     expect(matchComposer('George Frideric Haendel')?.canonicalName).toBe('Georg Friedrich Händel');
+    expect(matchComposer('Juan Sebastián Bach')?.canonicalName).toBe('Johann Sebastian Bach');
+    expect(matchComposer('Juan Hidalgo')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('Juan de Hidalgo')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('atribuida a JUAN DE HIDALGO')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('José Lidón')?.eras).toEqual(['classical']);
+    expect(matchComposer('Francisco Corselli')?.eras).toEqual(['baroque', 'classical']);
+    expect(matchComposer('Gaetano Brunetti')?.eras).toEqual(['classical']);
     expect(matchComposer('G. Puccini')?.canonicalName).toBe('Giacomo Puccini');
     expect(matchComposer('Chaikovski')?.eras).toEqual(['romantic']);
     expect(matchComposer('Camille Saint-Saëns')?.eras).toEqual(['romantic']);
@@ -59,10 +104,54 @@ describe('composer knowledge base', () => {
     );
   });
 
+  it('reconoce la grafía CNDM de un programa sin obras enumeradas', () => {
+    expect(matchComposer('H. I. F. von Biber')?.canonicalName).toBe('Heinrich Ignaz Franz Biber');
+    expect(matchComposer('G. Ligeti')?.canonicalName).toBe('György Ligeti');
+    expect(matchComposer('F. Couperin')?.canonicalName).toBe('François Couperin');
+    expect(matchComposer('J. S. Bach')?.canonicalName).toBe('Johann Sebastian Bach');
+
+    const found = findKnownComposersInText(
+      'Obras de J. S. Bach, F. Couperin, H. I. F. von Biber y G. Ligeti',
+    );
+    expect(found.map((item) => item.canonicalName).sort()).toEqual(
+      [
+        'François Couperin',
+        'György Ligeti',
+        'Heinrich Ignaz Franz Biber',
+        'Johann Sebastian Bach',
+      ].sort(),
+    );
+    expect(found).toHaveLength(4);
+  });
+
   it('no hace fuzzy matching agresivo', () => {
     expect(matchComposer('Bax')).toBeUndefined();
     expect(matchComposer('Mahlerian Ensemble')).toBeUndefined();
     expect(matchComposer('Bach Family Tribute')).toBeUndefined();
+  });
+
+  it.each(['Francisco Delgado-Iribarren', 'Francisco Iribarren', 'FRANCISCO IRIBARREN',  'Intervienen: Daniel Pérez, Francisco Delgado-Iribarren, María Crespo', 'Modera: Iribarren'])('no confunde el crédito personal %s con repertorio', (text) => {
+    expect(findKnownComposersInText(text)).toEqual([]);
+    expect(classify(facts({ description: text })).eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
+  it('keeps genuine repertoire while rejecting a different named person in the same sentence', () => {
+    expect(findKnownComposersInText('Obras de Bach interpretadas por Francisco Iribarren').map((item) => item.canonicalName)).toEqual(['Johann Sebastian Bach']);
+  });
+
+  it.each(['Obras de Iribarren', 'Iribarren: Misa', 'Iribarren\nMisa', 'Iribarren Misa', 'Juan Francés de Iribarren', 'Obras de Juan Francés de Iribarren'])('conserva la referencia musical %s', (text) => {
+    expect(findKnownComposersInText(text).map((item) => item.canonicalName)).toEqual(['Juan Francés de Iribarren']);
+    expect(classify(facts({ programText: text })).eligibility.ruleId).toBe('known-classical-composer');
+  });
+
+  it('requires repertoire context for a bare surname in narrative fields, but accepts a program list', () => {
+    expect(classify(facts({ description: 'Participa Iribarren' })).eligibility.value).toBe('uncertain');
+    expect(classify(facts({ title: 'Iribarren' })).eligibility.value).toBe('uncertain');
+    expect(classify(facts({ programText: 'Iribarren; Bach; Mozart' })).eligibility.ruleId).toBe('known-classical-composer');
+    for (const text of ['Obras de Iribarren', 'Iribarren: Misa', 'Juan Francés de Iribarren']) {
+      expect(classify(facts({ description: text })).eligibility.ruleId).toBe('known-classical-composer');
+      expect(classify(facts({ title: text })).eligibility.ruleId).toBe('known-classical-composer');
+    }
   });
 
   it.each<[string, string, Era]>([
@@ -225,6 +314,12 @@ describe('composer knowledge base', () => {
     ['Cherubini', 'Luigi Cherubini', 'classical'],
     ['Fernando Sor', 'Fernando Sor', 'classical'],
     ['Carl Maria von Weber', 'Carl Maria von Weber', 'romantic'],
+    ['C. M. Weber', 'Carl Maria von Weber', 'romantic'],
+    ['C.M. Weber', 'Carl Maria von Weber', 'romantic'],
+    ['C.M.Weber', 'Carl Maria von Weber', 'romantic'],
+    ['CM Weber', 'Carl Maria von Weber', 'romantic'],
+    ['J.Sibelius', 'Jean Sibelius', 'romantic'],
+    ['J. Sibelius', 'Jean Sibelius', 'romantic'],
     ['Paganini', 'Niccolò Paganini', 'romantic'],
     ['Amy Beach', 'Amy Beach', 'romantic'],
     ['Cécile Chaminade', 'Cécile Chaminade', 'romantic'],
@@ -273,6 +368,13 @@ describe('composer knowledge base', () => {
     ['Alberto Posadas', 'Alberto Posadas', 'contemporary'],
     ['Agustín Barrios', 'Agustín Barrios', 'twentieth'],
     ['Mangoré', 'Agustín Barrios', 'twentieth'],
+    ['Ángel Barrios', 'Ángel Barrios', 'twentieth'],
+    ['Angel Barrios', 'Ángel Barrios', 'twentieth'],
+    ['Joan Valent', 'Joan Valent', 'contemporary'],
+    ['Pedro Miguel Marqués', 'Pedro Miguel Marqués', 'romantic'],
+    ['Miguel Marqués', 'Pedro Miguel Marqués', 'romantic'],
+    ['Leopoldo Magenti', 'Leopoldo Magenti', 'twentieth'],
+    ['Chabuca Granda', 'Chabuca Granda', 'twentieth'],
   ])('reconoce %s sin ampliar la época ni atribuir otro compositor', (name, canonicalName, era) => {
     expect(matchComposer(name)).toMatchObject({ canonicalName, eras: [era] });
     expect(findKnownComposersInText(`Programa: ${name}; obra anunciada.`).map((item) => item.canonicalName))
@@ -324,12 +426,44 @@ describe('composer knowledge base', () => {
     ).toEqual([]);
     expect(findKnownComposersInText('Pieza basada en Mozart e inspirada en Bach')).toEqual([]);
     expect(findKnownComposersInText('Un homenaje a Rameau en clave contemporánea')).toEqual([]);
+    expect(findKnownComposersInText(
+      'Dedicado a la música española del S. XIX heredera de José Lidón, donde tendrá un lugar especial la madrileña Isabel Prota y Carmena.',
+    )).toEqual([]);
+    expect(findKnownComposersInText('Música de José Lidón').map((item) => item.canonicalName)).toEqual(['José Lidón']);
     expect(findKnownComposersInText('Bach: Suite. Mozart: Concierto.')).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ canonicalName: 'Johann Sebastian Bach' }),
         expect.objectContaining({ canonicalName: 'Wolfgang Amadeus Mozart' }),
       ]),
     );
+  });
+
+  it('heredera de no otorga eligibility ni época; una atribución explícita sí', () => {
+    const contextual = facts({
+      title: 'Saskia Roures y Francisco Gil',
+      programText: 'Dedicado a la música española del S. XIX heredera de José Lidón, donde tendrá un lugar especial la madrileña Isabel Prota y Carmena.',
+    });
+    expect(classify(contextual).eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(classify(contextual).eligibility.value).not.toBe('include');
+    expect(resolveEras(contextual).value).not.toContain('classical');
+
+    const musicOf = facts({ programText: 'Música de José Lidón.' });
+    expect(classify(musicOf).eligibility).toMatchObject({
+      value: 'include', method: 'knowledge', ruleId: 'known-classical-composer',
+    });
+    expect(resolveEras(musicOf).value).toEqual(['classical']);
+
+    const colon = facts({ programText: 'José Lidón: Sonata para órgano.' });
+    expect(classify(colon).eligibility).toMatchObject({
+      value: 'include', ruleId: 'known-classical-composer',
+    });
+    expect(resolveEras(colon).value).toEqual(['classical']);
+
+    const structured = facts({ composers: [{ name: 'José Lidón' }] });
+    expect(classify(structured).eligibility).toMatchObject({
+      value: 'include', ruleId: 'known-classical-composer',
+    });
+    expect(classify(structured).eras?.value).toEqual(['classical']);
   });
 
   it('reconoce el repertorio español añadido desde programa y composers[]', () => {
@@ -387,6 +521,124 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Mahler')?.canonicalName).toBe('Gustav Mahler');
   });
 
+  it('no atribuye un apellido ambiguo contenido en el nombre de otro compositor', () => {
+    expectCanonicalNames('Johann Christian Bach', ['Johann Christian Bach']);
+    expectCanonicalNames('Clara Schumann', ['Clara Schumann']);
+    expectCanonicalNames('C. P. E. Bach', ['Carl Philipp Emanuel Bach']);
+    expectCanonicalNames('W. F. Bach', ['Wilhelm Friedemann Bach']);
+    expectCanonicalNames('J. C. Bach', ['Johann Christian Bach']);
+    expectCanonicalNames('Michael Haydn', ['Michael Haydn']);
+    expectCanonicalNames('Alma Mahler', ['Alma Mahler']);
+    expectCanonicalNames('Fanny Mendelssohn', ['Fanny Hensel']);
+  });
+
+  it('conserva el alias corto cuando aparece aislado y no está subsumido', () => {
+    expectCanonicalNames('Bach: Suite n.º 1', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Bach: Suite ...', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Schumann: Carnaval, op. 9', ['Robert Schumann']);
+    expectCanonicalNames('Schumann: ...', ['Robert Schumann']);
+    expectCanonicalNames('Haydn: Sinfonía n.º 104', ['Franz Joseph Haydn']);
+    expectCanonicalNames('Mahler: Adagio', ['Gustav Mahler']);
+    expectCanonicalNames('Bach: Suite. Mozart: Concierto.', [
+      'Johann Sebastian Bach',
+      'Wolfgang Amadeus Mozart',
+    ]);
+  });
+
+  it('conserva dos nombres completos distintos aunque compartan apellido', () => {
+    expectCanonicalNames(
+      'Johann Christian Bach ... Johann Sebastian Bach ...',
+      ['Johann Christian Bach', 'Johann Sebastian Bach'],
+    );
+    expectCanonicalNames(
+      'Clara Schumann ... Robert Schumann ...',
+      ['Clara Schumann', 'Robert Schumann'],
+    );
+    expectCanonicalNames(
+      'Johann Christian Bach: Sinfonía. Johann Sebastian Bach: Suite.',
+      ['Johann Christian Bach', 'Johann Sebastian Bach'],
+    );
+  });
+
+  it('resuelve menciones con puntuación, tildes y saltos de línea', () => {
+    expectCanonicalNames('Johann Christian Bach:', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann Christian Bach — Sinfonía en sol menor', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann Christian Bach (1735-1782)', ['Johann Christian Bach']);
+    expectCanonicalNames('JOHANN CHRISTIAN BACH', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann\nChristian\nBach', ['Johann Christian Bach']);
+    expectCanonicalNames('Clara  Schumann', ['Clara Schumann']);
+    expectCanonicalNames('Clara Schümann', ['Clara Schumann']);
+    expectCanonicalNames('Clára Schumann', ['Clara Schumann']);
+    expectCanonicalNames('Clara Schumann: Notturno, op. 6 n.º 2', ['Clara Schumann']);
+    expectCanonicalNames('Bach:\nSuite n.º 2', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Schumann:\nCarnaval', ['Robert Schumann']);
+  });
+
+  it('no contamina un programText realista con el pariente homónimo', () => {
+    const jcProgram = [
+      'Johann Christian Bach (1735-1782)',
+      'Sinfonía en sol menor, op. 6 n.º 6',
+      'Concierto para clave en mi bemol mayor, op. 7 n.º 5',
+    ].join('\n');
+    expectCanonicalNames(jcProgram, ['Johann Christian Bach']);
+
+    const claraProgram = [
+      'Programa:',
+      'Clara Schumann — Notturno, op. 6 n.º 2',
+      'Clara Schumann — Scherzo op. 14',
+      'Intervalo',
+      'Robert Schumann — Carnaval, op. 9',
+    ].join('\n');
+    expectCanonicalNames(claraProgram, ['Clara Schumann', 'Robert Schumann']);
+
+    const mixedBach = [
+      'Obras de Johann Christian Bach y de Johann Sebastian Bach',
+      'J. C. Bach: Sinfonía op. 6 n.º 6',
+      'J. S. Bach: Suite inglesa n.º 2',
+    ].join('\n');
+    expectCanonicalNames(mixedBach, ['Johann Christian Bach', 'Johann Sebastian Bach']);
+  });
+
+  it('propaga la resolución por spans a composers[], eras[] y eligibility', () => {
+    const jcOnly = facts({
+      programText: [
+        'Johann Christian Bach (1735-1782)',
+        'Sinfonía en sol menor, op. 6 n.º 6',
+      ].join('\n'),
+    });
+    const jcClassified = classify(jcOnly);
+    expect(jcClassified.eligibility).toMatchObject({
+      value: 'include',
+      method: 'knowledge',
+      ruleId: 'known-classical-composer',
+    });
+    expect(jcClassified.eligibility.evidence).toEqual(['Johann Christian Bach']);
+    expect(jcClassified.eras?.value).toEqual(['classical']);
+    expect(jcClassified.eras?.ruleId).toBe('eras-from-program-text');
+    expect(jcClassified.eras?.evidence).toEqual(['Johann Christian Bach (classical)']);
+
+    const claraOnly = facts({ programText: 'Clara Schumann: Notturno, op. 6 n.º 2.' });
+    const claraClassified = classify(claraOnly);
+    expect(claraClassified.eligibility.evidence).toEqual(['Clara Schumann']);
+    expect(claraClassified.eligibility.evidence).not.toContain('Robert Schumann');
+    expect(claraClassified.eras?.value).toEqual(['romantic']);
+    expect(claraClassified.eras?.evidence).toEqual(['Clara Schumann (romantic)']);
+
+    const bothSchumann = classify(
+      facts({
+        programText: 'Clara Schumann: Notturno. Robert Schumann: Carnaval.',
+      }),
+    );
+    expect(bothSchumann.eligibility.evidence.sort()).toEqual(
+      ['Clara Schumann', 'Robert Schumann'].sort(),
+    );
+    expect(bothSchumann.eras?.value).toEqual(['romantic']);
+
+    const isolatedBach = classify(facts({ programText: 'Bach: Suite n.º 1 para violonchelo solo.' }));
+    expect(isolatedBach.eligibility.evidence).toEqual(['Johann Sebastian Bach']);
+    expect(isolatedBach.eras?.value).toEqual(['baroque']);
+  });
+
   it('detecta colisiones de alias normalizado entre compositores distintos', () => {
     const foldedCollision = [
       { canonicalName: 'Compositor A', aliases: ['Foo Bar'], eras: ['baroque'] as const },
@@ -412,7 +664,6 @@ describe('composer knowledge base', () => {
       { composers: [{ name: 'Tomas Luis de Victoria' }] },
       { works: [{ title: 'O magnum mysterium', composerName: 'Tomas Luis de Victoria' }] },
       { programText: 'Tomás Luis de Victoria: O magnum mysterium.' },
-      { description: 'Se interpretará O magnum mysterium de Tomás Luis de Victoria.' },
     ]) {
       const result = classify(facts(overrides));
       expect(result.eligibility).toMatchObject({
@@ -420,6 +671,14 @@ describe('composer knowledge base', () => {
       });
       expect(result.eras?.value).toEqual(['renaissance']);
     }
+
+    const fromDescription = classify(
+      facts({ description: 'Se interpretará O magnum mysterium de Tomás Luis de Victoria.' }),
+    );
+    expect(fromDescription.eligibility).toMatchObject({
+      value: 'include', method: 'knowledge', ruleId: 'known-classical-composer',
+    });
+    expect(fromDescription.eras?.value).toEqual([]);
   });
 
   it('respeta romantic / twentieth / contemporary en un programa mixto', () => {
@@ -452,11 +711,139 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('Rubén Mendoza')).toBe(false);
     expect(looksLikeComposerLine('Marco')).toBe(false);
     expect(looksLikeComposerLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(false);
+    expect(looksLikeComposerLine('Pique Dame, F. V. Suppé')).toBe(false);
+    expect(looksLikeComposerLine('I PARTE')).toBe(false);
+    expect(looksLikeComposerLine('PARTE ÚNICA:')).toBe(false);
+    expect(looksLikeComposerLine('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(false);
+    expect(looksLikeComposerLine('Compañía JAC Ballet')).toBe(false);
+    expect(looksLikeComposerLine('IX. Adagio')).toBe(false);
+    expect(looksLikeComposerLine('VIII.Nana de Sevilla')).toBe(false);
+    expect(looksLikeComposerLine('Johannes Brahms (1833-1897)')).toBe(true);
+    expect(looksLikeComposerLine('Marina Vespertilio (1991)')).toBe(true);
+    expect(looksLikeComposerLine('Sebastian Bartmann (*1979)')).toBe(true);
+    expect(looksLikeComposerLine('Michael Nyman (1944-)')).toBe(true);
+    expect(looksLikeComposerLine('Christian Fritz (1988 -)')).toBe(true);
+    expect(looksLikeComposerLine('Improvisaciones sobre la película Amanecer (1927)')).toBe(false);
+    expect(looksLikeComposerLine('de Friedrich Wilhelm Murnau (1888-1931)')).toBe(false);
+    expect(looksLikeComposerLine('La Bohème (1965)')).toBe(false);
+    expect(looksLikeComposerLine("Le roi s'amuse (1882)")).toBe(false);
+    expect(looksLikeComposerLine('Fast Blue Village (2022)')).toBe(false);
+    expect(looksLikeComposerLine('Adam Ilyas Kuruc (1984-)')).toBe(true);
+    expect(looksLikeComposerLine('JAVIER MARTÍNEZ CAMPOS (1989)')).toBe(true);
+    expect(looksLikeComposerLine('Ignacio ‘Indio’ Figueredo (1899-1995)')).toBe(true);
+    expect(looksLikeComposerLine('Tradicional de Venezuela')).toBe(false);
+    expect(looksLikeComposerLine('Anónimo (s. XVII)')).toBe(false);
+    expect(looksLikeWorkLine('Tradicional de Venezuela')).toBe(false);
+    expect(looksLikeWorkLine('Anónimo (s. XVII)')).toBe(false);
+    expect(looksLikeWorkLine('Varios autores')).toBe(false);
+    expect(looksLikeProgramHeader('I PARTE')).toBe(true);
+    expect(looksLikeProgramHeader('II PARTE')).toBe(true);
+    expect(looksLikeProgramHeader('PARTE I')).toBe(true);
+    expect(looksLikeProgramHeader('PARTE ÚNICA:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa')).toBe(true);
+    expect(looksLikeProgramHeader('Programa:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección)')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección de obras)')).toBe(true);
+    expect(looksLikeProgramHeader('Program (selection)')).toBe(true);
+    expect(looksLikeWorkLine('Programa (selección)')).toBe(false);
+    expect(looksLikeProgramHeader('El programa incluye obras de Bach')).toBe(false);
+    expect(looksLikeProgramHeader('un programa de cámara')).toBe(false);
+    expect(looksLikeProgramHeader('Programa de la OCNE')).toBe(false);
+    expect(looksLikeProgramHeader('Programa (selección de obras clásicas)')).toBe(false);
+    expect(looksLikeProgramHeader('Pause')).toBe(true);
+    expect(looksLikeProgramHeader('INTERVALO')).toBe(true);
+    expect(looksLikeEnsembleName('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(true);
+    expect(looksLikeEnsembleName('Compañía JAC Ballet')).toBe(true);
+    expect(looksLikeEnsembleName('Quinteto de la Filarmónica de Berlín')).toBe(true);
+    expect(looksLikeEnsembleName('Cuarteto para oboe y cuerdas sobre Una cosa rara')).toBe(false);
+    expect(looksLikeEnsembleName('Quinteto para clarinete, op. 34')).toBe(false);
+    expect(looksLikeEnsembleName('Der Schwanendreher, para viola y pequeña orquesta')).toBe(false);
+    expect(looksLikeEnsembleName('Dona nobis pacem, Tres cánones a capella,')).toBe(false);
+    expect(looksLikeWorkLine('Der Schwanendreher, para viola y pequeña orquesta')).toBe(true);
+    expect(looksLikeWorkLine('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(true);
+    expect(looksLikeWorkLine('Arr. Manuel Tévar')).toBe(false);
+    expect(looksLikeWorkLine('Arreglo de Manuel Tévar')).toBe(false);
+    expect(looksLikeWorkLine('Orquestación de Manuel Tévar')).toBe(false);
+    expect(looksLikeNonWorkCredit('Arr. Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Arreglo Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Arreglo de Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Orquestación Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Texto: Friedrich Hölderlin')).toBe(true);
+    expect(looksLikeNonWorkCredit('Transcripción de Ausiàs Parejo')).toBe(true);
+    expect(looksLikeNonWorkCredit('* Transcripción de Ausiàs Parejo')).toBe(true);
+    expect(looksLikeWorkLine('Transcripción de Ausiàs Parejo')).toBe(false);
+    expect(looksLikeNonWorkCredit('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(false);
+    expect(looksLikeEnsembleName('Grupo de música barroca “La Folía”')).toBe(true);
+    expect(isObviousNonPerformer('Presenta')).toBe(true);
+    expect(isObviousNonPerformer('Intervienen')).toBe(true);
+    expect(isObviousNonPerformer('Presentación')).toBe(true);
+    expect(isObviousNonPerformer('Interpretación musical')).toBe(true);
+    expect(isObviousNonPerformer('Intérpretes')).toBe(true);
+    expect(parseExplicitTitleAuthorWork('Concierto para Trompa y Orquesta N.1 de R. Strauss')).toEqual({
+      title: 'Concierto para Trompa y Orquesta N.1',
+      composerName: 'R. Strauss',
+    });
+    expect(parseExplicitTitleAuthorWork('Carmina Burana (C. Orff)')).toEqual({
+      title: 'Carmina Burana',
+      composerName: 'C. Orff',
+    });
+    expect(parseExplicitTitleAuthorWork('Pique Dame, F. V. Suppé')).toEqual({
+      title: 'Pique Dame',
+      composerName: 'F. V. Suppé',
+    });
+    expect(parseExplicitTitleAuthorWork('La Belle Hélène (J. Offenbach)')).toEqual({
+      title: 'La Belle Hélène',
+      composerName: 'J. Offenbach',
+    });
+    expect(parseExplicitTitleAuthorWork('ÓPERA MADAMA BUTTERFLY de G. PUCCINI')).toEqual({
+      title: 'ÓPERA MADAMA BUTTERFLY',
+      composerName: 'G. PUCCINI',
+    });
+    expect(parseExplicitTitleAuthorWork('Freikugeln Op. 362, Balas mágicas, Polca (J. Strauss)')).toBeUndefined();
+    expect(parseExplicitTitleAuthorWork('Invocación y danza (Homenaje a Manuel de Falla)')).toBeUndefined();
+    expect(
+      parseExplicitTitleAuthorWork('Variaciones para orquesta sobre un tema de Rameau (2001)'),
+    ).toBeUndefined();
+    expect(matchComposer('C. Orff')?.canonicalName).toBe('Carl Orff');
+    expect(matchComposer('F. V. Suppé')?.canonicalName).toBe('Franz von Suppé');
+    expect(matchComposer('F. Lehár')?.canonicalName).toBe('Franz Lehár');
+    expect(matchComposer('J. Strauss')).toBeUndefined();
     expect(looksLikeWorkLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(true);
+    expect(stripEditorialNoteMarkers('Cuarteto para saxofones, op. 126 **+ (2026)')).toBe(
+      'Cuarteto para saxofones, op. 126 (2026)',
+    );
+    expect(stripEditorialNoteMarkers('El portugués ø+')).toBe('El portugués');
+    expect(stripEditorialNoteMarkers('Un cantante italiano ø+1')).toBe('Un cantante italiano');
+    expect(stripEditorialNoteMarkers('Oye, dueño de mi vida ø+ (1723)')).toBe('Oye, dueño de mi vida (1723)');
+    expect(stripEditorialNoteMarkers('Demolition*')).toBe('Demolition');
+    expect(stripEditorialNoteMarkers('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(
+      'Cuarteto «Americano», op. 96 (arr. David Walter)',
+    );
+    expect(isEditorialNoteLegend('* Estreno absoluto')).toBe(true);
+    expect(isEditorialNoteLegend('** Estreno')).toBe(true);
+    expect(isEditorialNoteLegend('*+ Estreno absoluto. Encargo del CNDM')).toBe(true);
+    expect(isEditorialNoteLegend('*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz')).toBe(true);
+    expect(isEditorialNoteLegend('**+ Recuperación')).toBe(true);
+    expect(isEditorialNoteLegend('ø+ Recuperación histórica')).toBe(true);
+    expect(isEditorialNoteLegend('ø+1 Recuperación')).toBe(true);
+    expect(isEditorialNoteLegend('*Estreno absoluto')).toBe(true);
+    expect(looksLikeWorkLine('*+ Estreno absoluto. Encargo del CNDM')).toBe(false);
+    expect(looksLikeWorkLine('*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz')).toBe(false);
+    expect(looksLikeWorkLine('Cuarteto para saxofones, op. 126 **+ (2026)')).toBe(true);
+    expect(looksLikeWorkLine('Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)')).toBe(true);
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);
+    expect(normalizeComposerList([{ name: 'Transcripción de Ausiàs Parejo' }])).toEqual([]);
     expect(normalizeWorkList(works)).toEqual(works);
+    expect(
+      normalizeWorkList([{ title: '*+ Estreno absoluto. Encargo del CNDM', composerName: 'Gabriel Fauré' }]),
+    ).toEqual([]);
+    expect(
+      normalizeWorkList([
+        { title: '*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz', composerName: 'Jesús Torres' },
+      ]),
+    ).toEqual([]);
   });
 
   it('no trata una charla o un párrafo largo como intérprete', () => {

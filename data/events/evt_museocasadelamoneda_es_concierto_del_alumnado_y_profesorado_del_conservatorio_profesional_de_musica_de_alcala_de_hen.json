@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museocasadelamoneda_es_concierto_del_alumnado_y_profesorado_del_conservatorio_profesional_de_musica_de_alcala_de_hen",
+  "slug": "concierto-del-alumnado-y-profesorado-del-conservatorio-profesional-de-musica-de-alcala-de-henares",
+  "title": "Concierto del alumnado y profesorado del Conservatorio Profesional de Música de Alcalá de Henares",
+  "status": "scheduled",
+  "venueId": "ven_museo_casa_de_la_moneda_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museocasadelamoneda_es_concierto_del_alumnado_y_profesorado_del_conservatorio_profesional_de_musica_de_alcala_de_hen",
+      "date": "2026-11-20",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alumnado y profesorado del Conservatorio Profesional de Música de Alcalá de Henares"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museocasadelamoneda_es",
+      "url": "https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_museocasadelamoneda_es",
+  "lastVerifiedAt": "2026-09-20"
+}

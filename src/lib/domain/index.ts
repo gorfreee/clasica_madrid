@@ -3,16 +3,20 @@ export {
   fromMadridLocal,
   formatMadridDate,
   hasUpcomingOccurrence,
+  isMadridWeekendRange,
   isScheduledUpcoming,
   isUpcomingOccurrence,
   madridDateTimeIso,
   madridNowTime,
   madridToday,
+  madridWeekendRange,
   MADRID_TIME_ZONE,
   nextUpcomingOccurrence,
+  shiftIsoDate,
   systemClock,
   type Clock,
   type DatedOccurrence,
+  type IsoDateRange,
 } from './dates.ts';
 export { emptyCatalog, type Catalog } from './catalog.ts';
 export {
@@ -29,6 +33,7 @@ export {
 } from './filters.ts';
 export { isMadridMunicipality, normalizeText, textMatchesQuery } from './normalize.ts';
 export {
+  eventPublicSlugs,
   findEventBySlug,
   findVenueBySlug,
   listCanonicalEvents,
@@ -43,7 +48,6 @@ export {
   familyVenueKeys,
   isChildVenue,
   isExclusiveScheduleVenueId,
-  isPrincipalVenue,
   rootVenue,
   spaceNameOf,
   venueAddress,

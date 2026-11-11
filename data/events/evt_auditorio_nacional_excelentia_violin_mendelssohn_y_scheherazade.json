@@ -29,27 +29,27 @@
   ],
   "composers": [
     {
-      "name": "Borodin"
+      "name": "Alexander Borodin"
     },
     {
-      "name": "Mendelssohn"
+      "name": "Felix Mendelssohn"
     },
     {
-      "name": "Rimsky-Korsakov"
+      "name": "Nikolai Rimsky-Korsakov"
     }
   ],
   "works": [
     {
       "title": "Príncipe Ígor, obertura",
-      "composerName": "Borodin"
+      "composerName": "Alexander Borodin"
     },
     {
       "title": "Concierto para violín y orquesta en mi menor, op. 64",
-      "composerName": "Mendelssohn"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Scheherazade, op. 35",
-      "composerName": "Rimsky-Korsakov"
+      "composerName": "Nikolai Rimsky-Korsakov"
     }
   ],
   "eras": [
@@ -64,10 +64,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-mendelssohn-y-scheherazade",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "excelentia-violin-mendelssohn-y-scheherazade"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

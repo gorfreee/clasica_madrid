@@ -13,6 +13,7 @@ const workerSource = () =>
 
 afterEach(() => {
   resetRelayCookieJar();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -258,6 +259,83 @@ describe('Cloudflare fetch-relay worker', () => {
     const response = await handleRelayRequest(request(target, { originCookie: 'visid_incap_1=from-client' }), env);
     expect(response.status).toBe(200);
     expect(response.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=from-client');
+  });
+
+  it('retries a 202 challenge with a new Set-Cookie and ends on 200', async () => {
+    vi.useFakeTimers();
+    const target = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      const cookie = header(init, 'cookie');
+      if (!cookie) {
+        return new Response('<html>sgcaptcha</html>', {
+          status: 202,
+          headers: { 'set-cookie': 'sg_captcha=abc; path=/', 'content-type': 'text/html' },
+        });
+      }
+      expect(cookie).toBe('sg_captcha=abc');
+      return new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const pending = handleRelayRequest(request(target), env);
+    const response = await vi.runAllTimersAsync().then(() => pending);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('[]');
+    expect(response.headers.get('x-relay-origin-cookie')).toBe('sg_captcha=abc');
+    expect(response.headers.get('x-relay-recoveries')).toBe('1');
+    expect(fetch).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('retries a 202 with sgcaptcha body even without new cookies, then 200', async () => {
+    vi.useFakeTimers();
+    const target = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
+    let calls = 0;
+    const fetch = vi.fn(async () => {
+      calls += 1;
+      if (calls === 1) {
+        return new Response(
+          '<html><head><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json"></head></html>',
+          { status: 202, headers: { 'content-type': 'text/html' } },
+        );
+      }
+      return new Response('[]', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const pending = handleRelayRequest(request(target), env);
+    const response = await vi.runAllTimersAsync().then(() => pending);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('[]');
+    expect(response.headers.get('x-relay-recoveries')).toBe('1');
+    expect(fetch).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('never returns a persistent 202 as a valid document', async () => {
+    vi.useFakeTimers();
+    const target = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
+    const fetch = vi.fn(async () =>
+      new Response(
+        '<html><head><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json"></head></html>',
+        { status: 202, headers: { 'set-cookie': 'sg_captcha=abc; path=/', 'content-type': 'text/html' } },
+      ),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const pending = handleRelayRequest(request(target), env);
+    const denied = await vi.runAllTimersAsync().then(() => pending);
+    expect(denied.status).toBe(202);
+    expect(await denied.text()).toBe('origin HTTP 202');
+    expect(denied.headers.get('content-type')).toMatch(/text\/plain/);
+    expect(fetch.mock.calls.length).toBeGreaterThanOrEqual(2);
+    vi.useRealTimers();
+  });
+
+  it('does not retry a 202 without cookies or sgcaptcha evidence', async () => {
+    const fetch = vi.fn(async () => new Response('accepted', { status: 202 }));
+    vi.stubGlobal('fetch', fetch);
+    const denied = await handleRelayRequest(request(ordinary), env);
+    expect(denied.status).toBe(202);
+    expect(await denied.text()).toBe('origin HTTP 202');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 

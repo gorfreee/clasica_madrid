@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amaniel_audicion_de_camara_2027_02_18",
+  "slug": "amaniel-audicion-de-camara-2027-02-18",
+  "title": "Audición de Cámara — Conservatorio Amaniel",
+  "status": "scheduled",
+  "venueId": "ven_conservatorio_amaniel_salon_de_actos",
+  "organizerIds": [
+    "org_conservatorio_profesional_musica_amaniel"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amaniel_audicion_de_camara_2027_02_18_01",
+      "date": "2027-02-18",
+      "time": "15:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+      "checkedAt": "2026-10-27"
+    },
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/",
+      "checkedAt": "2026-10-27"
+    }
+  ],
+  "primarySourceId": "src_cpm_amaniel",
+  "lastVerifiedAt": "2026-10-27"
+}

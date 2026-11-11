@@ -17,26 +17,26 @@
   ],
   "performers": [
     {
-      "name": "CUARTETO DE JERUSALÉN"
+      "name": "Cuarteto de Jerusalén"
     }
   ],
   "composers": [
     {
-      "name": "Ludwig van Beethoven (1770-1827)"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Cuarteto de cuerda n.º 2 en sol mayor , op. 18, n.º 2 (1799)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Cuarteto de cuerda n.º 9 en do mayor ‘Razumovski’ , op. 59, n.º 3 (1806)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Cuarteto de cuerda n.º 16 en fa mayor , op. 135 (1826)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [
@@ -52,8 +52,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-de-jerusalen-3",
-      "checkedAt": "2026-09-03",
-      "externalId": "23778"
+      "checkedAt": "2026-10-11",
+      "externalId": "cndm-cuarteto-de-jerusalen-3"
     },
     {
       "sourceId": "src_cndm",
@@ -63,5 +63,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

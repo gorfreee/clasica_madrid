@@ -1,0 +1,25 @@
+---
+import HeroMotif from './HeroMotif.astro';
+
+// Los motivos gráficos solo aparecen en las páginas índice de Agenda y Lugares.
+type Motif = 'agenda' | 'venues';
+
+type Props = {
+  motif: Motif;
+  class?: string;
+};
+
+const { motif, class: className } = Astro.props;
+---
+
+<header
+  class:list={['page-hero', 'page-hero--index', `page-hero--${motif}`, className]}
+  data-page-hero="index"
+>
+  <div class="page-hero__copy">
+    <slot />
+  </div>
+  <div class="page-hero__artwork" aria-hidden="true">
+    <HeroMotif variant={motif} class="page-hero__motif" />
+  </div>
+</header>

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_auditorio_de_tres_cantos",
+  "slug": "auditorio-de-tres-cantos",
+  "name": "Auditorio de Tres Cantos",
+  "municipality": "Tres Cantos",
+  "area": "nearby",
+  "address": "Plaza del Ayuntamiento, 2, 28760 Tres Cantos, Madrid",
+  "url": "https://web.trescantos.es/tramite/cesion-del-teatro-municipal-y-del-auditorio/",
+  "lastVerifiedAt": "2026-09-29"
+}

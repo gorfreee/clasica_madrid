@@ -1,0 +1,71 @@
+{
+  "active_items": false,
+  "active_events": [
+    {
+      "type_terms": [
+        {
+          "id": 9,
+          "name": "Concierto",
+          "color": "#3838bd",
+          "lang": "es"
+        }
+      ],
+      "theme_terms": [
+        {
+          "id": 8,
+          "name": "Música",
+          "color": "#1c1b1f",
+          "lang": "es"
+        }
+      ],
+      "slug": "una-ultima-sesion-joaquin-nin-castellanos-en-el-auditorium-de-la-residencia-de-estudiantes",
+      "ID": 32261,
+      "title": "Una última sesión. Joaquín Nin Castellanos en el Auditórium de la Residencia de Estudiantes",
+      "excerpt": "Ana Benavides e Izan García Baumbach · Espacio JAE: un viaje entre arte y ciencia",
+      "date": "2026-10-24 11:00:00",
+      "date_end": "2026-10-24 13:00:00",
+      "user_id": null,
+      "hero_color": "#3838bd",
+      "ile_event": false,
+      "has_stream": false,
+      "external_event": false,
+      "has_icon_video": false,
+      "test2": false,
+      "post_type": "evento"
+    },
+    {
+      "type_terms": [
+        {
+          "id": 9,
+          "name": "Concierto",
+          "color": "#3838bd",
+          "lang": "es"
+        }
+      ],
+      "theme_terms": [
+        {
+          "id": 8,
+          "name": "Música",
+          "color": "#1c1b1f",
+          "lang": "es"
+        }
+      ],
+      "slug": "ecce-finem",
+      "ID": 32405,
+      "title": "Ecce finem",
+      "excerpt": "Canto coral interpretado por Vetus Carmina",
+      "date": "2026-11-22 19:00:00",
+      "date_end": "2026-11-22 21:00:00",
+      "user_id": null,
+      "hero_color": "#3838bd",
+      "ile_event": false,
+      "has_stream": true,
+      "external_event": false,
+      "has_icon_video": true,
+      "test2": false,
+      "post_type": "evento"
+    }
+  ],
+  "ile_events": false,
+  "external_events": false
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradasboadilla_es_c_59293_montserrat_marti_caballe",
+  "slug": "montserrat-marti-caballe",
+  "title": "Montserrat Martí Caballé",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_municipal_raphael",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradasboadilla_es_c_59293_montserrat_marti_caballe_01",
+      "date": "2026-12-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Montserrat Martí"
+    },
+    {
+      "name": "Luis Santana"
+    },
+    {
+      "name": "Orquesta Madrid Sinfónica Décimo Arte",
+      "role": "orchestra"
+    },
+    {
+      "name": "Alberto López",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Lara"
+    },
+    {
+      "name": "Gioachino Rossini"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradasboadilla_es",
+      "url": "https://entradasboadilla.es/evento/c_59293-montserrat-marti-caballe",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_entradasboadilla_es",
+  "lastVerifiedAt": "2026-09-28"
+}

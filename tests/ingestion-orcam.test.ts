@@ -4,13 +4,14 @@ import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { fundacionOrcamAdapter as adapter } from '../src/ingestion/sources/fundacion-orcam.ts';
 import { parseOrcamDetail, orcamDiv } from '../src/ingestion/detail/fundacion-orcam.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchEventIdentity, newObservationKeys } from '../src/ingestion/identity.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -32,10 +33,22 @@ async function smallListing() {
 
 describe('ORCAM official calendar', () => {
   it('reads the entire calendar with stable CMS IDs, real local dates and only observed facts', async () => {
-    const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
-    expect(events).toHaveLength(18);
+    const discards: AdapterDiscardReport[] = [];
+    const events = await adapter.extract(await fixture('listing'), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events).toHaveLength(17);
     expect(events.every((e) => e.sourceUrl.startsWith('https://fundacionorcam.org/conciertos/2026-27/'))).toBe(true);
-    expect(new Set(events.map((e) => e.externalId)).size).toBe(18);
+    expect(new Set(events.map((e) => e.externalId)).size).toBe(17);
+    expect(events.some((event) => event.externalId === '4861')).toBe(false);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        externalId: '4861',
+        reason: 'stale-conflicting-schedule',
+        title: 'Final del viaje',
+      }),
+    ]);
     const first = events.find((e) => e.externalId === '4840')!;
     expect(first.observed).toMatchObject({ title: 'La creación de un todo', categoryText: 'Ciclo Sinfónico, Proyecto Educativo', occurrences: [], composers: [], performers: [], works: [] });
     expect(first.listingDateText).toBe('6 octubre 2026 · 19:30h');
@@ -84,6 +97,49 @@ describe('ORCAM ficha hydration', () => {
     expect(patch).not.toHaveProperty('eras');
   });
 
+  it('reads an explicit price from the tickets widget and classifies it as paid', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Desde 12 €'));
+    expect(patch.accessText).toBe('Desde 12 €');
+    expect(resolveAccess(patch.accessText).value).toBe('paid');
+  });
+
+  it('reads explicit free admission from the tickets widget', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Entrada gratuita'));
+    expect(patch.accessText).toBe('Entrada gratuita');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('keeps free admission with prior reservation as observed evidence', async () => {
+    const patch = parseOrcamDetail(
+      await sample(),
+      withTicketsWidget(await fixture('detail-symphonic'), 'Gratuito con reserva previa'),
+    );
+    expect(patch.accessText).toBe('Gratuito con reserva previa');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('does not treat Compra la entrada as access evidence', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Compra la entrada'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
+  it('keeps unknown when the tickets widget is absent', async () => {
+    const patch = parseOrcamDetail(await sample(), await fixture('detail-symphonic'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
+  it('does not invent access from related-carousel copy or a season blurb widget', async () => {
+    const html = `${await fixture('detail-symphonic')}`.replace(
+      '</div></body>',
+      `<div data-widget_type="loop-carousel.post"><div data-id="d9fd9af">Entrada 18 €</div></div></div></body>`,
+    );
+    const patch = parseOrcamDetail(await sample(), html);
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
   it('preserves chamber and multi-composer concert facts, without forcing symphonic format', async () => {
     const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
     const chamber = parseOrcamDetail(events.find((e) => e.externalId === '4866')!, await fixture('detail-chamber'));
@@ -108,6 +164,12 @@ describe('ORCAM ficha hydration', () => {
     expect(failed?.observed).toEqual(event.observed);
   });
 });
+
+function withTicketsWidget(html: string, label: string): string {
+  const widget =
+    `<div data-id="d9fd9af" data-widget_type="button.default"><span class="elementor-button-text">${label}</span></div>`;
+  return html.replace('</div></body>', `${widget}</div></body>`);
+}
 
 describe('ORCAM pipeline safety', () => {
   async function run(catalog: Catalog = emptyCatalog(), fail = false, window = TEST_WINDOW) {
@@ -152,6 +214,80 @@ describe('ORCAM pipeline safety', () => {
     expect(failed.summary.written).toEqual([]);
   });
 
+  it('matches Geometrías ORCAM 4865 to the consolidated Auditorio concert', async () => {
+    const catalog = emptyCatalog();
+    catalog.events = [
+      JSON.parse(
+        await readFile(
+          path.join(
+            import.meta.dirname,
+            '..',
+            'data',
+            'events',
+            'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras.json',
+          ),
+          'utf8',
+        ),
+      ),
+    ];
+    const identity = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: 'https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras',
+        externalId: '4865',
+        title: 'Geometrías sonoras',
+        occurrences: [{ date: '2027-06-29', time: '19:30' }],
+      },
+      {
+        catalogSourceId: source.catalogSourceId,
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      },
+    );
+    expect(identity).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras' },
+    });
+  });
+
+  it('absorbs ORCAM 4861 into the canonical Auditorio event without accepting its stale date', async () => {
+    const catalog = emptyCatalog();
+    catalog.events = [
+      JSON.parse(
+        await readFile(
+          path.join(
+            import.meta.dirname,
+            '..',
+            'data',
+            'events',
+            'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje.json',
+          ),
+          'utf8',
+        ),
+      ),
+    ];
+    const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
+    expect(events.some((event) => event.externalId === '4861')).toBe(false);
+
+    const identity = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: 'https://fundacionorcam.org/conciertos/2026-27/final-del-viaje/',
+        externalId: '4861',
+        title: 'Final del viaje',
+        occurrences: [{ date: '2027-05-10', time: '19:30' }],
+      },
+      {
+        catalogSourceId: source.catalogSourceId,
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      },
+    );
+    expect(identity).toMatchObject({
+      kind: 'matched',
+      event: { id: 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje' },
+    });
+  });
+
   it('adds provenance to the already published Auditorio concert without duplicating or renaming it', async () => {
     const first = await run();
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
@@ -175,8 +311,11 @@ describe('ORCAM pipeline safety', () => {
     const observed = { sourceUrl: (await sample()).sourceUrl, title: 'La creación de un todo', occurrences: [{ date: '2026-10-06', time: '19:30' }] };
     const options = { catalogSourceId: source.catalogSourceId, venueId: published.venueId };
     expect(matchEventIdentity(catalog, observed, options).kind).toBe('matched');
+    expect(matchEventIdentity(catalog, { ...observed, title: 'Otro concierto' }, options)).toMatchObject({
+      kind: 'ambiguous',
+      methods: ['slot'],
+    });
     for (const changed of [
-      { ...observed, title: 'Otro concierto' },
       { ...observed, occurrences: [{ date: '2026-10-07', time: '19:30' }] },
       { ...observed, occurrences: [{ date: '2026-10-06', time: '21:00' }] },
       { ...observed, occurrences: [{ date: '2026-10-06', time: null }] },
@@ -217,7 +356,8 @@ describe('ORCAM pipeline safety', () => {
     });
     expect(result.apply.report.ok).toBe(true);
     expect(result.summary.newEvents).toBe(1);
-    expect(result.summary.batchDuplicates).toBe(1);
+    expect(result.summary.batchDuplicates).toBe(0);
+    expect(result.summary.crossSourceCorroborations).toBe(1);
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0]?.event.citations).toHaveLength(2);
     expect(result.apply.proposed.sources.map((s) => s.id).sort()).toEqual(['src_auditorio_nacional', source.catalogSourceId].sort());

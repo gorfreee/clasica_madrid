@@ -1,6 +1,7 @@
 import type { Catalog } from '../domain/catalog.ts';
 import { errorIssue, warningIssue, type ValidationIssue } from './report.ts';
 import { isMadridMunicipality, normalizeText } from '../domain/normalize.ts';
+import { eventPublicSlugs } from '../domain/queries.ts';
 import { isRealIsoDate } from '../schemas/common.ts';
 
 export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
@@ -21,7 +22,12 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
   issues.push(...findDuplicateSlugs('organizers', catalog.organizers.map((item) => ({ id: item.id, slug: item.slug }))));
   issues.push(...findDuplicateSlugs('series', catalog.series.map((item) => ({ id: item.id, slug: item.slug }))));
   issues.push(...findDuplicateSlugs('sources', catalog.sources.map((item) => ({ id: item.id, slug: item.slug }))));
-  issues.push(...findDuplicateSlugs('events', catalog.events.map((item) => ({ id: item.id, slug: item.slug }))));
+  issues.push(
+    ...findDuplicateSlugs(
+      'events',
+      catalog.events.flatMap((item) => eventPublicSlugs(item).map((slug) => ({ id: item.id, slug }))),
+    ),
+  );
 
   for (const venue of catalog.venues) {
     const path = `venues/${venue.id}.json`;
@@ -45,6 +51,7 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
       );
     }
     issues.push(...venueHierarchyIssues(venue, venues));
+    issues.push(...venueAddressIssues(venue, venues));
   }
 
   for (const event of catalog.events) {
@@ -190,6 +197,20 @@ function venueHierarchyIssues(
   }
 
   return issues;
+}
+
+function venueAddressIssues(
+  venue: { id: string; address?: string; parentVenueId?: string },
+  venues: Map<string, { id: string; address?: string; parentVenueId?: string }>,
+): ValidationIssue[] {
+  const path = `venues/${venue.id}.json`;
+  const root = venue.parentVenueId ? (venues.get(venue.parentVenueId) ?? venue) : venue;
+  const effective = root.address?.trim() || venue.address?.trim();
+  if (effective) return [];
+  const detail = venue.parentVenueId
+    ? 'ni el lugar ni su padre tienen una dirección física suficiente'
+    : 'un lugar principal publicado debe tener dirección';
+  return [errorIssue('missing-venue-address', detail, path)];
 }
 
 function indexById<T extends { id: string }>(items: T[]): Map<string, T> {

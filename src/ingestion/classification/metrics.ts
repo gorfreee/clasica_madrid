@@ -111,7 +111,7 @@ function countingAi(inner: AiClassifier): AiClassifier & { calls: number; eligib
     async classify(observed, context) {
       spy.calls += 1;
       if (context?.purpose === 'taxonomy') spy.taxonomyCalls += 1;
-      else spy.eligibilityCalls += 1;
+      else if (context?.purpose === 'eligibility' || context?.purpose === undefined) spy.eligibilityCalls += 1;
       return inner.classify(observed, context);
     },
   };

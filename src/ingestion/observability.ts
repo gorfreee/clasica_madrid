@@ -18,7 +18,7 @@ import {
   type IngestEventDecision,
   type IngestFailureInfo,
 } from './report.ts';
-import type { RawEvent } from './types.ts';
+import type { AdapterDiscard, RawEvent, SourceIngestResult } from './types.ts';
 
 export const INGEST_RUN_MANIFEST_SCHEMA_VERSION = 1;
 export const INGEST_JOURNAL_SCHEMA_VERSION = 1;
@@ -46,14 +46,17 @@ export type IngestSourceHttpStats = {
   timeoutCount: number;
   fetchFailedCount: number;
   challengeCount: number;
+  recoveries: number;
   statusCounts: Record<string, number>;
   latencyMsTotal: number;
   latencyMsMax: number;
   directRequests: number;
   relayRequests: number;
+  browserRequests: number;
+  browserFallbacks: number;
 };
 
-export type IngestSourceTiming = {
+export type IngestSourceTiming = Partial<SourceIngestResult> & {
   extractionMs: number;
   hydrationMs: number;
   totalMs: number;
@@ -64,9 +67,14 @@ export type IngestSourceTiming = {
   hydrationFailed: number;
   hydrationSkippedOutsideWindow: number;
   hydrationSkippedCircuitOpen: number;
+  hydrationRecoveries?: number;
   status: IngestSourceStatus;
   hydrationMode: IngestHydrationMode;
   listingError?: string;
+  listingFallback?: 'wp-rest';
+  listingTransport?: 'http' | 'browser';
+  adapterDiscards?: number;
+  adapterDiscardsByReason?: Record<string, number>;
   http: IngestSourceHttpStats;
 };
 
@@ -91,7 +99,7 @@ export type IngestRunManifest = {
   failure?: IngestFailureInfo;
 };
 
-export type IngestJournalKind = 'observation' | 'decision' | 'source-failure';
+export type IngestJournalKind = 'observation' | 'decision' | 'source-failure' | 'adapter-discard';
 
 export type IngestJournalClassification = {
   eligibility?: IngestEventDecision['eligibility'];
@@ -109,6 +117,7 @@ export type IngestJournalEntry = {
   externalId?: string;
   title?: string;
   message?: string;
+  reason?: string;
   hydration?: IngestEventDecision['hydration'];
   listing?: DiagnosticObservedFacts;
   observed?: DiagnosticObservedFacts;
@@ -124,6 +133,8 @@ export type IngestJournalEntry = {
   candidate?: IngestEventDecision['candidate'];
   aiAttempted?: boolean;
   ai?: IngestEventDecision['ai'];
+  outcome?: IngestEventDecision['outcome'];
+  outcomeReason?: string;
 };
 
 export type FailureContext = {
@@ -139,6 +150,14 @@ const SECRET_ENV_KEYS = [
   'GH_TOKEN',
   'GITHUB_TOKEN',
   'OPENAI_API_KEY',
+  'GROQ_API_KEY',
+  'MISTRAL_API_KEY',
+  'ZAI_API_KEY',
+  'CLOUDFLARE_API_TOKEN',
+  'CLOUDFLARE_ACCOUNT_ID',
+  'VERCEL_AI_GATEWAY_API_KEY',
+  'KILO_API_KEY',
+  'OPENROUTER_API_KEY',
 ] as const;
 
 const MAX_FAILURE_MESSAGE = 2000;
@@ -235,7 +254,7 @@ export class IngestObservability {
     }
   }
 
-  recordSourceStats(input: {
+  recordSourceStats(input: Partial<SourceIngestResult> & {
     sourceId: string;
     extractedEvents: number;
     hydratedEvents: number;
@@ -244,13 +263,21 @@ export class IngestObservability {
     hydrationFailed: number;
     hydrationSkippedOutsideWindow?: number;
     hydrationSkippedCircuitOpen?: number;
+    hydrationRecoveries?: number;
     status?: IngestSourceStatus;
     usesHydration?: boolean;
     hydrationReached?: boolean;
     listingError?: string;
+    listingFallback?: 'wp-rest';
+    adapterDiscards?: number;
+    adapterDiscardsByReason?: Record<string, number>;
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
+      for (const key of ['extraction', 'temporalCoverage', 'hydrationRequired', 'hydrationIncomplete',
+        'hydrationSevere', 'disappearanceEligible', 'usable'] as const) {
+        if (input[key] !== undefined) Object.assign(timing, { [key]: input[key] });
+      }
       timing.extractedEvents = input.extractedEvents;
       timing.hydratedEvents = input.hydratedEvents;
       timing.hydrationAttempted = input.hydrationAttempted;
@@ -258,23 +285,40 @@ export class IngestObservability {
       timing.hydrationFailed = input.hydrationFailed;
       timing.hydrationSkippedOutsideWindow = input.hydrationSkippedOutsideWindow ?? 0;
       timing.hydrationSkippedCircuitOpen = input.hydrationSkippedCircuitOpen ?? 0;
+      if (input.hydrationRecoveries) timing.hydrationRecoveries = input.hydrationRecoveries;
+      else delete timing.hydrationRecoveries;
       if (input.status) timing.status = input.status;
       timing.hydrationMode = hydrationMode(input);
       if (input.listingError) timing.listingError = sanitizeErrorMessage(input.listingError);
       else delete timing.listingError;
+      if (input.listingFallback) timing.listingFallback = input.listingFallback;
+      else delete timing.listingFallback;
+      if (timing.http.browserFallbacks > 0) timing.listingTransport = 'browser';
+      else delete timing.listingTransport;
+      if (input.adapterDiscards) {
+        timing.adapterDiscards = input.adapterDiscards;
+        if (input.adapterDiscardsByReason && Object.keys(input.adapterDiscardsByReason).length > 0) {
+          timing.adapterDiscardsByReason = input.adapterDiscardsByReason;
+        }
+      } else {
+        delete timing.adapterDiscards;
+        delete timing.adapterDiscardsByReason;
+      }
       this.persistManifest();
     });
   }
 
   recordHttp(input: {
     sourceId: string;
-    transport: 'direct' | 'relay';
+    transport: 'direct' | 'relay' | 'browser';
     durationMs: number;
     retry: boolean;
     status?: number;
     timeout?: boolean;
     fetchFailed?: boolean;
     challenge?: boolean;
+    recoveries?: number;
+    browserFallback?: boolean;
   }): void {
     this.guard(() => {
       const http = this.sourceTiming(input.sourceId).http;
@@ -283,10 +327,14 @@ export class IngestObservability {
       http.latencyMsTotal += Math.max(0, Math.round(input.durationMs));
       http.latencyMsMax = Math.max(http.latencyMsMax, Math.max(0, Math.round(input.durationMs)));
       if (input.transport === 'relay') http.relayRequests += 1;
+      else if (input.transport === 'browser') http.browserRequests += 1;
       else http.directRequests += 1;
+      if (input.browserFallback) http.browserFallbacks += 1;
       if (input.timeout) http.timeoutCount += 1;
       if (input.fetchFailed) http.fetchFailedCount += 1;
       if (input.challenge) http.challengeCount += 1;
+      if (input.retry && input.status === 200) http.recoveries += 1;
+      if (input.recoveries) http.recoveries += input.recoveries;
       const statusKey = input.timeout
         ? 'timeout'
         : input.fetchFailed
@@ -348,6 +396,8 @@ export class IngestObservability {
       }
       if (decision.candidate) entry.candidate = decision.candidate;
       if (decision.ai) entry.ai = decision.ai;
+      if (decision.outcome) entry.outcome = decision.outcome;
+      if (decision.outcomeReason) entry.outcomeReason = decision.outcomeReason;
       this.append(entry);
     });
   }
@@ -360,6 +410,21 @@ export class IngestObservability {
         sourceId,
         message: sanitizeErrorMessage(message),
       });
+    });
+  }
+
+  recordAdapterDiscard(discard: AdapterDiscard): void {
+    this.guard(() => {
+      const entry: IngestJournalEntry = {
+        schemaVersion: INGEST_JOURNAL_SCHEMA_VERSION,
+        kind: 'adapter-discard',
+        sourceId: discard.sourceId,
+        reason: discard.reason,
+      };
+      if (discard.sourceUrl) entry.sourceUrl = discard.sourceUrl;
+      if (discard.externalId) entry.externalId = discard.externalId;
+      if (discard.title) entry.title = discard.title;
+      this.append(entry);
     });
   }
 
@@ -484,11 +549,14 @@ function emptyHttpStats(): IngestSourceHttpStats {
     timeoutCount: 0,
     fetchFailedCount: 0,
     challengeCount: 0,
+    recoveries: 0,
     statusCounts: {},
     latencyMsTotal: 0,
     latencyMsMax: 0,
     directRequests: 0,
     relayRequests: 0,
+    browserRequests: 0,
+    browserFallbacks: 0,
   };
 }
 
@@ -540,7 +608,7 @@ export function readFailureContext(error: unknown): FailureContext | undefined {
 }
 
 export function classifyFailureCode(message: string): string {
-  if (/GEMINI_|requieren el provider Gemini/.test(message)) return 'ai-config-fatal';
+  if (/\b(?:AI_|GEMINI_|GROQ_|MISTRAL_|ZAI_|CLOUDFLARE_)|pool de IA|pool gratuito/i.test(message)) return 'ai-config-fatal';
   return 'unexpected-exception';
 }
 
@@ -555,7 +623,7 @@ export function sanitizeFailure(failure: IngestFailureInfo): IngestFailureInfo {
   return sanitized;
 }
 
-export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = process.env): string {
+export function redactSecrets(message: string, env: NodeJS.ProcessEnv = process.env): string {
   let result = message;
   for (const key of SECRET_ENV_KEYS) {
     const value = env[key];
@@ -563,6 +631,11 @@ export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = p
   }
   result = result.replace(/Bearer\s+\S+/gi, 'Bearer [redacted]');
   result = result.replace(/(api[_-]?key\s*[=:]\s*)\S+/gi, '$1[redacted]');
+  return result;
+}
+
+export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = process.env): string {
+  const result = redactSecrets(message, env);
   if (result.length <= MAX_FAILURE_MESSAGE) return result;
   return `${result.slice(0, MAX_FAILURE_MESSAGE)}…[truncated]`;
 }

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_juvenil_europea_de_madrid_requiem_oberturas",
+  "slug": "orquesta-juvenil-europea-de-madrid-requiem-oberturas",
+  "title": "Orquesta Juvenil Europea de Madrid. Requiem & Oberturas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_juvenil_europea_de_madrid_requiem_oberturas_01",
+      "date": "2027-02-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Escuela Coral OJEM"
+    },
+    {
+      "name": "Adriana Tanus",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Réquiem en re menor, K. 626",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-requiem-oberturas",
+      "checkedAt": "2026-10-21",
+      "externalId": "orquesta-juvenil-europea-de-madrid-requiem-oberturas"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -1,29 +1,274 @@
 ---
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const links = [
-  { href: '/', label: 'Agenda', current: path === '/' },
-  { href: '/lugares/', label: 'Lugares', current: path === '/lugares' || path.startsWith('/lugares/') },
-];
+import { headerNavigation } from '../lib/presentation/nav.ts';
+import LogoSymbol from './LogoSymbol.astro';
+
+const nav = headerNavigation(Astro.url.pathname);
 ---
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-mark" href="/" aria-label="Clásica Madrid, ir a la agenda">
-      <span class="site-mark__shape" aria-hidden="true"></span>
+    <a class="site-mark" href={nav.logoHref} aria-label={nav.logoAriaLabel}>
+      <LogoSymbol class="site-mark__symbol" />
       <span class="site-mark__text">Clásica<br />Madrid</span>
     </a>
-    <nav aria-label="Principal">
+    <nav class="site-nav" aria-label="Principal" data-site-nav>
       <ul class="nav-list">
+        <li>
+          <a
+            class="nav-link"
+            href={nav.agenda.href}
+            aria-current={nav.agenda.current ? 'page' : undefined}
+          >
+            <span>{nav.agenda.label}</span>
+          </a>
+        </li>
         {
-          links.map((link) => (
-            <li>
-              <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+          nav.desktopLinks.map((link) => (
+            <li class="nav-item--desktop">
+              <a class="nav-link" href={link.href} aria-current={link.current ? 'page' : undefined}>
                 <span>{link.label}</span>
               </a>
             </li>
           ))
         }
+        {
+          nav.showMore && (
+            <li class="nav-item--desktop">
+              <div class="nav-disclosure" data-nav-disclosure>
+                <button
+                  class="nav-link nav-trigger"
+                  type="button"
+                  data-nav-trigger
+                  aria-expanded="false"
+                  aria-controls="nav-more-panel"
+                  aria-current={nav.moreCurrent ? 'true' : undefined}
+                >
+                  <span>{nav.moreLabel}</span>
+                  <span class="nav-trigger__chevron" aria-hidden="true">
+                    <svg viewBox="0 0 10 6" width="10" height="6" focusable="false">
+                      <path d="m1 1 4 4 4-4"></path>
+                    </svg>
+                  </span>
+                </button>
+                <ul id="nav-more-panel" class="nav-popover" hidden data-nav-panel>
+                  {nav.secondaryLinks.map((link) => (
+                    <li>
+                      <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          )
+        }
       </ul>
+      {
+        nav.mobileMenuLinks.length > 0 && (
+          <div class="nav-disclosure nav-mobile" data-nav-disclosure>
+            <button
+              class="nav-link nav-trigger nav-trigger--menu"
+              type="button"
+              data-nav-trigger
+              aria-expanded="false"
+              aria-controls="nav-mobile-panel"
+              aria-label={nav.mobileMenuLabel}
+            >
+              <span class="nav-trigger__icon" aria-hidden="true">
+                <svg viewBox="0 0 18 14" width="18" height="14" focusable="false">
+                  <rect width="18" height="2" y="0"></rect>
+                  <rect width="18" height="2" y="6"></rect>
+                  <rect width="18" height="2" y="12"></rect>
+                </svg>
+              </span>
+            </button>
+            <ul id="nav-mobile-panel" class="nav-panel" hidden data-nav-panel>
+              {nav.mobileMenuLinks.map((link) => (
+                <li>
+                  <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
     </nav>
   </div>
 </header>
+<noscript>
+  <style>
+    .nav-list > .nav-item--desktop { display: flex !important; }
+    .nav-mobile { display: none !important; }
+  </style>
+</noscript>
+<script>
+  import { initSiteNav } from '../lib/presentation/nav-client.ts';
+  initSiteNav();
+</script>
+
+<style>
+  .site-header__inner {
+    min-height: 5.5rem;
+    align-items: center;
+    gap: 2.25rem;
+  }
+
+  .site-mark {
+    padding-block: 1rem;
+  }
+
+  .site-nav {
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .nav-list {
+    align-items: stretch;
+    gap: .2rem;
+  }
+
+  .nav-list > li {
+    align-items: stretch;
+  }
+
+  .nav-link {
+    min-width: 0;
+    padding: 1rem .95rem;
+    border-left: 0;
+    letter-spacing: .11em;
+    transition: color 140ms ease;
+  }
+
+  .nav-link::after {
+    right: .95rem;
+    bottom: .8rem;
+    left: .95rem;
+    width: auto;
+    height: 2px;
+    border-radius: 0;
+  }
+
+  .nav-link:hover,
+  .nav-link[aria-current='page'],
+  .nav-link[aria-current='true'],
+  .nav-disclosure[data-nav-open='true'] > .nav-trigger {
+    background: transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--color-accent);
+  }
+
+  .nav-link[aria-current='page']::after,
+  .nav-link[aria-current='true']::after {
+    background: var(--color-accent);
+  }
+
+  .nav-trigger {
+    gap: .45rem;
+    border-left: 0;
+  }
+
+  .nav-trigger__chevron {
+    display: inline-flex;
+    width: .65rem;
+    height: .4rem;
+    transition: transform 140ms ease;
+  }
+
+  .nav-trigger__chevron svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .nav-disclosure[data-nav-open='true'] .nav-trigger__chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-popover {
+    top: calc(100% - .45rem);
+    right: .25rem;
+    min-width: 11.75rem;
+    padding: .35rem;
+    border: 1px solid var(--color-header-border);
+    box-shadow: 0 .8rem 2rem var(--color-shadow);
+  }
+
+  .nav-popover a {
+    min-height: 2.6rem;
+    padding: .75rem .85rem;
+    letter-spacing: .08em;
+  }
+
+  .nav-popover a:hover,
+  .nav-popover a[aria-current='page'] {
+    background: var(--color-header-hover);
+  }
+
+  .nav-popover a[aria-current='page'] {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 620px) {
+    .site-header__inner {
+      min-height: 4.55rem;
+      gap: .45rem;
+    }
+
+    .site-mark {
+      padding-block: .8rem;
+    }
+
+    .nav-list {
+      gap: 0;
+    }
+
+    .nav-link {
+      padding: .9rem .65rem;
+      font-size: .68rem;
+    }
+
+    .nav-link[aria-current='page'] {
+      color: var(--color-accent);
+    }
+
+    .nav-link::after {
+      display: none;
+    }
+
+    .nav-trigger--menu {
+      min-width: 2.8rem;
+      padding-inline: .65rem;
+    }
+
+    .nav-panel {
+      padding-top: .2rem;
+      padding-bottom: .35rem;
+      border-top-color: var(--color-header-divider);
+    }
+
+    .nav-panel a {
+      min-height: 2.9rem;
+      padding: .95rem .15rem;
+      border-bottom: 1px solid var(--color-header-rule);
+      letter-spacing: .09em;
+    }
+
+    .nav-panel li:last-child a {
+      border-bottom: 0;
+    }
+
+    .nav-panel a:hover,
+    .nav-panel a[aria-current='page'] {
+      background: transparent;
+      color: var(--color-accent);
+    }
+  }
+</style>

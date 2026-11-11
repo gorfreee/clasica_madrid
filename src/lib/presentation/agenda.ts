@@ -1,14 +1,82 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { AgendaFilters, FilterableOccurrence } from '../domain/filters.ts';
 import { canonicalVenueFilter, parseAgendaFilters, toFilterable } from '../domain/filters.ts';
-import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
+import { formatMadridDate, fromMadridLocal, madridToday, shiftIsoDate } from '../domain/dates.ts';
+import { buildAgendaShortcuts, type AgendaShortcutModel } from './agenda-shortcuts.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
-import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
+import {
+  accessLabels,
+  areaLabels,
+  eraLabels,
+  formatLabels,
+  freeAgendaSignalLabel,
+  fullAgendaLoadErrorMessage,
+  kindLabels,
+  missingFormatLabel,
+  occurrenceCountLabel,
+  showAllAgendaLabel,
+  showingOccurrenceCountLabel,
+} from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { HOME_DESCRIPTION, HOME_TITLE } from './constants.ts';
 import { buildWebsiteJsonLd } from './json-ld.ts';
 import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
+
+export const INITIAL_AGENDA_OCCURRENCE_LIMIT = 150;
+
+/** Running total the home agenda's inline channel note aims to follow. */
+export const AGENDA_INLINE_CHANNEL_TARGET = 10;
+
+/** Preferred span around the target. A day is never split to land inside it. */
+export const AGENDA_INLINE_CHANNEL_MIN = 8;
+export const AGENDA_INLINE_CHANNEL_MAX = 12;
+
+/**
+ * Day index after which the home agenda renders its inline channel note.
+ * `null` when the list is too short for that note to sit between days.
+ *
+ * Counts complete days only. A boundary inside 8–12 occurrences is always
+ * closer to 10 than one outside that span, so it wins when a day ends there.
+ * Otherwise the closest boundary that has already reached 8 occurrences is
+ * used. Equal distances keep the earlier day. The last day is not a
+ * candidate: the agenda has to continue after the note.
+ */
+export function agendaInlineChannelBreak(
+  days: readonly { items: readonly unknown[] }[],
+): number | null {
+  const cumulative: number[] = [];
+  let total = 0;
+  for (const day of days) {
+    total += day.items.length;
+    cumulative.push(total);
+  }
+
+  const boundaries: { index: number; count: number }[] = [];
+  for (let index = 0; index < cumulative.length - 1; index += 1) {
+    const count = cumulative[index] ?? 0;
+    if (count <= 0 || total <= count) continue;
+    boundaries.push({ index, count });
+  }
+
+  const inBand = boundaries.filter(
+    (boundary) =>
+      boundary.count >= AGENDA_INLINE_CHANNEL_MIN && boundary.count <= AGENDA_INLINE_CHANNEL_MAX,
+  );
+  const pool =
+    inBand.length > 0
+      ? inBand
+      : boundaries.filter((boundary) => boundary.count >= AGENDA_INLINE_CHANNEL_MIN);
+  if (pool.length === 0) return null;
+
+  let best = pool[0]!;
+  for (const boundary of pool.slice(1)) {
+    const distance = Math.abs(boundary.count - AGENDA_INLINE_CHANNEL_TARGET);
+    if (distance < Math.abs(best.count - AGENDA_INLINE_CHANNEL_TARGET)) best = boundary;
+  }
+  return best.index;
+}
 
 export type TaxonomyOption = {
   id: string;
@@ -40,12 +108,39 @@ export type AgendaItemModel = {
   sourceLabel: string;
 };
 
+export type AgendaItemSignal = {
+  formatLabel: string;
+  freeLabel: string | null;
+};
+
+/**
+ * Right-column copy for an agenda row: principal format plus an optional
+ * free marker. `formats[0]` is the principal format; `kind` is never a fallback.
+ */
+export function agendaItemSignal(item: Pick<AgendaItemModel, 'formats' | 'access'>): AgendaItemSignal {
+  return {
+    formatLabel: item.formats[0]?.label ?? missingFormatLabel,
+    freeLabel: item.access.id === 'free' ? freeAgendaSignalLabel : null,
+  };
+}
+
+/**
+ * People line under the title: known performers only.
+ * Composers are never a fallback; omit the line when the cast is unknown.
+ */
+export function agendaItemPeopleLine(item: Pick<AgendaItemModel, 'performers'>): string | null {
+  if (item.performers.length === 0) return null;
+  return item.performers.join(', ');
+}
+
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
   dayNumber: string;
   weekdayLabel: string;
+  monthName: string;
   monthLabel: string;
+  year: string;
   monthKey: string;
   isToday: boolean;
   isTomorrow: boolean;
@@ -53,11 +148,7 @@ export type AgendaDayModel = {
   items: AgendaItemModel[];
 };
 
-export type AgendaShortcutModel = {
-  label: string;
-  href: string;
-  emphasis?: boolean;
-};
+export type { AgendaShortcutModel } from './agenda-shortcuts.ts';
 
 export type FilterFieldModel = {
   name: string;
@@ -79,7 +170,12 @@ export type AgendaPageModel = {
   days: AgendaDayModel[];
   resultCount: number;
   upcomingCount: number;
+  initialOccurrenceCount: number;
+  hasMoreOccurrences: boolean;
   resultCountLabel: string;
+  showingCountLabel: string;
+  showAllLabel: string;
+  fullAgendaLoadErrorMessage: string;
   selectFilters: FilterFieldModel[];
   composer: string;
   composerSuggestions: string[];
@@ -87,7 +183,31 @@ export type AgendaPageModel = {
   shortcuts: AgendaShortcutModel[];
 };
 
+export type FullAgendaFragmentModel = {
+  days: AgendaDayModel[];
+  filterIndex: FilterableOccurrence[];
+};
+
 export { occurrenceCountLabel } from './labels.ts';
+
+/**
+ * Take the first `limit` chronological occurrences and complete the cutoff date
+ * so a day is never split across the initial page and the full fragment.
+ */
+export function selectInitialAgendaOccurrences<T>(
+  upcoming: readonly T[],
+  dateOf: (item: T) => string,
+  limit: number = INITIAL_AGENDA_OCCURRENCE_LIMIT,
+): T[] {
+  if (upcoming.length <= limit) return [...upcoming];
+  const cutoffDate = dateOf(upcoming[limit - 1] as T);
+  if (!cutoffDate) return [...upcoming];
+  let end = limit;
+  while (end < upcoming.length && dateOf(upcoming[end] as T) === cutoffDate) {
+    end += 1;
+  }
+  return upcoming.slice(0, end);
+}
 
 export function buildAgendaPageModel(
   catalog: Catalog,
@@ -95,13 +215,13 @@ export function buildAgendaPageModel(
   clock: Clock = systemClock,
 ): AgendaPageModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
+  const initial = selectInitialAgendaOccurrences(upcoming, (item) => item.occurrence.date);
   const now = clock.now();
-  const days = groupByDate(upcoming.map(toAgendaItem), now);
+  const days = groupAgendaDays(initial.map(toAgendaItem), now, { includeEmptyToday: true });
   const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
-    title: 'Agenda de música clásica en Madrid',
-    description:
-      'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     canonicalPath: AGENDA_PATH,
     jsonLd: [buildWebsiteJsonLd()],
     isEmptyCatalog: catalog.events.length === 0,
@@ -112,12 +232,28 @@ export function buildAgendaPageModel(
     days,
     resultCount: upcoming.length,
     upcomingCount: upcoming.length,
+    initialOccurrenceCount: initial.length,
+    hasMoreOccurrences: initial.length < upcoming.length,
     resultCountLabel: occurrenceCountLabel(upcoming.length),
+    showingCountLabel: showingOccurrenceCountLabel(initial.length, upcoming.length),
+    showAllLabel: showAllAgendaLabel,
+    fullAgendaLoadErrorMessage,
     selectFilters: buildSelectFilters(upcoming, filters),
     composer: filters.composer ?? '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
+    filterIndex: initial.map(toFilterable),
+    shortcuts: buildAgendaShortcuts(filters, now),
+  };
+}
+
+export function buildFullAgendaFragmentModel(
+  catalog: Catalog,
+  clock: Clock = systemClock,
+): FullAgendaFragmentModel {
+  const upcoming = listUpcomingOccurrences(catalog, clock);
+  return {
+    days: groupAgendaDays(upcoming.map(toAgendaItem), clock.now(), { includeEmptyToday: true }),
     filterIndex: upcoming.map(toFilterable),
-    shortcuts: buildShortcuts(now),
   };
 }
 
@@ -149,7 +285,16 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
   };
 }
 
-function groupByDate(items: AgendaItemModel[], now: Date): AgendaDayModel[] {
+export type GroupAgendaDaysOptions = {
+  /** Home agenda only: keep a visible "today" row when the first concert is later. */
+  includeEmptyToday?: boolean;
+};
+
+export function groupAgendaDays(
+  items: AgendaItemModel[],
+  now: Date,
+  options: GroupAgendaDaysOptions = {},
+): AgendaDayModel[] {
   const days: AgendaDayModel[] = [];
   const today = madridToday(now);
   const tomorrow = shiftIsoDate(today, 1);
@@ -161,7 +306,7 @@ function groupByDate(items: AgendaItemModel[], now: Date): AgendaDayModel[] {
       days.push(buildDay(item.date, [item], today, tomorrow));
     }
   }
-  if (days.length > 0 && days[0]?.date !== today) {
+  if (options.includeEmptyToday && days.length > 0 && days[0]?.date !== today) {
     days.unshift(buildDay(today, [], today, tomorrow));
   }
   return days;
@@ -178,17 +323,20 @@ function buildDay(
     timeZone: 'Europe/Madrid',
     weekday: 'long',
   }).format(instant);
-  const monthLabel = new Intl.DateTimeFormat('es-ES', {
+  const monthName = new Intl.DateTimeFormat('es-ES', {
     timeZone: 'Europe/Madrid',
     month: 'long',
-    year: 'numeric',
   }).format(instant);
+  const year = date.slice(0, 4);
+  const monthLabel = `${monthName} de ${year}`;
   return {
     date,
     dateLabel: formatMadridDate(date),
     dayNumber: date.slice(8, 10).replace(/^0/, ''),
     weekdayLabel,
+    monthName,
     monthLabel,
+    year,
     monthKey: date.slice(0, 7),
     isToday: date === today,
     isTomorrow: date === tomorrow,
@@ -206,7 +354,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
   return [
     {
       name: 'area',
-      label: 'Ámbito',
+      label: 'Zona',
       value: filters.area ?? '',
       options: [
         { value: '', label: 'Madrid y alrededores' },
@@ -242,10 +390,10 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
     },
     {
       name: 'kind',
-      label: 'Contexto',
+      label: 'Programación',
       value: filters.kind ?? '',
       options: [
-        { value: '', label: 'Cualquier contexto' },
+        { value: '', label: 'Cualquier programación' },
         ...EVENT_KINDS.map((id) => ({ value: id, label: kindLabels[id] })),
       ],
     },
@@ -258,28 +406,8 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
   ];
 }
 
-function buildShortcuts(now: Date): AgendaShortcutModel[] {
-  const today = madridToday(now);
-  const tomorrow = shiftIsoDate(today, 1);
-  const weekday = fromMadridLocal(today, '12:00').getUTCDay();
-  const weekendStart = weekday === 0 ? today : shiftIsoDate(today, (6 - weekday + 7) % 7);
-  const weekendEnd = weekday === 0 ? today : shiftIsoDate(weekendStart, 1);
-  return [
-    { label: 'Hoy', href: `/?from=${today}&to=${today}` },
-    { label: 'Mañana', href: `/?from=${tomorrow}&to=${tomorrow}` },
-    { label: 'Fin de semana', href: `/?from=${weekendStart}&to=${weekendEnd}` },
-    { label: 'Gratis', href: '/?access=free', emphasis: true },
-  ];
-}
-
 function selectedVenueFilter(upcoming: ResolvedOccurrence[], value: string | undefined): string {
   return canonicalVenueFilter(upcoming.map(toFilterable), value);
-}
-
-function shiftIsoDate(date: string, days: number): string {
-  const instant = new Date(`${date}T12:00:00Z`);
-  instant.setUTCDate(instant.getUTCDate() + days);
-  return instant.toISOString().slice(0, 10);
 }
 
 function unique(values: string[]): string[] {

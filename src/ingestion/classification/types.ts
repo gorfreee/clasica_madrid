@@ -1,7 +1,19 @@
 import type { AccessMode, Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './golden-case.ts';
+import type { ObservedComposer } from '../observed.ts';
 
 export type ResolutionMethod = 'rule' | 'knowledge' | 'fallback' | 'ai';
+
+/**
+ * How much the enrich layer may trust a deterministic result.
+ * Not a numeric confidence score: three explicit buckets.
+ *
+ * - `strong`: practically unequivocal (e.g. "Entrada libre", Bach → baroque).
+ *   AI must not overwrite it.
+ * - `weak`: a reasonable heuristic that AI may confirm or correct.
+ * - `unresolved`: no reliable conclusion; AI may fill it when grounded.
+ */
+export type DeterministicStrength = 'strong' | 'weak' | 'unresolved';
 
 /**
  * Internal pipeline evidence. Not part of the canonical Event schema.
@@ -12,6 +24,8 @@ export type Resolution<T> = {
   method: ResolutionMethod;
   ruleId: string;
   evidence: string[];
+  /** Set on formats, eras and access so AI merge can distinguish strong/weak/unresolved. */
+  strength?: DeterministicStrength;
 };
 
 export type ClassificationResult = {
@@ -20,6 +34,8 @@ export type ClassificationResult = {
   eras?: Resolution<Era[]>;
   kind?: Resolution<EventKind>;
   access?: Resolution<AccessMode>;
+  /** AI-only observed enrichment; pipeline copies validated values to the normalized event. */
+  composers?: Resolution<ObservedComposer[]>;
 };
 
 /**

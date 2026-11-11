@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_13_bernard_herrmann_no_solo_cine",
+  "slug": "ocne-satelite-13-bernard-herrmann-no-solo-cine",
+  "title": "OCNE. Satélite 13. Bernard Herrmann, No Solo Cine",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_13_bernard_herrmann_no_solo_cine_01",
+      "date": "2027-03-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Diverso Ensemble"
+    },
+    {
+      "name": "Kremena Gancheva"
+    },
+    {
+      "name": "Luminita Nenita"
+    },
+    {
+      "name": "Joaquín Arias"
+    },
+    {
+      "name": "Mireya Peñarroja"
+    },
+    {
+      "name": "Carlos J. Casadó"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bernard Herrmann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Echoes (1965), para cuarteto de cuerda",
+      "composerName": "Bernard Herrmann"
+    },
+    {
+      "title": "Souvenirs de Voyage (1967), para quinteto con clarinete",
+      "composerName": "Bernard Herrmann"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-13-bernard-herrmann-no-solo-cine",
+      "checkedAt": "2026-10-21",
+      "externalId": "ocne-satelite-13-bernard-herrmann-no-solo-cine"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

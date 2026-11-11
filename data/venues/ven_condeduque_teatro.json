@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_condeduque_teatro",
+  "slug": "condeduque-teatro",
+  "name": "Contemporánea Condeduque — Teatro",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle del Conde Duque, 9-11, 28015 Madrid",
+  "url": "https://www.condeduquemadrid.es/conde-duque/espacios/teatro",
+  "parentVenueId": "ven_condeduque",
+  "spaceName": "Teatro",
+  "lastVerifiedAt": "2026-09-24"
+}

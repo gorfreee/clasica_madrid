@@ -4,12 +4,42 @@ import { describe, expect, it } from 'vitest';
 import { parseAuditorioNacionalDetail } from '../src/ingestion/detail/auditorio-nacional.ts';
 import { parseMadridDatosDetail } from '../src/ingestion/detail/madrid-datos.ts';
 import { parseTeatroRealDetail } from '../src/ingestion/detail/teatro-real.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
+import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
+import { resolvePerformerRole } from '../src/ingestion/classification/performer-role.ts';
 
 const detailDir = path.join(import.meta.dirname, 'fixtures', 'ingestion', 'detail');
 
 describe('parser de ficha Auditorio Nacional', () => {
+  it('mantiene el heading para obras con dos puntos y no invierte títulos con varios autores', () => {
+    const html = `<article><h1>Programa</h1><div class="content"><h4>Programa:<br />Mijaíl Glinka (1804–1857)<br />Ruslán y Ludmila: Obertura<br />Richard Wagner<br />Lohengrin: preludio del acto I<br />Parsifal: preludio<br />“My Way” — Claude François / Jacques Revaux / Paul Anka</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala Sinfónica</span></div></article>`;
+    const patch = parseAuditorioNacionalDetail(html);
+    expect(patch.works).toEqual(expect.arrayContaining([
+      { title: 'Ruslán y Ludmila: Obertura', composerName: 'Mijaíl Glinka (1804–1857)' },
+      { title: 'Lohengrin: preludio del acto I', composerName: 'Richard Wagner' },
+      { title: 'Parsifal: preludio', composerName: 'Richard Wagner' },
+    ]));
+    expect(patch.composers?.map((item) => item.name)).not.toContain('“My Way”');
+  });
+  it('cierra el heading anterior cuando empiezan Reynaldo Hahn y Barbara', () => {
+    const html = `<article><h1>CNDM. Lea Desandre & Thomas Dunford</h1><div class="content"><h4>Honoré d’Ambruys (1660-1702)<br />Le doux silence de nos bois<br />Reynaldo Hahn (1874-1947)<br />Néère, de Études latines (1900)<br />À Chloris (1913)<br />Erik Satie (1866-1925)<br />Gnossienne n.º 1<br />Claude Debussy (1862-1918)<br />Pelléas et Mélisande<br />Barbara (1930-1997)<br />Dis, quand reviendras-tu? (1962)</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala de Cámara</span></div></article>`;
+    const patch = parseAuditorioNacionalDetail(html);
+    expect(patch.works).toEqual(expect.arrayContaining([
+      { title: 'Néère, de Études latines (1900)', composerName: 'Reynaldo Hahn (1874-1947)' },
+      { title: 'À Chloris (1913)', composerName: 'Reynaldo Hahn (1874-1947)' },
+      { title: 'Gnossienne n.º 1', composerName: 'Erik Satie (1866-1925)' },
+      { title: 'Dis, quand reviendras-tu? (1962)', composerName: 'Barbara (1930-1997)' },
+    ]));
+  });
+  it('mantiene a Joseph Jongen entre headings con obras fechadas', () => {
+    const html = `<article><h1>CNDM. Cindy Castillo</h1><div class="content"><h4>César Franck (1822-1890)<br />Prière, op. 20 (1860-1862)<br />Joseph Jongen (1873-1953)<br />Toccata en re bemol mayor, op. 104 (1937)<br />Jean-Pierre Deleuze (1954)<br />La neige tombe, de Quatre haïku, para órgano, n.º 3 (2004)</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala Sinfónica</span></div></article>`;
+    expect(parseAuditorioNacionalDetail(html).works).toEqual(expect.arrayContaining([
+      { title: 'Toccata en re bemol mayor, op. 104 (1937)', composerName: 'Joseph Jongen (1873-1953)' },
+    ]));
+  });
   it('extrae performers, obras, compositores, sala y precios del excerpt', async () => {
     const html = await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-01.excerpt.html'), 'utf8');
     const facts = parseAuditorioNacionalDetail(html);
@@ -65,6 +95,29 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.composers).toEqual([{ name: 'Mikel Urquiza' }, { name: 'Gustav Mahler' }]);
   });
 
+  it('no pega Nacionalesde España al retirar etiquetas inline', () => {
+    const html = `
+      <article id="content">
+        <h1>OCNE. Descubre 01</h1>
+        <div class="content">
+          <h4>Orquesta y Coro Nacionales<span></span>de España<br />Irene Delgado-Jiménez, directora</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location sinfonica rightColumn__item__text">Sala Sinfónica</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta y Coro Nacionales de España' },
+      { name: 'Irene Delgado-Jiménez', roleText: 'directora' },
+    ]);
+    expect(facts.performers?.some((item) => /nacionalesde/i.test(item.name))).toBe(false);
+  });
+
   it('un programa largo no convierte Bach, BWV, movimientos ni PAUSA en performers', () => {
     const html = `
       <article id="content">
@@ -92,6 +145,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(names.some((name) => /allegro/i.test(name))).toBe(false);
     expect(facts.programText).toMatch(/Bach/);
     expect(facts.programText).toMatch(/PAUSA/);
+    expect(facts.programText).not.toMatch(/Maria Solozobova/);
   });
 
   it('no convierte solistas repetidos dentro del programa oficial de Ainhoa Arteta en obras', async () => {
@@ -130,10 +184,12 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     const facts = parseAuditorioNacionalDetail(html);
 
-    expect(facts.performers).toEqual([
-      { name: 'Orquesta Celeste Classic' },
-      { name: 'Coro y Escolanía Maravillas' },
-    ]);
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta Celeste Classic' },
+        { name: 'Coro y Escolanía Maravillas' },
+      ]),
+    );
     expect(facts.composers).toEqual([]);
     expect(facts.works).toEqual([]);
     expect(facts.programText).toMatch(/Times and seasons/);
@@ -204,7 +260,7 @@ describe('parser de ficha Auditorio Nacional', () => {
       </article>
     `;
     const facts = parseAuditorioNacionalDetail(html);
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences).toEqual([
       { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
     ]);
@@ -219,7 +275,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     const facts = parseAuditorioNacionalDetail(html);
     const names = facts.performers?.map((item) => item.name) ?? [];
 
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences).toEqual([
       { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
     ]);
@@ -232,7 +288,7 @@ describe('parser de ficha Auditorio Nacional', () => {
       false,
     );
     expect(facts.programText).toMatch(/Messiaen/);
-    expect(facts.programText).toMatch(/AL 11 de ABRIL de 2027/i);
+    expect(facts.programText).not.toMatch(/AL 11 de ABRIL de 2027/i);
     expect(facts.composers).toEqual([
       { name: 'Olivier Messiaen (1908-1992)' },
       { name: 'Alexander Scriabin (1872-1915)' },
@@ -242,7 +298,7 @@ describe('parser de ficha Auditorio Nacional', () => {
       { title: 'Chants de terre et de ciel (1938)', composerName: 'Olivier Messiaen (1908-1992)' },
       { title: 'Poème-nocturne, op. 61 (1911)', composerName: 'Alexander Scriabin (1872-1915)' },
       { title: 'Vers la flamme, op. 72 (1914)', composerName: 'Alexander Scriabin (1872-1915)' },
-      { title: 'Jumalattaret ** (2012)', composerName: 'John Zorn (1953)' },
+      { title: 'Jumalattaret (2012)', composerName: 'John Zorn (1953)' },
     ]);
   });
 
@@ -254,7 +310,8 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.performers).toEqual([{ name: 'Beatrice Rana', roleText: 'piano' }]);
     expect(names.some((name) => /bach|clementi|schumann|chopin|paganini/i.test(name))).toBe(false);
     expect(names.some((name) => /pause|préambule|pierrot|allegro|programa/i.test(name))).toBe(false);
-    expect(facts.programText).toMatch(/^Beatrice Rana, piano\. Programa\./);
+    expect(facts.programText?.split('\n')[0]).toBe('Programa');
+    expect(facts.programText).not.toMatch(/Beatrice Rana/);
     expect(facts.programText).toMatch(/Carnaval/);
     expect(facts.programText).toMatch(/Pause/);
     expect(facts.composers).toEqual([
@@ -279,6 +336,80 @@ describe('parser de ficha Auditorio Nacional', () => {
     ]);
   });
 
+  it('Recital de, piano no es un intérprete; un crédito de persona sí', () => {
+    const html = `
+      <article>
+        <h1>Camerata Musicalis. Falla, Chopin, Granados, Debussy</h1>
+        <div class="content">
+          <h4>Recital de, piano<br />Beatrice Rana, piano<br />Camerata Musicalis</h4>
+        </div>
+        <div class="rightcolumn">
+          <label class="rightColumn__item__label">Sala:</label>
+          <span class="rightColumn__item__text">Sala de Cámara</span>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+    expect(names).not.toContain('Recital de');
+    expect(facts.performers).toEqual(expect.arrayContaining([
+      { name: 'Beatrice Rana', roleText: 'piano' },
+    ]));
+    expect(names.some((name) => /camerata/i.test(name))).toBe(true);
+  });
+
+  it('conserva las líneas del programa y no promociona Difuntos', () => {
+    const html = `
+      <article>
+        <h1>UAM. Música por la Paz. Barroco Ibérico Italiano</h1>
+        <div class="content">
+          <h4>
+            Programa<br />
+            Primera Parte<br />
+            Benedetto Marcello (1686 - 1739)<br />
+            Concierto para oboe en re menor, S.Z799<br />
+            Antonio Vivaldi (1678-1741)<br />
+            Concierto para flautino en Do mayor RV 443<br />
+            Segunda Parte<br />
+            Francesco Corselli (1705-1778)<br />
+            Invitatorio de Difuntos
+          </h4>
+        </div>
+        <div class="rightcolumn">
+          <label class="rightColumn__item__label">Sala:</label>
+          <span class="rightColumn__item__text">Sala Sinfónica</span>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.programText?.split('\n')).toEqual(expect.arrayContaining([
+      'Benedetto Marcello (1686 - 1739)',
+      'Antonio Vivaldi (1678-1741)',
+      'Francesco Corselli (1705-1778)',
+      'Invitatorio de Difuntos',
+    ]));
+    expect(facts.programText).not.toMatch(/Corselli\. Invitatorio/);
+    const normalized = normalizeRawEvent({
+      sourceId: 'auditorio-nacional',
+      sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/uam-barroco-iberico',
+      observed: {
+        title: 'UAM. Música por la Paz. Barroco Ibérico Italiano',
+        occurrences: [{ date: '2026-09-15', time: '19:30' }],
+        performers: facts.performers ?? [],
+        composers: facts.composers ?? [],
+        works: facts.works ?? [],
+        ...(facts.programText ? { programText: facts.programText } : {}),
+      },
+    });
+    expect(normalized).toBeTruthy();
+    const names = enrichNormalizedEvent(normalized!).composers.map((item) => item.name);
+    expect(names.some((name) => /Marcello/.test(name))).toBe(true);
+    expect(names.some((name) => /Vivaldi/.test(name))).toBe(true);
+    expect(names.some((name) => /Corselli/.test(name))).toBe(true);
+    expect(names).not.toContain('Difuntos');
+    expect(facts.works?.some((work) => work.composerName === 'Difuntos')).toBe(false);
+  });
+
   it('Excelentia Tres Tenores: roles entre paréntesis son elenco; las arias no se inventan como obras', async () => {
     const html = await readFile(
       path.join(detailDir, 'auditorio-excelentia-tres-tenores.excerpt.html'),
@@ -294,8 +425,8 @@ describe('parser de ficha Auditorio Nacional', () => {
       { name: 'Sergio Escobar', roleText: 'Tenor' },
       { name: 'Francisco Pérez Sánchez', roleText: 'Piano' },
     ]);
-    expect(facts.programText).toMatch(/Miguel Borrallo/);
     expect(facts.programText).toMatch(/Tosca/);
+    expect(facts.programText).not.toMatch(/Miguel Borrallo/);
     expect(facts.works).toEqual([]);
     expect(facts.composers).toEqual([]);
   });
@@ -449,7 +580,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     ]);
   });
 
-  it('OCNE Sinfónico 09: el h4 de programa no publica a Shaw ni Entr’acte como performers', async () => {
+  it('OCNE Sinfónico 09: reconstruye Elgar y nunca atribuye Enigma a Britten', async () => {
     const html = await readFile(
       path.join(detailDir, 'auditorio-ocne-sinfonico-09.excerpt.html'),
       'utf8',
@@ -463,12 +594,148 @@ describe('parser de ficha Auditorio Nacional', () => {
       { name: 'Josu de Solaun', roleText: 'Piano' },
     ]);
     expect(names.some((name) => /shaw|entr.?acte|britten|elgar/i.test(name))).toBe(false);
-    expect(facts.works).toEqual(
+    expect(facts.works).toEqual([
+      { title: 'Entr’acte, para orquesta de cuerda', composerName: 'Caroline Shaw' },
+      { title: 'Concierto para piano núm. 1, op. 13', composerName: 'Benjamin Britten' },
+      { title: 'Variaciones Enigma, op. 36', composerName: 'Edward Elgar' },
+    ]);
+    expect(facts.works?.filter((work) => /enigma/i.test(work.title))).toEqual([
+      { title: 'Variaciones Enigma, op. 36', composerName: 'Edward Elgar' },
+    ]);
+    expect(facts.works?.some((work) => /enigma|elgar|variaciones/i.test(work.title) && /britten/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(facts.composers).toEqual([
+      { name: 'Caroline Shaw' },
+      { name: 'Benjamin Britten' },
+      { name: 'Edward Elgar' },
+    ]);
+  });
+
+  it('Recordando a Victoria de los Ángeles: la lista de compositores no fabrica obras', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-victoria-de-los-angeles.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([
+      { name: 'Elionor Martínez', roleText: 'soprano' },
+      { name: 'Olivia Zaugg', roleText: 'piano' },
+    ]);
+    expect(facts.works).toEqual([]);
+    expect(facts.works?.some((work) => /toldr|granados/i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /mompou/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.programText).toMatch(/Obras de Schubert/);
+    expect(facts.programText).toMatch(/Mompou, Toldrà y Granados/);
+    expect(composerNames).toEqual(
+      expect.arrayContaining(['Schubert', 'Boulanger', 'Debussy', 'Ravel', 'Rodrigo', 'Guastavino', 'Mompou', 'Toldrà', 'Granados']),
+    );
+    expect(composerNames.some((name) => /toldr[aàá].*granados|granados.*toldr/i.test(name))).toBe(false);
+  });
+
+  it('Lumina Natalis: Obras de partidos en varias líneas no crean una obra ficticia', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-lumina-natalis.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const performerNames = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(performerNames).toEqual(
+      expect.arrayContaining(['Ad Infinitum', 'Joan Espina', 'Alejandra Navarro', 'Manuel Torrado']),
+    );
+    expect(facts.works).toEqual([]);
+    expect(
+      facts.works?.some((work) => /vicente rodr[ií]guez|corselli|antol[ií] sala/i.test(work.title)),
+    ).toBe(false);
+    expect(facts.works?.some((work) => /nebra/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.programText).toMatch(/Obras de Josep Antoni Martí/);
+    expect(facts.programText).toMatch(/Francisco Corselli y Antolí Sala/);
+    expect(composerNames).toEqual(
       expect.arrayContaining([
-        { title: 'Entr’acte, para orquesta de cuerda', composerName: 'Caroline Shaw' },
+        'Josep Antoni Martí',
+        'José de Nebra',
+        'Vicente Rodríguez',
+        'Francisco Corselli',
+        'Antolí Sala',
       ]),
     );
-    expect(facts.composers).toEqual(expect.arrayContaining([{ name: 'Caroline Shaw' }]));
+  });
+
+  it('Danzas del Mundo: 14 obras reales y ningún heading como composer/work', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-danzas-del-mundo.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const works = facts.works ?? [];
+    const composers = facts.composers ?? [];
+
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['PHILHARMONIC ENSEMBLE', 'Serena Sáenz']),
+    );
+    expect(works).toEqual([
+      { title: 'Rosas del Sur, op. 388', composerName: 'Johann Strauss II' },
+      { title: 'Danza eslava, op. 46 n.º 8', composerName: 'Antonín Dvořák' },
+      { title: 'Danza de Anitra (de Peer Gynt)', composerName: 'Edvard Grieg' },
+      { title: 'Oblivion', composerName: 'Astor Piazzolla' },
+      { title: 'Danza húngara n.º 5', composerName: 'Johannes Brahms' },
+      { title: 'Danza macabra, op. 40', composerName: 'Camille Saint-Saëns' },
+      { title: 'Rondo alla turca, KV 331 (versión orquestal)', composerName: 'Wolfgang A. Mozart' },
+      { title: 'Voces de primavera, op. 410 (soprano y orquesta)', composerName: 'Johann Strauss II' },
+      { title: 'Las hijas de Cádiz (aria para soprano y orquesta)', composerName: 'Léo Delibes' },
+      { title: 'Danzas populares rumanas, Sz. 56', composerName: 'Béla Bartók' },
+      { title: 'Danza española n.º 1 (de La vida breve)', composerName: 'Manuel de Falla' },
+      { title: 'Csárdás de la ópera Ritter Pásmán, op. 441', composerName: 'Johann Strauss II' },
+      { title: 'Libertango', composerName: 'Astor Piazzolla' },
+      { title: 'Vals n.º 2', composerName: 'Dmitri Shostakóvich' },
+    ]);
+    expect(composers).toEqual([
+      { name: 'Johann Strauss II' },
+      { name: 'Antonín Dvořák' },
+      { name: 'Edvard Grieg' },
+      { name: 'Astor Piazzolla' },
+      { name: 'Johannes Brahms' },
+      { name: 'Camille Saint-Saëns' },
+      { name: 'Wolfgang A. Mozart' },
+      { name: 'Léo Delibes' },
+      { name: 'Béla Bartók' },
+      { name: 'Manuel de Falla' },
+      { name: 'Dmitri Shostakóvich' },
+    ]);
+    expect(works).toHaveLength(14);
+    expect(composers).toHaveLength(11);
+    expect(composers.some((item) => /danzas del mundo/i.test(item.name))).toBe(false);
+    expect(works.some((work) => /programa\s*\(\s*selecci/i.test(work.title))).toBe(false);
+    expect(
+      works.some(
+        (work) =>
+          Boolean(work.composerName) &&
+          work.title.toLocaleLowerCase('es').startsWith(work.composerName!.toLocaleLowerCase('es')),
+      ),
+    ).toBe(false);
+  });
+
+  it('una lista suelta de personas en el programa no se publica como composers', () => {
+    const html = `
+      <article id="content">
+        <h1>Concierto de cámara</h1>
+        <div class="content">
+          <h4>Cuarteto Ejemplo<br />Ana Morales, violín<br />Programa<br />Ana Morales, Rubén Mendoza y Marta Soler<br />Johann Sebastian Bach<br />Concierto italiano</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.works).toEqual([{ title: 'Concierto italiano', composerName: 'Johann Sebastian Bach' }]);
+    expect(facts.composers).toEqual([{ name: 'Johann Sebastian Bach' }]);
+    expect(facts.composers?.some((item) => /morales|mendoza|soler/i.test(item.name))).toBe(false);
+    expect(facts.programText).toMatch(/Ana Morales, Rubén Mendoza y Marta Soler/);
   });
 
   it('OCNE Satélite 04: Tres canciones rusas no es performer', async () => {
@@ -523,6 +790,62 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/Jeromita Linares/);
   });
 
+  it('no convierte un compositor desconocido ni un crédito Arr. en título de obra', async () => {
+    const rautavaara = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-rautavaara-lorca.excerpt.html'), 'utf8'),
+    );
+    const weill = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-10-weill.excerpt.html'), 'utf8'),
+    );
+    const raices = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-ocne-satelite-02.excerpt.html'), 'utf8'),
+    );
+    const amorBrujo = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-amor-brujo.excerpt.html'), 'utf8'),
+    );
+
+    expect(rautavaara.works).toEqual([
+      { title: 'Suite Lorca', composerName: 'Einojuhani Rautavaara' },
+      { title: 'Lorquiana', composerName: 'Héctor Eliel Márquez' },
+      { title: 'Nocturnos de la ventana', composerName: 'Francesc Vila' },
+    ]);
+    expect(weill.works).toEqual([
+      { title: 'Obertura de Fidelio, op. 72', composerName: 'Ludwig van Beethoven' },
+      { title: 'Las VII tentaciones actuales', composerName: 'Rodolphe Bruneau-Boulmier' },
+      { title: 'Obertura Egmont, op. 84', composerName: 'Ludwig van Beethoven' },
+      { title: 'Los siete pecados capitales', composerName: 'Kurt Weill' },
+    ]);
+    expect(raices.works).toEqual([
+      { title: 'Jeromita Linares', composerName: 'Carlos Guastavino' },
+      { title: 'Cuatro canciones opulares argentinas', composerName: 'Carlos Guastavino' },
+      { title: 'Canción del atardecer (del opus 5)', composerName: 'Alicia Terzian' },
+      { title: 'Luz de mundos', composerName: 'Irma Urteaga' },
+      { title: 'Cancionero de Lampião', composerName: 'Marlos Nobre' },
+      { title: 'Marcha del Inca (De cantos populares incaicos)', composerName: 'Luis Gianneo' },
+      { title: 'Zamba de Juan Panadero', composerName: 'C. Leguizamón' },
+    ]);
+    expect(amorBrujo.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Canciones españolas antiguas', composerName: 'FEDERICO GARCÍA LORCA (1898–1936)' },
+        { title: 'El amor brujo (versión 1914)', composerName: 'MANUEL DE FALLA (1876–1946)' },
+      ]),
+    );
+    expect(amorBrujo.programText).toMatch(/Arr\.\s*Manuel Tévar/);
+
+    const forbiddenTitles = [
+      'Arr. Manuel Tévar',
+      'Héctor Eliel Márquez',
+      'Marlos Nobre',
+      'Rodolphe Bruneau-Boulmier',
+    ];
+    for (const facts of [rautavaara, weill, raices, amorBrujo]) {
+      const titles = facts.works?.map((work) => work.title) ?? [];
+      for (const forbidden of forbiddenTitles) {
+        expect(titles, forbidden).not.toContain(forbidden);
+      }
+    }
+  });
+
   it('entiende el programa Excelentia Composer · Work en un h4 de producción', () => {
     const html = `
       <article id="content">
@@ -560,6 +883,21 @@ describe('parser de ficha Auditorio Nacional', () => {
     ]);
   });
 
+  it('no convierte un ordinal de edición del concierto en una obra', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Orquesta Sinfónica de Madrid. Thomas Dausgaard', [
+        'Orquesta Sinfónica de Madrid<br />Thomas Dausgaard, director',
+        'CONCIERTO DE SANTA CECILIA<br />(Edición 41°)<br />Ludwig van Beethoven<br />Sinfonía n.° 2 en re mayor, op. 36<br />Robert Schumann<br />Sinfonía n.° 2 en do mayor, op. 61',
+      ]),
+    );
+
+    expect(facts.works).toEqual([
+      { title: 'Sinfonía n.° 2 en re mayor, op. 36', composerName: 'Ludwig van Beethoven' },
+      { title: 'Sinfonía n.° 2 en do mayor, op. 61', composerName: 'Robert Schumann' },
+    ]);
+    expect(facts.programText).not.toMatch(/Edición 41/);
+  });
+
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
     const facts = parseAuditorioNacionalDetail(
       '<article><h1>OCNE. Sinfónico 01</h1><p>Concierto de temporada.</p></article>',
@@ -590,6 +928,23 @@ describe('parser de ficha Auditorio Nacional', () => {
         </div>
       </article>
     `;
+  }
+
+  function publishable(title: string, facts: ReturnType<typeof parseAuditorioNacionalDetail>) {
+    return normalizeRawEvent({
+      sourceId: 'auditorio-nacional',
+      sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/x',
+      observed: {
+        title,
+        occurrences: [{ raw: '2026-10-10T19:30:00+02:00' }],
+        programText: facts.programText,
+        venueText: facts.venueText,
+        accessText: facts.accessText,
+        performers: facts.performers ?? [],
+        composers: facts.composers ?? [],
+        works: facts.works ?? [],
+      },
+    });
   }
 
   it('Orquestra de Cambra Catalana es intérprete y nunca compositor', () => {
@@ -652,9 +1007,609 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     expect(facts.works).toEqual([]);
   });
+
+  it('Filarmonía Carmina Burana: Strauss y Orff por obra, sin I/II PARTE ni el solista como autor', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-filarmonia-carmina-burana.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const published = publishable('Filarmonía de Madrid. Carmina Burana', facts);
+    const composerBlob = JSON.stringify(published?.composers);
+    const workBlob = JSON.stringify(published?.works);
+
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta y Coro Filarmonía' },
+        { name: 'Matías Piñeira', roleText: 'Solista' },
+        { name: 'Pascual Osa', roleText: 'Director' },
+      ]),
+    );
+    expect(published?.works).toEqual([
+      { title: 'Concierto para Trompa y Orquesta N.1', composerName: 'R. Strauss' },
+      { title: 'Carmina Burana', composerName: 'C. Orff' },
+    ]);
+    expect(matchComposer('R. Strauss')?.canonicalName).toBe('Richard Strauss');
+    expect(matchComposer('C. Orff')?.canonicalName).toBe('Carl Orff');
+    expect(published?.composers?.map((item) => matchComposer(item.name)?.canonicalName)).toEqual([
+      'Richard Strauss',
+      'Carl Orff',
+    ]);
+    expect(composerBlob).not.toMatch(/I PARTE|II PARTE|Piñeira|Solista/i);
+    expect(workBlob).not.toMatch(/I PARTE|II PARTE|Piñeira|Solista/i);
+    expect(facts.programText).not.toMatch(/Matías Piñeira|Orquesta y Coro Filarmonía/i);
+  });
+
+  it('Viena en Madrid: atribuciones por obra, sin heredar Suppé ni inventar un Strauss', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-filarmonia-viena-en-madrid.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const published = publishable('Filarmonía de Madrid. Viena en Madrid', facts);
+    const composerNames = published?.composers?.map((item) => item.name) ?? [];
+    const pique = published?.works?.find((work) => /pique dame/i.test(work.title));
+    const helene = published?.works?.find((work) => /belle hélène/i.test(work.title));
+    const freikugeln = published?.works?.find((work) => /freikugeln/i.test(work.title));
+    const lehár = published?.works?.find((work) => /nechledil/i.test(work.title));
+
+    expect(composerNames.some((name) => /compa[ñn][ií]a|jac ballet/i.test(name))).toBe(false);
+    expect(composerNames.some((name) => /pique dame/i.test(name))).toBe(false);
+    expect(pique).toEqual({ title: 'Pique Dame', composerName: 'F. V. Suppé' });
+    expect(helene).toEqual({ title: 'La Belle Hélène', composerName: 'J. Offenbach' });
+    expect(freikugeln).toMatchObject({ title: expect.stringMatching(/Freikugeln/i) });
+    expect(freikugeln?.composerName).toBeUndefined();
+    expect(lehár?.composerName).toMatch(/Lehár/i);
+    expect(published?.works?.filter((work) => /suppé|suppe/i.test(work.composerName ?? ''))).toEqual([
+      { title: 'Pique Dame', composerName: 'F. V. Suppé' },
+    ]);
+    expect(composerNames.some((name) => /^j\.?\s*strauss$/i.test(name))).toBe(false);
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta Filarmonía' },
+        { name: 'Compañía JAC Ballet' },
+        { name: 'Jose Antonio Checa', roleText: 'Coreógrafo' },
+        { name: 'Pascual Osa', roleText: 'Director Artístico' },
+      ]),
+    );
+  });
+
+  it('Savall / Brahms: un compositor, dos obras, sin Capella ni créditos ni catálogo suelto', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-savall-brahms.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const published = publishable('Jordi Savall Dirige a Johannes Brahms', facts);
+    const composerNames = published?.composers?.map((item) => item.name) ?? [];
+    const titles = published?.works?.map((work) => work.title) ?? [];
+
+    expect(composerNames).toHaveLength(1);
+    expect(composerNames[0]).toMatch(/Johannes Brahms/i);
+    expect(published?.works).toHaveLength(2);
+    expect(titles[0]).toMatch(/Schicksalslied/i);
+    expect(titles[0]).toMatch(/op\.?\s*54/i);
+    expect(titles[1]).toMatch(/Ein deutsches Requiem/i);
+    expect(titles[1]).toMatch(/op\.?\s*45/i);
+    expect(published?.works?.every((work) => /Brahms/i.test(work.composerName ?? ''))).toBe(true);
+    expect(composerNames.some((name) => /capella|vilamajó|hölderlin/i.test(name))).toBe(false);
+    expect(titles.some((title) => /^op\.?\s*\d+/i.test(title))).toBe(false);
+    expect(titles.some((title) => /capella|vilamajó|hölderlin|texto:/i.test(title))).toBe(false);
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Lina Tur Bonet', roleText: 'concertino' },
+        { name: 'Luca Guglielmi', roleText: 'asistente de dirección' },
+        { name: 'LA CAPELLA NACIONAL DE CATALUNYA' },
+        { name: 'Lluís Vilamajó', roleText: 'preparación del conjunto vocal' },
+        { name: 'Jordi Savall', roleText: 'dirección' },
+      ]),
+    );
+  });
+
+  it('Madama Butterfly: Puccini y la ópera, sin Adaptación Escenificada como obra', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-madama-butterfly.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const published = publishable('Camerata Lírica. Ópera Madama Butterfly de G. Puccini', facts);
+
+    expect(published?.works).toHaveLength(1);
+    expect(published?.works?.[0]?.title).toMatch(/Madama Butterfly/i);
+    expect(published?.works?.[0]?.composerName).toMatch(/G\.\s*Puccini/i);
+    expect(matchComposer(published?.works?.[0]?.composerName ?? '')?.canonicalName).toBe('Giacomo Puccini');
+    expect(published?.composers).toHaveLength(1);
+    expect(JSON.stringify(published?.works)).not.toMatch(/Adaptaci[oó]n Escenificada/i);
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['CAMERATA LÍRICA', 'Sergio Kuhlmann']),
+    );
+    expect(facts.performers?.some((item) => /musical y piano/i.test(item.name))).toBe(false);
+    expect(facts.performers?.find((item) => item.name === 'Sergio Kuhlmann')?.roleText).toMatch(
+      /director musical y piano/i,
+    );
+  });
+
+  it('acepta un compositor contemporáneo desconocido con sintaxis de nombre personal', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Ciclo contemporáneo', [
+        'Ensemble Horizonte<br />Marina Vespertilio (1991)<br />Nocturno de los tilos, op. 8',
+      ]),
+    );
+    expect(facts.composers).toEqual([{ name: 'Marina Vespertilio (1991)' }]);
+    expect(facts.works).toEqual([
+      { title: 'Nocturno de los tilos, op. 8', composerName: 'Marina Vespertilio (1991)' },
+    ]);
+    expect(matchComposer('Marina Vespertilio')).toBeUndefined();
+  });
+
+  it('agrupa varias obras bajo un mismo encabezado válido', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Mahler vocal y sinfónico', [
+        'Gustav Mahler (1860-1911)<br />Lieder eines fahrenden Gesellen<br />Sinfonía núm. 1 en Re mayor',
+      ]),
+    );
+    expect(facts.composers).toEqual([{ name: 'Gustav Mahler (1860-1911)' }]);
+    expect(facts.works).toEqual([
+      { title: 'Lieder eines fahrenden Gesellen', composerName: 'Gustav Mahler (1860-1911)' },
+      { title: 'Sinfonía núm. 1 en Re mayor', composerName: 'Gustav Mahler (1860-1911)' },
+    ]);
+  });
+
+  it('un movimiento IX no se publica como compositor ni como obra', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Sinfonía con movimientos', [
+        'Anton Bruckner (1824-1896)<br />Sinfonía núm. 8<br />IX. Adagio',
+      ]),
+    );
+    expect(facts.composers).toEqual([{ name: 'Anton Bruckner (1824-1896)' }]);
+    expect(facts.works).toEqual([
+      { title: 'Sinfonía núm. 8', composerName: 'Anton Bruckner (1824-1896)' },
+    ]);
+    expect(facts.works?.some((work) => /^IX\./i.test(work.title))).toBe(false);
+    expect(facts.composers?.some((item) => /^IX\./i.test(item.name))).toBe(false);
+  });
+
+  it('Sinfónico 11: Schwanendreher es obra, no viola-persona, y el elenco inequívoco se conserva', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-11.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(expect.arrayContaining(['Orquesta Nacional de España', 'Kristiina Poska', 'Tabea Zimmermann']));
+    expect(names.some((name) => /schwanendreher|hindemith|mendelssohn|escocesa/i.test(name))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Der Schwanendreher, para viola y pequeña orquesta', composerName: 'Paul Hindemith' },
+      ]),
+    );
+  });
+
+  it('Pájaro de fuego: Composer, Title no se publica como intérprete', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-filarmonica-pajaro-fuego.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining(['Orquesta Joven de Colombia', 'Nelson Goerner', 'Andrés Orozco-Estrada']),
+    );
+    expect(names.some((name) => /stravinsky|p[aá]jaro de fuego|rachm[aá]ninov/i.test(name))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Concierto para piano núm. 2', composerName: 'Rachmáninov' },
+        { title: 'El pájaro de fuego (música del ballet completo)', composerName: 'Stravinsky' },
+      ]),
+    );
+  });
+
+  it('América 250: un segundo h4 de programa no convierte el cuarteto en elenco', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-america-250.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining(['Aulos Madrid', 'Álvaro Octavio Díaz', 'José María Ferrero', 'Javier Bonet']),
+    );
+    expect(names.some((name) => /americano|quinteto de viento|dvo[rř]ák|carter/i.test(name))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Cuarteto «Americano», op. 96 (arr. David Walter)', composerName: 'Antonín Dvořák' },
+      ]),
+    );
+  });
+
+  it('Vientos de Palacio: cuarteto sobre Una cosa rara es obra, el elenco con rol se conserva', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-vientos.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining(['Camerata Federici', 'Mario Pérez', 'Irene Val', 'Javier Bonet']),
+    );
+    expect(names.some((name) => /cosa rara|cuarteto para oboe|sexteto/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Una cosa rara/);
+  });
+
+  it('Maderas de Color: cuarteto para corno inglés partido no es performer', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-maderas.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(expect.arrayContaining(['Quima Ensemble', 'Elsa Sánchez', 'Marta Santamaría', 'José María Ferrero']));
+    expect(names.some((name) => /corno ingl[eé]s|françaix|schubert/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Cuarteto para corno inglés/);
+  });
+
+  it('Ven con Beethoven: Dona nobis a capella es programa; los nombres con rol se conservan', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-beethoven.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining(['Delia Agúndez', 'Ariadna Martínez', 'Patricia Glez. Arroyo', 'Daniel Oyarzabal']),
+    );
+    expect(names.some((name) => /dona nobis|c[aá]nones|beethoven|inn o al creatore/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Dona nobis pacem/);
+  });
+
+  it('UAM Quinteto: el quinteto de clarinete no desplaza al ensemble homónimo', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-uam-quinteto-berlin.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'QUINTETO DE LA FILARMÓNICA DE BERLÍN',
+        'Luiz Felipe Coelho',
+        'Wolfgang Talirz',
+        'Miguel Ángel Tamarit',
+      ]),
+    );
+    expect(names.some((name) => /quinteto para clarinete|op\. 34/i.test(name))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Quinteto para clarinete, op. 34', composerName: 'Carl Maria von Weber (1782-1826)' },
+      ]),
+    );
+  });
+
+  it('Excelentia Respighi: Composer.- Work no es performer ni compositor sticky', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-excelentia-respighi.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta Clásica Santa Cecilia' },
+      { name: 'Christian Vasquez', roleText: 'director' },
+    ]);
+    expect(names.some((name) => /respighi|pinos de roma|strauss|beethoven/i.test(name))).toBe(false);
+    expect(facts.works).toEqual([
+      { title: 'Don Juan, poema sinfónico', composerName: 'R.Strauss' },
+      { title: 'Pinos de Roma', composerName: 'Respighi' },
+      { title: 'Sinfonía núm 5', composerName: 'Beethoven' },
+    ]);
+    expect(facts.composers?.some((item) => /pinos de roma/i.test(item.name))).toBe(false);
+  });
+
+  it('UPM América: recupera solistas tras (compositor) y no publica la obra como nombre', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-upm-america.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining(['ORQUESTA SINFÓNICA UPM', 'Marcos Enrique Romero Gil', 'Susana Gómez Vázquez', 'Javier Sanz Pascual']),
+    );
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Susana Gómez Vázquez', roleText: 'piano' },
+        { name: 'Javier Sanz Pascual', roleText: 'fagot' },
+      ]),
+    );
+    expect(names.some((name) => /rhapsody in blue|ciranda das sete|gershwin|villa-lobos/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Rhapsody in Blue', composerName: 'G. Gershwin' },
+        { title: 'Ciranda das Sete Notas', composerName: 'H. Villa-Lobos' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/Rhapsody in Blue/);
+  });
+
+  it('Amor Brujo: VIII.Nana no es compositor sticky de los movimientos siguientes', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-amor-brujo.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(expect.arrayContaining(['Atlántida Chamber Orchestra', 'Manuel Tévar']));
+    expect(composerNames.some((name) => /nana de sevilla|pelegrinitos|reyes de la baraja/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.works?.some((work) => /nana de sevilla/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Canciones españolas antiguas', composerName: 'FEDERICO GARCÍA LORCA (1898–1936)' },
+        { title: 'El amor brujo (versión 1914)', composerName: 'MANUEL DE FALLA (1876–1946)' },
+      ]),
+    );
+    expect(facts.works?.some((work) => /^VIII\./i.test(work.title) || /^IX\./i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /^Arr\.\s*Manuel Tévar$/i.test(work.title))).toBe(false);
+    expect(facts.programText).toMatch(/Arr\.\s*Manuel Tévar/);
+  });
+
+  it('Mischa Maisky: Puccini, Saint-Saëns y Dvořák, sin I. Adagio como compositor', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-mischa-maisky.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const works = facts.works ?? [];
+
+    expect(composerNames.some((name) => /puccini/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /saint-s[aä]ens/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /dvor[aá]k/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /^I\.\s*Adagio$/i.test(name))).toBe(false);
+    expect(works.some((work) => /adagio/i.test(work.composerName ?? ''))).toBe(false);
+    expect(works.some((work) => /^Allegro molto$/i.test(work.title) && /adagio/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(works).toEqual(
+      expect.arrayContaining([
+        { title: 'Preludio Sinfónico', composerName: 'G. PUCCINI' },
+        { title: 'Concierto para violonchelo n.º 1', composerName: 'C. SAINT-SÄENS' },
+        { title: 'Sinfonía nº9 “Del Nuevo Mundo”', composerName: 'A. DVORÁK' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/I\. Adagio – Allegro molto/);
+  });
+
+  it('Thomas Ospital: conserva el programa y no inventa compositores ni obras', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-thomas-ospital.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerBlob = JSON.stringify(facts.composers ?? []);
+
+    expect(facts.programText).toMatch(/Improvisaciones sobre la película Amanecer \(1927\)/);
+    expect(facts.programText).toMatch(/Friedrich Wilhelm Murnau \(1888-1931\)/);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+    expect(composerBlob).not.toMatch(/Improvisaciones sobre la pel[ií]cula/i);
+    expect(composerBlob).not.toMatch(/Murnau/i);
+    expect(composerBlob).not.toMatch(/^de /i);
+  });
+
+  it('UAM Spark: encabezados de sección no se encadenan como composerName', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-uam-spark.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const works = facts.works ?? [];
+    const heading = /like a boho|rapsodia roman[ií]|baile y enso[nñ]aci[oó]n|flauta bohemia|fascinaci[oó]n carmen|utop[ií]as|^overture$/i;
+
+    expect(composerNames.some((name) => heading.test(name))).toBe(false);
+    expect(works.some((work) => heading.test(work.composerName ?? ''))).toBe(false);
+    expect(works.some((work) => heading.test(work.title))).toBe(false);
+    expect(composerNames.some((name) => /poulenc/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /delibes/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /nyman/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /bartmann/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /kats-chernin/i.test(name))).toBe(true);
+    expect(works).toEqual(
+      expect.arrayContaining([
+        { title: 'Toccata FP 48:3 (1928)', composerName: 'Francis Poulenc (1899-1963)' },
+        { title: 'Chasing Sheep is best left to Shepherds (1982)', composerName: 'Michael Nyman (1944-)' },
+        { title: 'Bohemian Suite (2025/26)', composerName: 'Adam Ilyas Kuruc (1984-)' },
+        { title: 'Fast Blue Village (2022)', composerName: 'Elena Kats-Chernin (1957-)' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/LIKE A BOHO/);
+    expect(facts.programText).toMatch(/RAPSODIA ROMANÍ/);
+  });
+
+  it('un movimiento con guion no abre un compositor; un contemporáneo con años sí', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Sinfonía y estreno', [
+        'G. VERDI<br />Sinfonía en Re<br />I. Adagio – Allegro molto<br />II. Largo<br />Marina Vespertilio (1991)<br />Nocturno de los tilos, op. 8',
+      ]),
+    );
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    expect(composerNames.some((name) => /^I\.\s*Adagio$/i.test(name))).toBe(false);
+    expect(facts.works?.some((work) => /adagio/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Sinfonía en Re', composerName: 'G. VERDI' },
+        { title: 'Nocturno de los tilos, op. 8', composerName: 'Marina Vespertilio (1991)' },
+      ]),
+    );
+  });
+
+  it('un encabezado en mayúsculas no se convierte en compositor de la línea siguiente', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Ciclo de cámara', [
+        'Programa<br />FIRST GROUPING<br />Marina Vespertilio (1991)<br />Nocturno de los tilos, op. 8<br />SECOND GROUPING<br />JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud',
+      ]),
+    );
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    expect(composerNames.some((name) => /first grouping|second grouping/i.test(name))).toBe(false);
+    expect(facts.works?.some((work) => /grouping/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works?.some((work) => /grouping/i.test(work.title))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Nocturno de los tilos, op. 8', composerName: 'Marina Vespertilio (1991)' },
+        { title: 'Kaerlud', composerName: 'JAVIER MARTÍNEZ CAMPOS (1989)' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/FIRST GROUPING/);
+  });
+
+  it('una frase descriptiva con año y de Autor no fabrica composers ni works', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Improvisación de órgano', [
+        'THOMAS EJEMPLO órgano<br />Variaciones sobre una película muda (1927), de Un Director De Cine (1888-1931)',
+      ]),
+    );
+    expect(facts.programText).toMatch(/Variaciones sobre una película muda \(1927\)/);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+  });
+
+  it('Anónimo corta el compositor sticky: Soberana María no hereda a José de San Juan', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('CNDM. Cantoría', [
+        [
+          'CANTORÍA',
+          'José de San Juan (1687-1735)',
+          '¡A la fiesta, zagales! (1728)',
+          'Anónimo (s. XVII)',
+          'Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)',
+          'J. de San Juan',
+          'De repiques de campanas (1734)',
+        ].join('<br />'),
+      ]),
+    );
+    const soberana = facts.works?.find((work) => /Soberana Mar[ií]a/i.test(work.title));
+    const fiesta = facts.works?.find((work) => /A la fiesta, zagales/i.test(work.title));
+    const repiques = facts.works?.find((work) => /De repiques de campanas/i.test(work.title));
+
+    expect(fiesta?.composerName).toMatch(/Jos[eé] de San Juan/i);
+    expect(soberana).toEqual(expect.objectContaining({ title: expect.stringMatching(/Soberana Mar[ií]a/i) }));
+    expect(soberana?.composerName ?? '').not.toMatch(/San Juan/i);
+    expect(facts.works?.some((work) => /Soberana Mar[ií]a/i.test(work.title) && /San Juan/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(repiques?.composerName).toMatch(/San Juan/i);
+    expect(facts.works?.some((work) => /^An[oó]nimo/i.test(work.title))).toBe(false);
+  });
+
+  it('Tradicional de… corta el compositor sticky y no se publica como composerName', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage("CNDM. L’Arpeggiata", [
+        [
+          'A. Mudarra',
+          'Claros y frescos ríos (Tres libros de música en cifras para vihuela, 1546)',
+          'Agustín Rivas Chupacaña',
+          'Coplas-Yo vengo regando flores (merengue venezolano)',
+          'Tradicional de Venezuela',
+          'Que me entierren en un arpa (joropo llanero)',
+          'A. Mudarra',
+          'Si me llaman (Tres libros de música en cifras para vihuela, 1546)',
+          'Tradicional de Venezuela',
+          'Pajarito (joropo llanero)',
+          'Ignacio ‘Indio’ Figueredo (1899-1995)',
+          'El gavilán (joropo llanero)',
+        ].join('<br />'),
+      ]),
+    );
+    const coplas = facts.works?.find((work) => /Yo vengo regando flores/i.test(work.title));
+    const arpa = facts.works?.find((work) => /Que me entierren en un arpa/i.test(work.title));
+    const siMeLlaman = facts.works?.find((work) => /^Si me llaman/i.test(work.title));
+    const pajarito = facts.works?.find((work) => /^Pajarito/i.test(work.title));
+    const gavilan = facts.works?.find((work) => /El gavil[aá]n/i.test(work.title));
+
+    expect(coplas?.composerName).toMatch(/Agust[ií]n Rivas/i);
+    expect(arpa).toEqual(expect.objectContaining({ title: expect.stringMatching(/Que me entierren en un arpa/i) }));
+    expect(arpa?.composerName ?? '').not.toMatch(/Rivas/i);
+    expect(siMeLlaman?.composerName).toMatch(/Mudarra/i);
+    expect(pajarito).toEqual(expect.objectContaining({ title: expect.stringMatching(/^Pajarito/i) }));
+    expect(pajarito?.composerName ?? '').not.toMatch(/Mudarra/i);
+    expect(facts.works?.some((work) => /Indio.*Figueredo|Figueredo/i.test(work.title))).toBe(false);
+    expect(gavilan).toEqual(expect.objectContaining({ title: expect.stringMatching(/El gavil[aá]n/i) }));
+    expect(gavilan?.composerName).toMatch(/Figueredo/i);
+    expect(facts.composers?.some((item) => /^Tradicional/i.test(item.name))).toBe(false);
+    expect(facts.works?.some((work) => /^Tradicional/i.test(work.title))).toBe(false);
+  });
+
+  it('un concepto Monteverdi y Schütz: subtítulo no es una obra de Monteverdi', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Universo Barroco', [
+        [
+          'Monteverdi y Schütz: la huella veneciana',
+          'Claudio Monteverdi',
+          'Vespro della Beata Vergine',
+          'Heinrich Schütz (1585-1672)',
+          'Musikalische Exequien',
+        ].join('<br />'),
+      ]),
+    );
+    expect(facts.works?.some((work) => /huella veneciana/i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /^y Schütz/i.test(work.title))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: expect.stringMatching(/Vespro della Beata Vergine/i),
+          composerName: expect.stringMatching(/Monteverdi/i),
+        }),
+        expect.objectContaining({
+          title: expect.stringMatching(/Musikalische Exequien/i),
+          composerName: expect.stringMatching(/Schütz|Schutz/i),
+        }),
+      ]),
+    );
+    expect(parseAuditorioNacionalDetail(
+      auditorioPage('Excelentia', ['Mozart: Divertimento en Re mayor, K. 136']),
+    ).works).toEqual([
+      { title: 'Divertimento en Re mayor, K. 136', composerName: 'Mozart' },
+    ]);
+  });
+
+  it('quita la llamada de nota **+ del título y conserva Composer: Obra y agrupación normal', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Liceo de Cámara', [
+        [
+          'Raquel García-Tomás (1984)',
+          'Cuarteto para saxofones, op. 126 **+ (2026)',
+          'Johann Sebastian Bach (1685-1750)',
+          'El clave bien temperado, libro I',
+          'Suite francesa n.º 5',
+        ].join('<br />'),
+      ]),
+    );
+    const quartet = facts.works?.find((work) => /Cuarteto para saxofones/i.test(work.title));
+    expect(quartet?.title).toBe('Cuarteto para saxofones, op. 126 (2026)');
+    expect(quartet?.title).not.toMatch(/\*\*/);
+    expect(quartet?.title).not.toMatch(/\+/);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        {
+          title: 'El clave bien temperado, libro I',
+          composerName: 'Johann Sebastian Bach (1685-1750)',
+        },
+        { title: 'Suite francesa n.º 5', composerName: 'Johann Sebastian Bach (1685-1750)' },
+      ]),
+    );
+  });
 });
 
 describe('parser de ficha Teatro Real', () => {
+  it('la dirección coral es dirección musical y una entidad mixta conserva rol ambiguo', () => {
+    expect(resolvePerformerRole('dirección del coro')).toBe('conductor');
+    expect(resolvePerformerRole('director del coro')).toBe('conductor');
+    expect(resolvePerformerRole('Coro y Orquesta')).toBeUndefined();
+  });
+  it('rechaza sinopsis de Gioconda como reparto y separa solistas inline de la Novena', () => {
+    const html = (intro: string) => `<div class="wrap-content-hero"><h4>Ópera</h4></div><div class="back-image"></div><section class="text-intro-show"><div class="wrap-text-free"><p>Programa musical.</p><hr />${intro}<div class="text-collapsible-cover"></div></div></section>`;
+    const gioconda = parseTeatroRealDetail(html('<p>Dramma lirico en cuatro actos.</p><p>Estrenada en el Teatro Alla Scala de Milán el 8 de abril de 1876.</p><p>Estrenada el 7 de febrero de 1884 en el Teatro Real.</p><p>Música de Amilcare Ponchielli.</p>'));
+    expect(gioconda.performers).toEqual([]);
+    expect(gioconda.composers).toEqual([{ name: 'Amilcare Ponchielli' }]);
+    const novena = parseTeatroRealDetail(html('<p>SOCIEDAD CORAL EXCELENTIA DE MADRID<br />ORQUESTA CLÁSICA SANTA CECILIA<br />Director, Kynan Johns Ruth Terán, Soprano Eduardo Sandoval, Tenor Olga Syniakova, mezzo David Cervera, bajo</p>'));
+    expect(novena.performers?.map((item) => item.name)).toEqual(expect.arrayContaining([
+      'Kynan Johns', 'Ruth Terán', 'Eduardo Sandoval', 'Olga Syniakova', 'David Cervera',
+    ]));
+
+    const mixed = parseTeatroRealDetail(html('<p>Coro y Orquesta Titulares del Teatro Real</p><p>José Luis Basso, dirección del coro</p><p>Klangforum Wien</p><p>Ensemble Les Surprises</p>'));
+    const mixedEntity = mixed.performers?.find((item) => item.name === 'Coro y Orquesta Titulares del Teatro Real');
+    expect(mixedEntity?.roleText).toBeUndefined();
+    expect(mixed.performers).toEqual(expect.arrayContaining([
+      { name: 'José Luis Basso', roleText: 'dirección del coro' },
+      { name: 'Klangforum Wien' },
+      { name: 'Ensemble Les Surprises' },
+    ]));
+  });
   it('extrae descripción, categoría, performers, programa y obras del excerpt', async () => {
     const html = await readFile(path.join(detailDir, 'teatro-real-concierto-navidad.excerpt.html'), 'utf8');
     const facts = parseTeatroRealDetail(html);
@@ -682,6 +1637,25 @@ describe('parser de ficha Teatro Real', () => {
       'J. Feliciano',
       'F. Sinatra',
     ]);
+  });
+
+  it('un paréntesis de catálogo no es compositor y un nombre entre paréntesis sí', () => {
+    const html = `
+      <article>
+        <h1>Xabier Anduaga</h1>
+        <ul>
+          <li>Sleigh Ride (L. Anderson)</li>
+          <li>Pavane pour une infante défunte (M 19)</li>
+        </ul>
+      </article>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.works).toEqual([
+      { title: 'Sleigh Ride', composerName: 'L. Anderson' },
+      { title: 'Pavane pour une infante défunte (M 19)' },
+    ]);
+    expect(facts.composers?.map((item) => item.name)).toEqual(['L. Anderson']);
+    expect(facts.works?.some((work) => work.composerName === 'M 19')).toBe(false);
   });
 
   it('en una ficha Drupal conserva el programa como texto y no adivina obras de un párrafo suelto', () => {
@@ -713,12 +1687,40 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.description).toMatch(/orquesta sinfónica/);
     expect(facts.programText).toMatch(/Sleigh Ride/);
     expect(facts.performers).toEqual([
-      { name: 'ORQUESTA CLÁSICA SANTA CECILIA' },
+      { name: 'ORQUESTA CLÁSICA SANTA CECILIA', roleText: 'orquesta' },
       { name: 'Kynan Johns', roleText: 'director' },
       { name: 'Francesco Castoro', roleText: 'tenor' },
     ]);
     expect(facts.works).toEqual([]);
     expect(facts.composers).toEqual([]);
+  });
+
+  it('extrae el reparto actual cuando Teatro Real publica cada crédito en un párrafo', () => {
+    const html = `
+      <div class="wrap-content-hero">
+        <h4>Conciertos</h4>
+        <h1>Xabier Anduaga</h1>
+      </div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free collapsible-mobile">
+          <p>Arias de óperas de Giuseppe Verdi, Gaetano Donizetti, Charles Gounod y Jules Massenet.</p>
+          <hr />
+          <p><strong>Xabier Anduaga</strong>, tenor</p>
+          <p><strong>Julio García Vico</strong>, dirección musical</p>
+          <p><strong>Orquesta Titular del Teatro Real</strong></p>
+          <hr />
+          <p><strong>Programa musical</strong></p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.performers).toEqual([
+      { name: 'Xabier Anduaga', roleText: 'tenor' },
+      { name: 'Julio García Vico', roleText: 'dirección musical' },
+      { name: 'Orquesta Titular del Teatro Real', roleText: 'orquesta' },
+    ]);
   });
 
   it('si la ficha pospone el concierto, usa la fecha nueva y no la original', () => {
@@ -739,7 +1741,7 @@ describe('parser de ficha Teatro Real', () => {
       </section>
     `;
     const facts = parseTeatroRealDetail(html);
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences?.[0]?.date).toBe('2026-09-13');
   });
 
@@ -835,6 +1837,86 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.composers).toEqual([{ name: 'Vincenzo Bellini' }]);
   });
 
+  it('no fusiona el crédito de música con el libreto ni con varios nombres', () => {
+    const libretto = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>El barbero de Sevilla</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Música</strong> de Gioachino Rossini Libreto de Cesare Sterbini, basado en El barbero de Sevilla Versión para la infancia.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(libretto.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+
+    const english = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>The Barber of Seville</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Music</strong> Gioachino Rossini</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(english.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+
+    const listed = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Recital</h4><h1>He Who Loves Beauty</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Música</strong> de Benjamin Britten, Henry Purcell y John Dowland.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(listed.composers).toEqual([
+      { name: 'Benjamin Britten' },
+      { name: 'Henry Purcell' },
+      { name: 'John Dowland' },
+    ]);
+  });
+
+  it('no trata Música y danza ni géneros como crédito musical, y limpia Music anidado', () => {
+    const category = (paragraph: string) =>
+      parseTeatroRealDetail(`
+        <div class="wrap-content-hero"><h4>Música</h4><h1>Pequeño concierto de Año Nuevo</h1></div>
+        <div class="back-image"></div>
+        <section class="text-intro-show">
+          <div class="wrap-text-free">
+            <p>${paragraph}</p>
+            <div class="text-collapsible-cover"></div>
+          </div>
+        </section>
+        <section class="functions-show">
+          <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+        </section>
+      `);
+
+    expect(category('Música y danza').composers).toEqual([]);
+    expect(category('Música clásica').composers).toEqual([]);
+    expect(category('Música contemporánea').composers).toEqual([]);
+    expect(category('<strong>Música</strong> de Music Gioachino Rossini (1792-1868).').composers).toEqual([
+      { name: 'Gioachino Rossini' },
+    ]);
+    expect(category('<strong>Música</strong> de Giacomo Puccini (1858-1924).').composers).toEqual([
+      { name: 'Giacomo Puccini' },
+    ]);
+    expect(category('<strong>Music</strong> by Benjamin Britten').composers).toEqual([{ name: 'Benjamin Britten' }]);
+    expect(category('<strong>Música</strong>: Vincenzo Bellini').composers).toEqual([{ name: 'Vincenzo Bellini' }]);
+  });
+
   it('no inventa un programa a partir del título', () => {
     const facts = parseTeatroRealDetail(
       '<article><h1>CONCIERTO DE NAVIDAD</h1><p>También en el Real</p></article>',
@@ -845,10 +1927,189 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.categoryText).toBe('También en el Real');
   });
 
+  it('conserva Sala Pacífico y Sala Principal del Retiro cuando la ficha las nombra', () => {
+    const pacifico = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>El Real Junior</h4><h1>¿Te suena Tannhäuser, de R. Wagner?</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Taller musical en familia.</p>
+          <p><strong>SALA PACÍFICO</strong> Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+      </section>
+    `);
+    expect(pacifico.venueText).toBe('Sala Pacífico Real Teatro de Retiro');
+
+    const principal = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>El Real Junior</h4><h1>Las bodas de Fígaro, de W.A Mozart</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera para niños y jóvenes.</p>
+          <p>SALA PRINCIPAL Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+      </section>
+    `);
+    expect(principal.venueText).toBe('Sala Principal Real Teatro de Retiro');
+  });
+
+  it('sigue leyendo Sala Principal del coliseo cuando no hay frase de Retiro', () => {
+    const facts = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>Tannhäuser</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera de Richard Wagner.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(facts.venueText).toBe('Sala Principal');
+  });
+
   it('falla si el HTML no es una ficha reconocible', () => {
     expect(() => parseTeatroRealDetail('<div class="home">Teatro Real</div>')).toThrow(/estructura esperada/);
   });
+
+  it('extrae Desde N euros del span ticket-col-2 y lo clasifica como paid', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/selection/event/date?productId=1">
+          <span class="ticket-col-1">Compra tus entradas</span>
+          <span class="ticket-col-2">Desde 15 euros</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Recital de canción lírica.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Desde 15 euros');
+    expect(resolveAccess(facts.accessText).value).toBe('paid');
+  });
+
+  it('prefiere el párrafo Precio de la intro frente al Desde del ticket', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/x">
+          <span class="ticket-col-1">Compra tus entradas</span>
+          <span class="ticket-col-2">Desde 8 euros</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Taller para bebés y familias.</p>
+          <p><strong>Precio</strong><br />Bebés entre 0 y 2 años: 1€<br />General: 8€</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toMatch(/^Precio\b/);
+    expect(facts.accessText).toMatch(/1€/);
+    expect(facts.accessText).toMatch(/8€/);
+    expect(resolveAccess(facts.accessText).value).toBe('paid');
+  });
+
+  it('extrae gratuidad explícita del párrafo Precio', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Concierto didáctico.</p>
+          <p><strong>Precio</strong><br />Entrada gratuita</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Precio Entrada gratuita');
+    expect(resolveAccess(facts.accessText).value).toBe('free');
+  });
+
+  it('conserva la gratuidad con reserva previa como evidencia observada', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ensayo abierto.</p>
+          <p><strong>Precio</strong><br />Gratuito con reserva previa</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Precio Gratuito con reserva previa');
+    expect(resolveAccess(facts.accessText).value).toBe('free');
+  });
+
+  it('un botón Compra tus entradas sin precio no es evidencia de acceso', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/x">
+          <span class="ticket-col-1">Compra tus entradas</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera en cuatro actos.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
+
+  it('sin ticket ni párrafo Precio conserva unknown', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera de Richard Wagner.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
+
+  it('no inventa acceso a partir de Abonos, letras de zona o Comprar Entradas del calendario de funciones', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>El Mesías de Händel.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <div class="functions-show__block--item-prices">Abonos A Comprar Entradas Ver más</div>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
 });
+
+function teatroRealFicha(inner: string): string {
+  return `
+    <div class="wrap-content-hero">
+      <h4>Conciertos</h4>
+      <h1>Recital</h1>
+    </div>
+    <div class="back-image"></div>
+    ${inner}
+    <section class="functions-show">
+      <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+    </section>
+  `;
+}
 
 describe('parser de ficha Madrid Datos', () => {
   it('extrae descripción ampliada, intérpretes y compositores del excerpt renacentista', async () => {
@@ -993,8 +2254,21 @@ describe('normalización de hechos observados', () => {
     expect(normalized?.programText).toBe('Mahler 2');
     expect(normalized?.performers).toEqual([{ name: 'Kent Nagano', roleText: 'director' }]);
     expect(normalized?.works).toEqual([{ title: 'Sinfonía 2', composerName: 'Gustav Mahler' }]);
-    expect(
-      normalizeRawEvent({
+    const multiline = normalizeRawEvent({
+      sourceId: 'auditorio-nacional',
+      sourceUrl: 'https://example.org/evento',
+      observed: {
+        title: 'OCNE',
+        occurrences: [{ raw: '2026-09-18T19:30:00+02:00' }],
+        programText: 'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann\r\n\n  Ouverture GWV 473 de Ch. Graupner  \n\nConcierto para clave en la mayor BWV 1055 de J. S. Bach',
+        ...emptyObservedLists(),
+      },
+    });
+    expect(multiline?.programText).toBe(
+      'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann\nOuverture GWV 473 de Ch. Graupner\nConcierto para clave en la mayor BWV 1055 de J. S. Bach',
+    );
+    expect(multiline?.programText).toContain('\n');
+    expect(normalizeRawEvent({
         sourceId: 'x',
         sourceUrl: 'https://example.org/e',
         observed: {

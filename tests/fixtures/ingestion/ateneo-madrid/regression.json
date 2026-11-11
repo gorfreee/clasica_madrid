@@ -1,0 +1,43 @@
+{
+  "events": [
+    {
+      "id": 62059,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/javier-elorrieta-quinteto-2/",
+      "title": "JAVIER ELORRIETA QUINTETO",
+      "description": "<p><strong>Información y entradas (<a href=\"https://cafecentralmadrid.com/reservas/?event=javier-elorrieta-quinteto-ae74bfd5\">aquí</a>). Socios, código descuento en el Área del Socio. Cátedra Mayor. Pase: 19:30h.</strong></p>",
+      "start_date": "2026-09-17 19:30:00",
+      "end_date": "2026-09-17 19:30:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [
+        { "name": "Conciertos Ateneo-Café Central", "slug": "conciertos-ateneo-cafe-central" }
+      ],
+      "venue": [],
+      "organizer": []
+    },
+    {
+      "id": 63614,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/de-cadiz-a-la-habana/",
+      "title": "«De Cádiz a la Habana»",
+      "description": "<p><strong>Concierto y presentación del disco</strong></p><p><strong>Sección de Música. Presenta: Luis Ángel de Benito. Concertista:</strong><strong>&nbsp;Miguel Trápaga &#8211; autor. Cátedra Mayor. 11:30.</strong></p>",
+      "start_date": "2026-09-26 11:30:00",
+      "end_date": "2026-09-26 11:30:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [
+        { "name": "Concierto", "slug": "concierto" },
+        { "name": "Presentación del disco", "slug": "presentacion-del-disco" }
+      ],
+      "venue": [],
+      "organizer": []
+    }
+  ],
+  "total": 2,
+  "total_pages": 1
+}

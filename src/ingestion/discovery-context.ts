@@ -197,6 +197,15 @@ export const DISCOVERY_EVIDENCE_INSTRUCTIONS: readonly string[] = [
   'No devolver eligibility, kind, eras o formats como hechos observados.',
   'Si hay rastro de búsqueda (URL de resultados, etc.), indicarlo en foundVia aparte de la URL de evidencia.',
   'Cuando la ficha oficial publique programa, compositores u obras, capturarlos con exhaustividad razonable; no detenerse tras una sola señal suficiente para eligibility.',
+  'Si existe ficha de detalle (no sólo la agenda/listado), ábrela y extrae de ahí. Una URL de listing (/agenda, /eventos, homepage, /actividades/conciertos-de-tarde) puede respaldar varios eventos: una observación por concierto, no una sola ficha genérica.',
+  'Cuando encuentres una agenda, ciclo o página con varios eventos, recorre todos los de la ventana (incluida paginación/load-more) y reconcilia cada uno como submitted / already-covered / excluded / unresolved en listingReviews. Extraer una ficha individual no cierra el listing.',
+  'Si al reconciliar un listing oficial el HTML parece incompleto, desactualizado, contradictorio o mezcla programación pasada y futura, y hay PDFs, programas de temporada, folletos, calendarios u otros documentos oficiales relevantes, consúltalos antes de marcar unresolved o insufficient-evidence. No rastrees todos los PDFs de la web: sólo cuando la fuente principal deja dudas o hay indicios de programación complementaria.',
+  'Ejecutar pasadas deliberadamente distintas: superficies amplias de alto recall, long tail por ecosistemas y búsquedas por vocabulario musical que no dependan sólo de “música clásica”. Declararlas de forma compacta en research.searchPasses.',
+  'Si una primera investigación amplia produce aproximadamente 0–4 observaciones tras revisar unos 40–50 candidatos o más, no cerrar: ejecutar una pasada recovery con nuevas superficies, tipologías, términos, festivales/programaciones institucionales o coverage gaps. Un batch pequeño sigue siendo válido después de esa diversificación.',
+  'Una source de sources.harvested no se barre sistemáticamente como si careciera de adapter, pero tampoco se ignora: un evento descubierto por otra superficie y ausente de coveredEvents puede enviarse como adapter coverage gap candidate.',
+  'La cobertura temporal se deriva de window: antes de cerrar, comprueba que ningún mes civil de la ventana (incluidos los parciales de inicio y final) haya quedado sin explorar. Agrupa búsquedas; no hace falta categoría × mes.',
+  'Si el lugar puede ser nuevo, investigar y aportar nombre canónico, municipio, area, dirección física suficiente y URL oficial del lugar cuando exista. Un venue nuevo sin localización suficiente no debe proponerse como publicable.',
+  'Incluir un DiscoveryResearchManifest en research (diagnóstico de cobertura de la búsqueda). No es dato de catálogo.',
   'En hosts compartidos (output.sharedSourceHosts), source.homepage debe ser el perfil de esa organización, no el origin de la plataforma.',
 ];
 
@@ -222,8 +231,9 @@ export const DISCOVERY_OUTPUT_CONTRACT: DiscoveryContext['output'] = {
   notes: [
     'Sólo hechos observados. El pipeline decide eligibility, kind, eras, formats, slugs e ids.',
     'Incluir siempre performers, composers y works; [] si la fuente no los declara.',
-    'venue es opcional; para publicar un lugar nuevo hacen falta name, municipality y area coherentes.',
+    'venue es opcional; para publicar un lugar nuevo hacen falta name, municipality, area coherentes y una dirección física suficiente. Sin localización suficiente no se propone como publicable.',
     'foundVia es rastro de búsqueda, no source canónica ni primarySource.',
+    'research es un DiscoveryResearchManifest diagnóstico; no influye en eligibility ni publicación. searchPasses, listingReviews y windowMonthsSearched son opcionales por compatibilidad y también diagnósticos; una investigación actual debe declararlos cuando correspondan.',
     'En un host compartido, no usar el origin de la plataforma como identidad de source.',
   ],
 };

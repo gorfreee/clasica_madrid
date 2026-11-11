@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_ioanna_kazoglou_20261022",
+  "slug": "festival-internacional-de-guitarra-andres-segovia-2026-concierto",
+  "title": "Ioanna Kazoglou — Festival Internacional de Guitarra Andrés Segovia",
+  "status": "scheduled",
+  "venueId": "ven_museo_historia_madrid_capilla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_ioanna_kazoglou_20261022_01",
+      "date": "2026-10-22",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ioanna Kazoglou",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=2bc7fb59df1f0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-21",
+      "externalId": "50437934"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-21"
+}

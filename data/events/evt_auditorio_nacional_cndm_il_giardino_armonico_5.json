@@ -17,34 +17,34 @@
   ],
   "performers": [
     {
-      "name": "IL GIARDINO ARMONICO"
+      "name": "Il Giardino Armonico"
     },
     {
-      "name": "GIOVANNI ANTONINI",
+      "name": "Giovanni Antonini",
       "role": "conductor"
     },
     {
-      "name": "ANETT FRITSCH"
+      "name": "Anett Fritsch"
     },
     {
-      "name": "JULIA LEZHNEVA"
+      "name": "Julia Lezhneva"
     },
     {
-      "name": "LUCILE RICHARDOT"
+      "name": "Lucile Richardot"
     },
     {
-      "name": "KRYSTIAN ADAM"
+      "name": "Krystian Adam"
     }
   ],
   "composers": [
     {
-      "name": "George Frideric Haendel (1685-1759)"
+      "name": "Georg Friedrich Händel"
     }
   ],
   "works": [
     {
       "title": "Il trionfo del Tempo e del Disinganno, HWV 46a (1707)",
-      "composerName": "George Frideric Haendel (1685-1759)"
+      "composerName": "Georg Friedrich Händel"
     }
   ],
   "eras": [
@@ -60,7 +60,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-il-giardino-armonico-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-il-giardino-armonico-5"
     },
     {
@@ -71,5 +71,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

@@ -1,7 +1,29 @@
 import type { Format } from '../../lib/schemas/taxonomies.ts';
-import type { ObservedFacts } from '../observed.ts';
-import { fieldFolded, foldName, formatHaystack, hasPhrase, hasWord } from './text.ts';
-import type { Resolution } from './types.ts';
+import type { ObservedFacts, ObservedPerson } from '../observed.ts';
+import {
+  evidenceHasPhrase,
+  evidenceHasWord,
+  fieldFolded,
+  foldName,
+  formatEvidence,
+  hasPhrase,
+  hasWord,
+  type FormatEvidence,
+  eligibilityTextFields,
+  isBiographicalClause,
+  narrativeClauses,
+  popularSongbookRepertoire,
+} from './text.ts';
+import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
+import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
+import type { DeterministicStrength, Resolution } from './types.ts';
+
+type FormatHit = {
+  format: Format;
+  ruleId: string;
+  evidence: string;
+  strength: 'strong' | 'weak';
+};
 
 const FORMAT_ORDER: Format[] = [
   'opera',
@@ -17,37 +39,7 @@ const FORMAT_ORDER: Format[] = [
 ];
 
 export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
-  const haystack = formatHaystack(facts);
-  const hits: Array<{ format: Format; ruleId: string; evidence: string }> = [];
-
-  if (isOperaFormat(facts, haystack)) {
-    hits.push({ format: 'opera', ruleId: 'opera-format', evidence: facts.categoryText ?? facts.title });
-  }
-  if (isZarzuelaFormat(facts, haystack)) {
-    hits.push({ format: 'zarzuela', ruleId: 'zarzuela-format', evidence: facts.title });
-  }
-  if (isOrganFormat(facts, haystack)) {
-    hits.push({ format: 'organ', ruleId: 'organ-format', evidence: organEvidence(facts) });
-  }
-  if (isChoralFormat(facts, haystack)) {
-    hits.push({ format: 'choral', ruleId: 'choral-format', evidence: choralEvidence(facts) });
-  }
-  if (isSymphonicFormat(facts, haystack)) {
-    hits.push({ format: 'symphonic', ruleId: 'symphonic-format', evidence: orchestraEvidence(facts) });
-  }
-  if (isChamberFormat(facts, haystack)) {
-    hits.push({ format: 'chamber', ruleId: 'chamber-format', evidence: chamberEvidence(facts) });
-  }
-  if (isRecitalFormat(facts, haystack, hits.map((item) => item.format))) {
-    hits.push({ format: 'recital', ruleId: 'recital-format', evidence: recitalEvidence(facts) });
-  }
-  if (isEarlyMusicFormat(facts, haystack)) {
-    hits.push({ format: 'early-music', ruleId: 'early-music-format', evidence: facts.categoryText ?? facts.title });
-  }
-  if (isLiedFormat(facts, haystack)) {
-    hits.push({ format: 'lied', ruleId: 'lied-format', evidence: facts.title });
-  }
-
+  const hits = collectFormatHits(facts);
   const unique = uniqueFormats(hits.map((item) => item.format));
   if (unique.length === 0) {
     return {
@@ -55,6 +47,16 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
       method: 'fallback',
       ruleId: 'formats-insufficient',
       evidence: [],
+      strength: 'unresolved',
+    };
+  }
+  if (unique.length > 1 && observedFormatChoiceIsUnresolved(facts)) {
+    return {
+      value: [],
+      method: 'fallback',
+      ruleId: 'formats-exclusive-alternatives',
+      evidence: [...new Set(hits.map((item) => item.evidence).filter(Boolean))],
+      strength: 'unresolved',
     };
   }
   return {
@@ -62,48 +64,239 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
     method: 'rule',
     ruleId: hits[0]!.ruleId,
     evidence: [...new Set(hits.map((item) => item.evidence).filter(Boolean))],
+    strength: overallFormatStrength(hits),
   };
 }
 
-function isOperaFormat(facts: ObservedFacts, haystack: string): boolean {
+/** Formats backed by an unequivocal identity signal. AI must retain these. */
+export function strongFormatValues(facts: ObservedFacts): Format[] {
+  return uniqueFormats(
+    collectFormatHits(facts)
+      .filter((hit) => hit.strength === 'strong')
+      .map((hit) => hit.format),
+  );
+}
+
+function collectFormatHits(facts: ObservedFacts): FormatHit[] {
+  const evidence = formatEvidence(facts);
+  const hits: FormatHit[] = [];
+
+  if (isOperaFormat(facts, evidence)) {
+    hits.push({
+      format: 'opera',
+      ruleId: 'opera-format',
+      evidence: facts.categoryText ?? facts.title,
+      strength: operaStrength(facts),
+    });
+  }
+  if (isZarzuelaFormat(facts, evidence)) {
+    hits.push({
+      format: 'zarzuela',
+      ruleId: 'zarzuela-format',
+      evidence: facts.title,
+      strength: zarzuelaStrength(facts),
+    });
+  }
+  if (isOrganFormat(facts, evidence)) {
+    hits.push({
+      format: 'organ',
+      ruleId: 'organ-format',
+      evidence: organEvidence(facts),
+      strength: organStrength(facts, evidence),
+    });
+  }
+  if (isChoralFormat(facts, evidence)) {
+    hits.push({
+      format: 'choral',
+      ruleId: 'choral-format',
+      evidence: choralEvidence(facts),
+      strength: 'strong',
+    });
+  }
+  if (isSymphonicFormat(facts, evidence)) {
+    hits.push({
+      format: 'symphonic',
+      ruleId: 'symphonic-format',
+      evidence: orchestraEvidence(facts),
+      strength: 'strong',
+    });
+  }
+  if (isChamberFormat(facts, evidence)) {
+    hits.push({
+      format: 'chamber',
+      ruleId: 'chamber-format',
+      evidence: chamberEvidence(facts),
+      strength: chamberStrength(facts, evidence),
+    });
+  }
+  if (isRecitalFormat(facts, evidence, hits.map((item) => item.format))) {
+    hits.push({
+      format: 'recital',
+      ruleId: 'recital-format',
+      evidence: recitalEvidence(facts),
+      strength: recitalStrength(facts, evidence),
+    });
+  }
+  if (isEarlyMusicFormat(evidence)) {
+    hits.push({
+      format: 'early-music',
+      ruleId: 'early-music-format',
+      evidence: facts.categoryText ?? facts.title,
+      strength: earlyMusicStrength(evidence),
+    });
+  }
+  if (isLiedFormat(evidence)) {
+    const announced = identityAnnouncesLied(evidence.identity);
+    hits.push({
+      format: 'lied',
+      ruleId: 'lied-format',
+      evidence: announced ? facts.title || facts.categoryText || facts.seriesText || '' : facts.programText ?? '',
+      strength: announced ? 'strong' : 'weak',
+    });
+  }
+  return hits;
+}
+
+function overallFormatStrength(hits: FormatHit[]): DeterministicStrength {
+  if (hits.length === 0) return 'unresolved';
+  return hits.some((hit) => hit.strength === 'weak') ? 'weak' : 'strong';
+}
+
+function operaStrength(facts: ObservedFacts): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  const title = fieldFolded(facts.title);
+  if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) return 'strong';
+  const program = fieldFolded(facts.programText);
+  if (
+    hasPhrase(program, 'arias de opera') ||
+    hasPhrase(program, 'fragmentos de operas') ||
+    hasPhrase(program, 'fragmentos de opera')
+  ) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function zarzuelaStrength(facts: ObservedFacts): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  const title = fieldFolded(facts.title);
+  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) return 'strong';
+  const program = fieldFolded(facts.programText);
+  if (hasPhrase(program, 'romanzas de zarzuela') || hasPhrase(program, 'temas de zarzuela')) return 'strong';
+  return 'weak';
+}
+
+function organStrength(_facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  const eventFields = eventFieldsOf(evidence);
+  if (
+    evidenceHasPhrase(eventFields, 'conciertos de organo') ||
+    evidenceHasPhrase(eventFields, 'concierto de organo') ||
+    evidenceHasPhrase(eventFields, 'recital de organo') ||
+    evidenceHasPhrase(eventFields, 'ciclo internacional de organo') ||
+    (evidenceHasWord(eventFields, 'organo') &&
+      (evidenceHasWord(eventFields, 'concierto') ||
+        evidenceHasWord(eventFields, 'recital') ||
+        evidenceHasWord(eventFields, 'ciclo')))
+  ) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function chamberStrength(facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  if (isMusicalChamberCategory(category, evidence.identity)) return 'strong';
+  if (hasStrongChamberFormation(evidence.identity)) return 'strong';
+  if (hasPhrase(evidence.program, 'formato de camara')) return 'strong';
+  if (evidence.performers.some((text) => hasStrongChamberFormation(text))) return 'strong';
+  if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return 'strong';
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(`${item.name} ${item.roleText ?? ''}`), 'quinteto de cuerda'))) {
+    return 'strong';
+  }
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(item.name), 'chamber orchestra'))) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function recitalStrength(_facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  if (evidenceHasWord([evidence.identity, evidence.program], 'recital')) return 'strong';
+  return 'weak';
+}
+
+function earlyMusicStrength(evidence: FormatEvidence): 'strong' | 'weak' {
+  return hasEarlyMusicPhrase(eventFieldsOf(evidence)) ? 'strong' : 'weak';
+}
+
+/**
+ * Strong chamber is a named chamber series or an explicit chamber-music
+ * formation of THIS concert. Bare quinteto/trío/dúo/cuarteto in a title is
+ * only a weak size cue: it must not freeze format after a weak include,
+ * and it never decides eligibility.
+ */
+function hasStrongChamberFormation(text: string): boolean {
+  if (!text) return false;
+  return (
+    hasPhrase(text, 'cuarteto de cuerda') ||
+    hasPhrase(text, 'cuarteto de cuerdas') ||
+    hasPhrase(text, 'string quartet') ||
+    hasPhrase(text, 'liceo de camara') ||
+    hasPhrase(text, 'domingos de camara') ||
+    hasPhrase(text, 'musica de camara') ||
+    hasPhrase(text, 'festival de ensembles') ||
+    isChamberOrchestraName(text)
+  );
+}
+
+function isOperaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
   if (hasWord(category, 'taller')) return false;
-  // Same title/category signals as eligibility `opera-event` / `isOperaTitle`.
-  if (hasWord(category, 'opera') || hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title)) {
+  // Same category / event-title signals as eligibility `opera-event`.
+  // A bare "ópera" in a longer title is not enough; detail evidence decides.
+  if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) {
     return true;
   }
+  const genreFields = genreFieldsOf(evidence);
   return (
-    hasPhrase(haystack, 'arias de opera') ||
-    hasPhrase(haystack, 'dramma lirico') ||
-    hasPhrase(haystack, 'opera en') ||
-    (hasWord(haystack, 'opera') && hasWord(haystack, 'actos'))
+    evidenceHasPhrase(genreFields, 'arias de opera') ||
+    evidenceHasPhrase(genreFields, 'fragmentos de operas') ||
+    evidenceHasPhrase(genreFields, 'fragmentos de opera') ||
+    evidenceHasPhrase(genreFields, 'dramma lirico') ||
+    evidenceHasPhrase(genreFields, 'opera en') ||
+    (evidenceHasWord(genreFields, 'opera') && evidenceHasWord(genreFields, 'actos'))
   );
 }
 
-function isZarzuelaFormat(facts: ObservedFacts, haystack: string): boolean {
+function isZarzuelaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
-  return (
-    hasWord(category, 'zarzuela') ||
-    hasWord(title, 'zarzuela') ||
-    hasPhrase(haystack, 'de zarzuelas') ||
-    hasPhrase(haystack, 'zarzuela de')
-  );
+  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela') || hasWord(title, 'zarzuelita')) {
+    return true;
+  }
+  const genreFields = genreFieldsOf(evidence);
+  if (evidenceHasPhrase(genreFields, 'de zarzuelas') || evidenceHasPhrase(genreFields, 'zarzuela de')) {
+    return true;
+  }
+  // A listed work/program that names the piece as a zarzuela, not a biography.
+  return evidenceHasWord([evidence.identity, evidence.program], 'zarzuela');
 }
 
-function isOrganFormat(facts: ObservedFacts, haystack: string): boolean {
+function isOrganFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
+  const eventFields = eventFieldsOf(evidence);
   if (
-    hasPhrase(haystack, 'conciertos de organo') ||
-    hasPhrase(haystack, 'concierto de organo') ||
-    hasPhrase(haystack, 'recital de organo') ||
-    hasPhrase(haystack, 'ciclo internacional de organo')
+    evidenceHasPhrase(eventFields, 'conciertos de organo') ||
+    evidenceHasPhrase(eventFields, 'concierto de organo') ||
+    evidenceHasPhrase(eventFields, 'recital de organo') ||
+    evidenceHasPhrase(eventFields, 'ciclo internacional de organo')
   ) {
     return true;
   }
   if (
-    hasWord(haystack, 'organo') &&
-    (hasWord(haystack, 'concierto') || hasWord(haystack, 'recital') || hasWord(haystack, 'ciclo'))
+    evidenceHasWord(eventFields, 'organo') &&
+    (evidenceHasWord(eventFields, 'concierto') ||
+      evidenceHasWord(eventFields, 'recital') ||
+      evidenceHasWord(eventFields, 'ciclo'))
   ) {
     return true;
   }
@@ -113,8 +306,8 @@ function isOrganFormat(facts: ObservedFacts, haystack: string): boolean {
   });
 }
 
-function isChoralFormat(facts: ObservedFacts, haystack: string): boolean {
-  if (hasWord(haystack, 'oratorio')) return true;
+function isChoralFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
+  if (evidenceHasWord(genreFieldsOf(evidence), 'oratorio')) return true;
   if (isNamedWorkEvent(facts)) return false;
   const title = fieldFolded(facts.title);
   const category = fieldFolded(facts.categoryText);
@@ -139,63 +332,50 @@ function isChoralFormat(facts: ObservedFacts, haystack: string): boolean {
   });
 }
 
-function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
+function isSymphonicFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   if (isNamedWorkEvent(facts)) return false;
   const category = fieldFolded(facts.categoryText);
   if (hasWord(category, 'sinfonica') || hasWord(category, 'sinfonico')) return true;
-  if (hasPhrase(haystack, 'orquesta y coro') || hasPhrase(haystack, 'orquestra y coro')) return true;
-  if (hasSymphonySignal(haystack)) {
-    if (isChamberOrchestraName(haystack) && !hasSymphonyWord(haystack)) {
-      return false;
-    }
-    return true;
-  }
+  if (hasSymphonicEventWord(evidence.identity)) return true;
   if (
-    (hasWord(haystack, 'orquesta') || hasWord(haystack, 'orquestra') || hasWord(haystack, 'orchestra')) &&
-    !isChamberOrchestraName(haystack)
+    evidenceHasPhrase([evidence.identity, ...evidence.performers], 'orquesta y coro') ||
+    evidenceHasPhrase([evidence.identity, ...evidence.performers], 'orquestra y coro')
   ) {
     return true;
   }
-  const orchestra = facts.performers.some((item) => {
-    const role = fieldFolded(item.roleText);
-    const name = fieldFolded(item.name);
-    if (
-      hasWord(role, 'orquesta') ||
-      hasWord(name, 'orquesta') ||
-      hasWord(role, 'orquestra') ||
-      hasWord(name, 'orquestra') ||
-      hasWord(role, 'orchestra') ||
-      hasWord(name, 'orchestra')
-    ) {
-      return !hasWord(name, 'chamber') && !hasPhrase(name, 'camara') && !hasPhrase(name, 'cambra');
-    }
-    return false;
-  });
-  return orchestra;
+  if (hasOrchestraFormation(evidence.identity)) return true;
+  return facts.performers.some((item) => isOrchestraPerformer(item));
 }
 
-function isChamberFormat(facts: ObservedFacts, haystack: string): boolean {
+function isChamberFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   const category = fieldFolded(facts.categoryText);
-  if (isMusicalChamberCategory(category, haystack)) return true;
-  if (
-    hasWord(haystack, 'cuarteto') ||
-    hasWord(haystack, 'quinteto') ||
-    hasWord(haystack, 'sexteto') ||
-    hasWord(haystack, 'octeto') ||
-    hasWord(haystack, 'trio') ||
-    hasPhrase(haystack, 'liceo de camara') ||
-    hasPhrase(haystack, 'domingos de camara') ||
-    hasPhrase(haystack, 'musica de camara') ||
-    hasPhrase(haystack, 'festival de ensembles')
-  ) {
+  if (isMusicalChamberCategory(category, evidence.identity)) return true;
+  // A small jazz/pop group is not classical chamber music. Keep explicit
+  // chamber evidence in a mixed programme, but do not infer it from size.
+  const popularEnsemble = eligibilityTextFields(facts).some(({ field, value }) => {
+    const identity = field === 'title' || field === 'categoryText' || field === 'seriesText';
+    return narrativeClauses(value).some((clause) => !isBiographicalClause(clause) && (
+      popularSongbookRepertoire(fieldFolded(clause), identity)
+      || (identity && hasWord(fieldFolded(clause), 'jazz'))
+      || /\b(?:concierto|recital|repertorio) de jazz\b/.test(fieldFolded(clause))
+    ));
+  }) || evidence.performers.some((text) => hasWord(text, 'jazz') || hasWord(text, 'swing'));
+  if (popularEnsemble) {
+    return [evidence.identity, ...evidence.performers].some(hasStrongChamberFormation)
+      || hasPhrase(evidence.program, 'formato de camara');
+  }
+  if (hasChamberFormation(evidence.identity)) return true;
+  if (hasPhrase(evidence.program, 'formato de camara')) return true;
+  if (evidence.performers.some((text) => hasChamberFormation(text))) return true;
+  if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return true;
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(`${item.name} ${item.roleText ?? ''}`), 'quinteto de cuerda'))) {
     return true;
   }
-  if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return true;
   return facts.performers.some((item) => hasPhrase(fieldFolded(item.name), 'chamber orchestra'));
 }
 
-function isRecitalFormat(facts: ObservedFacts, haystack: string, already: Format[]): boolean {
-  if (hasWord(haystack, 'recital')) return true;
+function isRecitalFormat(facts: ObservedFacts, evidence: FormatEvidence, already: Format[]): boolean {
+  if (evidenceHasWord([evidence.identity, evidence.program], 'recital')) return true;
   if (already.includes('organ') && !already.includes('symphonic')) return true;
   const soloRoles = facts.performers.filter((item) => {
     const role = fieldFolded(item.roleText);
@@ -237,20 +417,60 @@ function isRecitalFormat(facts: ObservedFacts, haystack: string, already: Format
   return false;
 }
 
-function isEarlyMusicFormat(_facts: ObservedFacts, haystack: string): boolean {
+const EARLY_MUSIC_PHRASES = [
+  'universo barroco',
+  'musica antigua',
+  'musica barroca',
+  'musica medieval',
+  'musica renacentista',
+  'alte musik',
+  'historicamente informad',
+  'les arts florissants',
+  'les musiciens du louvre',
+] as const;
+
+function isEarlyMusicFormat(evidence: FormatEvidence): boolean {
+  return hasEarlyMusicPhrase(eventFieldsOf(evidence));
+}
+
+function hasEarlyMusicPhrase(fields: string[]): boolean {
+  return EARLY_MUSIC_PHRASES.some((phrase) => evidenceHasPhrase(fields, phrase));
+}
+
+/**
+ * A recital, cycle or programme announced as lied / lieder / mélodie is strong.
+ * The same word inside `programText` — typically one work title — is only a
+ * weak hint. Taxonomy may replace it; it must not freeze the concert format.
+ */
+function isLiedFormat(evidence: FormatEvidence): boolean {
+  return identityAnnouncesLied(evidence.identity) || programHintsLied(evidence.program);
+}
+
+function identityAnnouncesLied(identity: string): boolean {
+  return namesLiedGenre(identity);
+}
+
+function programHintsLied(program: string): boolean {
+  return namesLiedGenre(program);
+}
+
+function namesLiedGenre(text: string): boolean {
+  // A programme about the song *before* Lied explicitly places its repertoire
+  // outside that genre. Other positive genre mentions in the field still count.
+  text = text.replace(/\b(?:antes (?:del?|de los)|before(?: the)?)\s+lied(?:er)?\b/g, '');
   return (
-    hasPhrase(haystack, 'universo barroco') ||
-    hasPhrase(haystack, 'musica antigua') ||
-    hasPhrase(haystack, 'alte musik') ||
-    hasPhrase(haystack, 'historicamente informad') ||
-    hasPhrase(haystack, 'les arts florissants') ||
-    hasPhrase(haystack, 'les musiciens du louvre') ||
-    hasPhrase(haystack, 'musica antigua')
+    hasWord(text, 'lied') ||
+    hasWord(text, 'lieder') ||
+    hasWord(text, 'melodie') ||
+    hasWord(text, 'melodies')
   );
 }
 
-function isLiedFormat(_facts: ObservedFacts, haystack: string): boolean {
-  return hasWord(haystack, 'lied') || hasWord(haystack, 'lieder') || hasWord(haystack, 'melodie');
+export function onlyHistoricalLiedReference(facts: ObservedFacts): boolean {
+  const evidence = formatEvidence(facts);
+  const musicalFields = `${evidence.identity} ${evidence.program}`;
+  return /\b(?:antes (?:del?|de los)|before(?: the)?)\s+lied(?:er)?\b/.test(musicalFields)
+    && !namesLiedGenre(musicalFields);
 }
 
 function organEvidence(facts: ObservedFacts): string {
@@ -266,13 +486,7 @@ function choralEvidence(facts: ObservedFacts): string {
 }
 
 function orchestraEvidence(facts: ObservedFacts): string {
-  const orchestra = facts.performers.find(
-    (item) =>
-      hasWord(fieldFolded(item.roleText), 'orquesta') ||
-      hasWord(fieldFolded(item.name), 'orquesta') ||
-      hasWord(fieldFolded(item.roleText), 'orquestra') ||
-      hasWord(fieldFolded(item.name), 'orquestra'),
-  );
+  const orchestra = facts.performers.find((item) => isOrchestraPerformer(item));
   return orchestra?.name ?? facts.title;
 }
 
@@ -281,7 +495,7 @@ function chamberEvidence(facts: ObservedFacts): string {
     (item) =>
       hasWord(fieldFolded(item.roleText), 'cuarteto') ||
       hasWord(fieldFolded(item.roleText), 'ensemble') ||
-      hasWord(fieldFolded(item.name), 'cuarteto'),
+      hasChamberFormation(fieldFolded(item.name)),
   );
   return ensemble?.name ?? facts.categoryText ?? facts.title;
 }
@@ -296,40 +510,102 @@ function isNamedWorkEvent(facts: ObservedFacts): boolean {
   return foldName(facts.works[0].title) === foldName(facts.title);
 }
 
-function isChamberOrchestraName(haystack: string): boolean {
-  return (
-    hasPhrase(haystack, 'chamber orchestra') ||
-    hasPhrase(haystack, 'orquesta de camara') ||
-    hasPhrase(haystack, 'orquestra de cambra')
+function isOrchestraPerformer(item: ObservedPerson): boolean {
+  const role = fieldFolded(item.roleText);
+  const name = fieldFolded(item.name);
+  // A guitar orchestra is a guitar ensemble, not evidence of symphonic format.
+  // Even an adapter-provided generic "orquesta" role must not override its name.
+  if (isGuitarOrchestra(name) && !hasSymphonicEventWord(name)) return false;
+  if (isOrchestraMembersLabel(name) || isOrchestraMembersLabel(role)) return false;
+  if (isChamberOrchestraName(name) && !hasSymphonicEventWord(name)) return false;
+  if (isOrchestraRole(role)) return true;
+  return hasOrchestraFormation(name);
+}
+
+/** Role names the performing body as an orchestra, not a conductor of one. */
+function isOrchestraRole(role: string): boolean {
+  if (!role) return false;
+  if (hasWord(role, 'director') || hasWord(role, 'direccion') || hasWord(role, 'concertino')) {
+    return false;
+  }
+  return hasWord(role, 'orquesta') || hasWord(role, 'orquestra') || hasWord(role, 'orchestra');
+}
+
+function hasOrchestraFormation(text: string): boolean {
+  if (!text) return false;
+  if (isGuitarOrchestra(text) && !hasSymphonicEventWord(text)) return false;
+  if (isOrchestraMembersLabel(text)) return false;
+  if (isChamberOrchestraName(text) && !hasSymphonicEventWord(text)) return false;
+  return hasWord(text, 'orquesta') || hasWord(text, 'orquestra') || hasWord(text, 'orchestra');
+}
+
+function isGuitarOrchestra(text: string): boolean {
+  return /\b(?:orquesta|orquestra) de guitarras\b|\bguitar orchestra\b/.test(text);
+}
+
+function isOrchestraMembersLabel(text: string): boolean {
+  return /(?:solistas|miembros|musicos|concertino) de (?:la |el |the )?(?:orquesta|orquestra|orchestra)/.test(
+    text,
   );
 }
 
-function hasSymphonyWord(haystack: string): boolean {
+function isChamberOrchestraName(text: string): boolean {
   return (
-    hasWord(haystack, 'sinfonico') ||
-    hasWord(haystack, 'sinfonica') ||
-    hasWord(haystack, 'sinfonia') ||
-    hasWord(haystack, 'symphony')
+    hasPhrase(text, 'chamber orchestra') ||
+    hasPhrase(text, 'orquesta de camara') ||
+    hasPhrase(text, 'orquestra de cambra')
   );
 }
 
-function hasSymphonySignal(haystack: string): boolean {
-  return hasPhrase(haystack, 'orquesta sinfonica') || hasSymphonyWord(haystack);
+function hasSymphonicEventWord(text: string): boolean {
+  return (
+    hasWord(text, 'sinfonico') ||
+    hasWord(text, 'sinfonica') ||
+    hasWord(text, 'symphonic') ||
+    hasWord(text, 'symphony')
+  );
+}
+
+function hasChamberFormation(text: string): boolean {
+  if (!text) return false;
+  return (
+    hasWord(text, 'cuarteto') ||
+    hasWord(text, 'quartet') ||
+    hasWord(text, 'quartett') ||
+    hasWord(text, 'quinteto') ||
+    hasWord(text, 'sexteto') ||
+    hasWord(text, 'octeto') ||
+    hasWord(text, 'trio') ||
+    hasWord(text, 'duo') ||
+    hasPhrase(text, 'liceo de camara') ||
+    hasPhrase(text, 'domingos de camara') ||
+    hasPhrase(text, 'musica de camara') ||
+    hasPhrase(text, 'festival de ensembles') ||
+    isChamberOrchestraName(text)
+  );
 }
 
 /** Municipal / source category `camara` when the event is already musical. */
-function isMusicalChamberCategory(category: string, haystack: string): boolean {
+function isMusicalChamberCategory(category: string, identity: string): boolean {
   if (!hasWord(category, 'camara')) return false;
   if (hasPhrase(category, 'camara de comercio') || hasPhrase(category, 'camara de fotos')) return false;
   if (category === 'camara' || hasPhrase(category, 'musica de camara')) return true;
   return (
-    hasWord(haystack, 'concierto') ||
-    hasWord(haystack, 'musica') ||
-    hasWord(haystack, 'recital') ||
-    hasWord(haystack, 'cuarteto') ||
-    hasWord(haystack, 'orquesta') ||
-    hasWord(haystack, 'orquestra')
+    hasWord(identity, 'concierto') ||
+    hasWord(identity, 'musica') ||
+    hasWord(identity, 'recital') ||
+    hasWord(identity, 'cuarteto') ||
+    hasWord(identity, 'duo') ||
+    hasWord(identity, 'trio')
   );
+}
+
+function eventFieldsOf(evidence: FormatEvidence): string[] {
+  return [evidence.identity, ...evidence.performers, evidence.program];
+}
+
+function genreFieldsOf(evidence: FormatEvidence): string[] {
+  return [...eventFieldsOf(evidence), evidence.narrative];
 }
 
 function uniqueFormats(formats: Format[]): Format[] {

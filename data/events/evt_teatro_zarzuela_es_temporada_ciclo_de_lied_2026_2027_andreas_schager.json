@@ -17,21 +17,21 @@
   ],
   "performers": [
     {
-      "name": "ANDREAS SCHAGER *"
+      "name": "Andreas Schager"
     },
     {
-      "name": "GUILLERMO GARCÍA CALVO *"
+      "name": "Guillermo García Calvo"
     }
   ],
   "composers": [
     {
-      "name": "Franz Schubert (1797-1828)"
+      "name": "Franz Schubert"
     }
   ],
   "works": [
     {
       "title": "Die schöne Müllerin , D 795 (1823)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     }
   ],
   "eras": [
@@ -47,7 +47,7 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/andreas-schager",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/andreas-schager"
     },
     {
@@ -58,5 +58,5 @@
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

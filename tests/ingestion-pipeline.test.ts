@@ -61,14 +61,12 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 function emptyEutherpeListing(): string {
-  const cells = ['-']
-    .concat(Array.from({ length: 30 }, (_, index) => String(index + 1)))
-    .map((label) => `<div role="listitem" class="collection-item-5 w-dyn-item"><div class="dia"><a href="#" class="link-10">${label}</a></div><div class="bloque-info-concierto w-condition-invisible"></div></div>`)
-    .join('');
-  return `<html data-wf-domain="www.fundacioneutherpe.com"><body><h1>Programación de conciertos de la Sala Eutherpe</h1><div class="bloque-meses"><div class="septiembre-2026 w-slide"><a href="#" class="link-calendario-b">Septiembre / 2026</a><div class="calendario"><div class="collection-list-2 w-dyn-items">${cells}</div></div></div></div></body></html>`;
+  const cells = Array.from({ length: 30 }, (_, index) => `<div class="collection-item-5"><div class="dia"><a href="#" class="link-10">${index + 1}</a></div></div>`).join('');
+  return `<html data-wf-domain="www.fundacioneutherpe.com"><body><h1>Ciclo en Shigeru Kawai Center, Madrid 2027</h1><div class="bloque-meses"><div class="w-slide"><div class="link-calendario-b">Septiembre / 2026</div><div class="calendario">${cells}</div></div></div><div class="collection-list-wrapper w-dyn-list"><div class="w-dyn-empty"></div></div></body></html>`;
 }
 
 async function fixtureGet(url: string): Promise<string> {
+  if (url === 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid') return emptyEutherpeListing();
   if (url === 'https://www.circulobellasartes.com/eventos/') {
     return '<body class="archive category category-eventos category-63 fl-theme-builder-archive-categoria-evento-es"><h1>Eventos</h1><div class="fl-post-grid" itemscope="itemscope" itemtype="https://schema.org/Collection"></div><a class="fl-button" href="pasado/"><span class="fl-button-text">Ver el histórico de Eventos</span></a></body>';
   }
@@ -110,6 +108,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/tribe/events/v1/events')) {
     return '{"events":[],"total":0,"total_pages":0}';
   }
+  if (url === 'https://rcsmm.eu/eventos') {
+    return '<body class="path-eventos"><h1>Eventos</h1><div id="views-bootstrap-eventos-page-1"></div></body>';
+  }
   if (url === 'https://cndm.inaem.gob.es/' || url === 'https://cndm.inaem.gob.es') {
     return '<title>Centro Nacional de Difusión Musical</title>';
   }
@@ -120,14 +121,32 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/wp/v2/calendario-eventos')) {
     return '[]';
   }
+  if (url.includes('/categoria-eventos/conciertos/')) {
+    return '<div class="jet-listing-grid__items" data-pages="1"></div>';
+  }
   if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
     return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
   }
-  if (
-    url === 'https://www.fundacioneutherpe.com/programacion' ||
-    url === 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid'
-  ) {
-    return emptyEutherpeListing();
+  if (url === 'https://www.fundaciongoethe.org/es/eventos/') {
+    return '<html lang="es"><head><title>Eventos | Fundación Goethe España</title></head><body><h1 class="standardtitel">Nuestros próximos eventos</h1><ul class="divide-y divide-gray-300"></ul><h2 class="standardtitel">Eventos pasados</h2></body></html>';
+  }
+  if (url === 'https://www.madridatempo.com/proximos-conciertos') {
+    return readFile(path.join(fixtures, 'madrid-a-tempo/listing-empty.html'), 'utf8');
+  }
+  if (url === 'https://www.tala-producciones.es/salon-del-ateneo/') {
+    return readFile(path.join(fixtures, 'tala-producciones/listing-empty.html'), 'utf8');
+  }
+  if (url === 'https://www.fundacionmutua.es/cultura/conciertos/') {
+    return readFile(path.join(fixtures, 'fundacion-mutua/listing-empty.html'), 'utf8');
+  }
+  if (url.includes('corodecamarademadrid.com/wp-json/wp/v2/pages')) {
+    return JSON.stringify([{
+      id: 57,
+      slug: 'agenda',
+      link: 'https://www.corodecamarademadrid.com/agenda/',
+      title: { rendered: 'AGENDA 2026-2027' },
+      content: { rendered: '<p>No hay conciertos programados.</p>', protected: false },
+    }]);
   }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
@@ -231,8 +250,18 @@ describe('aislamiento de fallos por fuente', () => {
         return fixtureGet(url);
       },
     });
-    expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-eutherpe']);
+    expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
+      'teatro-real',
+      'patrimonio-nacional',
+      'escuela-reina-sofia',
+      'residencia-estudiantes',
+      'condeduque',
+      'ayto-san-lorenzo',
+      'culturalcala',
+      'orquesta-ciudad-getafe',
+      'fundacion-cultural-las-rozas',
+    ]);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial', 'fundacion-eutherpe']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -252,7 +281,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-eutherpe',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas', 'fundacion-eutherpe',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
@@ -598,7 +627,7 @@ describe('toCandidate y deduplicación', () => {
     expect(built.candidate?.event.access).toBe('paid');
   });
 
-  it('detecta un duplicado por externalId y por URL equivalente', () => {
+  it('exige reconciliación explícita para otro ID con externalId o URL equivalente', () => {
     const catalog = teatroCatalog();
     catalog.events.push(
       teatroEvent({
@@ -634,7 +663,8 @@ describe('toCandidate y deduplicación', () => {
       },
     ]);
     expect(byExternal.newEvents).toBe(0);
-    expect(byExternal.unchangedEvents).toBe(1);
+    expect(byExternal.unchangedEvents).toBe(0);
+    expect(byExternal.issues).toEqual([expect.objectContaining({ code: 'publication-integrity' })]);
     expect(byExternal.filesToWrite).toEqual([]);
 
     const byUrl = mergeCandidateBatch(catalog, [
@@ -655,7 +685,8 @@ describe('toCandidate y deduplicación', () => {
       },
     ]);
     expect(byUrl.newEvents).toBe(0);
-    expect(byUrl.unchangedEvents).toBe(1);
+    expect(byUrl.unchangedEvents).toBe(0);
+    expect(byUrl.issues).toEqual([expect.objectContaining({ code: 'publication-integrity' })]);
     expect(byUrl.filesToWrite).toEqual([]);
   });
 });

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50434375",
+  "slug": "omnia-duo-violin-y-chelo",
+  "title": "Omnia dúo violín y chelo",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_114978",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50434375_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Omnia",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=92b4f752328e0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50434375"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

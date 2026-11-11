@@ -14,7 +14,9 @@ describe('workflow de deploy del fetch relay', () => {
     expect(yaml).not.toContain('pull_request');
     expect(yaml).not.toContain('schedule:');
 
-    expect(yaml).toContain('cloudflare/wrangler-action@v3');
+    expect(yaml).toContain(
+      'cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0',
+    );
     expect(yaml).toContain('workingDirectory: infra/fetch-relay');
     expect(yaml).toContain('apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
     expect(yaml).toContain('accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');

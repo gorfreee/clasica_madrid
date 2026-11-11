@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_bandamusicagetafe_es_encuentro_de_bandas_francisco_aguado_marti_2026_10_03_hospitalillo_de_san_jose",
+  "slug": "encuentro-de-bandas-francisco-aguado-marti",
+  "title": "Encuentro de Bandas Francisco Aguado Martí",
+  "status": "scheduled",
+  "venueId": "ven_hospitalillo_de_san_jose",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_bandamusicagetafe_es_encuentro_de_bandas_francisco_aguado_marti_2026_10_03_hospitalillo_de_san_jose_01",
+      "date": "2026-10-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda de Música de Getafe"
+    },
+    {
+      "name": "Agrupación Musical de Linares 1875"
+    },
+    {
+      "name": "Francisco Infantes Ortiz",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Bueno Cardeñosa",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Federico Chueca"
+    },
+    {
+      "name": "Joaquín Valverde"
+    },
+    {
+      "name": "David Rivas Domínguez"
+    },
+    {
+      "name": "Rubén Bustos Romero"
+    },
+    {
+      "name": "Gerónimo Giménez"
+    },
+    {
+      "name": "André Waignein"
+    }
+  ],
+  "works": [
+    {
+      "title": "Palomo Linares",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "La Gran Vía (selección)"
+    },
+    {
+      "title": "Arrels de poble",
+      "composerName": "David Rivas Domínguez"
+    },
+    {
+      "title": "Arena y flama",
+      "composerName": "Rubén Bustos Romero"
+    },
+    {
+      "title": "La torre del oro (preludio)",
+      "composerName": "Gerónimo Giménez"
+    },
+    {
+      "title": "Diagram",
+      "composerName": "André Waignein"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "other",
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_bandamusicagetafe_es",
+      "url": "https://bandamusicagetafe.es/programacion",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_bandamusicagetafe_es",
+  "lastVerifiedAt": "2026-09-27"
+}

@@ -3,9 +3,12 @@ import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 import { defaultDataDir } from '../src/lib/repository/fs.ts';
-import { findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
+import { isRealIsoDate } from '../src/lib/util/iso-date.ts';
+import { findScheduleCollisionIssues, findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
 
 const cndm = getSourceDefinition('cndm');
+const madridDatos = getSourceDefinition('madrid-datos');
+const piuMosso = getSourceDefinition('fundacion-piu-mosso');
 
 const ABSORBED_CNDM: Array<{ externalId: string; eventId: string }> = [
   { externalId: '23773', eventId: 'evt_auditorio_nacional_cndm_joven_orquesta_nacional_de_espana_jonde_1' },
@@ -29,6 +32,7 @@ const ABSORBED_CNDM: Array<{ externalId: string; eventId: string }> = [
   { externalId: '23813', eventId: 'evt_auditorio_nacional_cndm_le_concert_de_la_loge' },
   { externalId: '23770', eventId: 'evt_auditorio_nacional_cndm_neopercusion' },
   { externalId: '23834', eventId: 'evt_auditorio_nacional_cndm_orquesta_barroca_de_la_universidad_de_salamanca_2' },
+  { externalId: '23846', eventId: 'evt_auditorio_nacional_cndm_lucie_zakova' },
 ];
 
 describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo', () => {
@@ -36,6 +40,12 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const collisions = findScheduleCollisions(catalog);
     expect(collisions.filter((item) => item.kind === 'duplicate')).toEqual([]);
+    expect(collisions.filter((item) => item.kind === 'review')).toEqual([]);
+    const issues = findScheduleCollisionIssues(catalog);
+    expect(issues.filter((issue) => issue.code === 'schedule-conflict').every((issue) => issue.severity === 'warning')).toBe(true);
+    expect(issues.filter((issue) => issue.code === 'schedule-review')).toEqual([]);
+    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50221891')).toBe(false);
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_piu_mosso_2187')).toBe(false);
     expect(catalog.events.some((event) => event.id === 'evt_cndm_23900')).toBe(false);
 
     const oratorio = catalog.events.find(
@@ -66,10 +76,103 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     }
 
     const ospital = collisions.find((item) => item.eventIds.includes('evt_auditorio_nacional_cndm_thomas_ospital'));
-    expect(ospital?.kind).toBe('conflict');
-    expect(ospital?.eventIds).toEqual(
-      expect.arrayContaining(['evt_auditorio_nacional_cndm_thomas_ospital', 'evt_cndm_23846']),
+    expect(ospital).toBeUndefined();
+    expect(catalog.events.some((event) => event.id === 'evt_cndm_23846')).toBe(false);
+    const zakova = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_cndm_lucie_zakova',
     );
+    expect(zakova?.slug).toBe('cndm-lucie-zakova');
+    expect(zakova?.slugAliases).toEqual(['lucie-zakova']);
+    expect(zakova?.occurrences[0]).toMatchObject({ date: '2027-02-20', time: '12:00' });
+
+    const tempo = catalog.events.find((event) => event.id === 'evt_madrid_tempo_clausura_20260906');
+    expect(tempo).toBeTruthy();
+    expect(tempo?.slug).toBe('madrid-a-tempo-concierto-clausura');
+    expect(tempo?.slugAliases).toEqual(['ii-festival-internacional-de-piano']);
+    expect(tempo?.title).toBe('Madrid a Tempo: Concierto de clausura de alumnos');
+    expect(tempo?.organizerIds).toEqual(['org_madrid_a_tempo']);
+    expect(tempo?.seriesId).toBe('ser_festival_madrid_a_tempo_2026');
+    expect(tempo?.occurrences[0]).toMatchObject({ date: '2026-09-06', time: '12:00' });
+    expect(tempo?.citations.map((item) => item.sourceId)).toEqual([
+      'src_madrid_a_tempo',
+      'src_ayuntamiento_madrid',
+    ]);
+    expectStableCitation(tempo?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid'), {
+      sourceId: 'src_ayuntamiento_madrid',
+      url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
+      externalId: '50221891',
+    });
+    expectStableCitation(tempo?.citations.find((item) => item.sourceId === 'src_madrid_a_tempo'), {
+      sourceId: 'src_madrid_a_tempo',
+      url: 'https://www.madridatempo.com/programacion-2023',
+    });
+
+    const larrocha = catalog.events.find((event) => event.id === 'evt_madrid_datos_50265531');
+    expect(larrocha).toBeTruthy();
+    expect(larrocha?.slug).toBe('iv-edicion-festival-alicia-de-larrocha');
+    expect(larrocha?.slugAliases).toEqual(['victor-tretyakov-piano']);
+    expect(larrocha?.title).toBe('IV Edición Festival Alicia de Larrocha');
+    expect(larrocha?.performers).toEqual([{ name: 'Victor Tretyakov' }]);
+    expect(larrocha?.occurrences[0]).toMatchObject({ date: '2026-09-12', time: '19:30' });
+    expect(larrocha?.citations.map((item) => item.sourceId)).toEqual([
+      'src_ayuntamiento_madrid',
+      'src_fundacionpiumosso_com',
+    ]);
+    expectStableCitation(larrocha?.citations.find((item) => item.sourceId === 'src_fundacionpiumosso_com'), {
+      sourceId: 'src_fundacionpiumosso_com',
+      url: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
+      externalId: '2187',
+    });
+    expectStableCitation(larrocha?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid'), {
+      sourceId: 'src_ayuntamiento_madrid',
+      url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD',
+      externalId: '50265531',
+    });
+
+    const casaVacas = collisions.filter((item) => item.venueId === 'ven_casa_vacas_retiro');
+    expect(casaVacas).toEqual([]);
+
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_orcam_4861')).toBe(false);
+    const finalDelViaje = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje',
+    );
+    expect(finalDelViaje).toMatchObject({
+      slug: 'final-del-viaje',
+      slugAliases: ['orcam-sinfonico-11-final-del-viaje'],
+      title: 'Final del viaje',
+      occurrences: [expect.objectContaining({ date: '2027-05-10', time: '19:30' })],
+      primarySourceId: 'src_auditorio_nacional',
+    });
+    expect(finalDelViaje?.citations.map((item) => item.sourceId)).toEqual([
+      'src_auditorio_nacional',
+      'src_fundacion_orcam',
+    ]);
+    const kavakosOrcam = collisions.find((item) =>
+      item.eventIds.includes('evt_auditorio_nacional_fundacion_scherzo_leonidas_kavakos_y_enrico_pace')
+      && item.eventIds.includes('evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje'),
+    );
+    expect(kavakosOrcam).toBeUndefined();
+
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_orcam_4865')).toBe(false);
+    const geometrias = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras',
+    );
+    expect(geometrias?.slug).toBe('orcam-sinfonico-13-geometrias-sonoras');
+    expect(geometrias?.slugAliases).toEqual(['geometrias-sonoras']);
+    expect(geometrias?.occurrences[0]).toMatchObject({ date: '2027-06-29', time: '19:30' });
+    expect(geometrias?.performers.find((item) => item.name === 'Óscar Rodríguez')?.role).toBe(
+      'conductor',
+    );
+    expectStableCitation(geometrias?.citations.find((item) => item.sourceId === 'src_fundacion_orcam'), {
+      sourceId: 'src_fundacion_orcam',
+      url: 'https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras',
+      externalId: '4865',
+    });
+    const excelentiaOrcam = collisions.find((item) =>
+      item.eventIds.includes('evt_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven')
+      && item.eventIds.includes('evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras'),
+    );
+    expect(excelentiaOrcam).toBeUndefined();
   });
 
   it('reconoce la siguiente observación CNDM 23900 sobre el evento canónico', async () => {
@@ -94,4 +197,107 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       event: { id: 'evt_auditorio_nacional_la_filarmonica_oratorio_de_navidad_1' },
     });
   });
+
+  it('reconoce la siguiente observación CNDM 23846 sobre Lucie Žáková canónica', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: 'https://cndm.inaem.gob.es/node/23846',
+      externalId: '23846',
+      title: 'Lucie Žáková',
+      occurrences: [{ date: '2027-02-20', time: '12:00' }],
+      performers: [{ name: 'Lucie Žáková' }],
+      composers: [{ name: 'Johann Sebastian Bach (1685-1750)' }],
+      works: [{
+        title: 'Preludio y fuga en la menor, BWV 543 (d. 1715)',
+        composerName: 'Johann Sebastian Bach (1685-1750)',
+      }],
+    }, {
+      catalogSourceId: cndm.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_auditorio_nacional_cndm_lucie_zakova' },
+    });
+  });
+
+  it('desambigua el externalId municipal 50221891 reutilizado por fecha', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const sourceUrl = 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD';
+
+    const historical = matchEventIdentity(catalog, {
+      sourceUrl,
+      externalId: '50221891',
+      title: 'II Festival Internacional de Piano',
+      occurrences: [{ date: '2026-09-06', time: '12:00' }],
+      performers: [],
+      composers: [],
+      works: [],
+    }, {
+      catalogSourceId: madridDatos.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(historical).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+    });
+    expect(historical.kind === 'matched' && historical.event.id).toBe('evt_madrid_tempo_clausura_20260906');
+
+    const current = matchEventIdentity(catalog, {
+      sourceUrl,
+      externalId: '50221891',
+      title: 'Diálogos en el aire',
+      occurrences: [{ date: '2026-10-08', time: '19:00' }],
+      performers: [
+        { name: 'Grupo Trivento' },
+        { name: 'Pepe Gallego' },
+        { name: 'Víctor Bruna' },
+        { name: 'Franz Baciero' },
+      ],
+      composers: [],
+      works: [],
+    }, {
+      catalogSourceId: madridDatos.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(current).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+    });
+    expect(current.kind === 'matched' && current.event.id).toBe('evt_madrid_datos_dialogos_en_el_aire_20261008');
+  });
+
+  it('reconoce la siguiente observación Più Mosso 2187 sobre el Festival Alicia de Larrocha', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
+      externalId: '2187',
+      title: 'VICTOR TRETYAKOV, Piano',
+      occurrences: [{ date: '2026-09-12', time: '19:30' }],
+      performers: [],
+      works: [],
+    }, {
+      catalogSourceId: piuMosso.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_madrid_datos_50265531' },
+    });
+  });
 });
+
+function expectStableCitation(
+  citation:
+    | { sourceId: string; url: string; externalId?: string; checkedAt: string }
+    | undefined,
+  identity: { sourceId: string; url: string; externalId?: string },
+) {
+  expect(citation).toMatchObject(identity);
+  expect(citation?.checkedAt, `${identity.sourceId} checkedAt`).toBeTruthy();
+  expect(isRealIsoDate(citation!.checkedAt), `${identity.sourceId} checkedAt is a calendar date`).toBe(
+    true,
+  );
+}

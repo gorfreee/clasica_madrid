@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_esmadrid_joven_orquesta_winchester_parroquia_santa_cruz",
+  "slug": "joven-orquesta-de-winchester",
+  "title": "Joven Orquesta de Winchester",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_santa_cruz",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_esmadrid_joven_orquesta_winchester_parroquia_santa_cruz_01",
+      "date": "2026-10-17",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joven Orquesta de Winchester",
+      "role": "orchestra"
+    },
+    {
+      "name": "Rafael López Bolívar"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Arthur Bliss"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Edvard Grieg"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_esmadrid",
+      "url": "https://www.esmadrid.com/agenda/joven-orquesta-winchester-parroquia-santa-cruz",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_esmadrid",
+  "lastVerifiedAt": "2026-09-24"
+}

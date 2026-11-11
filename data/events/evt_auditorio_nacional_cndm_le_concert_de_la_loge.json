@@ -17,25 +17,25 @@
   ],
   "performers": [
     {
-      "name": "LE CONCERT DE LA LOGE"
+      "name": "Le Concert de la Loge"
     },
     {
-      "name": "JULIEN CHAUVIN"
+      "name": "Julien Chauvin"
     },
     {
-      "name": "LUCILE RICHARDOT"
+      "name": "Lucile Richardot"
     },
     {
-      "name": "LAURENCE KILSBY"
+      "name": "Laurence Kilsby"
     },
     {
-      "name": "MÉLISSA PETIT"
+      "name": "Mélissa Petit"
     },
     {
-      "name": "PAUL-ANTOINE BÉNOS-DJIAN"
+      "name": "Paul-Antoine Bénos-Djian"
     },
     {
-      "name": "JULIETTE MEY"
+      "name": "Juliette Mey"
     },
     {
       "name": "Bruno De Sá"
@@ -43,13 +43,13 @@
   ],
   "composers": [
     {
-      "name": "Antonio Vivaldi (1678-1741)"
+      "name": "Antonio Vivaldi"
     }
   ],
   "works": [
     {
       "title": "Griselda, RV 718 (1735)",
-      "composerName": "Antonio Vivaldi (1678-1741)"
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [
@@ -65,7 +65,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-le-concert-de-la-loge",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-le-concert-de-la-loge"
     },
     {
@@ -76,5 +76,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

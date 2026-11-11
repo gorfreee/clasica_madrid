@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_75131",
+  "slug": "concierto-encuentro-coral",
+  "title": "Concierto: Encuentro coral",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_75131_01",
+      "date": "2026-10-17",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coral de Moncada"
+    },
+    {
+      "name": "Coro Padre Antonio Soler"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-encuentro-coral-2",
+      "checkedAt": "2026-10-14",
+      "externalId": "75131"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-10-14"
+}

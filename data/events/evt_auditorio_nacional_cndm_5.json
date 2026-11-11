@@ -17,35 +17,36 @@
   ],
   "performers": [
     {
-      "name": "PIERRE-LAURENT AIMARD"
+      "name": "Pierre-Laurent Aimard"
     }
   ],
   "composers": [
     {
-      "name": "Ludwig van Beethoven (1770-1827)"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "L. van Beethoven"
+      "name": "György Ligeti"
     },
     {
-      "name": "György Ligeti (1923-2006)"
-    },
-    {
-      "name": "Karlheinz Stockhausen (1928-2007)"
+      "name": "Karlheinz Stockhausen"
     }
   ],
   "works": [
     {
       "title": "Bagatelas, op. 119, selección (1822)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Bagatelas, op. 33, selección (1782, rev. 1802)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sonata n.º 23 en fa menor ‘Appassionata’, op. 57 (1804-1805)",
-      "composerName": "L. van Beethoven"
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Musica ricercata (1951-1953)",
+      "composerName": "György Ligeti"
     }
   ],
   "eras": [
@@ -61,16 +62,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-5"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23821",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23821"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

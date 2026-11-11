@@ -17,47 +17,47 @@
   ],
   "performers": [
     {
-      "name": "CINDY CASTILLO"
+      "name": "Cindy Castillo"
     }
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "César Franck (1822-1890)"
+      "name": "César Franck"
     },
     {
-      "name": "Jean-Pierre Deleuze (1954)"
+      "name": "Jean-Pierre Deleuze"
     },
     {
-      "name": "J. S. Bach"
+      "name": "Joseph Jongen"
     }
   ],
   "works": [
     {
       "title": "Toccata y fuga en re menor , BWV 565 (ca. 1708)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto en re menor, sobre el Concierto para dos violines y violonchelo en re menor de A. Vivaldi, BWV 596 (1713-1714)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Prière , op. 20 (1860-1862)",
-      "composerName": "César Franck (1822-1890)"
+      "composerName": "César Franck"
     },
     {
       "title": "Toccata en re bemol mayor, op. 104 (1937)",
-      "composerName": "César Franck (1822-1890)"
+      "composerName": "Joseph Jongen"
     },
     {
       "title": "La neige tombe, de Quatre haïku , para órgano, n.º 3 (2004)",
-      "composerName": "Jean-Pierre Deleuze (1954)"
+      "composerName": "Jean-Pierre Deleuze"
     },
     {
       "title": "Ricercar a 6 de La ofrenda musical , BWV 1079 (1747)",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [
@@ -75,7 +75,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cindy-castillo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-24",
       "externalId": "cndm-cindy-castillo"
     },
     {
@@ -86,5 +86,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-24"
 }

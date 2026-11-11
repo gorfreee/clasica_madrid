@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_concierto_navidad_coro_ferrocarriles_20261218",
+  "slug": "concierto-de-navidad-coro-fundacion-ferrocarriles-espanoles",
+  "title": "Concierto de Navidad — Coro de la Fundación de los Ferrocarriles Españoles",
+  "status": "scheduled",
+  "venueId": "ven_real_monasterio_santa_isabel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_concierto_navidad_coro_ferrocarriles_20261218_01",
+      "date": "2026-12-18",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Fundación de los Ferrocarriles Españoles",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/noticias/patrimonio-nacional-recorre-la-musica-espanola-del-siglo-de-oro-al-clasicismo",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}

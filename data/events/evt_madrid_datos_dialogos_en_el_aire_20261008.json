@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_dialogos_en_el_aire_20261008",
+  "slug": "dialogos-en-el-aire",
+  "title": "Diálogos en el aire",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_dialogos_en_el_aire_20261008_01",
+      "date": "2026-10-08",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo Trivento",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pepe Gallego",
+      "role": "soloist"
+    },
+    {
+      "name": "Víctor Bruna",
+      "role": "soloist"
+    },
+    {
+      "name": "Franz Baciero",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50221891"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

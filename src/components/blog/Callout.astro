@@ -1,0 +1,40 @@
+---
+type Props = {
+  title?: string;
+};
+
+const { title } = Astro.props;
+---
+
+<aside class="article-callout" aria-label={title}>
+  {title && <p class="article-callout__title">{title}</p>}
+  <div class="article-callout__body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .article-callout {
+    margin: 1.5rem 0;
+    padding: .95rem 1rem 1rem 1.05rem;
+    border-left: 3px solid var(--color-brand);
+    background: var(--color-surface);
+  }
+
+  .article-callout__title {
+    margin: 0 0 .35rem;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .article-callout__body :global(p) {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .article-callout__body :global(p + p) {
+    margin-top: .6rem;
+  }
+</style>

@@ -13,7 +13,7 @@ import {
   writeIngestReport,
   type IngestEventDecision,
 } from '../src/ingestion/report.ts';
-import { makeEvent, makeSource, TEST_NOW } from './helpers.ts';
+import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 const ocneDetailPath = path.join(fixtures, 'detail', 'auditorio-ocne-sinfonico-01.excerpt.html');
@@ -171,6 +171,8 @@ describe('ingest event report', () => {
     expect(decision.publishable).toBe(true);
     expect(decision.candidateGenerated).toBe(true);
     expect(decision.identity?.action).toBe('new');
+    expect(decision.outcome).toBe('created');
+    expect(decision.outcomeReason).toBeUndefined();
     expect(decision.candidate).toBeDefined();
     expect(decision.candidate?.id).toBe(run.candidates[0]!.event.id);
     expect(decision.candidate?.slug).toBe(run.candidates[0]!.event.slug);
@@ -178,6 +180,18 @@ describe('ingest event report', () => {
     expect(decision.candidate?.venueId).toBe(run.candidates[0]!.event.venueId);
     expect(ai.calls).toBe(0);
     expect(run.candidates).toHaveLength(1);
+    expect(run.summary.quality).toEqual({
+      composers: { populated: 1, unresolved: 0, unresolvedNoProgramEvidence: 0 },
+      eras: { populated: 1, unresolved: 0 },
+      formats: { populated: 1, unresolved: 0 },
+      access: {
+        free: 0,
+        paid: 1,
+        unresolved: 0,
+        unresolvedNoEvidence: 0,
+        unresolvedWithEvidence: 0,
+      },
+    });
   });
 
   it('exclude determinista: no Candidate y sin llamada a IA', async () => {
@@ -194,6 +208,8 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Jazz en el Auditorio');
     expect(decision.eligibility?.value).toBe('exclude');
+    expect(decision.outcome).toBe('excluded');
+    expect(decision.outcomeReason).toBeTruthy();
     expect(decision.eligibility?.method).toBe('rule');
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
@@ -207,10 +223,12 @@ describe('ingest event report', () => {
   it('recoge diagnósticos de transporte de IA en el summary y por evento', async () => {
     const ai: AiClassifier = {
       async classify() {
-        return { eligibility: 'include', kind: 'alternative', evidence: ['fake'] };
+        return { eligibility: 'include', kind: 'alternative', evidence: ['Concierto extraordinario'] };
       },
       lastDiagnostics: () => ({
+        provider: 'gemini',
         model: 'gemini-3.1-flash-lite',
+        routeId: 'gemini:gemini-3.1-flash-lite',
         fallbackUsed: true,
         attempts: 3,
       }),
@@ -220,20 +238,30 @@ describe('ingest event report', () => {
         modelFallbacks: 1,
         requestsByModel: { 'gemini-3.1-flash-lite': 3, 'gemini-2.5-flash': 1 },
         classificationsByModel: { 'gemini-2.5-flash': 1 },
+        requestsByRoute: { 'gemini:gemini-3.1-flash-lite': 3, 'gemini:gemini-2.5-flash': 1 },
+        classificationsByRoute: { 'gemini:gemini-2.5-flash': 1 },
       }),
     };
     const { run } = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'gala-ai-diag' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'gala-ai-diag',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
     expect(run.decisions[0]!.aiAttempted).toBe(true);
     expect(run.decisions[0]!.ai).toEqual({
+      provider: 'gemini',
       model: 'gemini-3.1-flash-lite',
+      routeId: 'gemini:gemini-3.1-flash-lite',
       fallbackUsed: true,
       attempts: 3,
     });
     expect(run.summary.ai.include).toBe(1);
+    expect(run.summary.ai.byPurpose.eligibility).toMatchObject({ attempted: 1, resolved: 1 });
+    expect(run.summary.ai.byPurpose.taxonomy.attempted).toBe(1);
     expect(run.summary.ai.httpRequests).toBe(4);
     expect(run.summary.ai.retries).toBe(2);
     expect(run.summary.ai.modelFallbacks).toBe(1);
@@ -242,16 +270,27 @@ describe('ingest event report', () => {
       'gemini-2.5-flash': 1,
     });
     expect(run.summary.ai.classificationsByModel).toEqual({ 'gemini-2.5-flash': 1 });
+    expect(run.summary.ai.requestsByRoute).toEqual({
+      'gemini:gemini-3.1-flash-lite': 3,
+      'gemini:gemini-2.5-flash': 1,
+    });
+    expect(run.summary.ai.classificationsByRoute).toEqual({ 'gemini:gemini-2.5-flash': 1 });
+    expect(run.summary.quality).toMatchObject({
+      composers: { populated: 0, unresolved: 1, unresolvedNoProgramEvidence: 1 },
+      eras: { populated: 0, unresolved: 1 },
+      formats: { populated: 0, unresolved: 1 },
+      access: { unresolved: 1, unresolvedNoEvidence: 1, unresolvedWithEvidence: 0 },
+    });
     expect(run.summary.written).toEqual([]);
   });
 
   it('clasificación concurrente conserva orden, IDs y diagnósticos aunque termine al revés', async () => {
     const items = [
-      { title: 'Concierto extraordinario A', slug: 'a' },
-      { title: 'Concierto extraordinario B', slug: 'b' },
-      { title: 'Concierto extraordinario C', slug: 'c' },
+      { title: 'Concierto extraordinario A', slug: 'a', description: 'Programa en la tradición concertística.' },
+      { title: 'Concierto extraordinario B', slug: 'b', description: 'Programa en la tradición concertística.' },
+      { title: 'Concierto extraordinario C', slug: 'c', description: 'Programa en la tradición concertística.' },
     ];
-    const sequential = await runAuditorio({ items, ai: { async classify() { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' }; } } });
+    const sequential = await runAuditorio({ items, ai: { async classify(observed) { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative', evidence: [observed.title] }; } } });
     let releaseA!: () => void;
     const holdA = new Promise<void>((resolve) => { releaseA = resolve; });
     const completion: string[] = [];
@@ -263,7 +302,7 @@ describe('ingest event report', () => {
         completion.push(observed.title);
         context?.onDiagnostics?.({ model: observed.title, attempts: 1, cacheHit: false });
         if (observed.title.endsWith('B')) releaseA();
-        return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' };
+        return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative', evidence: [observed.title] };
       },
     } });
     expect(completion[0]).toBe('Concierto extraordinario B');
@@ -281,6 +320,7 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Concierto extraordinario');
     expect(decision.eligibility?.value).toBe('uncertain');
+    expect(decision.outcome).toBe('uncertain');
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
@@ -302,6 +342,8 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Fuera de ventana');
     expect(decision.structuralSkip?.reason).toBe('fuera de ventana');
+    expect(decision.outcome).toBe('structural-skip');
+    expect(decision.outcomeReason).toBe('fuera de ventana');
     expect(decision.eligibility).toBeUndefined();
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
@@ -473,6 +515,10 @@ describe('ingest event report', () => {
     const detail = await readFile(ocneDetailPath, 'utf8');
     const sourceUrl = 'https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1';
     const catalog = emptyCatalog();
+    catalog.venues.push(makeVenue(), makeVenue({
+      id: 'ven_auditorio_nacional_sala_sinfonica', slug: 'auditorio-nacional-sala-sinfonica',
+      name: 'Auditorio Nacional de Música — Sala Sinfónica', parentVenueId: 'ven_auditorio_nacional', spaceName: 'Sala Sinfónica',
+    }));
     catalog.sources.push(
       makeSource({
         id: 'src_auditorio_nacional',
@@ -486,6 +532,11 @@ describe('ingest event report', () => {
         id: 'evt_ocne_existente',
         slug: 'ocne-existente',
         title: 'OCNE ya publicado',
+        lastVerifiedAt: '2026-08-20',
+        organizerIds: [], seriesId: null,
+        performers: [], composers: [], works: [],
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        occurrences: [{ id: 'occ_ocne_existente', date: '2026-09-18', time: '19:30', status: 'scheduled' }],
         citations: [
           {
             sourceId: 'src_auditorio_nacional',
@@ -505,6 +556,7 @@ describe('ingest event report', () => {
     });
 
     expect(run.decisions[0]!.identity?.action).toBe('updated');
+    expect(run.decisions[0]!.outcome).toBe('updated');
     expect(run.decisions[0]!.identity?.method).toBe('externalId');
     expect(run.decisions[0]!.identity?.eventId).toBe('evt_ocne_existente');
     expect(run.decisions[0]!.candidateGenerated).toBe(true);

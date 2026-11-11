@@ -1,0 +1,382 @@
+# Discovery manual asistido por un agente
+
+Instrucción operativa para un agente (Codex, Cursor u otro) con acceso a GitHub y búsqueda web. Léela entera y ejecútala de principio a fin. No pidas al usuario que lance comandos si tú puedes completarlos.
+
+**Autorización operativa:** al pedir un Discovery, el usuario autoriza de antemano a lanzar el workflow **Manual discovery** y a abrir/localizar la PR resultante, sin pedir confirmación adicional. Si la vía directa no está disponible, usa la interfaz web/ordenador disponible para completar esas acciones en vez de detenerte a pedir permiso.
+
+Esta repo **no** busca en Internet. Tú investigas; GitHub Actions, con el código de `main` y los secrets del AI pool, clasifica y publica.
+
+Prompt mínimo suficiente para arrancar un ciclo:
+
+```text
+Parte del main actual. Lee docs/run-discovery-agent.md, ejecuta un Discovery manual completo siguiendo esas instrucciones y abre la PR resultante.
+```
+
+---
+
+## Qué haces tú y qué no
+
+Tú:
+
+* partes del `main` actual;
+* generas un `DiscoveryContext` fresco;
+* investigas en la web;
+* extraes **hechos observados** con la mayor riqueza razonable (ficha de detalle, no sólo la card del listado);
+* publicas un `DiscoveryBatch` JSON en una rama de petición, **incluyendo** un `research` (`DiscoveryResearchManifest`) de cobertura de la búsqueda;
+* lanzas el workflow **Manual discovery** contra `main`;
+* sigues la ejecución y reportas el resultado al usuario.
+
+Tú **no**:
+
+* usas ni pides las API keys del AI pool del proyecto;
+* decides `eligibility`, `kind`, `formats`, `eras`, `access`, `id`, `slug` ni `confidence`;
+* escribes en `data/**` ni abres la PR final de catálogo (eso lo hace Actions);
+* ejecutas `ingest:discovery` en local con secrets del pool;
+* lanzas el workflow desde una rama que no sea `main`;
+* programas un cron ni propones automatizar la periodicidad.
+
+La clasificación y el enrichment finales viven en el pipeline común (`runDiscoveryIngest`), el mismo que harvesting, con `AiClassifier` inyectado desde el entorno de producción.
+
+Pistas de búsqueda (no es un registry): [`discovery-search-hints.md`](discovery-search-hints.md). Contrato de datos: el `output` del `DiscoveryContext` y `src/ingestion/discovery.ts`. Política editorial (no la ejecutas tú): [`classification-policy.md`](classification-policy.md).
+
+---
+
+## 1. Preparación
+
+1. Sincroniza y parte **siempre** del `main` actual:
+
+```bash
+git fetch origin main
+git checkout -B discovery-request/<yyyy-mm-dd>-<id-corto> origin/main
+```
+
+`<id-corto>`: letras, números, `.`, `_` o `-`. La rama de petición **debe** empezar por `discovery-request/`. No uses `automation/discovery-*` (esa es la rama de publicación del workflow).
+
+2. Genera un `DiscoveryContext` fresco con el comando existente. Sin `--from`/`--to`, la ventana es hoy en `Europe/Madrid` → +120 días, la misma que `ingest:sync`.
+
+```bash
+npm run ingest:discovery-context -- --output ingestion/work/discovery-context.json
+```
+
+El fichero de contexto está gitignorado. No lo commitees.
+
+3. Lee y respeta el JSON:
+
+| Campo | Para qué |
+|---|---|
+| `window` | Sólo eventos cuya representación cae en este rango. Pásala tal cual al workflow (`from` / `to`). |
+| `sources.harvested` | Sources con adapter. No las barras sistemáticamente como si no tuvieran adapter, pero tampoco las trates como territorio prohibido: un evento ausente de `coveredEvents` puede ser un coverage gap. |
+| `sources.published` | Sources canónicas ya en el catálogo sin adapter. Útiles para no “descubrir” lo ya cubierto. |
+| `venues` | Lugares conocidos y aliases. Reutiliza el nombre exacto cuando coincida. |
+| `coveredEvents` | Fingerprints de la ventana. Evita reenviar lo ya cubierto salvo un coverage gap (abajo). |
+| `editorialScope` | Orientación geográfica y musical. No sustituye la Classification Policy ejecutable. |
+| `evidenceInstructions` | Cómo recoger evidencia. |
+| `output` | Contrato del `DiscoveryBatch`: schema, arrays obligatorios, `research` diagnóstico, campos prohibidos. |
+
+El alcance geográfico es el municipio de Madrid (`area: madrid`), con `nearby` sólo para municipios muy próximos. No es una agenda de toda la Comunidad.
+
+---
+
+## 2. Investigación
+
+El objetivo principal es encontrar cobertura que **todavía no** proporcionan los adapters. La investigación debe ser amplia y seguir estas pasadas deliberadamente distintas; no basta con acumular queries parecidas.
+
+### Pasada A — superficies de alto recall
+
+Revisa varias superficies amplias capaces de revelar programación escondida, aunque no sean la source canónica del evento. Incluye, según lo que exista en la ventana:
+
+* agendas culturales oficiales de Ayuntamiento, Comunidad y distritos;
+* programas como 21 DISTRITOS y equivalentes;
+* museos estatales, Ministerio de Cultura y programación cultural autonómica;
+* festivales multidisciplinares activos;
+* esmadrid / Turismo Madrid y agendas amplias equivalentes descubiertas durante la búsqueda.
+
+No es una whitelist. Estas superficies pueden quedar sólo como `foundVia`: cuando exista una ficha oficial mejor, persíguela como evidencia canónica. Si una superficie contiene múltiples eventos dentro de ventana, recórrela suficientemente —incluida paginación o carga adicional— y reconcíliala en `listingReviews`; no te quedes con la portada ni los primeros resultados.
+
+### Pasada B — long tail por ecosistemas
+
+Busca deliberadamente en varios ecosistemas: iglesias, parroquias, basílicas, órgano, coros, asociaciones, conservatorios, escuelas, universidades, colegios mayores, fundaciones, museos, institutos culturales, embajadas, ensembles, páginas de intérpretes, pequeñas salas, ciclos y equivalentes. Usa [`discovery-search-hints.md`](discovery-search-hints.md) como punto de partida, no como límite.
+
+### Pasada C — vocabulario musical
+
+No dependas de la frase “música clásica”. Diversifica con vocabulario que revele programación relevante: concierto, recital, ópera, zarzuela, barroco, renacentista, música antigua, música de cámara, cuarteto, trío, ensemble, órgano, coral, coro, oratorio, réquiem, cantata, lied, sinfónico, orquesta y equivalentes razonables. Tampoco es una whitelist.
+
+Registra cada pasada de forma compacta en `research.searchPasses`: tipo y enfoques usados, no cada URL visitada.
+
+### Recuperación obligatoria cuando el yield es bajo
+
+Después de una primera investigación razonablemente amplia, si el yield es anormalmente bajo —orientativamente, unas 0–4 observaciones tras revisar del orden de 40–50 candidatos o más— **no cierres el Discovery**. Ejecuta una pasada adicional `recovery` con una estrategia razonablemente independiente: nuevas superficies, tipologías, términos musicales, festivales o programaciones institucionales no explorados y posibles coverage gaps.
+
+No hay un mínimo obligatorio de eventos. Un batch pequeño o vacío es válido si la pasada de recuperación tampoco encuentra más. La exigencia es distinguir “hay pocos eventos nuevos” de “la primera estrategia encontró pocos y dejamos de buscar”.
+
+### Reglas transversales
+
+* Haz búsqueda web amplia, también fuera de cualquier lista predefinida.
+* **Cubre deliberadamente todos los meses civiles de `window`**, incluidos los parciales de inicio y final (si la ventana es `2026-09-20 → 2027-01-18`, explora septiembre, octubre, noviembre, diciembre y enero). Puedes agrupar búsquedas; no hace falta una query por categoría × mes.
+* Prioriza fuentes primarias u oficiales; usa agregadores, buscadores y redes como **leads** y persigue la fuente oficial cuando exista.
+* No inventes hechos e incluye siempre una URL http(s) concreta que respalde el evento.
+* Usa `foundVia` sólo como trazabilidad de descubrimiento, nunca como source canónica.
+
+Una source de `sources.harvested` **no** debe volver a barrerse sistemáticamente como si careciera de adapter, pero tampoco es territorio prohibido. Si una superficie externa, festival, buscador u otra investigación descubre un evento de esa source que no aparece en `coveredEvents`, investígalo y puedes enviarlo como *adapter coverage gap candidate*. La frase “no realizar una búsqueda sistemática redundante” nunca significa “ignorar cualquier evento perteneciente a una source adaptada”.
+
+Cuando encuentres una **agenda, ciclo, listing o página con múltiples eventos**, recorre **todos** los eventos de esa página que caigan dentro de la ventana —incluida paginación o load-more cuando exista— y contabiliza cada uno como `submitted`, `already-covered`, `excluded` o `unresolved` en `research.listingReviews` antes de considerar esa fuente terminada. Si sigues una ficha individual desde ese listing, extrae la ficha como evidencia del evento, pero **sigue reconciliando el listing completo**. No hace falta guardar un historial de todas las páginas visitadas: sólo listings/ciclos relevantes con varios candidatos.
+
+Si al reconciliar una agenda o listing **oficial** el HTML parece incompleto, desactualizado, contradictorio o mezcla programación pasada y futura, y esa misma fuente enlaza PDFs, programas de temporada, folletos, calendarios u otros documentos oficiales relevantes, **consúltalos** antes de marcar candidatos como `unresolved` o `insufficient-evidence`. No rastrees indiscriminadamente todos los PDFs de cada web: sólo cuando la fuente oficial principal deja dudas o hay indicios de programación complementaria. Sigue valiendo fuente primaria primero, no inventar, reconciliar todos los candidatos del listing y exigir evidencia oficial suficiente antes de publicar.
+
+Diferencia **lead** y **evidencia**:
+
+* Lead: Google, Eventbrite, Instagram, una agenda agregada.
+* Evidencia / `source.url`: la página que declara los hechos (preferiblemente la oficial).
+
+En hosts compartidos (`output.sharedSourceHosts`: Facebook, Instagram, X, Eventbrite, Meetup, …) `source.homepage` debe ser el **perfil** de esa organización, no el origin de la plataforma.
+
+---
+
+## 3. Extracción
+
+El batch contiene **hechos observados**, no decisiones canónicas.
+
+Intenta extraer con exhaustividad razonable cuando la ficha los declare:
+
+* título;
+* descripción;
+* fecha/hora (`occurrences`: `raw` obligatorio; `date`/`time` si la fuente los deja claros);
+* venue (`venueText` y, si el lugar puede ser nuevo, el objeto `venue` con `name`, `municipality`, `area`, `address` y `url` oficial cuando exista);
+* organizador / ciclo (`organizerText`, `seriesText`);
+* intérpretes (`performers`; `[]` si la fuente no los declara);
+* compositores (`composers`);
+* obras (`works`);
+* programa (`programText`);
+* texto de acceso/precio (`accessText`);
+* categoría oficial si existe (`categoryText`);
+* URL oficial que respalda los hechos (`source.url`);
+* `foundVia` si procede.
+
+Si una página trae programa completo, intérpretes, compositores u obras, **no** te limites al mínimo para demostrar que el evento existe. El pipeline (determinismo + knowledge + AI pool) clasifica mejor con evidencia rica. Si existe una **ficha de detalle** distinta de la agenda, ábrela y extrae de ahí; el pipeline no vuelve a navegar y no puede recuperar lo que no reciba.
+
+`performers`, `composers` y `works` pueden ser `[]` cuando la fuente no los declara. Eso es válido. Lo que no es válido es dejarlos vacíos si la ficha oficial que estás citando sí los publica.
+
+**URL de evidencia.** `source.url` debe ser la página que declara los hechos. Distingue:
+
+* **Ficha de evento:** path o query que identifica *ese* concierto (`/eventos/recital-de-violin-…`, `/p/a-delta-trio-madrid`, `?vgnextoid=…`, `/node/23846`). Es la preferida.
+* **Listing / URL genérica:** homepage, `/agenda`, `/eventos`, `/programacion`, `/conciertos`, `/actividades/conciertos-de-tarde` u otra agenda/ciclo permanente. Es evidencia aceptable si no hay ficha individual, pero **no** identifica un único evento. Un slug multi-palabra de colección (`conciertos-de-tarde`, `eventos-*`, `actividades-*`, `programacion-*`) sigue siendo listing. Si esa página lista varios conciertos, envía **una observación por concierto** (mismo `source.url` si no hay ficha, o la ficha individual como `source.url`) y reconcilia el listing entero en `research.listingReviews`. No inventes un `externalId`.
+
+**Prohibido** en el JSON (el schema es `strict` y lo rechazará): `eligibility`, `kind`, `formats`, `eras`, `access`, `id`, `slug`, `confidence`, `candidate`.
+
+`formats` y `eras` los resuelve el pipeline común. El AI pool del proyecto puede intervenir, sólo cuando hace falta, en `eligibility`, `composer-extraction`, `access-classification` y `taxonomy`. Una decisión determinista fuerte no se reabre; un fallo técnico de IA no corrompe datos deterministas válidos.
+
+Un venue **ya publicado** puede resolverse por nombre o alias; no hace falta volver a aportar su dirección.
+
+Un venue **nuevo** necesita:
+
+* nombre canónico razonable;
+* `municipality`;
+* `area` coherente (`madrid` en el municipio de Madrid, `nearby` sólo en un municipio muy próximo);
+* **dirección física suficiente** para que alguien pueda llegar;
+* URL oficial del lugar cuando esté disponible.
+
+Sin localización suficiente **no** se propone como publicable. Si identificas el sitio pero no puedes localizarlo con confianza, déjalo fuera del lote (revisión), no inventes la dirección ni crees un registro incompleto. No hagas fuzzy matching de salas.
+
+---
+
+## 4. Entrega del DiscoveryBatch
+
+Forma:
+
+```json
+{
+  "schemaVersion": 1,
+  "observations": [ ],
+  "research": {
+    "schemaVersion": 1,
+    "investigatedCategories": ["coros", "iglesias/parroquias"],
+    "leads": [
+      { "kind": "search", "query": "concierto coro Madrid octubre 2026" },
+      { "kind": "lead", "query": "https://ejemplo.example/agenda-cultural" }
+    ],
+    "candidatesReviewedApprox": 20,
+    "submittedToBatch": 0,
+    "exclusions": [
+      { "reason": "already-covered", "count": 8 },
+      { "reason": "harvested-source", "count": 5 },
+      { "reason": "non-classical", "count": 4 },
+      { "reason": "out-of-window", "count": 3 }
+    ],
+    "officialDetailReviewed": "all",
+    "searchPasses": [
+      {
+        "kind": "high-recall",
+        "approaches": ["agendas culturales oficiales", "festivales multidisciplinares"]
+      },
+      {
+        "kind": "long-tail",
+        "approaches": ["iglesias y órgano", "coros", "conservatorios y universidades"]
+      },
+      {
+        "kind": "music-vocabulary",
+        "approaches": ["recital y cámara", "órgano y coral", "oratorio y cantata"]
+      }
+    ],
+    "listingReviews": [
+      {
+        "url": "https://ejemplo.example/agenda-cultural",
+        "inWindowCandidatesSeen": 4,
+        "submitted": 1,
+        "alreadyCovered": 1,
+        "excluded": 2,
+        "unresolved": 0
+      }
+    ],
+    "windowMonthsSearched": ["2026-09", "2026-10", "2026-11", "2026-12", "2027-01"],
+    "notes": "Opcional, breve. Qué quedó fuera y por qué el lote es pequeño o vacío."
+  }
+}
+```
+
+Un batch vacío es válido (no-op). Prefiérelo a inventar eventos. **Aunque el lote sea vacío, incluye `research`**: es lo que permite saber después si no había cobertura nueva o si se investigó poco.
+
+`research` es **diagnóstico**. No es catálogo, no se escribe en `data/**`, no cambia eligibility ni publicación. El Job Summary y el artifact lo conservan.
+
+### Señal `Research coverage`
+
+El Job Summary y el body de la PR calculan una señal independiente de `pipeline health`:
+
+* `adequate`: el manifest declara cobertura temporal y las pasadas requeridas, sin activar una regla de recuperación pendiente;
+* `review`: la revisión humana debe comprobar la estrategia declarada.
+
+`review` se activa de forma objetiva si falta el manifest, faltan meses civiles, no se declara alguna pasada base (`high-recall`, `long-tail`, `music-vocabulary`), hay 0–4 observaciones tras al menos 40 candidatos sin `recovery`, o al menos el 70% de 20+ candidatos (y 20+ en términos absolutos) fueron `already-covered + harvested-source` sin diversificación posterior.
+
+Estas reglas evalúan la **estrategia**, no el éxito editorial. Encontrar pocos eventos no activa `review` por sí solo: el caso de bajo yield sólo pide una pasada adicional independiente. La señal no cambia eligibility, `health`, el contenido del catálogo ni la decisión de publicación.
+
+### Qué debe permitir auditar el manifest
+
+Nivel mínimo (no listes cada URL visitada):
+
+| Campo | Para qué |
+|---|---|
+| `investigatedCategories` | Tipologías cubiertas (las de `editorialScope.longTail` u otras equivalentes). |
+| `leads` | Búsquedas o leads relevantes (`kind`: `search` o `lead`). No hace falta el historial completo. |
+| `candidatesReviewedApprox` | Orden de magnitud de fichas/anuncios mirados. |
+| `submittedToBatch` | Cuántos acabaron en `observations` (debe coincidir con `observations.length`). |
+| `exclusions` | Recuentos por motivo: `already-covered`, `harvested-source`, `out-of-window`, `out-of-geographic-scope`, `non-classical`, `insufficient-evidence`, `duplicate-lead`, `other`. `examples` opcionales y cortos. |
+| `officialDetailReviewed` | `all` / `some` / `none` / `not-applicable`. Si citas una ficha de detalle, deberías haberla abierto. |
+| `searchPasses` | Pasadas realizadas: `high-recall`, `long-tail`, `music-vocabulary` y, cuando proceda por bajo yield o exceso de territorio ya cubierto, `recovery`. Cada pasada resume enfoques/superficies; no es un historial de URLs. Es opcional por compatibilidad con batches antiguos, pero su ausencia hace que la cobertura actual requiera revisión. |
+| `listingReviews` | Sólo agendas/ciclos/listings con **varios** candidatos en ventana. Para cada URL: cuántos viste en ventana y cuántos acabaron `submitted` / `alreadyCovered` / `excluded` / `unresolved`. Los cuatro outcomes deben sumar `inWindowCandidatesSeen`. No es un historial de páginas visitadas. |
+| `windowMonthsSearched` | Opcional. Meses civiles `YYYY-MM` de `window` que sí exploraste, incluidos los parciales de inicio y final. |
+
+`searchPasses` es opcional en el schema para que batches anteriores sigan siendo válidos. Un batch antiguo se procesa igual, pero la señal actual será `review` si no puede verificar la estrategia.
+
+Publica **solo** el JSON, en la rama de petición, en:
+
+```text
+ingestion/requests/discovery-batch.json
+```
+
+Esa ruta está gitignorada en `main`. En la rama de petición:
+
+```bash
+mkdir -p ingestion/requests
+# escribe el JSON en ingestion/requests/discovery-batch.json
+git add -f ingestion/requests/discovery-batch.json
+git commit -m "Add discovery batch for manual ingest"
+git push -u origin HEAD
+BATCH_SHA=$(git rev-parse HEAD)
+BATCH_REF=$(git rev-parse --abbrev-ref HEAD)
+```
+
+El commit no debe contener código, scripts ni cambios de `data/**`. El workflow **ignora** cualquier otro fichero de esa rama: no ejecuta npm de la petición ni hace checkout de ella. Sólo lee ese JSON si el tip actual de `refs/heads/<batch_ref>` es exactamente `batch_sha`. La rama debe existir **en este repositorio** (no en un fork).
+
+Registra el SHA completo (40 caracteres) del commit que acabas de empujar. El workflow comprueba que ese SHA **sigue siendo el tip** de la rama de petición; si alguien empuja otro commit encima, la run aborta. Un SHA que exista en el repositorio (por ejemplo `main` u otra `discovery-request/…`) no basta.
+
+---
+
+## 5. Ejecución: workflow seguro en main
+
+El workflow se llama **Manual discovery** (`.github/workflows/discovery.yml`). Es `workflow_dispatch` **sin** `schedule`.
+
+Lánzalo **siempre** contra `main`. El código que corre con secrets es el de `main`; el batch es dato no confiable.
+
+```bash
+gh workflow run "Manual discovery" --ref main \
+  -f batch_ref="$BATCH_REF" \
+  -f batch_sha="$BATCH_SHA" \
+  -f batch_path="ingestion/requests/discovery-batch.json" \
+  -f from="<window.from del DiscoveryContext>" \
+  -f to="<window.to del DiscoveryContext>"
+```
+
+`from`/`to` son la ventana del contexto. Si los omites, Actions usa hoy → +120 días en el momento de la run (puede no coincidir con el contexto que usaste).
+
+El job hace checkout de `main` **sin** persistir credenciales del `GITHUB_TOKEN` de solo lectura. Lee el batch con ese token de la run (`github.token`, `contents: read`): `git fetch` de `refs/heads/<batch_ref>` hacia un ref local temporal, comprueba que el tip es `batch_sha` y entonces `git cat-file` del blob. La publicación de `automation/discovery-*` se autentica aparte con `INGESTION_BOT_TOKEN`, igual que Production ingestion. No pongas tokens en la línea de comando.
+
+Sigue la ejecución (no pidas al usuario que lo haga):
+
+```bash
+gh run list --repo "$(gh repo view --json nameWithOwner -q .nameWithOwner)" \
+  --workflow "Manual discovery" --limit 5
+gh run watch <run-id>
+gh run view <run-id>
+```
+
+Job Summary y artifact `discovery-run-<run-id>-<attempt>` (retención 90 días): batch exacto, `batch-meta.json`, `research-manifest.json` (si venía en el batch), `evidence-diagnostics.json`, `report.json`, `run.json`, `events.jsonl`, `run.log`. No contienen secrets. El Job Summary y el body de la PR separan `pipeline health` de `Research coverage` (`adequate` / `review`) y muestran motivos explícitos, yield aproximado, redundancia, pasadas, listings y meses. `Research coverage` es diagnóstico: no cambia eligibility, health ni publicación. Los avisos de evidencia pobre tampoco bloquean la publicación.
+
+La PR de catálogo, si hay cambios válidos, la abre el workflow:
+
+* rama `automation/discovery-<run-id>-<attempt>` (no confundir con `discovery-request/…`);
+* título `Discovery catalog update`;
+* sólo `data/**`;
+* draft si `health == review`;
+* **sin auto-merge**. Revisión humana siempre.
+
+Localiza la PR:
+
+```bash
+gh pr list --base main --search "Discovery catalog update" --state open
+gh pr view <n>
+```
+
+También está enlazada en el Job Summary de la run.
+
+---
+
+## 6. Informe al usuario
+
+Cuando termines, informa con claridad:
+
+* URL de la run de GitHub Actions y su conclusión;
+* cobertura de investigación del `research` (categorías, candidatos revisados vs enviados, listings multi-evento reconciliados, meses de la ventana, motivos de exclusión);
+* avisos de evidencia pobre en fichas de detalle, si el Job Summary los lista;
+* `health` y `healthReasons`;
+* eventos nuevos / actualizados / sin cambios;
+* `exclude` / `uncertain` / descartes estructurales;
+* nuevas sources y nuevos venues (si el summary los lista);
+* duplicados del lote y corroboraciones cross-source;
+* *adapter coverage gap candidates* (observaciones de sources ya adaptadas);
+* problemas o elementos que necesiten revisión humana;
+* URL de la PR de catálogo, o que fue no-op / `fatal` (sin PR).
+
+No pegues API keys, tokens ni el contenido de `.local/ai.env`.
+
+---
+
+## 7. Modelo de seguridad (no lo eludas)
+
+```text
+rama de petición (DiscoveryBatch JSON)
+        │
+        │ fetch de refs/heads/<batch_ref> → tip exacto = batch_sha
+        │ después, blob <batch_sha>:<batch_path>
+        ▼
+workflow lanzado desde main
+        │
+        │ checkout de main (sin persistir credenciales)
+        │ lectura del batch con el token de la run (solo lectura)
+        │ código de main + secrets del AI pool
+        │ publicación con INGESTION_BOT_TOKEN
+        ▼
+npm run ingest:discovery → pipeline común → PR de data/**
+```
+
+Inaceptable: checkout de la rama del agente → `npm` / scripts de esa rama → secrets disponibles.
+
+Si el workflow rechaza el `ref` porque no es `main`, relánzalo con `--ref main`. No copies secrets a tu entorno para “saltarte” Actions.

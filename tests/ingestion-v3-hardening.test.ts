@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { formatAutomationSummary } from '../src/ingestion/automation.ts';
 import { HttpError } from '../src/ingestion/http.ts';
 import { createListingGet, isTransientListingError } from '../src/ingestion/listing-retry.ts';
@@ -11,11 +11,12 @@ import {
   type IngestRunManifest,
   type IngestSourceTiming,
 } from '../src/ingestion/observability.ts';
+import { takeBrowserFetchAttempts } from '../src/ingestion/browser-fetch.ts';
 import { SOURCE_INGEST_CONCURRENCY, extractSource, runIngest } from '../src/ingestion/pipeline.ts';
 import { buildFatalIngestReport } from '../src/ingestion/report.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { fundacionCanalAdapter } from '../src/ingestion/sources/fundacion-canal.ts';
-import { realHermandadRefugioAdapter } from '../src/ingestion/sources/real-hermandad-refugio.ts';
+import { realHermandadRefugioAdapter, setRefugioBrowserSessionForTests } from '../src/ingestion/sources/real-hermandad-refugio.ts';
 import { teatrosCanalAdapter } from '../src/ingestion/sources/teatros-canal.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { ENTITY_COLLECTIONS } from '../src/lib/repository/types.ts';
@@ -30,11 +31,14 @@ const emptyHttp = {
   timeoutCount: 0,
   fetchFailedCount: 0,
   challengeCount: 0,
+  recoveries: 0,
   statusCounts: {},
   latencyMsTotal: 0,
   latencyMsMax: 0,
   directRequests: 0,
   relayRequests: 0,
+  browserRequests: 0,
+  browserFallbacks: 0,
 } as const;
 
 function timing(overrides: Partial<IngestSourceTiming>): IngestSourceTiming {
@@ -185,7 +189,7 @@ describe('retry conservador de listing Canal', () => {
   });
 });
 
-describe('Real Hermandad del Refugio HTML inesperado y fallback REST', () => {
+describe('Real Hermandad del Refugio HTML inesperado y fallback de navegador', () => {
   const source = getSourceDefinition('real-hermandad-refugio');
   const listingUrl = realHermandadRefugioAdapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
   const ctx = {
@@ -196,38 +200,53 @@ describe('Real Hermandad del Refugio HTML inesperado y fallback REST', () => {
       throw new Error('sin red');
     },
   };
+  const archiveHtml = '<div class="jet-listing-grid__items" data-pages="1"></div>';
 
-  it('diagnostica HTML de captcha en lugar de parsearlo como JSON', async () => {
+  afterEach(() => {
+    setRefugioBrowserSessionForTests();
+    takeBrowserFetchAttempts(realHermandadRefugioAdapter.id);
+  });
+
+  it('diagnostica HTML de captcha en lugar de parsearlo como archivo', async () => {
     await expect(realHermandadRefugioAdapter.extract(CAPTCHA_HTML, listingUrl, ctx)).rejects.toThrow(
-      /HTML de desafío SiteGround \(captcha\) en lugar de JSON/,
+      /HTML de desafío SiteGround \(captcha\) en lugar del archivo de conciertos/,
     );
     await expect(realHermandadRefugioAdapter.extract('<html><head></head><body>blocked</body></html>', listingUrl, ctx))
-      .rejects.toThrow(/HTML inesperado en lugar de JSON/);
+      .rejects.toThrow(/paginación reconocible/);
     await expect(realHermandadRefugioAdapter.extract('not json', listingUrl, ctx)).rejects.toThrow(/JSON inválido/);
   });
 
-  it('reintenta el REST oficial y cae a la URL simplificada si el HTML persiste', async () => {
-    const json = await readFile(path.join(import.meta.dirname, 'fixtures/ingestion/refugio/listing-sample.json'), 'utf8');
+  it('cae al navegador si el archivo oficial sigue devolviendo captcha y no pide REST', async () => {
     const requested: string[] = [];
-    let primaryAttempts = 0;
+    const browserUrls: string[] = [];
+    setRefugioBrowserSessionForTests(async () => ({
+      async get(url) {
+        browserUrls.push(url);
+        return archiveHtml;
+      },
+      async close() {},
+    }));
     const body = await realHermandadRefugioAdapter.fetchListing!(listingUrl, {
       ...ctx,
       get: async (url) => {
         requested.push(url);
-        if (url.includes('_fields')) {
-          primaryAttempts += 1;
-          return CAPTCHA_HTML;
-        }
-        return json;
+        if (url.includes('categoria-eventos/conciertos')) return CAPTCHA_HTML;
+        throw new Error(`no debía pedir ${url}`);
       },
     });
-    expect(primaryAttempts).toBe(2);
-    expect(requested.some((url) => url.includes('_fields'))).toBe(true);
-    expect(requested.some((url) => !url.includes('_fields') && url.includes('status=publish'))).toBe(true);
-    expect(JSON.parse(body)).toHaveLength(2);
+    expect(requested.some((url) => url.includes('categoria-eventos/conciertos'))).toBe(true);
+    expect(requested.every((url) => !url.includes('/wp-json/'))).toBe(true);
+    expect(browserUrls).toEqual([listingUrl]);
+    expect(body).toContain('jet-listing-grid__items');
   });
 
-  it('un HTML persistente en REST y fallback sigue aislando la fuente', async () => {
+  it('un HTML persistente en HTTP y navegador sigue aislando la fuente', async () => {
+    setRefugioBrowserSessionForTests(async () => ({
+      async get() {
+        return CAPTCHA_HTML;
+      },
+      async close() {},
+    }));
     const dataDir = await emptyDataDir('clasica-refugio-html-');
     const run = await runIngest({
       dataDir,
@@ -239,7 +258,9 @@ describe('Real Hermandad del Refugio HTML inesperado y fallback REST', () => {
       get: async () => CAPTCHA_HTML,
     });
     expect(run.summary.sourcesFailed[0]?.sourceId).toBe('real-hermandad-refugio');
-    expect(run.summary.sourcesFailed[0]?.message).toMatch(/HTML de desafío SiteGround/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/html-archive/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/browser/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/wp-rest/);
     expect(run.rawEvents).toEqual([]);
   });
 });

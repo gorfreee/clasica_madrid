@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83108",
+  "slug": "solistas-del-siglo-xxi-la-voz-del-fondo-del-cuerpo-recital-de-violonchelo",
+  "title": "Solistas del Siglo XXI. «La voz del fondo del cuerpo»: recital de violonchelo",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83108_01",
+      "date": "2026-10-10",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yiqi Chen"
+    },
+    {
+      "name": "Ofelia Montalván Vázquez"
+    },
+    {
+      "name": "Luis Aracama Alonso"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Fritz Kreisler"
+    },
+    {
+      "name": "Bohuslav Martinů"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violonchelo y piano núm. 1 en mi menor op 38",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Alt-Wiener Tanzweisen (Danzas Vienesas Antiguas) para violín y piano (arreglo para violonchelo y piano)",
+      "composerName": "Fritz Kreisler"
+    },
+    {
+      "title": "Sonata para violonchelo y piano núm. 2 en fa mayor op 99",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Variaciones sobre un tema de Rossini para violonchelo y piano H 290",
+      "composerName": "Bohuslav Martinů"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-la-voz-del-fondo-del-cuerpo-recital-de-violonchelo",
+      "checkedAt": "2026-09-24",
+      "externalId": "83108"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-09-24"
+}

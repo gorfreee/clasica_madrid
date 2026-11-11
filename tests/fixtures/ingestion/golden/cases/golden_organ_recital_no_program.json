@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_organ_recital_no_program",
+  "origin": "published-catalog",
+  "sourceId": "basilica-san-miguel",
+  "sourceUrl": "https://www.example.org/ciclo-organo/concierto-sin-programa",
+  "listingTitle": "Concierto de órgano",
+  "observed": {
+    "title": "Concierto de David Titterington",
+    "categoryText": "Ciclo Internacional de Órgano; Conciertos",
+    "seriesText": "Ciclo Internacional de Órgano",
+    "venueText": "Basílica Pontificia de San Miguel",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["organ", "recital"],
+    "eras": [],
+    "kind": "alternative",
+    "access": "unknown"
+  },
+  "reason": "Concierto de órgano de un ciclo de órgano. Sin obras ni compositores: eras vacías es correcto; no rellenar taxonomía inventada.",
+  "checkedAt": "2026-09-14"
+}

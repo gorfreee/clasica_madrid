@@ -1,0 +1,362 @@
+[
+  {
+    "schemaVersion": 1,
+    "kind": "observation",
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-patricia-kopatchinskaja-fazil-say-1",
+    "title": "CNDM. Patricia Kopatchinskaja & Fazil Say",
+    "hydration": {
+      "status": "succeeded",
+      "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-patricia-kopatchinskaja-fazil-say-1"
+    },
+    "observed": {
+      "title": "CNDM. Patricia Kopatchinskaja & Fazil Say",
+      "performers": [
+        {
+          "name": "PATRICIA KOPATCHINSKAJA",
+          "roleText": "violín"
+        },
+        {
+          "name": "FAZIL SAY",
+          "roleText": "piano"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Karol Szymanowski (1882-1937)"
+        },
+        {
+          "name": "Fazıl Say (1970)"
+        },
+        {
+          "name": "Serguéi Prokófiev (1891-1953)"
+        }
+      ],
+      "works": [
+        {
+          "title": "Mythes, op. 30 (1921)",
+          "composerName": "Karol Szymanowski (1882-1937)"
+        },
+        {
+          "title": "Sonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "PatKop (1977)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "UniSolo, para violín y piano (2024)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "Sonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
+          "composerName": "Serguéi Prokófiev (1891-1953)"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "2026-11-20T19:30:00+01:00",
+          "date": "2026-11-20",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala de Cámara",
+      "accessText": "28, 21 y 14 € CONSULTAR ABONOS CNDM y ENTRADAS SUELTAS",
+      "programText": "Karol Szymanowski (1882-1937)\nMythes, op. 30 (1921)\nFazıl Say (1970)\nSonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)\nPatKop (1977)\nUniSolo, para violín y piano (2024)\nSerguéi Prokófiev (1891-1953)\nSonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)"
+    },
+    "externalId": "cndm-patricia-kopatchinskaja-fazil-say-1",
+    "listing": {
+      "title": "CNDM. Patricia Kopatchinskaja & Fazil Say",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-20T19:30:00+01:00",
+          "date": "2026-11-20",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala de Cámara"
+    },
+    "normalized": {
+      "title": "CNDM. Patricia Kopatchinskaja & Fazil Say",
+      "performers": [
+        {
+          "name": "PATRICIA KOPATCHINSKAJA",
+          "roleText": "violín"
+        },
+        {
+          "name": "FAZIL SAY",
+          "roleText": "piano"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Karol Szymanowski (1882-1937)"
+        },
+        {
+          "name": "Fazıl Say (1970)"
+        },
+        {
+          "name": "Serguéi Prokófiev (1891-1953)"
+        }
+      ],
+      "works": [
+        {
+          "title": "Mythes, op. 30 (1921)",
+          "composerName": "Karol Szymanowski (1882-1937)"
+        },
+        {
+          "title": "Sonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "PatKop (1977)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "UniSolo, para violín y piano (2024)",
+          "composerName": "Fazıl Say (1970)"
+        },
+        {
+          "title": "Sonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
+          "composerName": "Serguéi Prokófiev (1891-1953)"
+        }
+      ],
+      "occurrences": [
+        {
+          "date": "2026-11-20",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala de Cámara",
+      "accessText": "28, 21 y 14 € CONSULTAR ABONOS CNDM y ENTRADAS SUELTAS",
+      "programText": "Karol Szymanowski (1882-1937)\nMythes, op. 30 (1921)\nFazıl Say (1970)\nSonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)\nPatKop (1977)\nUniSolo, para violín y piano (2024)\nSerguéi Prokófiev (1891-1953)\nSonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
+      "dateFromDetail": true
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "kind": "observation",
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-requiem-oberturas",
+    "title": "Orquesta Juvenil Europea de Madrid. Requiem & Oberturas",
+    "hydration": {
+      "status": "succeeded",
+      "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-requiem-oberturas"
+    },
+    "observed": {
+      "title": "Orquesta Juvenil Europea de Madrid. Requiem & Oberturas",
+      "performers": [
+        {
+          "name": "Orquesta y Escuela Coral OJEM"
+        },
+        {
+          "name": "Adriana Tanus",
+          "roleText": "director"
+        }
+      ],
+      "composers": [
+        {
+          "name": "W.A. Mozart"
+        }
+      ],
+      "works": [
+        {
+          "title": "\"Requiem en re menor, K626\"",
+          "composerName": "W.A. Mozart"
+        },
+        {
+          "title": "& Oberturas",
+          "composerName": "W.A. Mozart"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "2027-02-28T19:30:00+01:00",
+          "date": "2027-02-28",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica",
+      "accessText": "24, 21, 17, 12 y 9 €",
+      "programText": "W.A. Mozart\n\"Requiem en re menor, K626\"\n& Oberturas"
+    },
+    "externalId": "orquesta-juvenil-europea-de-madrid-requiem-oberturas",
+    "listing": {
+      "title": "Orquesta Juvenil Europea de Madrid. Requiem & Oberturas",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2027-02-28T19:30:00+01:00",
+          "date": "2027-02-28",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica"
+    },
+    "normalized": {
+      "title": "Orquesta Juvenil Europea de Madrid. Requiem & Oberturas",
+      "performers": [
+        {
+          "name": "Orquesta y Escuela Coral OJEM"
+        },
+        {
+          "name": "Adriana Tanus",
+          "roleText": "director"
+        }
+      ],
+      "composers": [
+        {
+          "name": "W.A. Mozart"
+        }
+      ],
+      "works": [
+        {
+          "title": "\"Requiem en re menor, K626\"",
+          "composerName": "W.A. Mozart"
+        },
+        {
+          "title": "& Oberturas",
+          "composerName": "W.A. Mozart"
+        }
+      ],
+      "occurrences": [
+        {
+          "date": "2027-02-28",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica",
+      "accessText": "24, 21, 17, 12 y 9 €",
+      "programText": "W.A. Mozart\n\"Requiem en re menor, K626\"\n& Oberturas",
+      "dateFromDetail": true
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "kind": "observation",
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight",
+    "title": "Orquesta Juvenil Europea de Madrid. Scheherazade & The Black Knight",
+    "hydration": {
+      "status": "succeeded",
+      "detailUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight"
+    },
+    "observed": {
+      "title": "Orquesta Juvenil Europea de Madrid. Scheherazade & The Black Knight",
+      "performers": [
+        {
+          "name": "Orquesta y Coro Sinfónicos OJEM"
+        },
+        {
+          "name": "Adriana Tanus",
+          "roleText": "director"
+        }
+      ],
+      "composers": [
+        {
+          "name": "N. Rimsky-Korsakov"
+        },
+        {
+          "name": "E. Elgar"
+        }
+      ],
+      "works": [
+        {
+          "title": "\"Scheherazade\", op. 35",
+          "composerName": "N. Rimsky-Korsakov"
+        },
+        {
+          "title": "Suite sinfónica",
+          "composerName": "N. Rimsky-Korsakov"
+        },
+        {
+          "title": "\"The black knight\", op. 25",
+          "composerName": "E. Elgar"
+        },
+        {
+          "title": "Cantata para coro y orquesta",
+          "composerName": "E. Elgar"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "2026-12-04T19:30:00+01:00",
+          "date": "2026-12-04",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica",
+      "accessText": "27, 24, 20, 15 y 12 €",
+      "programText": "N. Rimsky-Korsakov\n\"Scheherazade\", op. 35\nSuite sinfónica\nE. Elgar\n\"The black knight\", op. 25\nCantata para coro y orquesta"
+    },
+    "externalId": "orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight",
+    "listing": {
+      "title": "Orquesta Juvenil Europea de Madrid. Scheherazade & The Black Knight",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-12-04T19:30:00+01:00",
+          "date": "2026-12-04",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica"
+    },
+    "normalized": {
+      "title": "Orquesta Juvenil Europea de Madrid. Scheherazade & The Black Knight",
+      "performers": [
+        {
+          "name": "Orquesta y Coro Sinfónicos OJEM"
+        },
+        {
+          "name": "Adriana Tanus",
+          "roleText": "director"
+        }
+      ],
+      "composers": [
+        {
+          "name": "N. Rimsky-Korsakov"
+        },
+        {
+          "name": "E. Elgar"
+        }
+      ],
+      "works": [
+        {
+          "title": "\"Scheherazade\", op. 35",
+          "composerName": "N. Rimsky-Korsakov"
+        },
+        {
+          "title": "Suite sinfónica",
+          "composerName": "N. Rimsky-Korsakov"
+        },
+        {
+          "title": "\"The black knight\", op. 25",
+          "composerName": "E. Elgar"
+        },
+        {
+          "title": "Cantata para coro y orquesta",
+          "composerName": "E. Elgar"
+        }
+      ],
+      "occurrences": [
+        {
+          "date": "2026-12-04",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica",
+      "accessText": "27, 24, 20, 15 y 12 €",
+      "programText": "N. Rimsky-Korsakov\n\"Scheherazade\", op. 35\nSuite sinfónica\nE. Elgar\n\"The black knight\", op. 25\nCantata para coro y orquesta",
+      "dateFromDetail": true
+    }
+  }
+]

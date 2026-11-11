@@ -1,9 +1,21 @@
+import { matchComposer, matchComposerPrefix } from '../knowledge/composers.ts';
 import {
+  isNonPersonComposerAttribution,
+  looksLikeCatalogOnlyLine,
+  looksLikeCatalogWorkLine,
   looksLikeComposerLine,
   looksLikeEnsembleName,
+  looksLikeMovementLine,
+  looksLikeNonWorkCredit,
+  looksLikePartHeader,
+  looksLikeProductionNote,
   looksLikeProgramHeader,
   looksLikeScheduleNotice,
+  looksLikeTextCredit,
+  looksLikeUnequivocalWorkLine,
   looksLikeWorkInstrumentation,
+  looksLikeWorkLine,
+  parseExplicitTitleAuthorWork,
 } from '../observed-cleanup.ts';
 
 export type AuditorioSegments = {
@@ -13,12 +25,15 @@ export type AuditorioSegments = {
 };
 
 const ROLE_TOKEN =
-  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora';
+  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|alto|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|flaut[ií]n|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|corno|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora|solista|core[oó]graf[oa]|cantaora';
 
-const ROLE_QUALIFIER = '(?:\\s+(?:primer[oa]|segund[oa]|principal|art[ií]stic[oa]))?';
+const CREDIT_PHRASE = 'preparaci[oó]n del conjunto vocal|asistente de direcci[oó]n';
+
+const ROLE_QUALIFIER =
+  '(?:\\s+(?:primer[oa]|segund[oa]|principal|art[ií]stic[oa]|ingl[eé]s|bajo|i{1,3}|[1-3]))?';
 
 const ROLE_ONLY = new RegExp(
-  `^(?:violines|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|${ROLE_TOKEN})${ROLE_QUALIFIER}(?:\\s+y\\s+(?:musical|${ROLE_TOKEN})${ROLE_QUALIFIER})?$`,
+  `^(?:(?:violines|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|${ROLE_TOKEN})${ROLE_QUALIFIER}(?:\\s+y\\s+(?:musical|${ROLE_TOKEN})${ROLE_QUALIFIER})?|${CREDIT_PHRASE})$`,
   'i',
 );
 
@@ -30,26 +45,38 @@ const ROLE_SUFFIX = new RegExp(
 const DIRECTOR_PREFIX =
   /^(?:dir(?:ector|ectora)?\.?|directora|direcci[oó]n(?:\s+musical)?)\s*[:.,]?\s+(.+)$/i;
 
-const PARENTHETICAL_ROLE = new RegExp(`^(.+?)\\s*\\((${ROLE_TOKEN})\\)$`, 'i');
+const DASH_CREDIT = /^(.+?)\s*[–—]\s+(.+)$/;
 
-const ANONYMOUS_COMPOSER = /^(?:an[oó]nimo|varios autores)\b/i;
+const COMPOSER_DOT_DASH = /^(.+?)\.-\s+(.+)$/;
+
+const COMPOSER_DASH = /^(.+?)\s*[—–]\s*(.+)$/;
+
+const MUSICAL_PAREN =
+  /\b(?:m[uú]sica|ballet|poema|versi[oó]n|arr\.?|orquesta|sinf[oó]nic|piano|coro)\b/i;
+
+const FORM_ONLY =
+  /^(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod(?:y|ie)?|rapsodia|divertimento|polonesa|polonaise|recital(?:es)?)$/i;
+
+const PARENTHETICAL_ROLE = new RegExp(`^(.+?)\\s*\\((${ROLE_TOKEN})\\)$`, 'i');
 
 const INITIALS_COMPOSER =
   /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+(?:\s+\([^)]*\d{3,4}[^)]*\))?$/u;
+
+const MOVEMENT_TEMPO =
+  /^(?:adagio|adagietto|allegro|allegretto|andante|andantino|largo|larghetto|lento|presto|prestissimo|vivace|vivo|moderato|grave|maestoso|sostenuto|scherzo|minuetto|menuetto|menuet|rondo|finale|introducci[oó]n|aria|recitativo|attacca|tempo)\b/iu;
 
 const STRONG_CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,}|n[úu]m\.?\s*\d)\b/i;
 
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise)\b/i;
-
-const MOVEMENT = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise|cancionero)\b/i;
 
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
 /**
  * Split Auditorio Nacional h4 lines into notice / cast / program.
- * Later h4 blocks never leak back into the cast once a program section has started.
+ * Consecutive blocks may all be cast; only a program header or musical evidence
+ * opens the repertoire. Later blocks never leak back into the cast after that.
  * When the frontier is unclear, omit unlabeled names — precision over a full cast.
  */
 export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
@@ -78,20 +105,42 @@ export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
 
     const start = findProgramStartIndex(content);
     if (start >= 0) {
-      performerLines.push(...content.slice(0, start));
+      for (const line of content.slice(0, start)) {
+        if (belongsToCastBeforeProgram(line)) performerLines.push(line);
+        else programLines.push(line);
+      }
       programLines.push(...content.slice(start));
       inProgram = true;
       continue;
     }
 
-    const hasLaterBlock = contentBlocks.slice(index + 1).some((block) => block.length > 0);
-    if (hasLaterBlock) {
-      performerLines.push(...content);
-      inProgram = true;
-      continue;
+    // No demonstrated frontier: classify line by line. A later h4 is not
+    // evidence that this whole block is cast.
+    let openedProgram = false;
+    const castScaffolding = blockHasCastScaffolding(content);
+    for (const line of content) {
+      if (looksLikeAuditorioRepertoireLine(line) || isComposerHeading(line)) {
+        programLines.push(line);
+        openedProgram = true;
+        continue;
+      }
+      if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line)) {
+        performerLines.push(line);
+        continue;
+      }
+      if (looksLikeCastEnsemble(line)) {
+        performerLines.push(line);
+        continue;
+      }
+      if (castScaffolding && looksLikePersonOrGroupName(line)) {
+        performerLines.push(line);
+        continue;
+      }
+      // Unlabeled names without an unequivocal cast context are omitted.
+      if (looksLikePersonOrGroupName(line) || looksLikeUnlabeledPerson(line)) continue;
+      programLines.push(line);
     }
-
-    performerLines.push(...content.filter((line) => hasExplicitPerformerSignal(line)));
+    if (openedProgram) inProgram = true;
   }
 
   return { noticeLines, performerLines, programLines };
@@ -103,13 +152,25 @@ export function findProgramStartIndex(lines: string[]): number {
     const line = lines[index] ?? '';
     const next = lines[index + 1];
     if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line)) continue;
-    if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
+    if (
+      looksLikeMovementLine(line) ||
+      looksLikeProductionNote(line) ||
+      looksLikeTextCredit(line) ||
+      looksLikeNonWorkCredit(line)
+    ) {
+      continue;
+    }
+    if (looksLikeProgramHeader(line) || isNonPersonComposerAttribution(line) || /^obras de\b/i.test(line)) {
       return index;
     }
     if (parseComposerYearWork(line)) return index;
     if (parseComposerColonWork(line)) return index;
+    if (parseWorkThenPersonCredit(line)) return index;
+    if (parseExplicitTitleAuthorWork(line)) return index;
     if (isComposerHeading(line)) return index;
-    if (looksLikeStrongWorkLine(line)) return walkBackComposers(lines, index);
+    if (looksLikeStrongWorkLine(line) || looksLikeAuditorioRepertoireLine(line)) {
+      return walkBackComposers(lines, index);
+    }
     if (
       looksLikeUnlabeledPerson(line) &&
       next !== undefined &&
@@ -128,14 +189,20 @@ export function looksLikeRoleOnlyLine(text: string): boolean {
 export function hasExplicitPerformerSignal(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned) return false;
+  if (looksLikeAuditorioRepertoireLine(cleaned)) return false;
   if (STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) return false;
+  if (parseComposerYearWork(cleaned) || parseComposerColonWork(cleaned)) return false;
+  if (parseWorkThenPersonCredit(cleaned)) return true;
   if (looksLikeCastEnsemble(cleaned)) return true;
-  if (DIRECTOR_PREFIX.test(cleaned)) return true;
+  if (parseDashRoleCredit(cleaned)) return true;
+  if (DIRECTOR_PREFIX.test(cleaned) && directorPrefixPerson(cleaned)) return true;
   if (parseCommaRole(cleaned)) return true;
   if (parseParentheticalRole(cleaned)) return true;
   if (ROLE_SUFFIX.test(cleaned) && !looksLikeProgramHeader(ROLE_SUFFIX.exec(cleaned)?.[1] ?? '')) {
     const name = ROLE_SUFFIX.exec(cleaned)?.[1]?.trim() ?? '';
-    if (STRONG_CATALOG.test(name) || looksLikeWorkInstrumentation(name)) return false;
+    if (looksLikeAuditorioRepertoireLine(name) || STRONG_CATALOG.test(name) || looksLikeWorkInstrumentation(name)) {
+      return false;
+    }
     return looksLikePersonOrGroupName(name);
   }
   return false;
@@ -168,13 +235,30 @@ function parseSingleAuditorioPerson(
   const cleaned = cleanLine(text);
   if (!cleaned) return undefined;
   if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
-  if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
-  if (parseComposerYearWork(cleaned) || parseComposerColonWork(cleaned)) return undefined;
-  if (isComposerHeading(cleaned) || looksLikeStrongWorkLine(cleaned)) return undefined;
-  if (looksLikeWorkInstrumentation(cleaned)) return undefined;
+  if (looksLikeRoleOnlyLine(cleaned) || isNonPersonComposerAttribution(cleaned)) return undefined;
+  if (
+    looksLikeMovementLine(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
+    return undefined;
+  }
 
-  const director = DIRECTOR_PREFIX.exec(cleaned);
-  if (director?.[1]) return { name: director[1].trim(), roleText: 'director' };
+  const workThenPerson = parseWorkThenPersonCredit(cleaned);
+  if (workThenPerson) return workThenPerson.person;
+
+  const dashed = parseDashRoleCredit(cleaned);
+  if (dashed) return dashed;
+
+  if (parseComposerYearWork(cleaned) || parseComposerColonWork(cleaned)) return undefined;
+  if (parseExplicitTitleAuthorWork(cleaned)) return undefined;
+  if (looksLikeAuditorioRepertoireLine(cleaned)) return undefined;
+  if (isComposerHeading(cleaned) || looksLikeStrongWorkLine(cleaned)) return undefined;
+  if (looksLikeWorkInstrumentation(cleaned) || looksLikeCatalogWorkLine(cleaned)) return undefined;
+
+  const director = parseDirectorPrefixCredit(cleaned);
+  if (director) return director;
 
   const comma = parseCommaRole(cleaned);
   if (comma) return comma;
@@ -185,7 +269,7 @@ function parseSingleAuditorioPerson(
   const suffix = ROLE_SUFFIX.exec(cleaned);
   if (suffix?.[1] && suffix[2] && !looksLikeProgramHeader(suffix[1])) {
     const name = suffix[1].trim();
-    if (!looksLikePersonOrGroupName(name)) return undefined;
+    if (looksLikeAuditorioRepertoireLine(name) || !looksLikePersonOrGroupName(name)) return undefined;
     const role = suffix[3] ? `${suffix[2].trim()} y ${suffix[3].trim()}` : suffix[2].trim();
     return { name, roleText: stripCharacterCue(role) };
   }
@@ -198,26 +282,87 @@ function parseSingleAuditorioPerson(
 /**
  * `Composer: Work title` on one line. Used as a program frontier, never as a person.
  * Requires a work-genre or catalogue signal on the title side so `Nombre: rol` stays a person.
+ * The comma form is ambiguous (`Composer, Work` vs a name list): only accept it with
+ * strong musical evidence on the title side.
  */
 export function parseComposerColonWork(
   text: string,
 ): { title: string; composerName: string } | undefined {
   const cleaned = cleanLine(text);
-  const named =
+  if (looksLikeMovementLine(cleaned)) return undefined;
+  if (parseDashRoleCredit(cleaned)) return undefined;
+  if (looksLikeComposerNameList(cleaned)) return undefined;
+  const dotDash = COMPOSER_DOT_DASH.exec(cleaned);
+  const colon =
     /^(.+?):\s+(.+)$/.exec(cleaned) ??
     /^(.+?)\s+[·•]\s+(.+)$/.exec(cleaned) ??
-    /^(.+?)\s+[—–]\s+(.+)$/.exec(cleaned);
+    COMPOSER_DASH.exec(cleaned);
+  const comma = /^(.+?),\s+(.+)$/.exec(cleaned);
+  const named = dotDash ?? colon ?? comma;
   if (!named?.[1] || !named[2]) return undefined;
   const composerName = named[1].trim();
   const title = named[2].trim();
   if (!composerName || !title) return undefined;
+  // A quoted title followed by several slash-separated authors is a work
+  // credit, never a composer heading (e.g. “My Way” — three authors).
+  if (/^[«“"'‘]/u.test(composerName) || /\s+\/\s+/.test(title)) return undefined;
   if (hasExplicitPerformerSignal(composerName) || looksLikeRoleOnlyLine(composerName)) return undefined;
   if (WORK_GENRE.test(composerName) || STRONG_CATALOG.test(composerName)) return undefined;
   if (composerName.length > 80 || /\d/.test(composerName)) return undefined;
   const words = composerName.split(/\s+/).filter(Boolean);
   if (words.length < 1 || words.length > 6) return undefined;
+  if (hasExplicitPerformerSignal(title) || looksLikeRoleOnlyLine(title)) return undefined;
+  if (parseCommaRole(title)) return undefined;
+  if (looksLikeComposerNameList(title)) return undefined;
+  if (looksLikeComposerNameList(composerName) || looksLikeKnownComposerPairHeading(cleaned)) {
+    return undefined;
+  }
+  if (isNamedCastEnsemble(title) && !looksLikeColonWorkTitle(title) && !/\([^)]+\)/.test(title)) {
+    return undefined;
+  }
+  if (dotDash) {
+    return { title, composerName };
+  }
+  const isDash = Boolean(colon && COMPOSER_DASH.test(cleaned) && !/:\s+/.test(cleaned) && !/\s+[·•]\s+/.test(cleaned));
+  if (!colon && comma) {
+    if (/^(?:para|for)\b/i.test(title)) return undefined;
+    if (!looksLikeComposerLine(composerName) && !looksLikeInitialsComposerName(composerName)) {
+      return undefined;
+    }
+    if (!hasStrongWorkTitleEvidence(title)) return undefined;
+    return { title, composerName };
+  }
+  if (isDash) {
+    return parseComposerDashWork(composerName, title);
+  }
   if (!looksLikeColonWorkTitle(title)) return undefined;
   return { title, composerName };
+}
+
+function parseComposerDashWork(
+  composerName: string,
+  title: string,
+): { title: string; composerName: string } | undefined {
+  const composerOk =
+    looksLikeComposerLine(composerName) ||
+    looksLikeInitialsComposerName(composerName) ||
+    looksLikeUnlabeledPerson(composerName);
+  if (!composerOk) return undefined;
+  if (looksLikeComposerNameList(title) || looksLikeRoleOnlyLine(title)) return undefined;
+  if (hasStrongWorkTitleEvidence(title) || looksLikeColonWorkTitle(title) || looksLikeWorkInstrumentation(title)) {
+    return { title, composerName };
+  }
+  if (looksLikeUnlabeledPerson(title) || looksLikeComposerLine(title) || matchComposer(title)) {
+    return undefined;
+  }
+  return { title, composerName };
+}
+
+function hasStrongWorkTitleEvidence(title: string): boolean {
+  if (looksLikeColonWorkTitle(title) || looksLikeWorkInstrumentation(title)) return true;
+  if (STRONG_CATALOG.test(title) || WORK_GENRE.test(title)) return true;
+  const paren = /\(([^)]+)\)/.exec(title);
+  return Boolean(paren?.[1] && MUSICAL_PAREN.test(paren[1]));
 }
 
 /**
@@ -259,6 +404,388 @@ function looksLikeColonWorkTitle(title: string): boolean {
   return /\b(?:bwv|hwv|hob|buxwv|swwv|rct|k\.?v?|op\.?|opus|g\.|h\.?)\s*\d+/i.test(title);
 }
 
+/**
+ * Known composer at the start of a line, optionally followed by a delimiter and title.
+ * A form-only remainder (`Variaciones`) may join the next line when that line continues the title.
+ */
+export function parseKnownComposerPrefixWork(
+  text: string,
+  nextLine?: string,
+): { title: string; composerName: string; consumedNext?: boolean } | undefined {
+  const cleaned = cleanLine(text);
+  const prefix = matchComposerPrefix(cleaned);
+  if (!prefix || !prefix.rest) return undefined;
+  if (parseDashRoleCredit(cleaned) || looksLikeComposerNameList(cleaned)) return undefined;
+  if (looksLikeKnownComposerPairHeading(cleaned)) return undefined;
+  const title = stripLeadingWorkDelimiter(prefix.rest);
+  if (!title) return undefined;
+  if (/^(?:y|and)\s+/i.test(title) && matchComposerPrefix(title.replace(/^(?:y|and)\s+/i, ''))) {
+    return undefined;
+  }
+  if (hasExplicitPerformerSignal(title) || looksLikeRoleOnlyLine(title) || parseCommaRole(title)) {
+    return undefined;
+  }
+  if (looksLikeComposerNameList(title)) return undefined;
+  const composerName = prefix.matchedText;
+
+  if (isMusicalFormFragment(title)) {
+    const next = nextLine ? cleanLine(nextLine) : '';
+    if (next && isTitleContinuationLine(next, composerName)) {
+      return { title: `${title} ${next}`, composerName, consumedNext: true };
+    }
+    return { title, composerName };
+  }
+
+  if (hasStrongWorkTitleEvidence(title) || looksLikeColonWorkTitle(title) || looksLikeWorkInstrumentation(title)) {
+    return { title, composerName };
+  }
+  if (looksLikeUnlabeledPerson(title) || looksLikeComposerLine(title) || matchComposer(title)) {
+    return undefined;
+  }
+  if (looksLikeWorkishLine(title) || STRONG_CATALOG.test(title) || WORK_GENRE.test(title)) {
+    return { title, composerName };
+  }
+  // Remainder after an explicit known composer and a delimiter is the title.
+  if (leadingWorkDelimiter(prefix.rest)) {
+    return { title, composerName };
+  }
+  return undefined;
+}
+
+/** Never attach a sticky composer to a line that already names a different composer. */
+export function titleBeginsWithExplicitComposer(text: string, stickyComposer: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned || !stickyComposer) return false;
+  const attributedWork = parseComposerColonWork(cleaned) ?? parseKnownComposerPrefixWork(cleaned);
+  if (attributedWork && composersAreDistinct(attributedWork.composerName, stickyComposer)) {
+    return true;
+  }
+  const prefix = matchComposerPrefix(cleaned);
+  if (prefix && composersAreDistinct(prefix.matchedText, stickyComposer)) {
+    if (prefix.rest) return true;
+    // Bare surnames like Chopin/Paganini inside a Schumann suite are movements, not headings.
+    const words = prefix.matchedText.split(/\s+/).filter(Boolean);
+    if (words.length >= 2 || /\(\s*(?:ca\.?\s*)?\d{3,4}/u.test(cleaned)) return true;
+  }
+  const dashed = COMPOSER_DASH.exec(cleaned);
+  if (dashed?.[1] && composersAreDistinct(dashed[1].trim(), stickyComposer)) {
+    const left = dashed[1].trim();
+    if (looksLikeComposerLine(left) || looksLikeUnlabeledPerson(left) || matchComposer(left)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function composersAreDistinct(left: string, right: string): boolean {
+  const a = left.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  const b = right.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  if (!a || !b) return false;
+  if (a.localeCompare(b, 'es', { sensitivity: 'accent' }) === 0) return false;
+  const knownLeft = matchComposer(a);
+  const knownRight = matchComposer(b);
+  if (knownLeft && knownRight) return knownLeft.canonicalName !== knownRight.canonicalName;
+  return a.localeCompare(b, 'es', { sensitivity: 'accent' }) !== 0;
+}
+
+/**
+ * Explicit `Obras de X, Y y Z`, including fragments split across lines.
+ * Names are composers, never a work title.
+ */
+export function extractObrasDeComposers(text: string): string[] {
+  const cleaned = cleanLine(text);
+  const body = cleaned.replace(/^obras de\s+/i, '').replace(/[.,;]+$/u, '').trim();
+  if (!body) return [];
+  return splitComposerNameList(body).filter(Boolean);
+}
+
+export function looksLikeObrasDeLine(text: string): boolean {
+  return /^obras de\b/i.test(cleanLine(text));
+}
+
+/**
+ * Programme concept `KnownComposer y KnownComposer: subtitle`.
+ * Not a `Composer: Work` line and not a work of the first composer.
+ */
+export function looksLikeKnownComposerPairHeading(text: string): boolean {
+  const cleaned = cleanLine(text).replace(/^[«“"']\s*|\s*[»”"']$/gu, '').trim();
+  if (!cleaned || looksLikeProgramHeader(cleaned)) return false;
+  const named =
+    /^(.+?)\s+(?:y|and)\s+(.+?)\s*:\s+(.+)$/iu.exec(cleaned) ??
+    /^(.+?)\s+(?:vs\.?|versus|contra)\s+(.+?)(?:\s*:\s+(.+))?$/iu.exec(cleaned);
+  if (!named?.[1] || !named[2]) return false;
+  const left = named[1].trim();
+  const right = named[2].trim();
+  if (!left || !right) return false;
+  if (WORK_GENRE.test(left) || STRONG_CATALOG.test(left) || looksLikeWorkInstrumentation(left)) {
+    return false;
+  }
+  if (!matchComposer(left) || !matchComposer(right)) return false;
+  return true;
+}
+
+/**
+ * A standalone comma/`y` name list (no `Obras de`) only becomes composers when
+ * every token is a known composer. Personal-name syntax alone is not enough.
+ */
+export function extractStandaloneKnownComposers(text: string): string[] {
+  if (looksLikeObrasDeLine(text) || !looksLikeComposerNameList(text)) return [];
+  const names = extractObrasDeComposers(text);
+  if (names.length < 2) return [];
+  if (!names.every((name) => Boolean(matchComposer(name)))) return [];
+  return names;
+}
+
+export function looksLikeComposerNameList(text: string): boolean {
+  const cleaned = cleanLine(text).replace(/^obras de\s+/i, '').replace(/[.,;]+$/u, '').trim();
+  if (!cleaned) return false;
+  if (parseExplicitTitleAuthorWork(cleanLine(text))) return false;
+  if (WORK_GENRE.test(cleaned) || STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) {
+    return false;
+  }
+  if (!/,/.test(cleaned) && !/\s+y\s+/i.test(cleaned)) return false;
+  const parts = splitComposerNameList(cleaned);
+  if (parts.length < 2) return false;
+  if (!parts.every((part) => isComposerListToken(part))) return false;
+  return parts.some(
+    (part) => matchComposer(part) || looksLikeComposerLine(part) || looksLikeUnlabeledPerson(part),
+  );
+}
+
+export function looksLikeNameListContinuation(text: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (looksLikeUnequivocalWorkLine(cleaned) && !looksLikeComposerNameList(cleaned)) return false;
+  if (parseComposerYearWork(cleaned)) return false;
+  if (looksLikeComposerNameList(cleaned)) return true;
+  const parts = splitComposerNameList(cleaned);
+  return (
+    parts.length >= 1 &&
+    parts.every((part) => isComposerListToken(part)) &&
+    !WORK_GENRE.test(cleaned) &&
+    !STRONG_CATALOG.test(cleaned)
+  );
+}
+
+function splitComposerNameList(text: string): string[] {
+  const raw = text
+    .split(/\s*,\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const names: string[] = [];
+  for (const part of raw) {
+    if (matchComposer(part) || looksLikeComposerLine(part)) {
+      names.push(part);
+      continue;
+    }
+    const joined = part.split(/\s+y\s+/i).map((item) => item.trim()).filter(Boolean);
+    if (joined.length >= 2 && joined.every((item) => isComposerListToken(item))) {
+      names.push(...joined);
+      continue;
+    }
+    names.push(part);
+  }
+  return names;
+}
+
+function isComposerListToken(text: string): boolean {
+  const cleaned = text.trim();
+  if (!cleaned || WORK_GENRE.test(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
+  if (looksLikeWorkInstrumentation(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (matchComposer(cleaned) || looksLikeComposerLine(cleaned) || looksLikeInitialsComposerName(cleaned)) {
+    return true;
+  }
+  if (looksLikeUnlabeledPerson(cleaned)) return true;
+  return /^[\p{Lu}\p{Lt}][\p{L}’'-]{1,}$/u.test(cleaned);
+}
+
+function stripLeadingWorkDelimiter(text: string): string {
+  return text.replace(/^(?:[:·•]|[—–])\s*/, '').trim();
+}
+
+function leadingWorkDelimiter(text: string): boolean {
+  return /^(?:[:·•]|[—–])/.test(text.trim());
+}
+
+function isMusicalFormFragment(text: string): boolean {
+  const trimmed = text.replace(/[.,;:]+$/u, '').trim();
+  if (!trimmed || /\s/.test(trimmed)) return false;
+  return FORM_ONLY.test(trimmed);
+}
+
+function isTitleContinuationLine(next: string, composerName: string): boolean {
+  if (!next || looksLikeProgramHeader(next) || looksLikePartHeader(next)) return false;
+  if (
+    looksLikeProductionNote(next) ||
+    looksLikeTextCredit(next) ||
+    looksLikeNonWorkCredit(next) ||
+    looksLikeMovementLine(next)
+  ) {
+    return false;
+  }
+  if (looksLikeObrasDeLine(next) || looksLikeComposerNameList(next)) return false;
+  const prefix = matchComposerPrefix(next);
+  if (prefix && !prefix.rest && composersAreDistinct(prefix.matchedText, composerName)) return false;
+  if (parseComposerColonWork(next) || parseComposerYearWork(next)) return false;
+  if (titleBeginsWithExplicitComposer(next, composerName)) return false;
+  return looksLikeWorkishLine(next) || looksLikeCatalogWorkLine(next) || STRONG_CATALOG.test(next);
+}
+
+/**
+ * Genre, catalogue, instrumentation, composer→obra delimiters, movements.
+ * A line with these signals is repertoire, never an unlabeled person.
+ */
+export function looksLikeAuditorioRepertoireLine(text: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned) return false;
+  if (looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (
+    looksLikeScheduleNotice(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
+    return false;
+  }
+  if (isNamedCastEnsemble(cleaned)) return false;
+  if (looksLikeMovementLine(cleaned)) return true;
+  if (looksLikeUnequivocalWorkLine(cleaned) || looksLikeCatalogWorkLine(cleaned)) return true;
+  if (looksLikeWorkInstrumentation(cleaned) || STRONG_CATALOG.test(cleaned)) return true;
+  if (COMPOSER_DOT_DASH.test(cleaned)) return true;
+  if (parseComposerYearWork(cleaned) || parseExplicitTitleAuthorWork(cleaned)) return true;
+  if (WORK_GENRE.test(cleaned)) return true;
+  return false;
+}
+
+/**
+ * `Title (Composer) Person, role` when the parenthetical is a composer and the
+ * tail is an explicit person credit. Otherwise leave the line as programme.
+ */
+export function parseWorkThenPersonCredit(text: string): {
+  work: { title: string; composerName: string };
+  person: { name: string; roleText: string };
+} | undefined {
+  const cleaned = cleanLine(text);
+  const named = /^(.+?)\s+\(([^)]+)\)\s+(.+)$/.exec(cleaned);
+  if (!named?.[1] || !named[2] || !named[3]) return undefined;
+  const title = named[1].trim();
+  const composerName = named[2].trim();
+  const rest = named[3].trim();
+  if (!title || !composerName || !rest) return undefined;
+  if (looksLikeRoleOnlyLine(title) || looksLikeProgramHeader(title)) return undefined;
+  const attributed = parseExplicitTitleAuthorWork(`${title} (${composerName})`);
+  const composerOk =
+    Boolean(attributed) ||
+    looksLikeInitialsComposerName(composerName) ||
+    looksLikeComposerLine(composerName);
+  if (!composerOk) return undefined;
+  const person = parseTrailingPersonCredit(rest);
+  if (!person?.roleText) return undefined;
+  if (looksLikeAuditorioRepertoireLine(person.name) || looksLikeCastEnsemble(person.name)) return undefined;
+  if (!looksLikePersonOrGroupName(person.name)) return undefined;
+  return {
+    work: attributed ?? { title, composerName },
+    person: { name: person.name, roleText: person.roleText },
+  };
+}
+
+/** `Director Musical y Piano – Sergio Kuhlmann` → name + source role phrase. */
+export function parseDashRoleCredit(
+  text: string,
+): { name: string; roleText: string } | undefined {
+  const cleaned = cleanLine(text);
+  const named = DASH_CREDIT.exec(cleaned);
+  if (!named?.[1] || !named[2]) return undefined;
+  const role = named[1].trim();
+  const rest = named[2].trim();
+  if (!looksLikeCreditRolePhrase(role)) return undefined;
+  const parenthetical = parseParentheticalRole(rest);
+  const name = parenthetical?.name ?? rest.replace(/[.,;:]+$/u, '').trim();
+  const roleText = parenthetical?.roleText ? `${role} (${parenthetical.roleText})` : role;
+  if (!looksLikeUnlabeledPerson(name) && !looksLikePersonOrGroupName(name)) return undefined;
+  if (looksLikeAuditorioRepertoireLine(name)) return undefined;
+  return { name, roleText };
+}
+
+function parseTrailingPersonCredit(
+  text: string,
+): { name: string; roleText?: string } | undefined {
+  const comma = parseCommaRole(text);
+  if (comma) return comma;
+  const parenthetical = parseParentheticalRole(text);
+  if (parenthetical) return parenthetical;
+  const suffix = ROLE_SUFFIX.exec(text);
+  if (suffix?.[1] && suffix[2] && !looksLikeProgramHeader(suffix[1])) {
+    const name = suffix[1].trim();
+    if (!looksLikePersonOrGroupName(name)) return undefined;
+    const role = suffix[3] ? `${suffix[2].trim()} y ${suffix[3].trim()}` : suffix[2].trim();
+    return { name, roleText: stripCharacterCue(role) };
+  }
+  return undefined;
+}
+
+function parseDirectorPrefixCredit(
+  text: string,
+): { name: string; roleText: string } | undefined {
+  const person = directorPrefixPerson(text);
+  if (!person) return undefined;
+  return person;
+}
+
+function directorPrefixPerson(
+  text: string,
+): { name: string; roleText: string } | undefined {
+  const director = DIRECTOR_PREFIX.exec(text);
+  if (!director?.[1]) return undefined;
+  const rest = director[1].trim();
+  const leftoverDash = DASH_CREDIT.exec(rest);
+  if (leftoverDash?.[1] && leftoverDash[2]) {
+    const role = `Director ${leftoverDash[1]}`.replace(/\s+/g, ' ').trim();
+    const name = leftoverDash[2].trim();
+    if (looksLikeUnlabeledPerson(name) || looksLikePersonOrGroupName(name)) {
+      return { name, roleText: role };
+    }
+    return undefined;
+  }
+  if (!looksLikePersonOrGroupName(rest) && !looksLikeUnlabeledPerson(rest)) return undefined;
+  if (looksLikeAuditorioRepertoireLine(rest) || looksLikeRoleOnlyLine(rest)) return undefined;
+  return { name: rest, roleText: 'director' };
+}
+
+function looksLikeCreditRolePhrase(text: string): boolean {
+  const cleaned = text.trim();
+  if (!cleaned || cleaned.length > 80) return false;
+  if (looksLikeRoleOnlyLine(cleaned)) return true;
+  if (!/^(?:dir(?:ector|ectora)?\.?|directora|direcci[oó]n)/i.test(cleaned)) return false;
+  const tokens = cleaned.split(/\s+y\s+|\s+/i).filter(Boolean);
+  if (tokens.length === 0 || tokens.length > 6) return false;
+  const roleWord = new RegExp(`^(?:${ROLE_TOKEN}|musical|art[ií]stic[oa])$`, 'i');
+  return tokens.every((token) => roleWord.test(token));
+}
+
+function isNamedCastEnsemble(text: string): boolean {
+  if (looksLikeWorkInstrumentation(text) || STRONG_CATALOG.test(text) || looksLikeCatalogWorkLine(text)) {
+    return false;
+  }
+  if (/(?:para|for)\b/i.test(text) && WORK_GENRE.test(text)) return false;
+  // "música del ballet completo" names a work, not a dance company.
+  if (/\bballet\b/i.test(text) && !/\bcompa[ñn][ií]a\b/i.test(text) && !/^ballet\b/i.test(text.trim())) {
+    return false;
+  }
+  // Generic chamber-genre labels are work titles, not group names.
+  if (/^(?:cuarteto|quinteto|tr[ií]o)\s+de\s+(?:viento|cuerda|cuerdas|c[aá]mara)\b/i.test(text.trim())) {
+    return false;
+  }
+  return looksLikeEnsembleName(text);
+}
+
+function blockHasCastScaffolding(lines: string[]): boolean {
+  return lines.some(
+    (line) =>
+      hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line) || looksLikeCastEnsemble(line),
+  );
+}
+
 function parseParentheticalRole(text: string): { name: string; roleText: string } | undefined {
   const named = PARENTHETICAL_ROLE.exec(text);
   if (!named?.[1] || !named[2]) return undefined;
@@ -279,12 +806,18 @@ function parseCommaRole(text: string): { name: string; roleText: string } | unde
   if (WORK_GENRE.test(name) || WORK_GENRE.test(role)) return undefined;
   if (looksLikeWorkInstrumentation(text) || looksLikeWorkInstrumentation(name)) return undefined;
   if (!ROLE_ONLY.test(role)) return undefined;
+  if (looksLikeRoleOnlyLine(name)) return undefined;
+  const shared = name.split(/\s+y\s+/i).map((part) => part.trim()).filter(Boolean);
+  const nameOk =
+    looksLikePersonOrGroupName(name) ||
+    (shared.length === 2 && shared.every((part) => looksLikeUnlabeledPerson(part)));
+  if (!nameOk) return undefined;
   return { name, roleText: role };
 }
 
 function looksLikeCastEnsemble(text: string): boolean {
-  if (!looksLikeEnsembleName(text)) return false;
-  if (STRONG_CATALOG.test(text)) return false;
+  if (looksLikeAuditorioRepertoireLine(text)) return false;
+  if (!isNamedCastEnsemble(text)) return false;
   if (/\ben\s+(?:do|re|mi|fa|sol|la|si|ut)\b/i.test(text)) return false;
   if (looksLikeScheduleNotice(text)) return false;
   return true;
@@ -292,8 +825,21 @@ function looksLikeCastEnsemble(text: string): boolean {
 
 function isComposerHeading(line: string): boolean {
   if (looksLikeProgramHeader(line) || looksLikeRoleOnlyLine(line)) return false;
+  if (
+    looksLikeMovementLine(line) ||
+    looksLikeProductionNote(line) ||
+    looksLikeTextCredit(line) ||
+    looksLikeNonWorkCredit(line)
+  ) {
+    return false;
+  }
+  if (/^de\s+/i.test(line)) return false;
+  if (looksLikeCatalogOnlyLine(line) || parseExplicitTitleAuthorWork(line)) return false;
+  if (looksLikeObrasDeLine(line) || looksLikeComposerNameList(line)) return false;
+  if (looksLikeAuditorioRepertoireLine(line)) return false;
+  if (hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line)) return false;
   if (looksLikeComposerLine(line)) return true;
-  if (INITIALS_COMPOSER.test(line)) return true;
+  if (looksLikeInitialsComposerName(line)) return true;
   return false;
 }
 
@@ -302,23 +848,24 @@ function looksLikeStrongWorkLine(text: string): boolean {
   if (!trimmed || looksLikeScheduleNotice(trimmed) || hasExplicitPerformerSignal(trimmed)) {
     return false;
   }
-  if (looksLikeRoleOnlyLine(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
-  if (STRONG_CATALOG.test(trimmed)) return true;
-  if (looksLikeCastEnsemble(trimmed)) return false;
-  if (looksLikeWorkInstrumentation(trimmed)) return true;
-  return WORK_GENRE.test(trimmed);
+  if (looksLikeRoleOnlyLine(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
+  if (STRONG_CATALOG.test(trimmed) || looksLikeWorkInstrumentation(trimmed) || WORK_GENRE.test(trimmed)) {
+    return true;
+  }
+  if (looksLikeUnlabeledPerson(trimmed) || looksLikeCastEnsemble(trimmed)) return false;
+  return false;
 }
 
 function looksLikeWorkishLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
-  if (hasExplicitPerformerSignal(trimmed)) return false;
+  if (hasExplicitPerformerSignal(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeScheduleNotice(trimmed)) return false;
   if (ROLE_SUFFIX.test(trimmed) && !looksLikeWorkInstrumentation(trimmed) && !STRONG_CATALOG.test(trimmed)) {
     return false;
   }
   if (isComposerHeading(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
-  if (looksLikeStrongWorkLine(trimmed) || MOVEMENT.test(trimmed)) return true;
+  if (looksLikeStrongWorkLine(trimmed) || looksLikeMovementLine(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed) && !STRONG_CATALOG.test(trimmed) && !WORK_GENRE.test(trimmed)) {
     return false;
   }
@@ -337,9 +884,18 @@ function looksLikePersonOrGroupName(text: string): boolean {
 function looksLikeUnlabeledPerson(text: string): boolean {
   const cleaned = text.replace(/[“”«»"']/g, '').trim();
   if (!cleaned || cleaned.length > 80) return false;
+  if (isNonPersonComposerAttribution(cleaned) || isNonPersonComposerAttribution(text.trim())) return false;
   if (/[¡!?,;:]/.test(cleaned) || /\d/.test(cleaned) || /[&/]/.test(cleaned)) return false;
-  if (/ y$/i.test(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (/ y$/i.test(cleaned) || looksLikeRoleOnlyLine(cleaned) || looksLikeNonWorkCredit(cleaned)) {
+    return false;
+  }
+  if (WORK_GENRE.test(cleaned) || STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) {
+    return false;
+  }
   const words = cleaned.split(/\s+/).filter(Boolean);
+  // "Recital de" is a programme format, not a person. FORM_ONLY stays out of
+  // WORK_GENRE so the same token does not open the repertoire frontier.
+  if (words.some((word) => FORM_ONLY.test(word))) return false;
   if (words.length < 2 || words.length > 6) return false;
   return words.every(
     (word) => NAME_PARTICLE.test(word) || /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word),
@@ -354,8 +910,9 @@ function walkBackComposers(lines: string[], index: number): number {
     if (
       isComposerHeading(prev) ||
       looksLikeUnlabeledPerson(prev) ||
-      ANONYMOUS_COMPOSER.test(prev) ||
-      INITIALS_COMPOSER.test(prev)
+      isNonPersonComposerAttribution(prev) ||
+      looksLikeInitialsComposerName(prev) ||
+      looksLikeWorkishLine(prev)
     ) {
       start -= 1;
       continue;
@@ -365,17 +922,144 @@ function walkBackComposers(lines: string[], index: number): number {
   return start;
 }
 
+function belongsToCastBeforeProgram(line: string): boolean {
+  if (looksLikeAuditorioRepertoireLine(line) || isComposerHeading(line)) return false;
+  if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line) || looksLikeCastEnsemble(line)) {
+    return true;
+  }
+  const people = parseAuditorioPersonCredits(line);
+  if (people.some((person) => looksLikeAuditorioRepertoireLine(person.name))) return false;
+  return people.length > 0;
+}
+
 function isCastBoundary(line: string): boolean {
   return hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line) || looksLikeRoleOnlyLine(line);
 }
 
-/** Composer heading in a program block, including unlabeled names not in the knowledge base. */
+/**
+ * Composer heading in a program block. Personal-name syntax alone is not enough:
+ * require a knowledge-base match, initials+surname, or biographical years.
+ * Non-person labels are grouping boundaries, not pairable composers.
+ * `looksLikeUnlabeledPerson` stays a cast heuristic.
+ */
 export function canPairAsAuditorioComposer(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (
+    looksLikeMovementLine(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
+    return false;
+  }
+  if (/^de\s+/i.test(cleaned)) return false;
+  if (parseExplicitTitleAuthorWork(cleaned) || looksLikeCatalogOnlyLine(cleaned)) return false;
+  if (looksLikeObrasDeLine(cleaned) || looksLikeComposerNameList(cleaned)) return false;
+  if (looksLikeAuditorioRepertoireLine(cleaned)) return false;
   if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned)) return false;
-  return isComposerHeading(cleaned) || looksLikeUnlabeledPerson(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
+  if (isNonPersonComposerAttribution(cleaned) || looksLikeKnownComposerPairHeading(cleaned)) return false;
+  return isComposerHeading(cleaned);
+}
+
+/**
+ * Unknown personal name as a new sticky heading, only with look-ahead:
+ * the line looks like a person and the next line has work evidence.
+ * Two-word work titles (Jeromita Linares) stay works unless the next line
+ * is itself an unequivocal work. Callers must also require an already-open
+ * composer→work sequence so the first title after a heading is not stolen.
+ */
+export function canPairAsLookaheadComposer(text: string, next?: string): boolean {
+  const cleaned = cleanLine(text);
+  const following = next ? cleanLine(next) : '';
+  if (!cleaned || !following) return false;
+  if (canPairAsAuditorioComposer(cleaned)) return false;
+  if (isNonPersonComposerAttribution(cleaned) || looksLikeKnownComposerPairHeading(cleaned)) return false;
+  if (looksLikeNonWorkCredit(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+    return false;
+  }
+  if (looksLikeUnequivocalWorkLine(cleaned) || looksLikeCatalogWorkLine(cleaned)) return false;
+  if (looksLikeAuditorioRepertoireLine(cleaned) || looksLikeProgramSectionLetters(cleaned)) return false;
+  if (!looksLikeUnlabeledPerson(cleaned)) return false;
+  return hasLookaheadWorkEvidence(following, cleaned);
+}
+
+/**
+ * A mononym absent from knowledge needs a biographical range (not just a
+ * possible composition year) and a following work. PatKop's single birth year
+ * is resolved through its documented shared alias, never a camel-case guess.
+ */
+export function isBiographicalMononymHeading(text: string, next?: string): boolean {
+  const match = /^(\p{Lu}[\p{L}’'-]+)\s+\((\d{4})\s*[-–—]\s*(\d{4})\)$/u.exec(text);
+  if (!match || Number(match[3]) - Number(match[2]) < 20) return false;
+  if (looksLikeUnequivocalWorkLine(text) || looksLikeAuditorioRepertoireLine(text)) return false;
+  return Boolean(next && looksLikeWorkLine(next) && !looksLikeMovementLine(next));
+}
+
+/**
+ * A generic form/instrumentation line can qualify the preceding named work.
+ * It cannot qualify a form-only title, nor cross a composer/section boundary;
+ * callers pass only the currently linked work. Suite/Cantata/Obertura alone
+ * remain legitimate titles, as do numbered, catalogued or dated forms.
+ */
+export function isLinkedWorkDescriptor(text: string, previousTitle: string): boolean {
+  if (!/^(?:suite\s+sinf[oó]nica|cantata\s+para\s+coro\s+y\s+orquesta)$/iu.test(text)) return false;
+  return /^(?:["“«]).+?["”»]/u.test(previousTitle) || looksLikeCatalogWorkLine(previousTitle);
+}
+
+/** An unspecified supplement is programme copy, not an identified work. */
+export function isUnspecifiedRepertoireSupplement(text: string): boolean {
+  return /^(?:&|y)\s+oberturas[.]?$/iu.test(text);
+}
+
+function hasLookaheadWorkEvidence(next: string, candidateComposer: string): boolean {
+  if (looksLikeProgramHeader(next) || looksLikePartHeader(next) || looksLikeMovementLine(next)) {
+    return false;
+  }
+  if (looksLikeProductionNote(next) || looksLikeTextCredit(next) || looksLikeNonWorkCredit(next)) {
+    return false;
+  }
+  if (looksLikeRoleOnlyLine(next) || hasExplicitPerformerSignal(next)) return false;
+  if (canPairAsAuditorioComposer(next) || looksLikeComposerLine(next)) return false;
+  if (titleBeginsWithExplicitComposer(next, candidateComposer)) return false;
+  if (looksLikeProgramSectionLetters(next)) return false;
+
+  if (
+    looksLikeUnequivocalWorkLine(next) ||
+    looksLikeCatalogWorkLine(next) ||
+    looksLikeStrongWorkLine(next) ||
+    hasStrongWorkTitleEvidence(next)
+  ) {
+    return true;
+  }
+
+  // Weaker title evidence only for stronger person-name headings
+  // (three given/surname tokens, or a hyphenated surname).
+  if (!isStrongPersonNameHeading(candidateComposer)) return false;
+  if (!looksLikeWorkLine(next) || looksLikeUnlabeledPerson(next)) return false;
+  return /\p{Ll}/u.test(next);
+}
+
+function isStrongPersonNameHeading(text: string): boolean {
+  const stripped = text.replace(/\s*\([^)]*\)\s*$/u, '').trim();
+  const words = stripped.split(/\s+/).filter((word) => word && !NAME_PARTICLE.test(word));
+  if (words.length >= 3) return true;
+  return words.length === 2 && words.some((word) => word.includes('-'));
+}
+
+function looksLikeProgramSectionLetters(text: string): boolean {
+  const letters = text.replace(/[^\p{L}]/gu, '');
+  if (letters.length < 4) return false;
+  return letters === letters.toLocaleUpperCase('es');
+}
+
+function looksLikeInitialsComposerName(text: string): boolean {
+  const cleaned = text.trim();
+  if (!INITIALS_COMPOSER.test(cleaned) || looksLikeMovementLine(cleaned)) return false;
+  const last = cleaned.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim().split(/\s+/).pop() ?? '';
+  return !MOVEMENT_TEMPO.test(last);
 }
 
 function stripCharacterCue(role: string): string {

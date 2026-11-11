@@ -105,7 +105,7 @@ export function richCatalog(): Catalog {
     name: 'Iglesia de San Manuel',
     municipality: 'Alcobendas',
     area: 'nearby',
-    address: undefined,
+    address: 'Calle de la Iglesia, 1, Alcobendas',
     url: 'https://example.org/san-manuel',
   });
   const parishSource = makeSource({

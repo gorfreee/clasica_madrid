@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_concierto_orquesta_de_camara_i_de_escuela_superior_de_musica_forum_musikae",
+  "slug": "concierto-orquesta-de-camara-i-de-la-escuela-superior-de-musica-forum-musikae",
+  "title": "Concierto Orquesta de Cámara I de la Escuela Superior de Música Forum Musikae",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_paco_de_lucia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_concierto_orquesta_de_camara_i_de_escuela_superior_de_musica_forum_musikae_01",
+      "date": "2026-10-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de Cámara de la Escuela Superior de Música Forum Musikae",
+      "role": "orchestra"
+    },
+    {
+      "name": "Diego Fortes",
+      "role": "conductor"
+    },
+    {
+      "name": "Héctor García Sánchez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Jacques Ibert"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de Las ruinas de Atenas, op. 113",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Concierto para flauta travesera",
+      "composerName": "Jacques Ibert"
+    },
+    {
+      "title": "Sinfonía n.º 25 en sol menor, K. 183/173dB",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/todos?idEvent=concierto-orquesta-de-camara-i-de-escuela-superior-de-musica-forum-musikae",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-09-28"
+}

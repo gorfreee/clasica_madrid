@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata, MarkdownHeading } from 'astro';
+import type { PageAnalyticsOverrides } from '../lib/analytics/page.ts';
+import TableOfContents from '../components/blog/TableOfContents.astro';
+import { BLOG_AUTHOR_NAME } from '../lib/presentation/blog.ts';
+import { ABOUT_PATH, AGENDA_PATH, BLOG_PATH } from '../lib/presentation/urls.ts';
+import Layout from './Layout.astro';
+import '../styles/article.css';
+
+type Props = {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  kindLabel: string;
+  publishedAt: string;
+  publishedLabel: string;
+  updatedAt?: string;
+  updatedLabel?: string;
+  hero: ImageMetadata;
+  heroAlt: string;
+  heroCaption?: string;
+  heroCredit?: string;
+  heroCreditUrl?: string;
+  headings: MarkdownHeading[];
+  jsonLd: Record<string, unknown>[] | Record<string, unknown>;
+  analytics: PageAnalyticsOverrides;
+  socialImage: string;
+  socialImageAlt: string;
+  socialImageWidth: number;
+  socialImageHeight: number;
+  socialImageType: string;
+  publishedTime: string;
+  modifiedTime?: string;
+};
+
+const {
+  title,
+  description,
+  canonicalPath,
+  kindLabel,
+  publishedAt,
+  publishedLabel,
+  updatedAt,
+  updatedLabel,
+  hero,
+  heroAlt,
+  heroCaption,
+  heroCredit,
+  heroCreditUrl,
+  headings,
+  jsonLd,
+  analytics,
+  socialImage,
+  socialImageAlt,
+  socialImageWidth,
+  socialImageHeight,
+  socialImageType,
+  publishedTime,
+  modifiedTime,
+} = Astro.props;
+
+const showUpdated = Boolean(updatedAt && updatedLabel && updatedAt !== publishedAt);
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+  analytics={analytics}
+  ogType="article"
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+  socialImage={socialImage}
+  socialImageAlt={socialImageAlt}
+  socialImageWidth={socialImageWidth}
+  socialImageHeight={socialImageHeight}
+  socialImageType={socialImageType}
+>
+  <article class="article">
+    <header class="article-header">
+      <nav class="article-crumbs" aria-label="Migas de pan">
+        <ol>
+          <li><a href={AGENDA_PATH}>Agenda</a></li>
+          <li><a href={BLOG_PATH}>Blog</a></li>
+          <li aria-current="page">{title}</li>
+        </ol>
+      </nav>
+      <p class="article-kind">{kindLabel}</p>
+      <h1>{title}</h1>
+      <p class="article-dek">{description}</p>
+      <p class="article-byline">
+        <a href={ABOUT_PATH}>{BLOG_AUTHOR_NAME}</a>
+        <time datetime={publishedAt}>{publishedLabel}</time>
+      </p>
+      {
+        showUpdated && (
+          <p class="article-updated">
+            Actualizado el <time datetime={updatedAt}>{updatedLabel}</time>
+          </p>
+        )
+      }
+    </header>
+
+    <figure class="article-hero">
+      <Image
+        src={hero}
+        alt={heroAlt}
+        widths={[480, 768, 1200]}
+        sizes="(max-width: 760px) 100vw, 52rem"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+      {
+        (heroCaption || heroCredit) && (
+          <figcaption>
+            {heroCaption && <span>{heroCaption}</span>}
+            {heroCredit && (
+              <span>
+                {heroCreditUrl ? (
+                  <a href={heroCreditUrl} target="_blank" rel="noopener noreferrer">
+                    {heroCredit}
+                    <span class="visually-hidden"> (se abre en otra pestaña)</span>
+                  </a>
+                ) : (
+                  heroCredit
+                )}
+              </span>
+            )}
+          </figcaption>
+        )
+      }
+    </figure>
+
+    <div class="article-layout">
+      <TableOfContents headings={headings} />
+      <div class="article-prose">
+        <slot />
+      </div>
+    </div>
+
+    <div class="article-related">
+      <slot name="related" />
+    </div>
+  </article>
+</Layout>

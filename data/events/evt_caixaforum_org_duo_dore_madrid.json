@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_caixaforum_org_duo_dore_madrid",
+  "slug": "duo-dore",
+  "title": "Duo Doré",
+  "status": "scheduled",
+  "venueId": "ven_caixaforum_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_caixaforum_org_duo_dore_madrid_01",
+      "date": "2026-11-09",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_caixaforum_org_duo_dore_madrid_02",
+      "date": "2026-11-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "María Escudero"
+    },
+    {
+      "name": "Carlos de la Blanca"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Juan José García Abril"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_caixaforum_org",
+      "url": "https://caixaforum.org/es/madrid/p/duo-dore-madrid",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_caixaforum_org",
+  "lastVerifiedAt": "2026-09-15"
+}

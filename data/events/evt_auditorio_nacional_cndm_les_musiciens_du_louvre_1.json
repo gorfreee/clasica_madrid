@@ -17,22 +17,22 @@
   ],
   "performers": [
     {
-      "name": "LES MUSICIENS DU LOUVRE"
+      "name": "Les Musiciens du Louvre"
     },
     {
-      "name": "MARC MINKOWSKI",
+      "name": "Marc Minkowski",
       "role": "conductor"
     }
   ],
   "composers": [
     {
-      "name": "George Frideric Haendel (1685-1759)"
+      "name": "Georg Friedrich Händel"
     }
   ],
   "works": [
     {
       "title": "Concerti grossi, op. 3 (1710-1718)",
-      "composerName": "George Frideric Haendel (1685-1759)"
+      "composerName": "Georg Friedrich Händel"
     }
   ],
   "eras": [
@@ -53,10 +53,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23799",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-14",
       "externalId": "23799"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-14"
 }

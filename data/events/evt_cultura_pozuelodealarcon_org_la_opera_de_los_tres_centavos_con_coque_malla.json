@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_pozuelodealarcon_org_la_opera_de_los_tres_centavos_con_coque_malla",
+  "slug": "la-opera-de-los-tres-centavos",
+  "title": "La ópera de los tres centavos",
+  "status": "scheduled",
+  "venueId": "ven_teatro_mira",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_la_opera_de_los_tres_centavos_con_coque_malla_01",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coque Malla"
+    },
+    {
+      "name": "Carmen Barrantes"
+    },
+    {
+      "name": "Omar Calicchio"
+    },
+    {
+      "name": "Paula Iwasaki"
+    },
+    {
+      "name": "Miquel Mars"
+    },
+    {
+      "name": "Cristina García"
+    },
+    {
+      "name": "Andrea Guash"
+    },
+    {
+      "name": "Pablo Novoa"
+    },
+    {
+      "name": "Néstor Ballesteros"
+    },
+    {
+      "name": "Miguel Malla (saxofón tenor y clarinete bajo)"
+    },
+    {
+      "name": "Daniel Rouleau (saxofones, flauta y piccolo)"
+    },
+    {
+      "name": "Yevhen Riechkalov (trompeta)"
+    },
+    {
+      "name": "Gabriel Marijuan (percusión y trompeta)"
+    },
+    {
+      "name": "Roberto Bazán (trombón y contrabajo)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Kurt Weill"
+    }
+  ],
+  "works": [
+    {
+      "title": "La ópera de los tres centavos",
+      "composerName": "Kurt Weill"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_pozuelodealarcon_org",
+      "url": "https://cultura.pozuelodealarcon.org/agenda/la-opera-de-los-tres-centavos-con-coque-malla",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_pozuelodealarcon_org",
+  "lastVerifiedAt": "2026-09-28"
+}

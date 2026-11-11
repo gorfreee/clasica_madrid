@@ -1,5 +1,8 @@
 import { parseZarzuelaDetail } from '../detail/teatro-zarzuela.ts';
-import { createZarzuelaListingGet, ZARZUELA_RETRYABLE } from '../detail/zarzuela-transport.ts';
+import {
+  createZarzuelaListingGet,
+  isZarzuelaTransientListingError,
+} from '../detail/zarzuela-transport.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
@@ -136,10 +139,10 @@ function zarzuelaSectionPriority(url: string): number {
 }
 
 function isIsolatedListingFailure(error: unknown): boolean {
+  if (isZarzuelaTransientListingError(error)) return true;
   if (!error || typeof error !== 'object' || !('status' in error)) return false;
   const status = error.status;
-  if (typeof status !== 'number') return false;
-  return status === 404 || status === 410 || ZARZUELA_RETRYABLE.has(status);
+  return status === 404 || status === 410;
 }
 
 function officialUrl(href: string, base: string): string | undefined {

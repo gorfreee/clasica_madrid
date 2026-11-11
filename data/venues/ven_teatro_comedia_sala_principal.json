@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_comedia_sala_principal",
+  "slug": "teatro-comedia-sala-principal",
+  "name": "Teatro de la Comedia — Sala Principal",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_teatro_comedia",
+  "spaceName": "Sala Principal",
+  "lastVerifiedAt": "2026-10-21"
+}

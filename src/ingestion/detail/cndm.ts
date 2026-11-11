@@ -1,15 +1,19 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { decodeHtmlEntities, splitBreaks, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, splitBreaks, stripTags } from '../html.ts';
 import { canPairAsAuditorioComposer } from './auditorio-segments.ts';
-import { matchComposer } from '../knowledge/composers.ts';
+import { matchComposer, stripTrailingBiographicalYears } from '../knowledge/composers.ts';
 import {
   hasComposerYears,
+  isEditorialNoteLegend,
   isUnreliableComposerName,
   looksLikeComposerLine,
   looksLikeEnsembleName,
   looksLikeProgramHeader,
+  looksLikeMovementLine,
+  looksLikeRepertoireDescriptor,
   looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
+  stripEditorialNoteMarkers,
 } from '../observed-cleanup.ts';
 import {
   normalizeComposerList,
@@ -165,10 +169,11 @@ function parseCndmProgram(html: string | undefined): {
   if (!/<h3\b[^>]*>\s*Programa\s*<\/h3>/i.test(html)) {
     throw new Error('cndm: bloque de programa sin encabezado');
   }
-  const programText = stripTags(html.replace(/<h3\b[^>]*>[\s\S]*?<\/h3>/i, '')) || undefined;
+  const programText = flattenHtmlBlocks(html.replace(/<h3\b[^>]*>[\s\S]*?<\/h3>/i, '')) || undefined;
   const composers: { name: string }[] = [];
   const works: ObservedWork[] = [];
   let composerName: string | undefined;
+  let unattributedRepertoire = false;
   const body = html.replace(/^[\s\S]*?<\/h3>/i, '');
   const lines = body
     .split(/<br\s*\/?>|<\/p>\s*<p\b[^>]*>/i)
@@ -183,15 +188,46 @@ function parseCndmProgram(html: string | undefined): {
   for (const [index, line] of lines.entries()) {
     const following = lines[index + 1]?.text;
     const strongText = line.strong.join(' ');
-    if (line.strong.length > 0 && strongText === line.text) {
-      if (isCndmComposerHeading(line.text, following)) {
-        composerName = line.text;
-        composers.push({ name: line.text });
+    const detachedYears = /^\(\s*\d{4}(?:\s*[-–—]\s*\d{4})?\s*\)$/u;
+    const headingText = detachedYears.test(following ?? '') ? `${line.text} ${following}` : line.text;
+    if (line.strong.length > 0 &&
+        stripTrailingBiographicalYears(strongText) === stripTrailingBiographicalYears(line.text)) {
+      // Years may be inside, outside, or in a second <strong>. Any other
+      // heading is a boundary; it cannot leave the previous author active.
+      composerName = undefined;
+      unattributedRepertoire = false;
+      if (looksLikeRepertoireDescriptor(line.text)) {
+        unattributedRepertoire = true;
+        continue;
+      }
+      if (isCndmComposerHeading(headingText, detachedYears.test(following ?? '') ? lines[index + 2]?.text : following)) {
+        composerName = headingText;
+        composers.push({ name: headingText });
       }
       continue;
     }
-    if (composerName && !line.text.startsWith('*') && looksLikeWorkLine(line.text)) {
-      works.push({ title: line.text, composerName });
+    if (composerName && detachedYears.test(line.text) && lines[index - 1]?.strong.length) continue;
+    if (looksLikeRepertoireDescriptor(line.text)) {
+      composerName = undefined;
+      unattributedRepertoire = true;
+      continue;
+    }
+    if (isEditorialNoteLegend(line.text) || looksLikeProgramHeader(line.text)) {
+      composerName = undefined;
+      unattributedRepertoire = false;
+      continue;
+    }
+    // Movements are part of the preceding work. Plain unrecognized prose,
+    // cast/credits and administrative text close the attribution instead.
+    if (looksLikeMovementLine(line.text)) continue;
+    const work = looksLikeWorkLine(line.text) &&
+      (/<em\b/i.test(line.raw) || looksLikeUnequivocalWorkLine(line.text) ||
+        /\(\d{4}\)\s*$/u.test(line.text) || /^Estreno absoluto\./iu.test(line.text));
+    if ((composerName || unattributedRepertoire) && work) {
+      works.push({ title: stripEditorialNoteMarkers(line.text), ...(composerName ? { composerName } : {}) });
+    } else {
+      composerName = undefined;
+      unattributedRepertoire = false;
     }
   }
   return {
@@ -211,12 +247,21 @@ function isCndmComposerHeading(text: string, following: string | undefined): boo
   if (looksLikeEnsembleName(text) || looksLikeEventTitleHeading(text)) return false;
   const stripped = text.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
   if (matchComposer(stripped) || matchComposer(text)) return true;
-  if (hasComposerYears(text) && (looksLikeComposerLine(text) || canPairAsAuditorioComposer(text))) {
+  if (hasComposerYears(text) && (looksLikeComposerLine(text) || looksLikeCndmPersonalName(stripped))) {
     return true;
   }
   if (!following || looksLikeProgramHeader(following)) return false;
   if (!looksLikeUnequivocalWorkLine(following)) return false;
-  return looksLikeComposerLine(text) || canPairAsAuditorioComposer(text);
+  return looksLikeComposerLine(text) || canPairAsAuditorioComposer(text) || looksLikeCndmPersonalName(stripped);
+}
+
+/** In this adapter only: bold programme heading + years or a following
+ * unequivocal work supplies the structural credit for an unknown person. */
+function looksLikeCndmPersonalName(text: string): boolean {
+  const words = text.split(/\s+/u);
+  const content = words.filter((word) => !/^(?:de|del|la|las|los|van|von|di|da)$/iu.test(word));
+  return content.length >= 2 && content.length <= 6 && words.every((word) =>
+    /^(?:de|del|la|las|los|van|von|di|da)$/iu.test(word) || /^[\p{Lu}\p{Lt}][\p{L}.’'-]*$/u.test(word));
 }
 
 /** Prize, festival or numbered programme titles are not composer names. */
@@ -269,7 +314,7 @@ function cndmSchedule(text: string): Pick<ObservedFactPatch, 'eventStatus' | 'oc
     const year = postponed[3]!.length === 2 ? `20${postponed[3]}` : postponed[3]!;
     const date = `${year}-${postponed[2]!.padStart(2, '0')}-${postponed[1]!.padStart(2, '0')}`;
     if (parseObservedDateTime(date)) {
-      return { eventStatus: 'scheduled', occurrences: [{ raw: postponed[0], date }] };
+      return { eventStatus: 'postponed', occurrences: [{ raw: postponed[0], date }] };
     }
     return { eventStatus: 'postponed' };
   }

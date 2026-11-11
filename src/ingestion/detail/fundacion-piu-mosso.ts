@@ -1,8 +1,9 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
-import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
+import { explicitAccessText } from './access-evidence.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
+import { emptyObservedLists, type DetailOccurrence, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
-import type { RawEvent, RawOccurrence } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundacionpiumosso.com', 'fundacionpiumosso.com']);
 const EVENT_PATH = /^\/evento\/[a-z0-9_-]+$/i;
@@ -28,7 +29,7 @@ export function piumossoEventUrl(href: string, base?: string): string | undefine
   }
 }
 
-export function extractPiumossoListing(body: string, url: string, sourceId: string): RawEvent[] {
+export function extractPiumossoListing(body: string, url: string, ctx: AdapterContext): RawEvent[] {
   assertListingSurface(body, url);
   const grids = piumossoDivs(body, /<div\b[^>]*id=["']ect-grid-wrapper["'][^>]*>/i);
   if (grids.length === 0) throw new Error('fundacion-piu-mosso: falta la cuadrícula de programación');
@@ -52,7 +53,7 @@ export function extractPiumossoListing(body: string, url: string, sourceId: stri
 
   const events = new Map<string, RawEvent>();
   for (const item of ldEvents) {
-    const raw = toRawEvent(item, byUrl.get(item.sourceUrl), sourceId);
+    const raw = toRawEvent(item, byUrl.get(item.sourceUrl), ctx.source.id);
     if (events.has(raw.sourceUrl) || (raw.externalId && [...events.values()].some((event) => event.externalId === raw.externalId))) {
       throw new Error('fundacion-piu-mosso: evento duplicado');
     }
@@ -71,7 +72,23 @@ export function extractPiumossoListing(body: string, url: string, sourceId: stri
       `fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${missingFromLd[0]})`,
     );
   }
-  return [...events.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+
+  const kept: RawEvent[] = [];
+  for (const item of ldEvents) {
+    const raw = events.get(item.sourceUrl);
+    if (!raw) continue;
+    if (item.pendingSchedule) {
+      reportAdapterDiscard(ctx, {
+        reason: 'pending-information',
+        title: raw.observed.title,
+        sourceUrl: raw.sourceUrl,
+        ...(raw.externalId ? { externalId: raw.externalId } : {}),
+      });
+      continue;
+    }
+    kept.push(raw);
+  }
+  return kept.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
 export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFactPatch {
@@ -102,24 +119,30 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   if (!dateTitle) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
   const parsedDate = parseObservedDateTime(dateTitle);
   if (!parsedDate) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
-  const time = parseStartClock(timeText);
-  if (timeText && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
-  const occurrence: RawOccurrence = {
+  const descriptionHtml = fichaDescriptionHtml(body);
+  const pendingSchedule = isPendingEventInfo(listingTitle) || isPendingEventInfo(descriptionHtml);
+  const technicalSlot = isTechnicalClockRange(timeText);
+  const time = pendingSchedule || technicalSlot ? null : parseStartClock(timeText);
+  if (timeText && !pendingSchedule && !technicalSlot && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
+  const occurrence: DetailOccurrence = {
     raw: timeText ? `${dateTitle} ${timeText}` : dateTitle,
     date: parsedDate.date,
-    ...(time ? { time } : {}),
+    ...(time !== undefined ? { time } : {}),
   };
 
   const venueText = stripTags(
     /<li\b[^>]*\btribe-venue\b[^>]*>([\s\S]*?)<\/li>/i.exec(body)?.[1] ?? '',
   ) || undefined;
-  const accessText = stripTags(
-    /<span\b[^>]*class=["'][^"']*\btribe-events-event-cost\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
-  ) || undefined;
+  const accessText = explicitAccessText(
+    stripTags(
+      /<span\b[^>]*class=["'][^"']*\btribe-events-event-cost\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
+    ),
+  );
   const categoryText = categoryNames(
     /<span\b[^>]*class=["'][^"']*\btribe-events-event-categories\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
   );
-  const description = fichaDescription(body);
+  const description = descriptionHtml ? fichaDescriptionText(descriptionHtml) : undefined;
+  const programText = descriptionHtml ? extractPiumossoProgramText(descriptionHtml) : undefined;
   const eventStatus = statusFromBody(body);
 
   if (venueText && event.observed.venueText && normalizeLoose(venueText) !== normalizeLoose(event.observed.venueText)) {
@@ -131,7 +154,8 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
     ...(venueText ? { venueText } : {}),
     ...(accessText ? { accessText } : {}),
     ...(categoryText ? { categoryText } : {}),
-    ...(description ? { description, programText: description } : {}),
+    ...(description ? { description } : {}),
+    ...(programText ? { programText } : {}),
     ...(eventStatus ? { eventStatus } : {}),
     ...emptyObservedLists(),
   };
@@ -144,6 +168,7 @@ type LdEvent = {
   endDate?: string;
   venueText?: string;
   description?: string;
+  pendingSchedule?: boolean;
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
 };
 
@@ -213,6 +238,8 @@ function parseLdEvent(item: Record<string, unknown>): LdEvent {
     ? (item.location as Record<string, unknown>)
     : undefined;
   const venueText = location ? asText(location.name) : undefined;
+  const rawDescription = asText(item.description);
+  const pendingSchedule = isPendingEventInfo(title) || isPendingEventInfo(rawDescription);
   const description = asHtmlText(item.description);
   const eventStatus = statusFromSchema(asText(item.eventStatus));
   return {
@@ -222,6 +249,7 @@ function parseLdEvent(item: Record<string, unknown>): LdEvent {
     endDate: asText(item.endDate),
     venueText,
     description,
+    ...(pendingSchedule ? { pendingSchedule } : {}),
     eventStatus,
   };
 }
@@ -253,7 +281,7 @@ function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: stri
   if (!card) {
     throw new Error(`fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${item.sourceUrl})`);
   }
-  const occurrence = occurrenceFromLd(item.startDate, item.endDate);
+  const occurrence = occurrenceFromLd(item.startDate, item.endDate, item.pendingSchedule);
   if (!occurrence.date) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   return {
     sourceId,
@@ -267,21 +295,26 @@ function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: stri
       ...(item.venueText ? { venueText: item.venueText } : {}),
       ...(card.categoryText ? { categoryText: card.categoryText } : {}),
       ...(card.accessText ? { accessText: card.accessText } : {}),
-      ...(item.description ? { description: item.description, programText: item.description } : {}),
+      ...(item.description ? { description: item.description } : {}),
       ...emptyObservedLists(),
     },
   };
 }
 
-function occurrenceFromLd(startDate: string, endDate: string | undefined): RawOccurrence {
+function occurrenceFromLd(
+  startDate: string,
+  endDate: string | undefined,
+  pendingSchedule = false,
+): RawOccurrence {
   const start = parseObservedDateTime(startDate);
   if (!start) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   const end = endDate ? parseObservedDateTime(endDate) : undefined;
   const allDay = start.time === '00:00' && end?.date === start.date && (end.time === '23:59' || end.time === '00:00');
+  const technicalSlot = start.time === '08:00' && end?.date === start.date && end.time === '17:00';
   return {
     raw: startDate,
     date: start.date,
-    ...(start.time && !allDay ? { time: start.time } : {}),
+    ...(start.time && !allDay && !pendingSchedule && !technicalSlot ? { time: start.time } : {}),
   };
 }
 
@@ -291,11 +324,16 @@ function parseStartClock(text: string): string | undefined {
   return parseObservedTime(`${match[1]!.padStart(2, '0')}:${match[2]}`) ?? undefined;
 }
 
+/** TEC defaults are not independent concert-time evidence, even with a real title. */
+function isTechnicalClockRange(text: string): boolean {
+  return /^0?8[:.]00\s*[-–—]\s*17[:.]00$/.test(text.trim());
+}
+
 function cardCost(card: string): string | undefined {
   const block = /<div\b[^>]*\bect-grid-cost\b[^>]*>([\s\S]*?)<\/div>/i.exec(card)?.[1];
   if (!block) return undefined;
   const withoutLinks = block.replace(/<a\b[\s\S]*?<\/a>/gi, ' ');
-  return stripTags(withoutLinks) || undefined;
+  return explicitAccessText(stripTags(withoutLinks));
 }
 
 function categoryNames(html: string): string | undefined {
@@ -305,15 +343,120 @@ function categoryNames(html: string): string | undefined {
   return names.length ? names.join('; ') : undefined;
 }
 
-function fichaDescription(html: string): string | undefined {
+function fichaDescriptionHtml(html: string): string | undefined {
   const block = piumossoDiv(
     html,
     /<div\b[^>]*class=["'][^"']*\btribe-events-single-event-description\b[^"']*["'][^>]*>/i,
   );
   if (!block) return undefined;
-  const text = stripTags(block.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' '));
-  if (!text || /^estamos esperando informaci[oó]n$/i.test(text)) return undefined;
+  return block.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ');
+}
+
+function fichaDescriptionText(html: string): string | undefined {
+  const text = stripTags(html);
+  if (!text || isPendingEventInfo(text)) return undefined;
   return text;
+}
+
+/**
+ * The Events Calendar fills a default 08:00–17:00 slot while the ficha still
+ * says the programme is pending. Placeholder copy also appears in the event
+ * title (`… - Esperando Información`). Those slots are discarded at extract so
+ * they never become canonical events; a later listing with a real title is
+ * accepted normally. Do not treat the plugin clock as a concert time.
+ */
+function isPendingEventInfo(text: string | undefined): boolean {
+  if (!text) return false;
+  const plain = normalizeLoose(decodeHtmlEntities(text.replace(/\\n/g, ' ')));
+  if (!plain) return false;
+  return (
+    /\besperando informacion\b/.test(plain) ||
+    /\binformacion(?: del evento)?(?: esta)? pendiente\b/.test(plain) ||
+    /\bpendiente de informacion\b/.test(plain)
+  );
+}
+
+const PROGRAM_HEADING =
+  /^(?:el\s+)?(?:programa|repertorio)(?:\s+musical|\s+del\s+concierto)?\s*[:.]?\s*(.*)$/i;
+const PROGRAM_HEDGE =
+  /programa exacto|desarrollaremos en breve|pendiente de confirmaci[oó]n|lo desarrollaremos/i;
+const BIO_OR_CREDIT_HEADING =
+  /^(?:el\s+)?(?:int[ée]rprete|biograf[íi]a|direcci[oó]n\s+art[íi]stica)\b/i;
+const OBRAS_DE = /^obras?\s+de\b/i;
+const NAME_LIST_SPLIT = /\s*[-–—·•|/]\s*/;
+
+/**
+ * Repertoire only: an explicit Programa/Repertorio section, "Obras de…" lines,
+ * dashed composer/work lists, or a short independent list. Biography and
+ * generic intro prose stay in description.
+ */
+function extractPiumossoProgramText(html: string): string | undefined {
+  const blocks = flattenHtmlBlocks(html).split('\n');
+  const parts: string[] = [];
+  const pendingList: string[] = [];
+  let inProgramSection = false;
+  let seenBioOrCredit = false;
+
+  const flushPendingList = (): void => {
+    if (pendingList.length >= 2) parts.push(...pendingList);
+    pendingList.length = 0;
+  };
+
+  for (const block of blocks) {
+    if (BIO_OR_CREDIT_HEADING.test(block)) {
+      flushPendingList();
+      if (inProgramSection) break;
+      seenBioOrCredit = true;
+      continue;
+    }
+
+    const programHeading = PROGRAM_HEADING.exec(block);
+    if (programHeading && !PROGRAM_HEDGE.test(block)) {
+      flushPendingList();
+      inProgramSection = true;
+      seenBioOrCredit = false;
+      const trailing = programHeading[1]?.trim();
+      if (trailing) parts.push(trailing);
+      continue;
+    }
+
+    if (inProgramSection) {
+      parts.push(block);
+      continue;
+    }
+    if (seenBioOrCredit) continue;
+
+    if (OBRAS_DE.test(block) || isDashedMusicalList(block)) {
+      flushPendingList();
+      parts.push(block);
+      continue;
+    }
+    if (looksLikeIndependentListItem(block)) {
+      pendingList.push(block);
+      continue;
+    }
+    flushPendingList();
+  }
+  flushPendingList();
+  const programText = collapseWhitespace(parts.join(' '));
+  return programText || undefined;
+}
+
+function isDashedMusicalList(text: string): boolean {
+  if (!/[-–—·•|]/.test(text)) return false;
+  const parts = text.split(NAME_LIST_SPLIT).map((item) => item.trim()).filter(Boolean);
+  return parts.length >= 2 && parts.every((item) => looksLikeIndependentListItem(item) && item.split(/\s+/).length <= 4);
+}
+
+function looksLikeIndependentListItem(text: string): boolean {
+  if (text.length > 80 || /[.!?¡¿]/.test(text)) return false;
+  if (BIO_OR_CREDIT_HEADING.test(text) || PROGRAM_HEDGE.test(text)) return false;
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0 || words.length > 6) return false;
+  if (/^(nacido|realiza|ha|es|entre|adem[aá]s|el t[ií]tulo|caracter[ií]sticas)\b/i.test(text)) {
+    return false;
+  }
+  return /^[\p{L}\d][\p{L}\d .,'’\-–—()/]*$/u.test(text);
 }
 
 function statusFromBody(html: string): 'scheduled' | 'cancelled' | 'postponed' | undefined {
@@ -343,7 +486,7 @@ function asHtmlText(value: unknown): string | undefined {
   const raw = asText(value);
   if (!raw) return undefined;
   const text = stripTags(decodeHtmlEntities(raw.replace(/\\n/g, ' ')));
-  if (!text || /^estamos esperando informaci[oó]n$/i.test(text)) return undefined;
+  if (!text || isPendingEventInfo(text)) return undefined;
   return text;
 }
 

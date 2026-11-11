@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_vivelo_concierto_ano_nuevo_20261227",
+  "slug": "vivelo-en-vivo-producciones-concierto-de-ano-nuevo",
+  "title": "Vívelo en Vivo Producciones. Concierto de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_vivelo_concierto_ano_nuevo_20261227_01",
+      "date": "2026-12-27",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Christmas Festival Orchestra",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Johann Strauss I"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Émile Waldteufel"
+    },
+    {
+      "name": "Josef Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Danubio azul",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Marcha Radetzky",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "El Cascanueces (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Vals del Emperador",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Voces de primavera",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Tritsch-Tratsch-Polka",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Sangre vienesa",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Rosas del sur",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Truenos y relámpagos",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Vals de los patinadores",
+      "composerName": "Émile Waldteufel"
+    },
+    {
+      "title": "Feuerfest!",
+      "composerName": "Josef Strauss"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/vivelo-en-vivo-producciones-concierto-de-ano-nuevo",
+      "checkedAt": "2026-10-21",
+      "externalId": "vivelo-en-vivo-producciones-concierto-de-ano-nuevo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

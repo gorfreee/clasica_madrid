@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_alcobendas_org_concierto_navidad_banda_coral_20261213",
+  "slug": "concierto-de-navidad-banda-y-coral-de-alcobendas",
+  "title": "Concierto de Navidad — Banda y Coral de Alcobendas",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_ciudad_de_alcobendas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_alcobendas_org_concierto_navidad_banda_coral_20261213_01",
+      "date": "2026-12-13",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Municipal de Música de Alcobendas",
+      "role": "ensemble"
+    },
+    {
+      "name": "Coral de Alcobendas",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral",
+    "other"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_alcobendas_org",
+      "url": "https://teatro.alcobendas.org/es/actividad/concierto-de-navidad-2026",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_teatro_alcobendas_org",
+  "lastVerifiedAt": "2026-10-14"
+}

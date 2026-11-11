@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_conservatorio_amaniel_sala_de_camara",
+  "slug": "conservatorio-amaniel-sala-de-camara",
+  "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_conservatorio_profesional_musica_amaniel",
+  "spaceName": "Sala de Cámara",
+  "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+  "lastVerifiedAt": "2026-10-27"
+}

@@ -18,32 +18,35 @@
   "performers": [
     {
       "name": "Richard Egarr"
+    },
+    {
+      "name": "Hippocampus"
     }
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Asís Márquez (1987)"
+      "name": "Asís Márquez"
     }
   ],
   "works": [
     {
       "title": "Suite orquestal n.º 3 en re mayor, BWV 1068 (ca. 1730)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Suite orquestal n.º 4 en re mayor , BWV 1069 (1725)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Danzas de suites y partitas para tecla, selección (arr. R. Egarr y A. Martínez) *",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Suite orquestal *+ (2027)",
-      "composerName": "Asís Márquez (1987)"
+      "composerName": "Asís Márquez"
     }
   ],
   "eras": [
@@ -59,16 +62,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-hippocampus-1",
-      "checkedAt": "2026-09-03",
-      "externalId": "23828"
+      "checkedAt": "2026-11-01",
+      "externalId": "cndm-hippocampus-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23828",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "23828"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-11-01"
 }

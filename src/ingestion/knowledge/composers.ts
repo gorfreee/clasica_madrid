@@ -1,11 +1,13 @@
 import type { Era } from '../../lib/schemas/taxonomies.ts';
+import { CONTEXTUAL_COMPOSER_RELATIONS } from '../contextual-composer-relations.ts';
 
 /**
  * Musical knowledge base v1.
  *
  * Observed composers plus habitual concert repertoire for Madrid programming.
  * Aliases also scan editorial prose and can decide eligibility: prefer full
- * names over ambiguous surnames. Not an encyclopedia or publication normalizer.
+ * names over ambiguous surnames. `canonicalName` is the published identity of
+ * a known composer. Not an encyclopedia.
  * Era assignments follow docs/classification-policy.md, not lifespan alone.
  * Duplicate aliases for the same composer are fine; a folded/compact collision
  * between two canonical names fails at index build.
@@ -16,8 +18,6 @@ export type ComposerKnowledge = {
   eras: Era[];
 };
 
-export const COMPOSER_KNOWLEDGE_VERSION = '2026-09-03';
-
 export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Guillaume de Machaut',
@@ -26,7 +26,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Josquin des Prez',
-    aliases: ['Josquin des Prez', 'Josquin Desprez', 'Josquin'],
+    aliases: ['Josquin des Prez', 'Josquin Desprez', 'J. Desprez', 'Josquin'],
     eras: ['renaissance'],
   },
   {
@@ -36,12 +36,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Cristóbal de Morales',
-    aliases: ['Cristóbal de Morales'],
+    aliases: ['Cristóbal de Morales', 'C. de Morales'],
     eras: ['renaissance'],
   },
   {
     canonicalName: 'Luis de Milán',
-    aliases: ['Luis de Milán', 'Luys de Milán'],
+    aliases: ['Luis de Milán', 'Luys de Milán', 'Luys Milan', 'L. de Milán'],
     eras: ['renaissance'],
   },
   {
@@ -51,7 +51,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Johann Sebastian Bach',
-    aliases: ['Johann Sebastian Bach', 'J. S. Bach', 'J.S. Bach', 'J.S.Bach', 'Bach'],
+    aliases: [
+      'Johann Sebastian Bach',
+      'Juan Sebastián Bach',
+      'Juan Sebastian Bach',
+      'J. S. Bach',
+      'J.S. Bach',
+      'J.S.Bach',
+      'Bach',
+    ],
     eras: ['baroque'],
   },
   {
@@ -119,7 +127,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Giovanni Pierluigi da Palestrina',
-    aliases: ['Giovanni Pierluigi da Palestrina', 'Palestrina'],
+    aliases: ['Giovanni Pierluigi da Palestrina', 'G.P. da Palestrina', 'G. P. da Palestrina', 'Palestrina'],
     eras: ['renaissance'],
   },
   {
@@ -201,7 +209,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Luigi Boccherini',
-    aliases: ['Luigi Boccherini', 'Boccherini'],
+    aliases: ['Luigi Boccherini', 'L. Boccherini', 'Boccherini'],
     eras: ['classical'],
   },
   {
@@ -221,7 +229,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Felix Mendelssohn',
-    aliases: ['Felix Mendelssohn', 'Mendelssohn'],
+    aliases: ['Felix Mendelssohn', 'Felix Mendelssohn-Bartholdy', 'Mendelssohn'],
     eras: ['romantic'],
   },
   {
@@ -291,6 +299,8 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Piotr Ilich Chaikovsky',
       'Piotr Ilich Tchaikovsky',
       'Piotr I. Tchaikovsky',
+      'P.I.Tchaikovsky',
+      'P. I. Tchaikovsky',
       'Pyotr Ilyich Tchaikovsky',
       'Tchaikovsky',
       'Tchaikovski',
@@ -306,7 +316,14 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Frédéric Chopin',
-    aliases: ['Frédéric Chopin', 'Fryderyk Chopin', 'F. Chopin', 'Chopin'],
+    aliases: [
+      'Frédéric Chopin',
+      'Fryderyk Chopin',
+      'Fryderyk Franciszek Chopin',
+      'Fryderyck Franciszek Chopin',
+      'F. Chopin',
+      'Chopin',
+    ],
     eras: ['romantic'],
   },
   {
@@ -336,7 +353,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Jean Sibelius',
-    aliases: ['Jean Sibelius', 'Sibelius'],
+    aliases: ['Jean Sibelius', 'J. Sibelius', 'J.Sibelius', 'Sibelius'],
     eras: ['romantic'],
   },
   {
@@ -355,16 +372,18 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Serguéi Rajmáninov',
       'Sergei Rachmaninoff',
       'Sergei Rachmaninov',
+      'Sergey Rachmaninov',
       'Rachmaninoff',
       'Rachmaninov',
       'Rachmáninov',
       'Rajmáninov',
+      'Serguéi Rachmaninov',
     ],
     eras: ['romantic'],
   },
   {
     canonicalName: 'Edward Elgar',
-    aliases: ['Edward Elgar', 'Elgar'],
+    aliases: ['Edward Elgar', 'E. Elgar', 'Elgar'],
     eras: ['romantic'],
   },
   {
@@ -434,7 +453,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Lili Boulanger',
-    aliases: ['Lili Boulanger'],
+    aliases: ['Lili Boulanger', 'L. Boulanger'],
     eras: ['twentieth'],
   },
   {
@@ -449,7 +468,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Ígor Stravinski',
-    aliases: ['Ígor Stravinski', 'Igor Stravinsky', 'Igor Stravinski', 'Stravinski', 'Stravinsky'],
+    aliases: ['Ígor Stravinski', 'Igor Stravinsky', 'Igor Stravinski', 'Í. Stravinsky', 'Stravinski', 'Stravinsky'],
     eras: ['twentieth'],
   },
   {
@@ -546,6 +565,26 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['baroque'],
   },
   {
+    canonicalName: 'Juan Hidalgo',
+    aliases: ['Juan Hidalgo', 'Juan de Hidalgo', 'J. Hidalgo', 'J. de Hidalgo'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'José Lidón',
+    aliases: ['José Lidón', 'Jose Lidon', 'J. Lidón', 'J. Lidon'],
+    eras: ['classical'],
+  },
+  {
+    canonicalName: 'Francisco Corselli',
+    aliases: ['Francisco Corselli', 'Francesco Corselli', 'F. Corselli'],
+    eras: ['baroque', 'classical'],
+  },
+  {
+    canonicalName: 'Gaetano Brunetti',
+    aliases: ['Gaetano Brunetti', 'G. Brunetti'],
+    eras: ['classical'],
+  },
+  {
     canonicalName: 'Luis Misón',
     aliases: ['Luis Misón', 'Luis Mison'],
     eras: ['baroque', 'classical'],
@@ -592,7 +631,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Carl Orff',
-    aliases: ['Carl Orff', 'Orff'],
+    aliases: ['Carl Orff', 'C. Orff', 'Orff'],
     eras: ['twentieth'],
   },
   {
@@ -603,6 +642,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Alberto Ginastera',
     aliases: ['Alberto Ginastera', 'A. Ginastera', 'Ginastera'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Chabuca Granda',
+    aliases: ['Chabuca Granda', 'María Isabel Granda', 'Maria Isabel Granda'],
     eras: ['twentieth'],
   },
   {
@@ -753,7 +797,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Nicolas Gombert',
-    aliases: ['Nicolas Gombert', 'Gombert'],
+    aliases: ['Nicolas Gombert', 'N. Gombert', 'Gombert'],
     eras: ['renaissance'],
   },
   {
@@ -778,7 +822,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Diego Ortiz',
-    aliases: ['Diego Ortiz'],
+    aliases: ['Diego Ortiz', 'D. Ortiz'],
     eras: ['renaissance'],
   },
   {
@@ -788,12 +832,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Juan del Encina',
-    aliases: ['Juan del Encina', 'Juan del Enzina'],
+    aliases: ['Juan del Encina', 'J. del Encina', 'Juan del Enzina'],
     eras: ['renaissance'],
   },
   {
     canonicalName: 'Mateo Flecha',
-    aliases: ['Mateo Flecha'],
+    aliases: ['Mateo Flecha', 'Mateo Flecha el Viejo', 'M. Flecha el Viejo'],
     eras: ['renaissance'],
   },
   {
@@ -823,7 +867,13 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Heinrich Ignaz Franz Biber',
-    aliases: ['Heinrich Ignaz Franz Biber', 'Heinrich Biber', 'H. I. F. Biber', 'Biber'],
+    aliases: [
+      'Heinrich Ignaz Franz Biber',
+      'Heinrich Biber',
+      'H. I. F. von Biber',
+      'H. I. F. Biber',
+      'Biber',
+    ],
     eras: ['baroque'],
   },
   {
@@ -1129,7 +1179,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Carl Maria von Weber',
-    aliases: ['Carl Maria von Weber', 'C. M. von Weber', 'C.M. von Weber'],
+    aliases: [
+      'Carl Maria von Weber',
+      'C. M. von Weber',
+      'C.M. von Weber',
+      'C. M. Weber',
+      'C.M. Weber',
+      'C.M.Weber',
+      'CM Weber',
+    ],
     eras: ['romantic'],
   },
   {
@@ -1144,7 +1202,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Fanny Hensel',
-    aliases: ['Fanny Hensel', 'Fanny Hensel-Mendelssohn', 'Fanny Mendelssohn'],
+    aliases: ['Fanny Hensel', 'Fanny Hensel-Mendelssohn', 'Fanny Mendelssohn', 'Fanny Mendelssohn-Hensel'],
     eras: ['romantic'],
   },
   {
@@ -1211,7 +1269,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Franz von Suppé',
-    aliases: ['Franz von Suppé', 'Franz von Suppe', 'F. von Suppé', 'F.v. Suppe', 'Suppé', 'Suppe'],
+    aliases: ['Franz von Suppé', 'Franz von Suppe', 'F. von Suppé', 'F. V. Suppé', 'F. V. Suppe', 'F.v. Suppe', 'Suppé', 'Suppe'],
     eras: ['romantic'],
   },
   {
@@ -1231,7 +1289,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Franz Lehár',
-    aliases: ['Franz Lehár', 'Franz Lehar', 'Lehár', 'Lehar'],
+    aliases: ['Franz Lehár', 'Franz Lehar', 'F. Lehár', 'F. Lehar', 'Lehár', 'Lehar'],
     eras: ['romantic'],
   },
   {
@@ -1343,6 +1401,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Nikolai Rimsky-Korsakov',
     aliases: [
       'Nikolai Rimsky-Korsakov',
+      'N. Rimsky-Korsakov',
       'Nikolái Rimski-Kórsakov',
       'Nicolai Rimsky-Korsakov',
       'Rimsky-Korsakov',
@@ -1458,7 +1517,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Pablo de Sarasate',
-    aliases: ['Pablo de Sarasate', 'Pablo Sarasate', 'Sarasate'],
+    aliases: ['Pablo de Sarasate', 'Pablo Sarasate', 'P. Sarasate', 'P. de Sarasate', 'Sarasate'],
     eras: ['romantic'],
   },
   {
@@ -1474,6 +1533,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Ruperto Chapí',
     aliases: ['Ruperto Chapí', 'Ruperto Chapi', 'R. Chapí', 'R. Chapi'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Pedro Miguel Marqués',
+    aliases: ['Pedro Miguel Marqués', 'Pedro Miguel Marques', 'Miguel Marqués', 'Miguel Marques'],
     eras: ['romantic'],
   },
   {
@@ -1533,7 +1597,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Joaquín Turina',
-    aliases: ['Joaquín Turina', 'Joaquin Turina', 'J. Turina'],
+    aliases: ['Joaquín Turina', 'Joaquin Turina', 'J. Turina', 'J.Turina'],
     eras: ['twentieth'],
   },
   {
@@ -1623,12 +1687,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Manuel Ponce',
-    aliases: ['Manuel Ponce', 'M. Ponce'],
+    aliases: ['Manuel Ponce', 'Manuel María Ponce', 'Manuel M. Ponce', 'M. Ponce'],
     eras: ['twentieth'],
   },
   {
     canonicalName: 'Heitor Villa-Lobos',
-    aliases: ['Heitor Villa-Lobos', 'Villa-Lobos'],
+    aliases: ['Heitor Villa-Lobos', 'H. Villa-Lobos', 'Villa-Lobos'],
     eras: ['twentieth'],
   },
   {
@@ -1644,6 +1708,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Barrios Mangore',
       'Mangoré',
     ],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Ángel Barrios',
+    aliases: ['Ángel Barrios', 'Angel Barrios'],
     eras: ['twentieth'],
   },
   {
@@ -1684,6 +1753,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Amadeo Vives',
     aliases: ['Amadeo Vives'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Leopoldo Magenti',
+    aliases: ['Leopoldo Magenti'],
     eras: ['twentieth'],
   },
   {
@@ -1857,6 +1931,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Fritz Kreisler',
+    aliases: ['Fritz Kreisler', 'F. Kreisler', 'Kreisler'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Frank Martin',
     aliases: ['Frank Martin'],
     eras: ['twentieth'],
@@ -1913,7 +1992,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'György Ligeti',
-    aliases: ['György Ligeti', 'Gyorgy Ligeti', 'Ligeti'],
+    aliases: ['György Ligeti', 'Gyorgy Ligeti', 'G. Ligeti', 'Ligeti'],
     eras: ['twentieth'],
   },
   {
@@ -2117,6 +2196,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['contemporary'],
   },
   {
+    canonicalName: 'Joan Valent',
+    aliases: ['Joan Valent'],
+    eras: ['contemporary'],
+  },
+  {
     canonicalName: 'José María Sánchez-Verdú',
     aliases: ['José María Sánchez-Verdú', 'Jose Maria Sanchez-Verdu', 'Sánchez-Verdú'],
     eras: ['contemporary'],
@@ -2312,6 +2396,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['contemporary'],
   },
   {
+    // Official author identity: https://www.patriciakopatchinskaja.com/list-of-works
+    // (PatKop Compositions) and https://cndm.inaem.gob.es/node/23864 (UniSolo).
+    // The Auditorio uses PatKop (1977); preserve that observed credit and let
+    // the shared publication mechanism resolve the same composer identity.
+    canonicalName: 'Patricia Kopatchinskaja',
+    aliases: ['Patricia Kopatchinskaja', 'PatKop'],
+    eras: ['contemporary'],
+  },
+  {
     canonicalName: 'Olga Neuwirth',
     aliases: ['Olga Neuwirth', 'Neuwirth'],
     eras: ['contemporary'],
@@ -2389,54 +2482,196 @@ type ComposerIndex = {
 };
 
 const INDEX: ComposerIndex = buildIndex(COMPOSERS);
-const ALIASES_BY_LENGTH = [...new Set(COMPOSERS.flatMap((entry) => entry.aliases))].sort(
-  (left, right) => right.length - left.length,
+const COMPOSER_NAME_TOKENS = new Set(COMPOSERS.flatMap((composer) =>
+  composer.aliases.flatMap((alias) => foldName(alias).split(' ')),
+));
+const CANONICAL_SURNAME_COUNTS = new Map<string, number>();
+for (const composer of COMPOSERS) {
+  const words = foldName(composer.canonicalName).split(' ').filter(Boolean);
+  while (/^(?:i|ii|iii|iv|jr|sr)$/.test(words.at(-1) ?? '')) words.pop();
+  const surname = words.at(-1);
+  if (surname) CANONICAL_SURNAME_COUNTS.set(surname, (CANONICAL_SURNAME_COUNTS.get(surname) ?? 0) + 1);
+}
+
+/**
+ * Trailing biographical year annotation only: `(1685-1750)`, `(1937)`,
+ * `(ca. 1650-1710)`, open spans such as `(1944-)`. Does not match other
+ * parentheticals that happen to contain digits (`(s. XVII)`, `(Op. 123)`).
+ */
+export const COMPOSER_LIFESPAN_ANNOTATION =
+  /\(\s*(?:ca\.?\s*)?\*?\d{3,4}\s*[–—-]\s*(?:(?:ca\.?\s*)?\*?\d{3,4})?\s*\)|\(\s*(?:ca\.?\s*)?\*?\d{4}\s*\)/;
+
+const TRAILING_COMPOSER_LIFESPAN = new RegExp(
+  String.raw`\s*(?:${COMPOSER_LIFESPAN_ANNOTATION.source})\s*$`,
+  'u',
 );
+
+export function hasComposerLifespanAnnotation(text: string): boolean {
+  return COMPOSER_LIFESPAN_ANNOTATION.test(text);
+}
+
+export function stripTrailingBiographicalYears(name: string): string {
+  return name.replace(TRAILING_COMPOSER_LIFESPAN, '').trim();
+}
+
+const COMPOSER_ATTRIBUTION_PREFIX =
+  /^(?:atribuid[oa]s?\s+a|attributed\s+to|attr(?:ib(?:uted)?)?\.?\s*a(?:\s+)?)\s+/i;
+
+/** Source wording such as "atribuida a Juan de Hidalgo", not a second identity. */
+export function stripComposerAttributionPrefix(name: string): string {
+  return name.replace(COMPOSER_ATTRIBUTION_PREFIX, '').trim();
+}
 
 export function matchComposer(name: string): ComposerKnowledge | undefined {
   const folded = foldName(name);
   if (!folded) return undefined;
   const direct = INDEX.byFolded.get(folded) ?? INDEX.byCompact.get(compactName(name));
   if (direct) return direct;
-  const withoutYears = name.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  const withoutYears = stripTrailingBiographicalYears(name);
   if (withoutYears && withoutYears !== name) return matchComposer(withoutYears);
+  const withoutAttribution = stripComposerAttributionPrefix(name);
+  if (withoutAttribution && withoutAttribution !== name) return matchComposer(withoutAttribution);
   return undefined;
 }
 
+/** A bare surname shared by several catalogued composers cannot identify one. */
+export function isAmbiguousComposerSurname(name: string): boolean {
+  const folded = foldName(name);
+  return Boolean(folded && !folded.includes(' ') && (CANONICAL_SURNAME_COUNTS.get(folded) ?? 0) > 1);
+}
+
+export type ComposerPrefixMatch = {
+  knowledge: ComposerKnowledge;
+  matchedText: string;
+  rest: string;
+};
+
+/**
+ * Longest known-composer prefix of a line, word-boundary only.
+ * Returns the source spelling of the matched words and the unmatched remainder.
+ * Does not invent names or match inside a longer token (`Bachianas`).
+ */
+export function matchComposerPrefix(text: string): ComposerPrefixMatch | undefined {
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  if (!cleaned) return undefined;
+  const words = cleaned.split(' ').filter(Boolean);
+  if (words.length === 0) return undefined;
+  const max = Math.min(words.length, 8);
+  for (let count = max; count >= 1; count--) {
+    let candidateWords = words.slice(0, count);
+    while (candidateWords.length > 0 && isDelimiterToken(candidateWords[candidateWords.length - 1] ?? '')) {
+      candidateWords = candidateWords.slice(0, -1);
+    }
+    if (candidateWords.length === 0) continue;
+    const matchedText = candidateWords.join(' ');
+    const knowledge = matchComposer(matchedText);
+    if (!knowledge) continue;
+    return {
+      knowledge,
+      matchedText,
+      rest: words.slice(candidateWords.length).join(' ').trim(),
+    };
+  }
+  return undefined;
+}
+
+function isDelimiterToken(token: string): boolean {
+  return /^(?:[:·•]|[—–-])$/.test(token);
+}
+
+type ComposerMentionHit = {
+  start: number;
+  end: number;
+  knowledge: ComposerKnowledge;
+};
+
 /**
  * Conservative scan of observed prose for known composer names.
- * Longest alias first; word-boundary only. Does not invent names.
+ * Collects alias spans, then keeps the longest match when spans overlap so a
+ * short surname alias cannot add a second identity already named more
+ * specifically in the same span (`Bach` inside `Johann Christian Bach`).
+ * Word-boundary only. Does not invent names.
  * Skips names inside institutions/centres and contextual mentions
  * (tema de, basado en, inspirado en, homenaje a).
  */
-export function findKnownComposersInText(text: string): ComposerKnowledge[] {
+export function findKnownComposersInText(
+  text: string,
+  context: 'program' | 'narrative' = 'program',
+): ComposerKnowledge[] {
   const folded = foldName(text);
   if (!folded) return [];
+  // Retain punctuation/case alongside the folded index: word boundaries alone
+  // cannot distinguish Delgado-Iribarren from a repertoire reference.
+  const surface = text.normalize('NFD').replace(/\p{M}/gu, '');
+  const tokens = [...surface.matchAll(/[a-z0-9]+/gi)];
+  const offsets = new Map<number, { start: number; end: number }>();
+  let offset = 0;
+  for (const token of tokens) {
+    offsets.set(offset, { start: token.index!, end: token.index! + token[0].length });
+    offset += token[0].length + 1;
+  }
+  const hits: ComposerMentionHit[] = [];
+  for (const [needle, knowledge] of INDEX.byFolded) {
+    if (needle.length < 4) continue;
+    for (const span of unguardedAliasSpans(folded, needle)) {
+      const entityPosition = offsets.get(span.start);
+      if (entityPosition && isInstitutionNamePrefix(surface.slice(0, entityPosition.start))) continue;
+      if (!needle.includes(' ')) {
+        const position = offsets.get(span.start);
+        if (position && isPersonalSurnameMention(surface, position.start, position.end, context)) continue;
+      }
+      hits.push({ start: span.start, end: span.end, knowledge });
+    }
+  }
+
   const found: ComposerKnowledge[] = [];
   const seen = new Set<string>();
-  for (const alias of ALIASES_BY_LENGTH) {
-    const needle = foldName(alias);
-    if (!needle || needle.length < 4) continue;
-    if (!hasAttributedComposerPhrase(folded, needle)) continue;
-    const match = INDEX.byFolded.get(needle);
-    if (!match || seen.has(match.canonicalName)) continue;
-    seen.add(match.canonicalName);
-    found.push(match);
+  for (const hit of resolveOverlappingComposerHits(hits)) {
+    if (seen.has(hit.knowledge.canonicalName)) continue;
+    seen.add(hit.knowledge.canonicalName);
+    found.push(hit.knowledge);
   }
   return found;
 }
 
-const CONTEXTUAL_COMPOSER_PREFIXES = [
-  'tema de',
-  'un tema de',
-  'sobre un tema de',
-  'basado en',
-  'basada en',
-  'inspirado en',
-  'inspirada en',
-  'homenaje a',
-  'en homenaje a',
-];
+/** Preserve surface case so intervening narrative verbs end an entity name.
+ * This also protects short aliases inside a longer named institution. */
+function isInstitutionNamePrefix(prefix: string): boolean {
+  const clause = prefix.split(/[.;:\n]/u).at(-1) ?? '';
+  const heads = [...clause.matchAll(/\b(?:auditorio|teatro|sala|calle|avenida|paseo|plaza|biblioteca|escuela|conservatorio|instituto|fundacion|centro)\b/giu)];
+  const head = heads.at(-1);
+  if (!head) return false;
+  const suffix = clause.slice(head.index! + head[0].length).replace(/[«»“”"']/gu, ' ').trim();
+  const words = suffix.split(/\s+/u).filter(Boolean);
+  if (words.length > 10) return false;
+  return words.every((word) => /^(?:municipal|superior|profesional|nacional|real|cultural|de|del|la|las|los|musica|danza)$/iu.test(word) || /^\p{Lu}[\p{L}’'.-]*$/u.test(word) || COMPOSER_NAME_TOKENS.has(foldName(word)));
+}
+
+function isPersonalSurnameMention(
+  text: string, start: number, end: number, context: 'program' | 'narrative',
+): boolean {
+  const before = text.slice(0, start);
+  const after = text.slice(end);
+  // A compound surname is one person, even if its second half is an alias.
+  if (/[\p{L}]['’\-]$/u.test(before) || /^['’\-][\p{L}]/u.test(after)) return true;
+  const clause = before.split(/[.;\n]/).at(-1) ?? '';
+  if (/\b(?:presenta|presentan|interviene|intervienen|modera|moderan|ponente|coautor|retratista|autor del libro)\b/i.test(clause)) return true;
+  const repertoire = /\b(?:obras?|musica|repertorio|programa|composiciones?|piezas?)\s+(?:de\s+)?[^.;\n]*$/i.test(clause)
+    || /\b(?:concierto|sinfonia|sonata|misa|suite|cantata)\b[^;\n]*\bde\s+(?:[A-Z]\.\s*)?$/i.test(before);
+  const previousName = /\b([A-Z][a-z]+|[A-Z]{2,})\s+$/u.exec(before)?.[1];
+  const nextName = /^[ \t]+([A-Z][a-z]+|[A-Z]{2,})\b/u.exec(after)?.[1];
+  if (previousName && !matchComposer(previousName) && !/^(?:de|el|la|por|con|y|obras?|musica|repertorio|programa|piezas?)$/i.test(previousName)) return true;
+  const programWorkHeading = context === 'program' && /^(?:misa|motete|cantata|sonata|sinfonia|suite|concierto|nocturno)$/i.test(nextName ?? '');
+  if (nextName && !matchComposer(nextName) && !programWorkHeading) return true;
+  if (context === 'narrative') {
+    // Prose needs a musical attribution or a composer/work heading. Bare
+    // aliases remain useful in programText, where the field already is repertoire.
+    return !repertoire && !/^\s*:/.test(after);
+  }
+  return false;
+}
+
+const CONTEXTUAL_COMPOSER_PREFIXES = CONTEXTUAL_COMPOSER_RELATIONS;
 
 const INSTITUTION_COMPOSER_PREFIXES = [
   'cim',
@@ -2450,15 +2685,49 @@ const INSTITUTION_COMPOSER_PREFIXES = [
   'instituto',
   'fundacion',
   'fundacio',
+  'auditorio', 'teatro', 'sala', 'calle', 'avenida', 'paseo', 'plaza', 'biblioteca',
 ];
 
-function hasAttributedComposerPhrase(haystack: string, phrase: string): boolean {
+function unguardedAliasSpans(
+  haystack: string,
+  phrase: string,
+): Array<{ start: number; end: number }> {
   const pattern = new RegExp(`(?:^| )${escapeRegExp(phrase)}(?: |$)`, 'g');
+  const spans: Array<{ start: number; end: number }> = [];
   for (const match of haystack.matchAll(pattern)) {
     const start = match[0].startsWith(' ') ? match.index! + 1 : match.index!;
-    if (!isGuardedComposerContext(haystack.slice(0, start))) return true;
+    if (isGuardedComposerContext(haystack.slice(0, start))) continue;
+    // A short surname in a presentation credit can belong to a different
+    // named person; preserve the alias for genuine repertoire mentions.
+    if (!phrase.includes(' ') && /\b(?:presenta|interviene|modera|ponente)\s+\w+\s+$/u.test(haystack.slice(0, start))) continue;
+    spans.push({ start, end: start + phrase.length });
   }
-  return false;
+  return spans;
+}
+
+/**
+ * Longest span wins when mentions overlap. Distinct non-overlapping names
+ * are all kept, including two full names that share a family surname.
+ */
+function resolveOverlappingComposerHits(hits: ComposerMentionHit[]): ComposerMentionHit[] {
+  const ranked = [...hits].sort((left, right) => {
+    const lengthDelta = right.end - right.start - (left.end - left.start);
+    if (lengthDelta !== 0) return lengthDelta;
+    if (left.start !== right.start) return left.start - right.start;
+    return left.knowledge.canonicalName.localeCompare(right.knowledge.canonicalName);
+  });
+
+  const accepted: ComposerMentionHit[] = [];
+  for (const hit of ranked) {
+    if (accepted.some((kept) => composerSpansOverlap(kept, hit))) continue;
+    accepted.push(hit);
+  }
+  accepted.sort((left, right) => left.start - right.start || left.end - right.end);
+  return accepted;
+}
+
+function composerSpansOverlap(left: ComposerMentionHit, right: ComposerMentionHit): boolean {
+  return left.start < right.end && right.start < left.end;
 }
 
 function isGuardedComposerContext(prefix: string): boolean {

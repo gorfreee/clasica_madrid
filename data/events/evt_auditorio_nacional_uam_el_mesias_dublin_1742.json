@@ -26,13 +26,13 @@
   ],
   "composers": [
     {
-      "name": "Georg Friedrich Händel (1685-1759)"
+      "name": "Georg Friedrich Händel"
     }
   ],
   "works": [
     {
       "title": "El Mesías (selección de coros y arias)",
-      "composerName": "Georg Friedrich Händel (1685-1759)"
+      "composerName": "Georg Friedrich Händel"
     }
   ],
   "eras": [
@@ -47,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-el-mesias-dublin-1742",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-11-01",
       "externalId": "uam-el-mesias-dublin-1742"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-11-01"
 }

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_comedia",
+  "slug": "teatro-de-la-comedia",
+  "name": "Teatro de la Comedia",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle del Príncipe, 14, 28012 Madrid",
+  "url": "https://teatroclasico.inaem.gob.es/",
+  "lastVerifiedAt": "2026-10-21"
+}

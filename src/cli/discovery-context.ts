@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { systemClock } from '../lib/domain/dates.ts';

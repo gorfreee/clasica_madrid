@@ -15,18 +15,49 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [
+  "performers": [
     {
-      "name": "ALBERTO CARRETERO"
+      "name": "Sergio Gómez «El Colorao»"
+    },
+    {
+      "name": "Javier Povedano"
+    },
+    {
+      "name": "Laura García-Lorca"
+    },
+    {
+      "name": "Marco Flores"
+    },
+    {
+      "name": "Trío Arbós"
+    },
+    {
+      "name": "Ferdinando Trematore"
+    },
+    {
+      "name": "José Miguel Gómez"
+    },
+    {
+      "name": "Juan Carlos Garvayo"
     }
   ],
-  "works": [],
+  "composers": [
+    {
+      "name": "Alberto Carretero"
+    }
+  ],
+  "works": [
+    {
+      "title": "Poeta en Nueva York",
+      "composerName": "Alberto Carretero"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
   "formats": [
-    "chamber"
+    "chamber",
+    "opera"
   ],
   "kind": "established",
   "access": "paid",
@@ -34,10 +65,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-29",
       "externalId": "/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-29"
 }

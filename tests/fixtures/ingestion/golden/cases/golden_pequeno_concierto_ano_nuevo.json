@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_pequeno_concierto_ano_nuevo",
+  "origin": "published-catalog",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/pequeno-concierto-ano-nuevo",
+  "listingTitle": "Pequeño concierto de Año Nuevo",
+  "observed": {
+    "title": "Pequeño concierto de Año Nuevo",
+    "description": "Música y danza",
+    "categoryText": "El Real Junior",
+    "venueText": "HALL Real Teatro de Retiro",
+    "organizerText": "02 ene, 27 - 03 ene, 27",
+    "accessText": "Precio Bebés de 0 a 2 años: 3€ De 3 a 15 años: 15€ A partir de 16 años: 20€",
+    "programText": "Música y danza Nuestro Real Teatro de Retiro se vuelve a convertir en un salón vienés Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular del Teatro Real. Vuelve al Real Teatro de Retiro el acontecimiento navideño más esperado: viajaremos a Viena a través de la música de los compositores más representativos de los salones vieneses y disfrutaremos de los valses y polkas que forman parte de nuestro imaginario navideño. Un cuarteto de cuerdas de la Orquesta Sinfónica de Madrid , Titular del Teatro Real, junto con la bailarina Elisa Bermejo y las voces de los solistas de la Orquesta Titular del Teatro Real , introducirá al público de todas las edades en los ritmos y melodías que se escuchan en Viena todos los primeros de enero. Valses, mazurkas y polkas serán los protagonistas de esta actividad en la que pueden participar desde niños hasta abuelos, demostrando así que el baile siempre es un puente de unión entre generaciones. En Navidad, vamos a bailar como si estuviéramos en Viena. Una producción del Real Teatro de Retiro Funciones Sábado 2 de enero de 2027, a las 17:00 horas Domingo, 3 de enero de 2027, a las 12:00 horas HALL Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico Duración 60 minutos (aprox.) Precio Bebés de 0 a 2 años: 3€ De 3 a 15 años: 15€ A partir de 16 años: 20€ Apto para todos los públicos",
+    "performers": [],
+    "composers": [
+      {
+        "name": "y danza"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto real de repertorio de salón vienés (valses, mazurcas y polcas) interpretado por solistas / cuarteto de cuerda de la Orquesta Titular. La danza es coprincipal o accesoria. performers[] vacío y el composer erróneo «y danza» no son la evidencia: el programText observa interpretación y repertorio de este evento.",
+  "notes": "Regresión de ingestión PR #194 / run 34603170413: el clasificador determinista dejaba uncertain, la IA devolvía exclude y classification-drift conservaba el evento publicado. No usar el título, el Teatro Real ni el composer «y danza» como atajo.",
+  "checkedAt": "2026-09-11"
+}

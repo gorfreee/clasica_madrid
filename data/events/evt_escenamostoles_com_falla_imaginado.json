@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escenamostoles_com_falla_imaginado",
+  "slug": "falla-imaginado-de-moises-sanchez",
+  "title": "Falla Imaginado de Moisés Sánchez",
+  "status": "scheduled",
+  "venueId": "ven_teatro_del_bosque",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escenamostoles_com_falla_imaginado_01",
+      "date": "2026-12-10",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Moisés P. Sánchez"
+    },
+    {
+      "name": "Ana María Valderrama"
+    },
+    {
+      "name": "Pablo Martín Caminero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Moisés P. Sánchez"
+    }
+  ],
+  "works": [
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La vida breve",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_escenamostoles_com",
+      "url": "https://escenamostoles.com/falla-imaginado/",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_escenamostoles_com",
+  "lastVerifiedAt": "2026-09-29"
+}

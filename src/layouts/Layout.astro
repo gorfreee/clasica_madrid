@@ -1,9 +1,20 @@
 ---
 import '../styles/global.css';
+import archivoFontUrl from '../assets/fonts/archivo-latin-ext-wght.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from '../lib/presentation/constants.ts';
+import FloatingWhatsAppChannel from '../components/FloatingWhatsAppChannel.astro';
+import PostHogAnalytics from '../components/PostHogAnalytics.astro';
+import {
+  BRAND_BLUE,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  pageDocumentTitle,
+  SITE_NAME,
+} from '../lib/presentation/constants.ts';
+import { buildSocialImageMetadata } from '../lib/presentation/social.ts';
 import { publicUrl } from '../lib/presentation/urls.ts';
+import { buildPageAnalytics, type PageAnalyticsOverrides } from '../lib/analytics/page.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
 type Props = {
@@ -12,6 +23,19 @@ type Props = {
   canonicalPath?: string;
   indexable?: boolean;
   jsonLd?: Record<string, unknown>[] | Record<string, unknown>;
+  socialImage?: string;
+  socialImageAlt?: string;
+  socialImageWidth?: number;
+  socialImageHeight?: number;
+  socialImageType?: string;
+  /** `website` everywhere except article pages. */
+  ogType?: 'website' | 'article';
+  /** `YYYY-MM-DD` for `og:type=article`. */
+  publishedTime?: string;
+  /** Only when the article declares `updatedAt`. */
+  modifiedTime?: string;
+  /** Semantic page context copied onto the existing PostHog pageview. */
+  analytics?: PageAnalyticsOverrides;
 };
 
 const {
@@ -20,11 +44,22 @@ const {
   canonicalPath = '/',
   indexable = true,
   jsonLd,
+  socialImage,
+  socialImageAlt,
+  socialImageWidth = 1200,
+  socialImageHeight = 630,
+  socialImageType = 'image/png',
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
+  analytics,
 } = Astro.props;
 
-const pageTitle = title === DEFAULT_TITLE || title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
+const pageTitle = pageDocumentTitle(title);
+const pageAnalytics = serializeJsonForScript(buildPageAnalytics(canonicalPath, analytics));
 const canonical = indexable ? publicUrl(canonicalPath) : null;
 const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
+const social = buildSocialImageMetadata(socialImage, socialImageAlt);
 ---
 
 <!doctype html>
@@ -34,29 +69,47 @@ const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content={BRAND_BLUE} />
+    <link rel="preload" href={archivoFontUrl} as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" type="image/x-icon" />
+    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex" />}
     <title>{pageTitle}</title>
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
-    <meta name="twitter:card" content="summary" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    <meta property="og:image" content={social.url} />
+    <meta property="og:image:width" content={String(socialImageWidth)} />
+    <meta property="og:image:height" content={String(socialImageHeight)} />
+    <meta property="og:image:type" content={socialImageType} />
+    <meta property="og:image:alt" content={social.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={social.url} />
+    <meta name="twitter:image:alt" content={social.alt} />
     {
       jsonLdScript && (
         <script is:inline type="application/ld+json" set:html={jsonLdScript}></script>
       )
     }
   </head>
-  <body>
+  <body id="top">
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <Header />
     <main id="contenido" class="page">
       <slot />
     </main>
     <Footer />
+    <FloatingWhatsAppChannel />
+    <script id="analytics-page" type="application/json" is:inline set:html={pageAnalytics} />
+    <PostHogAnalytics />
   </body>
 </html>
