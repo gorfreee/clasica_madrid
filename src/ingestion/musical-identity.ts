@@ -23,7 +23,7 @@ export type SlotVerdict =
   | { kind: 'insufficient' };
 
 const TITLE_PREFIXES: RegExp[] = [
-  /^\[(?:aplazado|cancelado)\]\s*/iu,
+  /^\[(?:aplazado|cancelado|pospuesto)\]\s*/iu,
   /^[«“"']?Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo[»”"']?\.\s*/iu,
   /^CNDM\.\s*/iu,
   /^ORCAM\.\s+(?:Sinfónico|Tiempo de Cámara)\s+\d+\.\s*/iu,
@@ -49,6 +49,18 @@ const GENERIC_WORK_WORDS = new Set([
 const CATALOG_NUMBER =
   /\b(bwv|wwv|hwv|rwv|rv|k(?:v)?|hob|d|op(?:us)?|woo|sz|bb)\s*\.?\s*([a-z]?\s*\d+[a-z]?(?:\s*[:/]\s*\d+)?)/giu;
 
+/**
+ * Identidades revisadas contra el catálogo. No es un traductor ni un
+ * comparador aproximado: cualquier otra grafía sigue siendo distinta.
+ */
+const VERIFIED_COMPOSER_FORMS: readonly (readonly [string, string])[] = [
+  ['k jenkins', 'karl jenkins'],
+];
+
+const VERIFIED_WORK_CORES: readonly (readonly [string, string])[] = [
+  ['the armed man a mass for peace', 'the armed man una misa para la paz'],
+];
+
 export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): SlotVerdict {
   const a = collectSignals(left);
   const b = collectSignals(right);
@@ -73,7 +85,11 @@ export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): Sl
     return { kind: 'conflict', reasons: [`intérpretes incompatibles: ${summarize(a.performers)} vs ${summarize(b.performers)}`] };
   }
   if (workHits.length > 0) return { kind: 'match', reasons };
-  const workConflict = bothDistinctAndDisjoint(a.works, b.works, worksCompatible);
+  const workConflict = bothDistinctAndDisjoint(
+    worksForContradiction(left, right, a),
+    worksForContradiction(right, left, b),
+    worksCompatible,
+  );
   if (workConflict) {
     return { kind: 'conflict', reasons: [`obras incompatibles: ${summarize(a.works)} vs ${summarize(b.works)}`] };
   }
@@ -374,6 +390,7 @@ function worksCompatible(left: WorkSignal, right: WorkSignal): boolean {
   if (left.catalogs.some((item) => right.catalogs.includes(item))) return true;
   if (left.catalogs.length && right.catalogs.length) return false;
   if (!left.core || !right.core) return false;
+  if (verifiedPair(left.core, right.core, VERIFIED_WORK_CORES)) return true;
   if (left.core === right.core) {
     if (!signalGeneric(left) && !signalGeneric(right)) return true;
     return composersCompatible(left.composer ?? '', right.composer ?? '');
@@ -388,6 +405,9 @@ function worksCompatible(left: WorkSignal, right: WorkSignal): boolean {
 
 function composersCompatible(left: string, right: string): boolean {
   if (!left || !right) return false;
+  if (verifiedPair(normalizeText(stripYears(left)), normalizeText(stripYears(right)), VERIFIED_COMPOSER_FORMS)) {
+    return true;
+  }
   const knownLeft = matchComposer(left);
   const knownRight = matchComposer(right);
   if (knownLeft && knownRight) return knownLeft.canonicalName === knownRight.canonicalName;
@@ -428,6 +448,65 @@ function givenNamesCompatible(left: string[], right: string[]): boolean {
     if (other.length === 1 && token.startsWith(other)) return true;
     return false;
   });
+}
+
+/**
+ * «Concierto ECCE FINEM» nombra el evento. No es una obra que contradiga
+ * el repertorio publicado. «Concierto para…», un número de catálogo o un
+ * opus sí lo son.
+ */
+function isEditorialConcertTitle(title: string): boolean {
+  const folded = normalizeText(stripTitlePrefixes(title));
+  if (!/^(?:concierto|recital|gala|actuacion)\b/u.test(folded)) return false;
+  if (/^concierto\s+(?:para|en|n|no|num|op|opus)\b/u.test(folded)) return false;
+  if (catalogNumbers(title).length > 0) return false;
+  return true;
+}
+
+/** Only discard a whole editorial label corroborated by the other title.
+ * Quoted works and musical titles without that corroboration remain evidence. */
+function worksForContradiction(facts: MusicalFacts, other: MusicalFacts, signals: Signals): WorkSignal[] {
+  if (facts.works.length === 0 && isEditorialConcertTitle(facts.title) &&
+    editorialTitlesCompatible(facts, other)) {
+    const label = stripWorkDecorations(normalizeText(stripTitlePrefixes(facts.title)));
+    return signals.works.filter(work => work.core !== label);
+  }
+  return signals.works;
+}
+
+const EDITORIAL_TITLE_PREFIX = /^(?:concierto|recital|gala|actuacion)\s+/u;
+const EDITORIAL_TITLE_GLUE = new Set([
+  'a', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'para', 'the', 'un', 'una', 'y',
+]);
+
+/** Exact editorial name, optionally followed by observed credits after a dash.
+ * Keep numbers, qualifiers and prepositions: they may distinguish editions. */
+export function editorialTitlesCompatible(
+  left: { title: string; performers?: Array<{ name: string }> },
+  right: { title: string; performers?: Array<{ name: string }> },
+): boolean {
+  const a = editorialTitleCore(left);
+  const b = editorialTitleCore(right);
+  return Boolean(a && b && a === b);
+}
+
+function editorialTitleCore(facts: { title: string; performers?: Array<{ name: string }> }): string {
+  const [head, ...credits] = stripTitlePrefixes(facts.title).split(/\s+[–—-]\s+/u);
+  if (credits.some(credit => !facts.performers?.some(performer =>
+    normalizeText(performer.name) === normalizeText(credit)))) return '';
+  const core = normalizeText(head!).replace(EDITORIAL_TITLE_PREFIX, '');
+  const content = core.split(' ').filter(token =>
+    token && !EDITORIAL_TITLE_GLUE.has(token) && !/^\d+$/.test(token));
+  return content.length >= 2 ? core : '';
+}
+
+function verifiedPair(
+  left: string,
+  right: string,
+  pairs: readonly (readonly [string, string])[],
+): boolean {
+  if (!left || !right || left === right) return false;
+  return pairs.some(([a, b]) => (left === a && right === b) || (left === b && right === a));
 }
 
 function bothDistinctAndDisjoint<T>(

@@ -5,7 +5,12 @@ import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
 import { normalizeUrl, urlIdentifiesSingleEvent, urlPathIdentity, urlsEquivalent } from './urls.ts';
-import { compareRecyclableIdentity, compareSourceIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
+import {
+  compareRecyclableIdentity,
+  compareSourceIdentity,
+  sourceIdentityCanRecycle,
+  type VenueRelation,
+} from './source-identity-policy.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
@@ -195,12 +200,9 @@ function guardSourceHits(
     // Even for cancellations, an attested calendar owner must win over an
     // unrelated older performance that happens to share the source identity.
     guardedIds.add(hit.event.id);
+    const relation = catalogVenueRelation(options.venueId, hit.event.venueId, catalog.venues);
     const verdict = (recyclable ? compareRecyclableIdentity : compareSourceIdentity)(
-      observed, hit.event, options.venueId,
-      // Refining a published building to an explicit child room is not a
-      // relocation. Sibling rooms remain distinct venues.
-      catalog.venues.find(venue => venue.id === options.venueId)?.parentVenueId === hit.event.venueId
-        ? options.venueId : hit.event.venueId,
+      observed, hit.event, options.venueId, hit.event.venueId, relation,
     );
     if (verdict === 'compatible') accepted.push(hit);
     if (verdict === 'review') reviews.push(hit);
@@ -244,6 +246,50 @@ function guardSourceHits(
     };
   }
   return { kind: 'filtered', hits: compatible, recyclable: recyclableSource };
+}
+
+type VenueParent = { id: string; parentVenueId?: string };
+
+/**
+ * Parent/child comes from the catalog, not from splitting a name.
+ * A missing id is absence. Sibling rooms are not the same place.
+ */
+export function catalogVenueRelation(
+  observedVenueId: string | undefined,
+  existingVenueId: string | undefined,
+  venues: readonly VenueParent[],
+): VenueRelation {
+  if (!observedVenueId || !existingVenueId) return 'absent';
+  if (observedVenueId === existingVenueId) return 'same';
+  const observed = venues.find((venue) => venue.id === observedVenueId);
+  const existing = venues.find((venue) => venue.id === existingVenueId);
+  if (observed?.parentVenueId === existingVenueId) return 'refinement';
+  if (existing?.parentVenueId === observedVenueId) return 'coarser';
+  if (
+    observed?.parentVenueId &&
+    existing?.parentVenueId &&
+    observed.parentVenueId === existing.parentVenueId
+  ) {
+    return 'sibling';
+  }
+  return 'unrelated';
+}
+
+/**
+ * Keeping the identity does not authorize replacing a published room
+ * with the building that contains it. A child observation may still
+ * refine a published building.
+ */
+export function preservePreciseVenue(
+  observedVenueId: string | undefined,
+  publishedVenueId: string | undefined,
+  venues: readonly VenueParent[],
+): string | undefined {
+  if (!publishedVenueId) return observedVenueId;
+  if (catalogVenueRelation(observedVenueId, publishedVenueId, venues) === 'coarser') {
+    return publishedVenueId;
+  }
+  return observedVenueId;
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {

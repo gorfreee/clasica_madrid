@@ -16,6 +16,7 @@ import {
   exclusiveSlotKeys,
   matchEventIdentity,
   newObservationKeys,
+  preservePreciseVenue,
   slotIdentityVerdict,
   sharesObservedSourceIdentity,
 } from './identity.ts';
@@ -215,7 +216,7 @@ export function reconcileHarvest(options: {
   }
 
   for (const item of shared) {
-    applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
+    applySharedSourceObservation(item, catalog, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
   }
 
   const freshGroups = groupNewObservations(fresh, catalog);
@@ -268,22 +269,26 @@ function prepareItem(
 ): PreparedItem {
   const event = observation.event;
   const venueMatch = matchVenue(venueHint(event), catalog);
+  const observedVenueId = venueMatch?.venue.id;
   const identity = matchEventIdentity(catalog, event, {
     catalogSourceId: observation.source.catalogSourceId,
-    venueId: venueMatch?.venue.id,
+    venueId: observedVenueId,
     aliases,
   });
+  const venueId = identity.kind === 'matched'
+    ? preservePreciseVenue(observedVenueId, identity.event.venueId, catalog.venues)
+    : observedVenueId;
   const skip =
     identity.kind === 'unmatched' ? newEventPublicationSkip(event, catalog, now, window) : undefined;
   const proposal = proposalFromObservation(event, {
     catalogSourceId: resolveCatalogSource(observation.source, catalog).id,
     now,
     window,
-    venueId: venueMatch?.venue.id,
-    venue: unpublishedMatchedVenue(venueMatch, catalog),
+    venueId,
+    venue: venueId === observedVenueId ? unpublishedMatchedVenue(venueMatch, catalog) : undefined,
     classification: observation.classification,
   });
-  return { observation, identity, venueId: venueMatch?.venue.id, venue: proposal.venue, proposal, skip };
+  return { observation, identity, venueId, venue: proposal.venue, proposal, skip };
 }
 
 function persistAction(existing: Event, incoming: Event): 'updated' | 'unchanged' {
@@ -356,6 +361,7 @@ function applyExistingGroup(
 
 function applySharedSourceObservation(
   item: PreparedItem,
+  catalog: Catalog,
   now: Date,
   candidates: Candidate[],
   byIndex: Map<number, ObservationReconcile>,
@@ -394,10 +400,13 @@ function applySharedSourceObservation(
   for (const assignment of match.assigned) {
     if (!cancelAll && assignment.occurrences.length === 0) continue;
     const existing = assignment.event;
+    const venueId = preservePreciseVenue(item.proposal.venueId, existing.venueId, catalog.venues);
     seenEventIds.add(existing.id);
     eventIds.push(existing.id);
     const proposal: EventProposal = {
       ...item.proposal,
+      venueId,
+      venue: venueId === item.proposal.venueId ? item.proposal.venue : undefined,
       calendarEvidence: undefined, // A 1→N identity does not convey event-wide replacement authority.
       occurrences: cancelAll ? item.proposal.occurrences : assignment.occurrences,
     };
