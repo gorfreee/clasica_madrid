@@ -61,6 +61,51 @@ describe('adapter Auditorio Nacional (JSON)', () => {
     expect(chamber?.externalId).toBe('ocne-satelite-01-evoluciones');
   });
 
+  it('distingue el UUID de Plone del slug de la ficha, aunque el slug acabe en dígitos', () => {
+    const events = auditorioNacionalAdapter.extract(JSON.stringify([
+      {
+        title: 'UUID con índice',
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2',
+        start: '2026-11-11T19:30:00+01:00',
+        className: 'sinfonica',
+        id: '02450A76451141628DF2CBE9DECDCE5D-0',
+      },
+      {
+        title: 'Slug numerado',
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-3',
+        start: '2026-11-12T19:30:00+01:00',
+        className: 'sinfonica',
+        id: 'ibermusica-filarmonica-checa-3',
+      },
+      {
+        title: 'Slug con índice de función',
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1',
+        start: '2026-11-18T19:30:00+01:00',
+        className: 'sinfonica',
+        id: 'ocne-sinfonico-01-1-0',
+      },
+      {
+        title: 'Sin id',
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid',
+        start: '2026-11-11T19:30:00+01:00',
+        className: 'camara',
+      },
+      {
+        title: 'Índice corto ajeno al slug',
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/otro-concierto',
+        start: '2026-11-20T19:30:00+01:00',
+        id: 'mismo-0',
+      },
+    ]), 'https://example.test/events.json', ctx('auditorio-nacional'));
+    expect(events.map((event) => [event.sourceUrl.split('/').at(-1), event.externalId])).toEqual([
+      ['ibermusica-filarmonica-checa-2', '02450a76451141628df2cbe9decdce5d'],
+      ['ibermusica-filarmonica-checa-3', 'ibermusica-filarmonica-checa-3'],
+      ['ocne-sinfonico-01-1', 'ocne-sinfonico-01-1'],
+      ['otro-concierto', 'mismo'],
+      ['xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid', 'xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid'],
+    ]);
+  });
+
   it('falla si el documento no es un array', () => {
     expect(() =>
       auditorioNacionalAdapter.extract('{"events":[]}', 'https://example.test/events.json', ctx('auditorio-nacional')),
