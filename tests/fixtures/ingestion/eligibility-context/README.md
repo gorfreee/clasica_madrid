@@ -49,3 +49,10 @@ descargado sí contiene los programas anteriores.
 No se relaja el grounding de IA: un span inventado se rechaza y la
 coprincipalidad sin bloque clásico resuelto no puede convertirse en include por
 una respuesta de IA. Tampoco se reabren los excludes deterministas.
+
+El programa de Janáček del run 43056214891 se evalúa conservando sus entradas
+y encabezados de compositor. Para este camino de bloque clásico se exigen dos
+títulos y dos referencias de catálogo distintos, atribuidos explícitamente a
+compositores conocidos. Una referencia repetida en una nota, una línea con dos
+números o una mención incidental del apellido no acreditan dos obras. Las
+variantes negativas de los tests son controles sintéticos, no nuevas capturas.

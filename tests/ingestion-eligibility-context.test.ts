@@ -216,6 +216,25 @@ describe('actividad principal frente a contexto', () => {
 describe('run 43056214891: danza secundaria frente a ballet principal', () => {
   const janacek = run43056214891.find((row) => row.sourceUrl.includes('diario-desaparecido'))!;
 
+  it.each([
+    'Leoš Janáček: Cuarteto de cuerda nº 2, JW VII/13. Nota: JW VII/13.',
+    'Leoš Janáček\nCuarteto de cuerda nº 2, JW VII/13\nJW VII/13',
+    'Leoš Janáček\nCuarteto de cuerda nº 2, JW VII/13\nOtra edición del cuarteto, JW VII/13',
+    'Leoš Janáček\nCuarteto de cuerda nº 2, JW VII/13\nCuarteto de cuerda nº 2, JW VIII/33',
+    'Leoš Janáček: Una sola entrada con JW VII/13 y JW VIII/33.',
+    'Comentario sobre Leoš Janáček\nPrimera pieza, JW VII/13\nSegunda pieza, JW VIII/33',
+    'Leoš Janáček\nCuarteto de cuerda nº 2, JW VII/13\nAutor sin identificar\nSegunda pieza, JW VIII/33',
+    'Leoš Janáček\nCuarteto de cuerda nº 2, JW VII/13\nNotas sobre el catálogo, JW VIII/33',
+  ])('no fabrica un bloque clásico con referencias repetidas o sin atribución: %s', (programText) => {
+    const observed = facts({
+      title: 'Diario de un desaparecido', categoryText: 'Teatro Musical de Cámara', programText,
+      performers: [{ name: 'Cuarteto Seikilos' }, { name: 'Ensemble del Ballet del Teatro Nacional de Brno' }],
+    });
+    const deterministic = resolveEligibility(observed);
+    expect(deterministic.value).not.toBe('include');
+    expect(evaluateEligibilityAi(observed, { eligibility: 'include', evidence: [programText] }, deterministic).accepted).toBe(false);
+  });
+
   it('no excluye el ciclo de Janáček por el ensemble del ballet', () => {
     expect(janacek.originalDecision).toEqual({ value: 'exclude', ruleId: 'dance-spectacle' });
     expect(janacek.observed.categoryText).toBe('Teatro Musical de Cámara');

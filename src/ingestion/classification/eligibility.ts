@@ -1,4 +1,5 @@
-import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer, stripTrailingBiographicalYears } from '../knowledge/composers.ts';
+import { decodeHtmlEntities } from '../html.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
 import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
@@ -1071,7 +1072,7 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
 
   // Several independently identified sonatas are a substantial programme,
   // even when the adapter describes them together under one composer.
-  const multipleConcertWorks = /\b(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
+  const multipleConcertWorks = /(?<![\w/])(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
   const liveMusicians = facts.performers.some((person) =>
     /\b(?:orquesta|orchestra|ensemble|cuarteto|quartet|filarmonica|solista)\b/.test(
       fieldFolded([person.name, person.roleText].filter(Boolean).join(' ')),
@@ -1140,17 +1141,46 @@ const CLASSICAL_WORK_NOUNS = [
  */
 function listedCataloguedProgramme(facts: ObservedFacts, known: string[]): boolean {
   if (known.length === 0) return false;
-  const programme = fieldFolded(facts.programText);
-  if (!programme) return false;
-  const surnames = known
-    .map((name) => foldName(name).split(' ').at(-1) ?? '')
-    .filter((surname) => surname.length >= 4);
-  if (!surnames.some((surname) => hasWord(programme, surname))) return false;
   if (excludedRepertoireSharesTheBill(facts)) return false;
-  const catalogs = programme.match(
-    /\b(?:opus|op|bwv|hwv|rv|jw|woo|hob|kv|sz|swv)\.?\s*(?:[ivxlcdm]+\s*\/\s*)?\d+/g,
-  );
-  return (catalogs?.length ?? 0) >= 2;
+  // Keep entry boundaries: folding the whole field would turn an editorial
+  // repetition of a catalogue number into a second performed work.
+  const entries = decodeHtmlEntities(facts.programText ?? '').split(/\n+|;\s*|(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚ])/u);
+  const titles = new Set<string>();
+  const catalogs = new Set<string>();
+  let composer: string | undefined;
+  for (const entry of entries) {
+    let line = entry.trim();
+    const heading = matchComposer(stripTrailingBiographicalYears(line.replace(/:\s*$/, '')));
+    if (heading) {
+      composer = heading.canonicalName;
+      continue;
+    }
+    const colon = line.indexOf(':');
+    if (colon >= 0) {
+      // An explicit author starts a new group. Unknown authors and labels
+      // cannot borrow the preceding composer's attribution.
+      composer = matchComposer(stripTrailingBiographicalYears(line.slice(0, colon).trim()))?.canonicalName;
+      line = line.slice(colon + 1).trim();
+    }
+    if (!composer) continue;
+    const folded = fieldFolded(line);
+    const references = [...folded.matchAll(/\b(?:opus|op|bwv|hwv|rv|jw|woo|hob|kv|sz|swv)\.?\s*(?:[ivxlcdm]+\s*\/\s*)?\d+(?:[a-z]|\/\d+)?/g)];
+    if (references.length !== 1) {
+      composer = undefined;
+      continue;
+    }
+    const reference = references[0]!;
+    const title = folded.slice(0, reference.index).replace(/[\s,.:–—-]+$/, '');
+    const suffix = folded.slice(reference.index + reference[0].length);
+    if (!/\p{L}/u.test(title) || !/^[\s.,]*(?:\(\d{4}(?:-\d{2,4})?\))?[\s.,]*$/.test(suffix)) continue;
+    if (/^(?:notas?|referencias?|vease|catalogo|comentarios?|ejemplos?|estrenad|nueva produccion|ciclo de canciones)\b/.test(title)) continue;
+    const titleKey = `${composer}|${foldName(title)}`;
+    const catalogKey = `${composer}|${reference[0].replace(/opus/, 'op').replace(/[.\s]/g, '')}`;
+    if (titles.has(titleKey) || catalogs.has(catalogKey)) continue;
+    titles.add(titleKey);
+    catalogs.add(catalogKey);
+  }
+  return titles.size >= 2;
 }
 
 function excludedRepertoireSharesTheBill(facts: ObservedFacts): boolean {
