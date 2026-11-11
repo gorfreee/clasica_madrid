@@ -5,7 +5,11 @@ import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundaciongoethe.org', 'fundaciongoethe.org']);
-const EVENT_PATH = /^\/es\/eventos\/[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+const EVENT_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+const EVENT_YEAR = /^(?:19|20)\d{2}$/;
+const ROUTE_DAY = /^(\d{2})-(\d{2})-(\d{2})(?:-|$)/;
+// The live ficha labels the roster "Aristas". Keep the singular and plural too.
+const ARTIST_LABELS = ['artista', 'artistas', 'aristas'] as const;
 const MONTH_ABBREV: Record<string, string> = {
   ene: 'enero',
   feb: 'febrero',
@@ -23,12 +27,23 @@ const MONTH_ABBREV: Record<string, string> = {
 };
 
 /**
- * Official Spanish `/es/eventos/{slug}` URL. Apex host is rewritten to www.
- * Trailing slashes, hash and tracking params go. German `/de/events/` is not
- * an identity for this adapter.
+ * Official Spanish event URL. Apex host is rewritten to www. Trailing slashes,
+ * hash and tracking params go. Accepts `/es/eventos/{slug}` and
+ * `/es/eventos/{year}/{slug}` when the year is explicit. German `/de/events/`
+ * is not an identity for this adapter.
  */
 export function goetheEventUrl(href: string, base?: string): string | undefined {
-  return goethePathUrl(href, base, (pathname) => EVENT_PATH.test(pathname));
+  return goethePathUrl(href, base, isGoetheEventPath);
+}
+
+export type GoetheListingCard = {
+  city: string;
+  event: RawEvent;
+};
+
+/** True only for the explicit municipality Madrid. Not a default for a missing city. */
+export function goetheCityIsMadrid(city: string): boolean {
+  return normalizeLoose(city) === 'madrid';
 }
 
 export function goetheListingUrl(href: string, base?: string): string | undefined {
@@ -36,33 +51,38 @@ export function goetheListingUrl(href: string, base?: string): string | undefine
 }
 
 export function extractGoetheListing(body: string, url: string, sourceId: string): RawEvent[] {
+  return extractGoetheCards(body, url, sourceId).map((card) => card.event);
+}
+
+export function extractGoetheCards(body: string, url: string, sourceId: string): GoetheListingCard[] {
   assertListingSurface(body, url);
   const upcoming = upcomingList(body);
   if (/\b(?:e-load-more-anchor|data-next-page|page-numbers)\b|rel=["']next["']|\/page\/\d+/i.test(upcoming)) {
     throw new Error('fundacion-goethe: paginación no soportada');
   }
-  const cards = goetheTags(upcoming, 'li');
-  const events: RawEvent[] = [];
+  const blocks = goetheTags(upcoming, 'li');
+  const cards: GoetheListingCard[] = [];
   const seen = new Set<string>();
-  for (const card of cards) {
-    const event = listingCard(card, url, sourceId);
+  for (const block of blocks) {
+    const card = listingCard(block, url, sourceId);
+    const event = card.event;
     if (seen.has(event.sourceUrl) || (event.externalId && seen.has(event.externalId))) {
       throw new Error('fundacion-goethe: tarjeta duplicada');
     }
     seen.add(event.sourceUrl);
     if (event.externalId) seen.add(event.externalId);
-    events.push(event);
+    cards.push(card);
   }
   const headingLinks = [...upcoming.matchAll(/<h2\b[^>]*>[\s\S]*?<a\b[^>]*href=["']([^"']+)["']/gi)]
     .map((item) => goetheEventUrl(item[1]!, url))
     .filter((item): item is string => Boolean(item));
-  if (headingLinks.length !== events.length) {
+  if (headingLinks.length !== cards.length) {
     throw new Error('fundacion-goethe: cobertura distinta de las tarjetas del listado');
   }
-  if (cards.length === 0 && headingLinks.length > 0) {
+  if (blocks.length === 0 && headingLinks.length > 0) {
     throw new Error('fundacion-goethe: cobertura distinta de las tarjetas del listado');
   }
-  return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+  return cards.sort((left, right) => left.event.sourceUrl.localeCompare(right.event.sourceUrl));
 }
 
 export function parseGoetheDetail(event: RawEvent, body: string): ObservedFactPatch {
@@ -81,6 +101,7 @@ export function parseGoetheDetail(event: RawEvent, body: string): ObservedFactPa
   const date = dateText ? parseSpanishCalendarDate(dateText) : undefined;
   if (!dateText || !date) throw new Error('fundacion-goethe: fecha de ficha no reconocible');
   assertListingDateAgrees(event.listingDateText, date);
+  assertDetailMatchesRoute(event.sourceUrl, date);
 
   const doorText = fields.get('apertura de puerta');
   const time = doorText ? startClock(doorText) : undefined;
@@ -98,7 +119,7 @@ export function parseGoetheDetail(event: RawEvent, body: string): ObservedFactPa
   }
   const accessText = bannerAccess(body) || undefined;
   const description = proseDescription(body);
-  const performers = artistNames(fields.get('artista'));
+  const performers = artistNames(artistRoster(fields));
 
   return {
     occurrences: [occurrence],
@@ -110,46 +131,66 @@ export function parseGoetheDetail(event: RawEvent, body: string): ObservedFactPa
   };
 }
 
-function listingCard(card: string, base: string, sourceId: string): RawEvent {
+function listingCard(card: string, base: string, sourceId: string): GoetheListingCard {
   const href = /<h2\b[^>]*>[\s\S]*?<a\b[^>]*href=["']([^"']+)["']/i.exec(card)?.[1];
   const sourceUrl = href ? goetheEventUrl(href, base) : undefined;
   const title = stripTags(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i.exec(card)?.[1] ?? '');
   const dateParts = dateColumnParts(card);
-  const city = stripTags(
-    /<p\b[^>]*text-orange-600[^>]*>([\s\S]*?)<\/p>/i.exec(card)?.[1] ?? '',
-  );
-  const venueText = stripTags(
-    /<p\b[^>]*hidden sm:block text-gray-600[^>]*>([\s\S]*?)<\/p>/i.exec(card)?.[1] ?? '',
-  );
-  const accessText = listingMeta(card, /entrada|invitaci[oó]n|aforo|gratuit/i);
+  const cities = taggedParagraphs(card).filter((paragraph) => paragraph.tokens.has('text-orange-600'));
+  const city = cities.length === 1 ? cities[0] : undefined;
+  const venueText = city?.text ? venueBesideCity(card, city.index) : undefined;
+  const accessText = listingMeta(card, /entrada|invitaci[oó]n|aforo|gratuit|inscripci[oó]n/i);
   const timeText = listingMeta(card, /comienzo\s*:/i);
-  if (!sourceUrl || !title || !dateParts || !city || !venueText) {
+  if (!sourceUrl || !title || !dateParts || !city?.text || !venueText) {
     throw new Error('fundacion-goethe: tarjeta incompleta');
   }
+  assertListingMatchesRoute(sourceUrl, dateParts.day, dateParts.month);
   const listingDateText = [dateParts.day, dateParts.month, timeText].filter(Boolean).join(' ');
-  const externalId = new URL(sourceUrl).pathname.split('/').filter(Boolean).at(-1);
+  const externalId = externalIdFromEventUrl(sourceUrl);
   if (!externalId) throw new Error('fundacion-goethe: tarjeta incompleta');
   return {
-    sourceId,
-    sourceUrl,
-    externalId,
-    listingDateText,
-    observed: {
-      title,
-      venueText,
-      ...(accessText ? { accessText } : {}),
-      occurrences: [],
-      ...emptyObservedLists(),
+    city: city.text,
+    event: {
+      sourceId,
+      sourceUrl,
+      externalId,
+      listingDateText,
+      observed: {
+        title,
+        venueText,
+        ...(accessText ? { accessText } : {}),
+        occurrences: [],
+        ...emptyObservedLists(),
+      },
     },
   };
 }
 
 function dateColumnParts(card: string): { day: string; month: string } | undefined {
-  const column = goetheTag(card, 'div', /w-20 md:w-32 lg:w-40/);
-  if (!column) return undefined;
-  const parts = [...column.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)].map((item) => stripTags(item[1]!));
-  if (parts.length < 3 || !parts[1] || !parts[2]) return undefined;
-  return { day: parts[1], month: parts[2] };
+  const texts = taggedParagraphs(card).map((paragraph) => paragraph.text).filter(Boolean);
+  const pairs: Array<{ day: string; month: string }> = [];
+  for (let index = 0; index < texts.length - 1; index += 1) {
+    const day = texts[index]!;
+    const month = texts[index + 1]!;
+    if (isDayOrdinal(day) && isMonthAbbrev(month)) pairs.push({ day, month });
+  }
+  return pairs.length === 1 ? pairs[0] : undefined;
+}
+
+/**
+ * Venue is the gray paragraph beside the orange city, not a later access line
+ * and not the city itself. Class tokens are a set: `xl:block` vs `sm:block`
+ * and their order do not matter. A missing sibling is incomplete.
+ */
+function venueBesideCity(card: string, cityIndex: number): string | undefined {
+  const start = innermostOpenDiv(card, cityIndex);
+  if (start === undefined) return undefined;
+  const parent = readTag(card.slice(start), 'div');
+  if (!parent) return undefined;
+  const venues = taggedParagraphs(parent).filter(
+    (paragraph) => paragraph.text && paragraph.tokens.has('text-gray-600') && !paragraph.tokens.has('text-orange-600'),
+  );
+  return venues.length === 1 ? venues[0]!.text : undefined;
 }
 
 function listingMeta(card: string, pattern: RegExp): string | undefined {
@@ -203,6 +244,17 @@ function startClock(text: string): string | undefined {
   return parseObservedTime(match[1]!) ?? undefined;
 }
 
+function artistRoster(fields: Map<string, string>): string | undefined {
+  const present = ARTIST_LABELS.flatMap((key) => {
+    const value = fields.get(key);
+    return value ? [value] : [];
+  });
+  if (present.length > 1 && new Set(present.map((value) => normalizeLoose(value))).size > 1) {
+    throw new Error('fundacion-goethe: ficha con intérpretes contradictorios');
+  }
+  return present[0];
+}
+
 function artistNames(text: string | undefined) {
   if (!text) return [];
   return normalizePersonList(
@@ -241,6 +293,110 @@ function listingDayMonth(text: string): string | undefined {
   if (!monthName) return undefined;
   const parsed = parseSpanishCalendarDate(`${match[1]} de ${monthName} de 2000`);
   return parsed ? parsed.slice(5) : undefined;
+}
+
+function assertListingMatchesRoute(sourceUrl: string, day: string, month: string): void {
+  const routed = explicitRouteDate(sourceUrl);
+  if (!routed) return;
+  const hint = listingDayMonth(`${day} ${month}`);
+  if (!hint || hint !== `${routed.month}-${routed.day}`) {
+    throw new Error('fundacion-goethe: fecha de tarjeta distinta de la ruta');
+  }
+}
+
+function assertDetailMatchesRoute(sourceUrl: string, date: string): void {
+  const year = explicitRouteYear(sourceUrl);
+  if (year && date.slice(0, 4) !== year) {
+    throw new Error('fundacion-goethe: año de ficha distinto de la ruta');
+  }
+  const routed = explicitRouteDate(sourceUrl);
+  if (routed && date.slice(5) !== `${routed.month}-${routed.day}`) {
+    throw new Error('fundacion-goethe: fecha de ficha distinta de la ruta');
+  }
+}
+
+function explicitRouteYear(sourceUrl: string): string | undefined {
+  const tail = eventPathTail(sourceUrl);
+  return tail.length === 2 && EVENT_YEAR.test(tail[0]!) ? tail[0] : undefined;
+}
+
+/**
+ * `YY-MM-DD` prefix on the slug is an explicit date. A directory year must
+ * agree with that prefix. Neither one is filled from the clock.
+ */
+function explicitRouteDate(sourceUrl: string): { year?: string; month: string; day: string } | undefined {
+  const tail = eventPathTail(sourceUrl);
+  const slug = tail.at(-1);
+  if (!slug) return undefined;
+  const match = ROUTE_DAY.exec(slug);
+  if (!match) return undefined;
+  const yy = match[1]!;
+  const month = match[2]!;
+  const day = match[3]!;
+  if (Number(month) < 1 || Number(month) > 12 || Number(day) < 1 || Number(day) > 31) {
+    throw new Error('fundacion-goethe: fecha de ruta no reconocible');
+  }
+  const year = tail.length === 2 ? tail[0] : undefined;
+  if (year && (!EVENT_YEAR.test(year) || year.slice(2) !== yy)) {
+    throw new Error('fundacion-goethe: el año de la ruta no coincide con la fecha explícita');
+  }
+  return { ...(year ? { year } : {}), month, day };
+}
+
+function eventPathTail(sourceUrl: string): string[] {
+  const parts = new URL(sourceUrl).pathname.split('/').filter(Boolean);
+  if (parts[0]?.toLowerCase() !== 'es' || parts[1]?.toLowerCase() !== 'eventos') return [];
+  return parts.slice(2);
+}
+
+function externalIdFromEventUrl(sourceUrl: string): string | undefined {
+  const id = eventPathTail(sourceUrl).join('/');
+  return id || undefined;
+}
+
+function isGoetheEventPath(pathname: string): boolean {
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts[0]?.toLowerCase() !== 'es' || parts[1]?.toLowerCase() !== 'eventos') return false;
+  if (parts.length === 3) return isEventSlug(parts[2]!);
+  return parts.length === 4 && EVENT_YEAR.test(parts[2]!) && isEventSlug(parts[3]!);
+}
+
+function isEventSlug(slug: string): boolean {
+  return EVENT_SLUG.test(slug) && /[a-z]/i.test(slug);
+}
+
+function isDayOrdinal(text: string): boolean {
+  return /^\d{1,2}º$/.test(text);
+}
+
+function isMonthAbbrev(text: string): boolean {
+  const key = foldSpanish(text).toLowerCase().replace(/\./g, '').trim();
+  return key.length === 3 && Boolean(MONTH_ABBREV[key]);
+}
+
+type TaggedParagraph = { tokens: Set<string>; text: string; index: number };
+
+function taggedParagraphs(html: string): TaggedParagraph[] {
+  return [...html.matchAll(/<p\b([^>]*)>([\s\S]*?)<\/p>/gi)].map((match) => ({
+    tokens: classTokens(match[1] ?? ''),
+    text: stripTags(match[2] ?? ''),
+    index: match.index ?? 0,
+  }));
+}
+
+function classTokens(attrs: string): Set<string> {
+  const value = /\bclass\s*=\s*["']([^"']*)["']/i.exec(attrs)?.[1] ?? '';
+  return new Set(value.split(/\s+/).filter(Boolean));
+}
+
+function innermostOpenDiv(html: string, childIndex: number): number | undefined {
+  const stack: number[] = [];
+  for (const tag of html.slice(0, childIndex).matchAll(/<\/?div\b[^>]*>/gi)) {
+    if (tag.index === undefined) continue;
+    if (/^<\//.test(tag[0])) stack.pop();
+    else stack.push(tag.index);
+  }
+  return stack.at(-1);
 }
 
 function goethePathUrl(
