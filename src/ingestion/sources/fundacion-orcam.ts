@@ -1,3 +1,4 @@
+import { parseSpanishCalendarDate } from '../dates.ts';
 import { orcamDiv, orcamOccurrence, parseOrcamDetail } from '../detail/fundacion-orcam.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
@@ -26,6 +27,9 @@ export const fundacionOrcamAdapter: SourceAdapter = {
     const counts = monthCounts(main);
     const grid = orcamDiv(main, /<div\b[^>]*data-widget_type=["']loop-grid\.post["'][^>]*>/i);
     if (grid === undefined) throw new Error('fundacion-orcam: falta la cuadrícula de conciertos');
+    // Elementor may set load_more_infinite_scroll and render a spinner even
+    // when every card is already in the document. The month counter is what
+    // proves that. A next link or a load-more anchor is another page.
     if (/\b(?:data-next-page|data-max-page|e-load-more-anchor)\b|rel=["']next["']/i.test(grid)) {
       throw new Error('fundacion-orcam: calendario paginado no soportado');
     }
@@ -40,16 +44,19 @@ export const fundacionOrcamAdapter: SourceAdapter = {
       const titleBlock = orcamDiv(card, /<div\b[^>]*data-widget_type=["']theme-post-title\.default["'][^>]*>/i);
       const title = stripTags(titleBlock ?? '');
       const headings = [...card.matchAll(/<p\b[^>]*class=["'][^"']*\belementor-heading-title\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/gi)].map((m) => stripTags(m[1]!));
-      if (!id || !sourceUrl || !title || headings.length !== 2) throw new Error('fundacion-orcam: tarjeta incompleta');
-      const occurrence = orcamOccurrence(headings[0]!, headings[1]!);
+      if (!id || !sourceUrl || !title) throw new Error('fundacion-orcam: tarjeta incompleta');
+      // One card is one concert for the month counter, even when the card
+      // prints a same-month range. Sessions come only from the ficha.
+      // An unreadable card still fails the listing: it is not dropped to
+      // force the monthly totals to match.
+      const schedule = listingSchedule(headings);
       if (events.has(id) || [...events.values()].some((e) => e.sourceUrl === sourceUrl)) throw new Error('fundacion-orcam: tarjeta duplicada');
-      const month = occurrence.date!.slice(0, 7);
-      actual.set(month, (actual.get(month) ?? 0) + 1);
+      actual.set(schedule.month, (actual.get(schedule.month) ?? 0) + 1);
       // The individual ficha for 4861 still contradicts both the ORCAM
       // season programme and Auditorio Nacional (10 May, Tenerife orchestra).
       // Keep counting the card for coverage, but do not hydrate or reconcile
       // the stale 11 May observation. This expires as soon as ORCAM fixes it.
-      if (id === STALE_FINAL_DEL_VIAJE.externalId && occurrence.date === STALE_FINAL_DEL_VIAJE.date) {
+      if (id === STALE_FINAL_DEL_VIAJE.externalId && schedule.date === STALE_FINAL_DEL_VIAJE.date) {
         reportAdapterDiscard(ctx, {
           reason: 'stale-conflicting-schedule',
           title,
@@ -61,10 +68,10 @@ export const fundacionOrcamAdapter: SourceAdapter = {
       const category = orcamDiv(card, /<div\b[^>]*data-widget_type=["']post-info\.default["'][^>]*>/i);
       events.set(id, {
         sourceId: ctx.source.id, sourceUrl, externalId: id,
-        listingDateText: occurrence.raw,
+        listingDateText: schedule.listingDateText,
         // Like March, keep the listing date as a hint until the ficha verifies
-        // schedule + venue. Failed hydration must not update a published date
-        // from a potentially stale card or invent a venue for a new event.
+        // schedule + venue. A range is not a session. Failed hydration must
+        // not update a published date from a card or invent a venue.
         observed: { title, occurrences: [], categoryText: stripTags(category ?? '') || undefined, ...emptyObservedLists() },
       });
     }
@@ -78,6 +85,29 @@ export const fundacionOrcamAdapter: SourceAdapter = {
   },
   hydrate: parseOrcamDetail,
 };
+
+/** Dated card, or a same-month range used only as a hydration hint. */
+function listingSchedule(headings: string[]): { listingDateText: string; month: string; date?: string } {
+  if (headings.length === 2) {
+    const occurrence = orcamOccurrence(headings[0]!, headings[1]!);
+    return { listingDateText: occurrence.raw, month: occurrence.date!.slice(0, 7), date: occurrence.date };
+  }
+  if (headings.length === 1) {
+    const month = sameMonthRange(headings[0]!);
+    if (month) return { listingDateText: headings[0]!, month };
+  }
+  throw new Error('fundacion-orcam: tarjeta incompleta');
+}
+
+/** `5 y 6 de diciembre de 2026`: one concert in that month, not two sessions. */
+function sameMonthRange(text: string): string | undefined {
+  const match = /^(\d{1,2}) y (\d{1,2}) de ([a-záéíóú]+) de (\d{4})$/i.exec(text);
+  if (!match) return undefined;
+  const start = parseSpanishCalendarDate(`${match[1]} de ${match[3]} de ${match[4]}`);
+  const end = parseSpanishCalendarDate(`${match[2]} de ${match[3]} de ${match[4]}`);
+  if (!start || !end || start >= end || start.slice(0, 7) !== end.slice(0, 7)) return undefined;
+  return start.slice(0, 7);
+}
 
 function monthCounts(html: string): Map<string, number> {
   for (const match of html.matchAll(/data-search-filter-settings=["']([^"']+)["']/gi)) {
