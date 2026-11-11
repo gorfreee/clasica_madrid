@@ -39,10 +39,13 @@ const ctx: AdapterContext = {
 async function pages(url: string): Promise<string> {
   if (url === listingUrl) return fixture('listing');
   const key = url.replace(/\/+$/, '');
-  if (key !== 'https://www.fundaciongoethe.org/es/eventos/concierto-cantus-juvenum-madrid-2026') {
-    throw new Error(`no debe hidratar fuera de Madrid: ${url}`);
-  }
-  return fixture('detail-cantus');
+  const name = {
+    'concierto-cantus-juvenum-madrid-2026': 'detail-cantus',
+    'concierto-piano-jose-antonio-candel-barcelona-2026': 'detail-candel',
+    'concierto-organo-robert-schulz-el-escorial-2026': 'detail-schulz',
+  }[key.split('/').at(-1)!];
+  if (!name) throw new Error(`URL no mapeada: ${url}`);
+  return fixture(name);
 }
 
 async function sample(id = 'concierto-cantus-juvenum-madrid-2026') {
@@ -84,12 +87,8 @@ describe('Fundación Goethe listing', () => {
       ...ctx,
       reportDiscard: (discard) => discards.push(discard),
     });
-    expect(kept.map((event) => event.externalId)).toEqual(['concierto-cantus-juvenum-madrid-2026']);
-    expect(discards.map((item) => item.externalId)).toEqual([
-      'concierto-organo-robert-schulz-el-escorial-2026',
-      'concierto-piano-jose-antonio-candel-barcelona-2026',
-    ]);
-    expect(discards.every((item) => item.reason === 'city-outside-madrid')).toBe(true);
+    expect(kept.map((event) => event.externalId)).toEqual(events.map((event) => event.externalId));
+    expect(discards).toEqual([]);
     expect(adapter.requiresDetailSchedule).toBe(true);
     expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBeFalsy();
@@ -254,9 +253,8 @@ describe('Fundación Goethe pipeline safety', () => {
 
     const first = await run();
     expect(first.summary.sourcesFailed).toEqual([]);
-    expect(first.rawEvents).toHaveLength(1);
-    expect(first.adapterDiscards).toHaveLength(2);
-    expect(first.adapterDiscards.every((item) => item.reason === 'city-outside-madrid')).toBe(true);
+    expect(first.rawEvents).toHaveLength(3);
+    expect(first.adapterDiscards).toEqual([]);
     expect(first.summary.candidates).toBe(1);
     expect(first.summary.possiblyMissing).toBe(0);
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
@@ -275,6 +273,25 @@ describe('Fundación Goethe pipeline safety', () => {
     expect(second.summary.updatedEvents).toBe(0);
     expect(second.summary.unchangedEvents).toBe(1);
     expect(second.summary.possiblyMissing).toBe(0);
+  });
+
+  it('publishes a nearby concert through its catalog venue and still skips Barcelona', async () => {
+    const catalog = emptyCatalog();
+    catalog.venues = [JSON.parse(await readFile(path.join(import.meta.dirname,
+      '../data/venues/ven_real_monasterio_san_lorenzo_escorial.json'), 'utf8'))];
+    const first = await run(catalog);
+    expect(first.summary.sourcesFailed).toEqual([]);
+    const organ = first.candidates.find((candidate) => candidate.event.citations.some((citation) => citation.externalId?.includes('organo')));
+    expect(organ?.event).toMatchObject({
+      venueId: 'ven_real_monasterio_san_lorenzo_escorial',
+      occurrences: [{ date: '2026-09-26', time: '20:00' }],
+    });
+    expect(first.candidates).toHaveLength(2);
+    expect(first.candidates.some((candidate) => candidate.event.citations.some((citation) => citation.url.includes('barcelona')))).toBe(false);
+    const second = await run(mergeCandidateBatch(catalog, first.candidates).catalog);
+    expect(second.summary.newEvents).toBe(0);
+    expect(second.summary.updatedEvents).toBe(0);
+    expect(second.summary.unchangedEvents).toBe(2);
   });
 
   it('matches the already published concert by URL without duplicating or renaming it', async () => {
@@ -495,35 +512,22 @@ describe('Fundación Goethe current listing', () => {
     expect(() => extractGoetheCards(crossed, listingUrl, source.id)).toThrow(/año de la ruta no coincide/);
   });
 
-  it('hydrates both Madrid fichas and discards the other cities without borrowing a Madrid venue', async () => {
+  it('keeps all municipalities for venue resolution without borrowing a Madrid venue', async () => {
     const html = await fixture('listing-current');
     const discards: AdapterDiscardReport[] = [];
     const kept = adapter.extract(html, listingUrl, {
       ...ctx,
       reportDiscard: (discard) => discards.push(discard),
     });
-    expect(kept.map((event) => event.externalId)).toEqual([
-      'ampliacion-linea-11-metro-madrid-herrenknecht-2026',
-      'concierto-adviento-madrid-2026',
-    ]);
-    expect(kept.map((event) => event.observed.venueText)).toEqual([
-      'Herrenknecht',
-      'Basilica Parroquia La Milagrosa',
-    ]);
-    expect(discards.map((item) => item.externalId)).toEqual([
-      'concierto-adviento-alicante-2026',
-      'concierto-adviento-barcelona-2026',
-      'concierto-adviento-malaga-2026',
-      'concierto-adviento-sevilla-2026',
-    ]);
-    expect(discards.every((item) => item.reason === 'city-outside-madrid')).toBe(true);
+    expect(kept.map((event) => event.externalId)).toEqual(CURRENT_CARDS.map((card) => card.externalId).sort());
+    expect(discards).toEqual([]);
     expect(matchVenue({ venueText: 'Herrenknecht', sourceId: source.id }, emptyCatalog())).toBeUndefined();
     expect(matchVenue({ venueText: 'Basilica Parroquia La Milagrosa', sourceId: source.id }, emptyCatalog())).toBeUndefined();
     expect(matchVenue({ venueText: 'ADDA Sinfónica', sourceId: source.id }, emptyCatalog())).toBeUndefined();
     expect(matchVenue({ venueText: 'La Caja Blanca', sourceId: source.id }, emptyCatalog())).toBeUndefined();
 
-    const visit = kept[0]!;
-    const advent = kept[1]!;
+    const visit = kept.find((event) => event.externalId === 'ampliacion-linea-11-metro-madrid-herrenknecht-2026')!;
+    const advent = kept.find((event) => event.externalId === 'concierto-adviento-madrid-2026')!;
     expect(parseGoetheDetail(visit, await fixture('detail-herrenknecht'))).toMatchObject({
       venueText: 'Herrenknecht',
       occurrences: [{ raw: 'Martes, 17 de noviembre de 2026 Comienzo 09:15', date: '2026-11-17', time: '09:15' }],
@@ -627,35 +631,34 @@ describe('Fundación Goethe current listing', () => {
         if (url === 'https://www.fundaciongoethe.org/es/eventos/concierto-adviento-madrid-2026') {
           return fixture('detail-adviento-madrid');
         }
-        throw new Error(`no debe hidratar fuera de Madrid: ${url}`);
+        // Synthetic detail controls for the other cities, using their listing
+        // identities. These are not claimed to be official detail captures.
+        const card = CURRENT_CARDS.find((item) => url.endsWith(`/${item.externalId}`));
+        if (!card) throw new Error(`URL no mapeada: ${url}`);
+        const hint = /^(\d+)º (nov|dic)\. Comienzo: (\d{2}:\d{2})$/.exec(card.listingDateText)!;
+        return `<html><head><link rel="canonical" href="${url}"></head><body><h1>${card.title}</h1><dl>
+          <dt>Fecha</dt><dd>${hint[1]} de ${hint[2] === 'nov' ? 'noviembre' : 'diciembre'} de 2026</dd>
+          <dt>Apertura de puerta</dt><dd>Comienzo ${hint[3]}</dd>
+          <dt>Lugar</dt><dd>${card.venueText}</dd></dl></body></html>`;
       },
     });
     expect(result.summary.sourcesFailed).toEqual([]);
-    expect(result.rawEvents.map((event) => event.externalId)).toEqual([
-      'ampliacion-linea-11-metro-madrid-herrenknecht-2026',
-      'concierto-adviento-madrid-2026',
-    ]);
-    expect(result.rawEvents.map((event) => event.observed.venueText)).toEqual([
+    expect(result.rawEvents.map((event) => event.externalId)).toEqual(CURRENT_CARDS.map((card) => card.externalId).sort());
+    const madridEvents = result.rawEvents.filter((event) => event.externalId?.includes('madrid'));
+    expect(madridEvents.map((event) => event.observed.venueText)).toEqual([
       'Herrenknecht',
       'Basilica Parroquia La Milagrosa',
     ]);
-    expect(result.rawEvents[0]?.observed.occurrences).toEqual([
+    expect(madridEvents[0]?.observed.occurrences).toEqual([
       { raw: 'Martes, 17 de noviembre de 2026 Comienzo 09:15', date: '2026-11-17', time: '09:15' },
     ]);
-    expect(result.rawEvents[1]?.observed.occurrences).toEqual([
+    expect(madridEvents[1]?.observed.occurrences).toEqual([
       { raw: 'Miércoles, 2 de diciembre de 2026 Comienzo 21:00', date: '2026-12-02', time: '21:00' },
     ]);
-    expect(result.adapterDiscards.map((item) => item.externalId)).toEqual([
-      'concierto-adviento-alicante-2026',
-      'concierto-adviento-barcelona-2026',
-      'concierto-adviento-malaga-2026',
-      'concierto-adviento-sevilla-2026',
-    ]);
+    expect(result.adapterDiscards).toEqual([]);
     expect(result.summary.candidates).toBe(0);
     expect(result.candidates).toEqual([]);
-    expect(result.decisions.map((decision) => decision.structuralSkip)).toEqual([
-      { reason: 'lugar no reconocido' },
-      { reason: 'lugar no reconocido' },
-    ]);
+    expect(result.decisions).toHaveLength(6);
+    expect(result.decisions.every((decision) => decision.structuralSkip?.reason === 'lugar no reconocido')).toBe(true);
   });
 });

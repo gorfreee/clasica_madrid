@@ -1,5 +1,5 @@
-import { extractGoetheCards, goetheCityIsMadrid, goetheListingUrl, parseGoetheDetail } from '../detail/fundacion-goethe.ts';
-import { reportAdapterDiscard, type RawEvent, type SourceAdapter } from '../types.ts';
+import { extractGoetheListing, goetheListingUrl, parseGoetheDetail } from '../detail/fundacion-goethe.ts';
+import type { SourceAdapter } from '../types.ts';
 
 export const fundacionGoetheAdapter: SourceAdapter = {
   id: 'fundacion-goethe',
@@ -15,20 +15,9 @@ export const fundacionGoetheAdapter: SourceAdapter = {
     return [url];
   },
   extract(body, url, ctx) {
-    const kept: RawEvent[] = [];
-    for (const card of extractGoetheCards(body, url, ctx.source.id)) {
-      if (!goetheCityIsMadrid(card.city)) {
-        reportAdapterDiscard(ctx, {
-          reason: 'city-outside-madrid',
-          title: card.event.observed.title,
-          sourceUrl: card.event.sourceUrl,
-          ...(card.event.externalId ? { externalId: card.event.externalId } : {}),
-        });
-        continue;
-      }
-      kept.push(card.event);
-    }
-    return kept;
+    // Venue resolution uses the catalog's Madrid/nearby scope after hydration.
+    // A municipality different from Madrid is not evidence of being outside it.
+    return extractGoetheListing(body, url, ctx.source.id);
   },
   hydrate: parseGoetheDetail,
 };

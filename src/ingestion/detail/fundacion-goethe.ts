@@ -41,11 +41,6 @@ export type GoetheListingCard = {
   event: RawEvent;
 };
 
-/** True only for the explicit municipality Madrid. Not a default for a missing city. */
-export function goetheCityIsMadrid(city: string): boolean {
-  return normalizeLoose(city) === 'madrid';
-}
-
 export function goetheListingUrl(href: string, base?: string): string | undefined {
   return goethePathUrl(href, base, (pathname) => pathname === '/es/eventos');
 }

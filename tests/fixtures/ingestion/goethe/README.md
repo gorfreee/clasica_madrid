@@ -33,3 +33,11 @@ pages.
 - `detail-herrenknecht.html`: https://www.fundaciongoethe.org/es/eventos/ampliacion-linea-11-metro-madrid-herrenknecht-2026/
 - `detail-adviento-madrid.html`: https://www.fundaciongoethe.org/es/eventos/concierto-adviento-madrid-2026/
   (the roster is labelled `Aristas` on the ficha)
+
+Municipality is observed metadata, not a Madrid-capital allowlist. All cards
+reach hydration and the shared catalog venue resolver. The historical Schulz
+capture verifies that an existing `nearby` venue in El Escorial remains eligible;
+Barcelona and the other unrecognized venues are not assigned a Madrid venue.
+The current-listing pipeline test uses explicitly synthetic sidebar controls
+for foreign detail pages that were not captured; these controls are not live
+source evidence.
