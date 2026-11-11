@@ -416,12 +416,22 @@ function isLiveMusicalPerformer(item: { name: string; roleText?: string }): bool
     hasPhrase(name, 'banda sinfonica') ||
     hasPhrase(name, 'banda de musica') ||
     hasWord(name, 'coro') ||
+    // A named quartet, quintet or trio is the musical cast. A dance company
+    // that also contains "ensemble" or "ballet" already returned false above.
+    hasWord(name, 'cuarteto') ||
+    hasWord(name, 'quinteto') ||
+    hasWord(name, 'trio') ||
+    hasWord(name, 'quartet') ||
+    hasWord(name, 'quintet') ||
     hasWord(role, 'orquesta') ||
     hasWord(role, 'orchestra') ||
     hasWord(role, 'orquestra') ||
     hasWord(role, 'ensemble') ||
     hasWord(role, 'coro') ||
     hasWord(role, 'choir') ||
+    hasWord(role, 'cuarteto') ||
+    hasWord(role, 'quinteto') ||
+    hasWord(role, 'trio') ||
     hasWord(role, 'piano') ||
     hasWord(role, 'violin') ||
     hasWord(role, 'viola') ||
@@ -1068,6 +1078,11 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
     ));
   if (structuredBlock || textualBlock || describedProgrammeBlock ||
     (multipleConcertWorks && known.length > 0 && liveMusicians)) return true;
+  // Several catalogued works listed in the programme are that programme.
+  // One citation, or the same listing beside pop, film, jazz, flamenco or
+  // songbook repertoire, is not. A separated classical half stays on
+  // classicalFirstHalf, including when this gate declines.
+  if (listedCataloguedProgramme(facts, known)) return true;
   const haystack = identityHaystack(facts);
   // Organ accompaniment alone is not a block of classical repertoire.
   // A concert presenting improvisation over a film is a musical performance.
@@ -1116,6 +1131,41 @@ const CLASSICAL_WORK_NOUNS = [
   'motete',
   'magnificat',
 ];
+
+/**
+ * The programme itself lists at least two catalogued works of a known
+ * composer. Dance sharing the bill does not remove that listing. Pop, film,
+ * jazz, flamenco, DJ and songbook repertoire does: an arrangement or a
+ * citation inside that bill is not an autonomous block.
+ */
+function listedCataloguedProgramme(facts: ObservedFacts, known: string[]): boolean {
+  if (known.length === 0) return false;
+  const programme = fieldFolded(facts.programText);
+  if (!programme) return false;
+  const surnames = known
+    .map((name) => foldName(name).split(' ').at(-1) ?? '')
+    .filter((surname) => surname.length >= 4);
+  if (!surnames.some((surname) => hasWord(programme, surname))) return false;
+  if (excludedRepertoireSharesTheBill(facts)) return false;
+  const catalogs = programme.match(
+    /\b(?:opus|op|bwv|hwv|rv|jw|woo|hob|kv|sz|swv)\.?\s*(?:[ivxlcdm]+\s*\/\s*)?\d+/g,
+  );
+  return (catalogs?.length ?? 0) >= 2;
+}
+
+function excludedRepertoireSharesTheBill(facts: ObservedFacts): boolean {
+  if (repertoireExclusionEvidence(facts, popularSongbookRepertoire).length > 0) return true;
+  if (repertoireExclusionEvidence(facts, (text) =>
+    /\b(?:abba|queen|beatles|broadway)\b/.test(
+      text.replace(/\bqueen of (?:the )?night\b|\babba pater\b/g, ' '),
+    )
+    || /\b(?:bandas? sonoras?|musica (?:de|para el) cine|film music)\b/.test(text)
+    || /\b(?:homenaje|tributo)\b.*\b(?:hans zimmer|john williams|ennio morricone)\b/.test(text)
+  ).length > 0) return true;
+  const haystack = identityHaystack(facts);
+  if (hasWord(haystack, 'jazz') || hasWord(haystack, 'dj')) return true;
+  return hasMusicalFlamencoIdentity(facts, haystack);
+}
 
 function explicitListedClassicalWork(facts: ObservedFacts, known: string[]): boolean {
   const program = fieldFolded(facts.programText);

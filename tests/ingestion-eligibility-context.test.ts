@@ -3,7 +3,16 @@ import { describe, expect, it, vi } from 'vitest';
 import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import { evaluateEligibilityAi } from '../src/ingestion/classification/eligibility-grounding.ts';
+import { findKnownComposersInText } from '../src/ingestion/knowledge/composers.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
+
+const run43056214891 = JSON.parse(readFileSync(new URL(
+  './fixtures/ingestion/eligibility-context/run-43056214891.json', import.meta.url,
+), 'utf8')) as Array<{
+  sourceUrl: string;
+  observed: ObservedFacts;
+  originalDecision: { value: string; ruleId: string };
+}>;
 
 const originals = JSON.parse(readFileSync(new URL(
   './fixtures/ingestion/eligibility-context/run-39603845469.json', import.meta.url,
@@ -23,22 +32,22 @@ describe('eligibility: observaciones originales del run 39603845469', () => {
     const result = resolveEligibility(row.observed);
     expect(result.value).not.toBe('exclude');
     // The original observation is used verbatim, without the curated data/**.
-    if (/lucia-iglesias|donde-nace-la-voz/.test(row.sourceUrl) || row.observed.title === 'Todo Chapí') {
+    if (
+      /lucia-iglesias|donde-nace-la-voz|xxxi-concierto-navidad/.test(row.sourceUrl)
+      || row.observed.title === 'Todo Chapí'
+    ) {
       expect(result.value).toBe('include');
     } else {
       expect(result.value).toBe('uncertain');
     }
   });
 
-  it('documenta el límite de reconocimiento de Cofares y aísla la corrección de mixtos', () => {
+  it('reconoce el concierto de Cofares aunque el crédito diga Rachmaninov.-', () => {
     const original = originals.find((row) => row.sourceUrl.endsWith('xxxi-concierto-navidad'))!.observed;
     expect(original.composers).toEqual([]);
+    expect(original.works).toEqual([]);
     expect(original.programText).toContain('Piano Rachmaninov.- Concierto para piano núm 3');
     expect(resolveEligibility(original)).toMatchObject({
-      value: 'uncertain', ruleId: 'classical-and-nonclassical-coprincipal',
-    });
-    // Diagnostic variant: the observed composer is structured, not a curated catalogue input.
-    expect(resolveEligibility({ ...original, composers: [{ name: 'Rachmaninov' }] })).toMatchObject({
       value: 'include', ruleId: 'mixed-program-classical-block',
     });
   });
@@ -201,5 +210,126 @@ describe('actividad principal frente a contexto', () => {
     expect(evaluateEligibilityAi(fso, {
       eligibility: 'include', evidence: ['OBERTURA 1812'],
     }, resolveEligibility(fso))).toMatchObject({ accepted: false, ruleId: 'ai-coprincipal-without-classical-block' });
+  });
+});
+
+describe('run 43056214891: danza secundaria frente a ballet principal', () => {
+  const janacek = run43056214891.find((row) => row.sourceUrl.includes('diario-desaparecido'))!;
+
+  it('no excluye el ciclo de Janáček por el ensemble del ballet', () => {
+    expect(janacek.originalDecision).toEqual({ value: 'exclude', ruleId: 'dance-spectacle' });
+    expect(janacek.observed.categoryText).toBe('Teatro Musical de Cámara');
+    expect(janacek.observed.performers).toContainEqual({ name: 'Ensemble del Ballet del Teatro Nacional de Brno' });
+    expect(janacek.observed.performers).toContainEqual({ name: 'Cuarteto Seikilos' });
+    expect(janacek.observed.programText).toContain('JW VII/13');
+    expect(janacek.observed.composers).toEqual([]);
+    expect(janacek.observed.works).toEqual([]);
+    expect(resolveEligibility(janacek.observed)).toMatchObject({
+      value: 'include', ruleId: 'mixed-program-classical-block',
+    });
+  });
+
+  it('un ballet principal sigue excluido aunque haya cuarteto y obras catalogadas', () => {
+    expect(resolveEligibility(facts({
+      title: 'Gala de ballet',
+      categoryText: 'Danza',
+      performers: [
+        { name: 'Cuarteto Seikilos' },
+        { name: 'Compañía Nacional de Ballet' },
+      ],
+      programText: 'Piotr Ilich Chaikovski: El lago de los cisnes, op. 20. Igor Stravinski: El pájaro de fuego, op. 4.',
+    }))).toMatchObject({ value: 'exclude', ruleId: 'dance-spectacle' });
+  });
+
+  it('una compañía de ballet sin intérprete musical no se publica por el compositor citado', () => {
+    const withoutQuartet = {
+      ...janacek.observed,
+      performers: janacek.observed.performers.filter((person) => person.name !== 'Cuarteto Seikilos'),
+    };
+    expect(resolveEligibility(withoutQuartet)).toMatchObject({
+      value: 'exclude', ruleId: 'dance-spectacle',
+    });
+  });
+
+  it('un solo número de catálogo con danza en el reparto no es un bloque', () => {
+    const oneWork = facts({
+      title: 'Diario de un desaparecido',
+      categoryText: 'Teatro Musical de Cámara',
+      performers: [
+        { name: 'Cuarteto Seikilos' },
+        { name: 'Ensemble del Ballet del Teatro Nacional de Brno' },
+      ],
+      programText: 'Leoš Janáček: Cuarteto de cuerda nº 2, JW VII/13.',
+    });
+    const deterministic = resolveEligibility(oneWork);
+    expect(deterministic).toMatchObject({
+      value: 'uncertain', ruleId: 'classical-and-nonclassical-coprincipal',
+    });
+    expect(evaluateEligibilityAi(oneWork, {
+      eligibility: 'include',
+      evidence: ['Leoš Janáček: Cuarteto de cuerda nº 2, JW VII/13.'],
+    }, deterministic)).toMatchObject({
+      accepted: false, ruleId: 'ai-coprincipal-without-classical-block',
+    });
+  });
+});
+
+describe('run 43056214891: primera parte clásica con la grafía Rachmaninov.-', () => {
+  const cofares = run43056214891.find((row) => row.sourceUrl.endsWith('xxxi-concierto-navidad'))!;
+
+  it('incluye el concierto para piano y no la segunda parte popular', () => {
+    expect(cofares.originalDecision).toEqual({
+      value: 'uncertain', ruleId: 'ai-coprincipal-without-classical-block',
+    });
+    expect(cofares.observed.composers).toEqual([]);
+    expect(cofares.observed.works).toEqual([]);
+    expect(cofares.observed.performers).toEqual([]);
+    expect(cofares.observed.programText).toContain('Piano Rachmaninov.- Concierto para piano núm 3');
+    expect(cofares.observed.programText).toContain('ABBA');
+    expect(findKnownComposersInText(cofares.observed.programText ?? '')
+      .map((item) => item.canonicalName)).toEqual(['Serguéi Rajmáninov']);
+    expect(resolveEligibility(cofares.observed)).toMatchObject({
+      value: 'include', ruleId: 'mixed-program-classical-block',
+    });
+  });
+
+  it('no lee Piano Rachmaninov como compositor si no sigue una obra de concierto', () => {
+    expect(findKnownComposersInText('Nicolas Varela, Piano Rachmaninov')).toEqual([]);
+    expect(findKnownComposersInText('Ana Rachmaninov.- Concierto para piano núm 3')).toEqual([]);
+    expect(findKnownComposersInText('Nicolas Varela, Piano Rachmaninov.- Concierto para piano núm 3')
+      .map((item) => item.canonicalName)).toEqual(['Serguéi Rajmáninov']);
+  });
+
+  it('un tributo popular con cita o arreglo clásico sigue fuera', () => {
+    for (const programText of [
+      'ABBA: Dancing Queen. Queen: Bohemian Rhapsody. Arreglo de Rachmaninov.',
+      'ABBA: Dancing Queen. Piano Rachmaninov.',
+      'Canciones del Great American Songbook. Rachmaninov.- Concierto para piano núm 3.',
+    ]) {
+      expect(resolveEligibility(facts({
+        title: 'Tributo pop',
+        programText,
+        performers: [{ name: 'Orquesta Clásica Santa Cecilia', roleText: 'orquesta' }],
+      })), programText).toMatchObject({ value: 'exclude', ruleId: 'popular-music-identity' });
+    }
+  });
+
+  it('mantiene songbook, jazz, flamenco y la evidencia insuficiente', () => {
+    expect(resolveEligibility(facts({
+      title: 'The Art of Love',
+      description: 'Canciones del Great American Songbook.',
+      composers: [{ name: 'George Gershwin' }, { name: 'Kurt Weill' }],
+    }))).toMatchObject({ value: 'exclude', ruleId: 'popular-music-identity' });
+    expect(resolveEligibility(facts({
+      title: 'Noche de jazz',
+      programText: 'Johann Sebastian Bach: Suite BWV 1007. Ludwig van Beethoven: Sonata op. 27.',
+    }))).toMatchObject({ value: 'exclude', ruleId: 'jazz-identity' });
+    expect(resolveEligibility(facts({
+      title: 'Gala de jóvenes flamencos',
+      programText: 'Johann Sebastian Bach: Suite BWV 1007. Manuel de Falla: El amor brujo, op. 2.',
+    }))).toMatchObject({ value: 'exclude', ruleId: 'flamenco-identity' });
+    expect(resolveEligibility(facts({ title: 'Concierto de Navidad' }))).toMatchObject({
+      value: 'uncertain', ruleId: 'insufficient-evidence',
+    });
   });
 });

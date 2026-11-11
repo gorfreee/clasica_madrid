@@ -2647,6 +2647,17 @@ function isInstitutionNamePrefix(prefix: string): boolean {
   return words.every((word) => /^(?:municipal|superior|profesional|nacional|real|cultural|de|del|la|las|los|musica|danza)$/iu.test(word) || /^\p{Lu}[\p{L}’'.-]*$/u.test(word) || COMPOSER_NAME_TOKENS.has(foldName(word)));
 }
 
+function isPerformerRoleToken(token: string): boolean {
+  const folded = token.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  return /^(?:piano|pianista|violin|violinista|viola|violonchelo|chelo|cello|violoncello|director|directora|soprano|tenor|baritono|mezzosoprano|mezzo|contralto|organo|organista|flauta|clarinete|oboe|fagot|trompa|arpa|clave|clavecin|solista)$/.test(folded);
+}
+
+/** Concert-work heading after a credit, allowing ".-", ":", "." or a dash. */
+function concertWorkFollowsCredit(after: string): boolean {
+  const rest = after.replace(/^(?:[\s.:=;\-–—])+/, '');
+  return /^(?:misa|motete|cantata|sonata|sinfonia|sinfonias|suite|concierto|conciertos|concerto|cuarteto|quinteto|oratorio|obertura|preludio|nocturno|partita|pasion|requiem|toccata|fuga)\b/i.test(rest);
+}
+
 function isPersonalSurnameMention(
   text: string, start: number, end: number, context: 'program' | 'narrative',
 ): boolean {
@@ -2660,7 +2671,18 @@ function isPersonalSurnameMention(
     || /\b(?:concierto|sinfonia|sonata|misa|suite|cantata)\b[^;\n]*\bde\s+(?:[A-Z]\.\s*)?$/i.test(before);
   const previousName = /\b([A-Z][a-z]+|[A-Z]{2,})\s+$/u.exec(before)?.[1];
   const nextName = /^[ \t]+([A-Z][a-z]+|[A-Z]{2,})\b/u.exec(after)?.[1];
-  if (previousName && !matchComposer(previousName) && !/^(?:de|el|la|por|con|y|obras?|musica|repertorio|programa|piezas?)$/i.test(previousName)) return true;
+  // "Piano Rachmaninov.- Concierto…" is a flattened credit plus a work, not
+  // the given name Piano. A real given name, or a role with no concert work
+  // after the surname, stays a personal credit.
+  const roleThenConcertWork = previousName !== undefined
+    && isPerformerRoleToken(previousName)
+    && concertWorkFollowsCredit(after);
+  if (
+    previousName
+    && !roleThenConcertWork
+    && !matchComposer(previousName)
+    && !/^(?:de|el|la|por|con|y|obras?|musica|repertorio|programa|piezas?)$/i.test(previousName)
+  ) return true;
   const programWorkHeading = context === 'program' && /^(?:misa|motete|cantata|sonata|sinfonia|suite|concierto|nocturno)$/i.test(nextName ?? '');
   if (nextName && !matchComposer(nextName) && !programWorkHeading) return true;
   if (context === 'narrative') {

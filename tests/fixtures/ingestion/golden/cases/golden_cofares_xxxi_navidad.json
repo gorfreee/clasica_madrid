@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cofares_xxxi_navidad",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad",
+  "listingTitle": "XXXI Concierto de Navidad",
+  "observed": {
+    "title": "XXXI Concierto de Navidad",
+    "description": "Presentado por: FUNDACIÓN COFARES",
+    "categoryText": "También en el Real",
+    "venueText": "Sala Principal",
+    "organizerText": "Fundación COFARES",
+    "programText": "Presentado por: FUNDACIÓN COFARES PROGRAMA MUSICAL DEL XXXI CONCIERTO DE NAVIDAD DE LA FUNDACIÓN COFARES Primera Parte Orquesta Clásica Santa Cecilia Director Kynan Johns Nicolas Varela, Piano Rachmaninov.- Concierto para piano núm 3 Segunda parte DÉLICA ABBA QUEEN BEATLES Queen - Somebody to love Abba - Money, money money; gimme, gimme,gimme; Mamma Mia Queen - Crazy little thing called love Beatles - Come together, Let it be Beatles - Yesterday Abba - The winner takes it all Scorpions - Still loving you Queen - Bohemian Rapsody Queen - Show must go on Beatles - Hey Jude Queen - We are the champions Abba - Dancing Queen",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [],
+    "eras": [
+      "romantic"
+    ],
+    "kind": "alternative",
+    "access": "unknown"
+  },
+  "reason": "Primera parte autónoma: Rachmaninov, Concierto para piano núm. 3, con la grafía aplanada «Piano Rachmaninov.-». La segunda parte (ABBA, Queen, Beatles) no borra ese bloque. No basta el nombre del Teatro Real ni la orquesta.",
+  "notes": "Observación literal del run 43056214891 (artifact 13872362925, commit b05b75a). Antes: uncertain / ai-coprincipal-without-classical-block. venueText es solo «Sala Principal», así que kind no se infiere de la source. performers[] y composers[] llegaron vacíos. No es un evento de data/**.",
+  "checkedAt": "2026-11-11"
+}

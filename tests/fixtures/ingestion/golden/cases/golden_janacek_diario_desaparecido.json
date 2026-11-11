@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_janacek_diario_desaparecido",
+  "origin": "phase1-smoke",
+  "sourceId": "fundacion-juan-march",
+  "sourceUrl": "https://www.march.es/es/madrid/concierto/diario-desaparecido-leos-janacek",
+  "listingTitle": "Diario de un desaparecido de Leoš Janáček",
+  "observed": {
+    "title": "Diario de un desaparecido de Leoš Janáček",
+    "description": "Leoš Janáček concibió su ciclo de canciones Diario de un desaparecido con una marcada intencionalidad escénica. Estrenado en 1921 en Brno —epicentro vital de su última etapa creativa—, comparte con su Cuarteto nº 2 “Cartas íntimas”, un mismo trasfondo autobiográfico: ambas obras nacen de la intensa relación platónica que mantuvo con Kamila Stösslová, casi cuarenta años más joven que él. A la poderosa narración del Diario se suma así una partitura instrumental que, aun sin palabras, sugiere una trama latente, aquí trasladada escénicamente por medio de la coreografía. La música entrelaza lo cantado y lo sugerido en un relato continuo que convierte en drama íntimo la escritura privada del diario y la correspondencia entre los amantes. Este proyecto hispano-checo supone, además, la primera coproducción del formato Teatro Musical de Cámara con otra institución europea.",
+    "categoryText": "Teatro Musical de Cámara",
+    "venueText": "Fundación Juan March | Madrid",
+    "organizerText": "Fundación Juan March | Madrid",
+    "accessText": "entrada libre y gratuita",
+    "programText": "Leo&scaron; Janáček (1854-1928)\nCuarteto de cuerda n&ordm; 2 &ldquo;Cartas íntimas&rdquo; , JW VII/13\nÁlbum para Kamila Stösslová , JW VIII/33\nDiario de un desaparecido , JW V/12\nCiclo de canciones de Leo&scaron; Janáček (1854-1928), basado en poemas de Ozef Kalda (1871-1921)\nEstrenado en versión de concierto en el Teatro Reduta de Brno el 18 de abril de 1921 y en versión escénica en Liubliana el 28 de octubre de 1926\nNueva producción de la Fundacion Juan March, el Auditorio de Tenerife y el Ballet del Teatro Nacional de Brno, con la colaboración del Centro Checo Madrid",
+    "performers": [
+      {
+        "name": "Borja Mariño"
+      },
+      {
+        "name": "Tomás Muñoz"
+      },
+      {
+        "name": "Mário Radačovský"
+      },
+      {
+        "name": "Michał Jopek"
+      },
+      {
+        "name": "Cristina Faus"
+      },
+      {
+        "name": "Ensemble del Ballet del Teatro Nacional de Brno"
+      },
+      {
+        "name": "Cuarteto Seikilos"
+      },
+      {
+        "name": "Lorenzo Meseguer"
+      },
+      {
+        "name": "Iván Görnemann"
+      },
+      {
+        "name": "Pablo Quintanilla"
+      },
+      {
+        "name": "Adrián Vázquez"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [
+      "twentieth"
+    ],
+    "kind": "established",
+    "access": "free"
+  },
+  "reason": "Teatro musical de cámara: el programa lista obras catalogadas de Janáček (cuarteto JW VII/13, álbum JW VIII/33 y el ciclo JW V/12) y el cuarteto es un intérprete musical. El ensemble del ballet es danza secundaria, no la actividad principal.",
+  "notes": "Observación literal del run 43056214891 (artifact 13872362925, commit b05b75a). Antes: exclude / dance-spectacle por «Ensemble del Ballet del Teatro Nacional de Brno». No es un evento de data/**.",
+  "checkedAt": "2026-11-11"
+}
