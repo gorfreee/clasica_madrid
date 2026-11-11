@@ -4,7 +4,7 @@ import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
-import { normalizeUrl, urlIdentifiesSingleEvent, urlsEquivalent } from './urls.ts';
+import { normalizeUrl, urlIdentifiesSingleEvent, urlPathIdentity, urlsEquivalent } from './urls.ts';
 import { compareRecyclableIdentity, compareSourceIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
@@ -119,11 +119,16 @@ export function matchEventIdentity(
     }
   }
 
+  const fichaOwners = auditorioFichaOwners(catalog, observed, options.catalogSourceId);
+  const representationOwners = auditorioRepresentationOwners(catalog, observed, options.catalogSourceId);
   for (const event of catalog.events) {
     if (
       eventMatchesUrl(event, observed.sourceUrl, {
         catalogSourceId: options.catalogSourceId,
         observedExternalId: observed.externalId,
+        // A shared ficha stays on the strict externalId check. Equivalence
+        // applies only when one published citation owns that URL.
+        acceptEquivalentExternalId: fichaOwners.length === 1,
       })
     ) {
       hits.push({ event, method: 'url' });
@@ -152,6 +157,14 @@ export function matchEventIdentity(
     return { ...precise, scopeCancellationToAssignments: true };
   }
   if (precise.kind !== 'unmatched') return precise;
+  if (fichaOwners.length > 1 && representationOwners.length > 0) {
+    return {
+      kind: 'ambiguous',
+      events: fichaOwners,
+      methods: fichaOwners.map(() => 'url'),
+      reason: `source-identity-review: ficha del Auditorio compartida por identificadores distintos (${fichaOwners.map((event) => event.id).join(', ')})`,
+    };
+  }
   if (options.allowSlot === false) return { kind: 'unmatched' };
   return matchExclusiveSlot(catalog, observed, options.venueId);
 }
@@ -239,11 +252,82 @@ export function eventMatchesExternalId(event: Event, catalogSourceId: string, ex
   );
 }
 
-/** Same-URL matching is only for event-detail URLs. Listing pages are citations, not identity. */
+const AUDITORIO_CATALOG_SOURCE_ID = 'src_auditorio_nacional';
+const PLONE_UUID = /^[0-9a-f]{32}$/i;
+
+/**
+ * Plone UUID and the ficha path slug are two representations of one Auditorio
+ * concert only when both cite that same event URL. A different UUID, a slug
+ * that is not the path, another host, or another source stays incompatible:
+ * the URL does not override those externalIds.
+ */
+export function auditorioIdentityRepresentationsEquivalent(
+  leftId: string | undefined,
+  leftUrl: string,
+  rightId: string | undefined,
+  rightUrl: string,
+  catalogSourceId: string,
+): boolean {
+  if (catalogSourceId !== AUDITORIO_CATALOG_SOURCE_ID) return false;
+  if (!leftId || !rightId || leftId === rightId) return false;
+  if (!urlsEquivalent(leftUrl, rightUrl) || !isAuditorioFichaUrl(leftUrl)) return false;
+  const pathId = urlPathIdentity(leftUrl);
+  const slug = leftId === pathId ? leftId : rightId === pathId ? rightId : undefined;
+  const uuid = slug === leftId ? rightId : slug === rightId ? leftId : undefined;
+  return Boolean(slug && uuid && PLONE_UUID.test(uuid));
+}
+
+function isAuditorioFichaUrl(url: string): boolean {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    if (parsed.hostname !== 'auditorionacional.inaem.gob.es') return false;
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const programacion = parts.lastIndexOf('programacion');
+    return programacion >= 0 && parts.length === programacion + 2;
+  } catch {
+    return false;
+  }
+}
+
+function auditorioFichaOwners(
+  catalog: Catalog,
+  observed: IdentityFacts,
+  catalogSourceId: string,
+): Event[] {
+  if (catalogSourceId !== AUDITORIO_CATALOG_SOURCE_ID || !isAuditorioFichaUrl(observed.sourceUrl)) return [];
+  return catalog.events.filter((event) => event.citations.some((citation) =>
+    citation.sourceId === catalogSourceId &&
+    urlIdentifiesSingleEvent(citation.url) &&
+    urlsEquivalent(citation.url, observed.sourceUrl),
+  ));
+}
+
+function auditorioRepresentationOwners(
+  catalog: Catalog,
+  observed: IdentityFacts,
+  catalogSourceId: string,
+): Event[] {
+  if (!observed.externalId) return [];
+  return catalog.events.filter((event) => event.citations.some((citation) =>
+    citation.sourceId === catalogSourceId &&
+    auditorioIdentityRepresentationsEquivalent(
+      citation.externalId,
+      citation.url,
+      observed.externalId,
+      observed.sourceUrl,
+      catalogSourceId,
+    ),
+  ));
+}
+
+/** Same-URL matching is only for event-detail URLs. Listing pages are citations, not identity.
+ * Differing externalIds still reject the URL. The only exception is a verified
+ * Auditorio UUID/slug pair, and only when the caller has already checked that
+ * a single citation owns the ficha. */
 export function eventMatchesUrl(
   event: Event,
   sourceUrl: string,
-  options?: { catalogSourceId?: string; observedExternalId?: string },
+  options?: { catalogSourceId?: string; observedExternalId?: string; acceptEquivalentExternalId?: boolean },
 ): boolean {
   if (!urlIdentifiesSingleEvent(sourceUrl)) return false;
   return event.citations.some((citation) => {
@@ -254,7 +338,17 @@ export function eventMatchesUrl(
       options.catalogSourceId &&
       citation.sourceId === options.catalogSourceId &&
       citation.externalId &&
-      citation.externalId !== options.observedExternalId
+      citation.externalId !== options.observedExternalId &&
+      !(
+        options.acceptEquivalentExternalId &&
+        auditorioIdentityRepresentationsEquivalent(
+          citation.externalId,
+          citation.url,
+          options.observedExternalId,
+          sourceUrl,
+          options.catalogSourceId,
+        )
+      )
     ) {
       return false;
     }
@@ -269,7 +363,10 @@ export function sharesObservedSourceIdentity(
   right: IdentityFacts, rightSourceId: string,
 ): boolean {
   if (leftSourceId === rightSourceId && left.externalId && right.externalId) {
-    return left.externalId === right.externalId;
+    if (left.externalId === right.externalId) return true;
+    return auditorioIdentityRepresentationsEquivalent(
+      left.externalId, left.sourceUrl, right.externalId, right.sourceUrl, leftSourceId,
+    );
   }
   return urlIdentifiesSingleEvent(left.sourceUrl) && urlIdentifiesSingleEvent(right.sourceUrl) &&
     urlsEquivalent(left.sourceUrl, right.sourceUrl);

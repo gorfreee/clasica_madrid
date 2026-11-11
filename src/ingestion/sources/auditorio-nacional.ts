@@ -104,7 +104,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   return {
     sourceId: ctx.source.id,
     sourceUrl,
-    externalId: id ? stripOccurrenceSuffix(id) : urlPathIdentity(sourceUrl),
+    externalId: externalIdFromCalendar(id, sourceUrl),
     observed: {
       title,
       description: description && description !== title ? description : undefined,
@@ -118,7 +118,21 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   };
 }
 
-function stripOccurrenceSuffix(id: string): string {
+const PLONE_CALENDAR_ID = /^([0-9a-f]{32})(?:-\d+)?$/i;
+
+/**
+ * FullCalendar used to identify a concert by its Plone UUID, with an
+ * occurrence index (`uuid` or `uuid-0`). The same ficha is now also named by
+ * its path slug, and that slug may itself end in digits (`…-checa-2`).
+ * A numeric tail is an occurrence index only for a UUID, or when removing it
+ * leaves exactly the path slug. Any other id keeps the previous stem rule.
+ */
+function externalIdFromCalendar(id: string | undefined, sourceUrl: string): string {
+  const pathId = urlPathIdentity(sourceUrl);
+  if (!id) return pathId;
+  const plone = PLONE_CALENDAR_ID.exec(id);
+  if (plone?.[1]) return plone[1].toLowerCase();
+  if (id === pathId || id.replace(/-\d+$/, '') === pathId) return pathId;
   return id.replace(/-\d+$/, '');
 }
 
