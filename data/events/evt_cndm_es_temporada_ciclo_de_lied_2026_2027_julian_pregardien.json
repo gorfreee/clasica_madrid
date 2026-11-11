@@ -49,16 +49,16 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23796",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-12",
       "externalId": "23796"
     },
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-12",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-12"
 }

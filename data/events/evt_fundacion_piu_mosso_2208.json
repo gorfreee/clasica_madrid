@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Alumnos del profesor Francisco Fierro"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
@@ -23,15 +27,20 @@
     "recital"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro-2",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "2208"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-12"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

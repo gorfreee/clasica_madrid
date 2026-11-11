@@ -91,7 +91,7 @@
     {
       "sourceId": "src_basilica_san_miguel",
       "url": "https://basilicadesanmiguel.org/actividad/concierto-ecce-finem/",
-      "checkedAt": "2026-11-10",
+      "checkedAt": "2026-11-12",
       "externalId": "4871"
     },
     {
@@ -102,5 +102,5 @@
     }
   ],
   "primarySourceId": "src_vivaticket_es",
-  "lastVerifiedAt": "2026-11-10"
+  "lastVerifiedAt": "2026-11-12"
 }
