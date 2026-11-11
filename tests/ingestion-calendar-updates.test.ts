@@ -217,3 +217,162 @@ it('a complete calendar removes absent future sessions only inside its explicit 
   expect(merged.ambiguousReason).toBeUndefined();
   expect(merged.event.occurrences).toEqual(before[1]!.occurrences.map(s => ({ ...s, time: '18:30' })));
 });
+
+const noon = (day: string) => new Date(`${day}T12:00:00Z`);
+const occurrenceFacts = (event: Event) => event.occurrences.map(({ id, date, time, status }) => ({ id, date, time, status }));
+/** Post-#396 Fígaro: the published 11/11 session already lives on 9/11. Derived from the pre-move fixture, not from data/. */
+function appliedFigaro(): Event {
+  const event = structuredClone(before[0]!);
+  const moved = event.occurrences.find(s => s.id === 'occ_teatro_real_bodas_figaro_02')!;
+  moved.date = '2026-11-09';
+  return event;
+}
+async function figaroAt(event: Event, day: string) {
+  const obs = await observation(0);
+  const at = noon(day);
+  const proposal = proposalFromObservation(obs.event, { catalogSourceId: obs.source.catalogSourceId, now: at });
+  return { proposal, merged: mergeExistingEvent(event, proposal, at) };
+}
+
+it('Tomatito "hacia adelante" does not open the strict advance parser', async () => {
+  const html = await readFile(new URL('./fixtures/ingestion/calendar-updates-20261111/tomatito.html', import.meta.url), 'utf8');
+  const facts = parseTeatroRealDetail(html);
+  expect(facts.calendarEvidence).toBeUndefined();
+  expect(facts.occurrences).toBeUndefined();
+  expect(html).toContain('mirando hacia adelante');
+});
+
+it('a real but ambiguous advance notice stays withheld when the prose also says adelante', async () => {
+  const html = (await fixture('figaro'))
+    .replace('9 de noviembre a las 19:30 h', '9 de noviembre a las 20:00 h')
+    .replace('huelga general.', 'huelga general. El teatro sigue mirando hacia adelante.');
+  expect(() => parseTeatroRealDetail(html)).toThrow(HydrationConflictError);
+});
+
+it('the adverb adelante does not spoil a singular advance notice', async () => {
+  const html = (await fixture('figaro')).replace('huelga general.', 'huelga general. El teatro sigue mirando hacia adelante.');
+  const patch = parseTeatroRealDetail(html);
+  expect(patch.calendarEvidence?.changes).toEqual([
+    { from: { date: '2026-11-11' }, to: { date: '2026-11-09', time: '19:30' } },
+  ]);
+  expect(patch.occurrences?.some(s => s.date === '2026-11-11')).toBe(false);
+});
+
+it.each([
+  ['2026-11-08', true],
+  ['2026-11-10', false],
+  ['2026-11-11', false],
+  ['2026-11-12', false],
+])('an already applied Fígaro move is recognized on %s without rewriting sessions (destination still proposed: %s)', async (day, destinationProposed) => {
+  const event = appliedFigaro();
+  const { proposal, merged } = await figaroAt(event, day);
+  expect(proposal.occurrences.some(s => s.date === '2026-11-09')).toBe(destinationProposed);
+  expect(proposal.occurrences.some(s => s.date === '2026-11-11')).toBe(false);
+  expect(merged.ambiguousReason).toBeUndefined();
+  expect(occurrenceFacts(merged.event)).toEqual(occurrenceFacts(event));
+  expect(merged.event.occurrences.filter(s => s.date === '2026-11-09' && s.time === '19:30')).toHaveLength(1);
+});
+
+it('a second identical application neither duplicates the destination nor restores the origin', async () => {
+  const first = await figaroAt(appliedFigaro(), '2026-11-11');
+  const second = await figaroAt(first.merged.event, '2026-11-11');
+  expect(second.merged.ambiguousReason).toBeUndefined();
+  expect(occurrenceFacts(second.merged.event)).toEqual(occurrenceFacts(first.merged.event));
+  expect(second.merged.event.occurrences.filter(s => s.date === '2026-11-09')).toHaveLength(1);
+  expect(second.merged.event.occurrences.some(s => s.date === '2026-11-11')).toBe(false);
+});
+
+it.each(['2026-11-08', '2026-11-01'])('before the destination day the unpublished move still reuses the origin id (%s)', async day => {
+  const event = structuredClone(before[0]!);
+  const { merged } = await figaroAt(event, day);
+  expect(merged.ambiguousReason).toBeUndefined();
+  expect(merged.event.occurrences.find(s => s.id === 'occ_teatro_real_bodas_figaro_02')).toMatchObject({ date: '2026-11-09', time: '19:30' });
+  expect(merged.event.occurrences.some(s => s.date === '2026-11-11')).toBe(false);
+  expect(merged.event.occurrences).toHaveLength(event.occurrences.length);
+  expect(new Set(merged.event.occurrences.map(s => s.id))).toEqual(new Set(event.occurrences.map(s => s.id)));
+});
+
+it.each(['2026-11-10', '2026-11-11'])('a not-yet-applied move whose destination is already historical stays in review (%s)', async day => {
+  const event = structuredClone(before[0]!);
+  const { proposal, merged } = await figaroAt(event, day);
+  expect(proposal.occurrences.some(s => s.date === '2026-11-09')).toBe(false);
+  expect(merged.ambiguousReason).toContain('schedule-review');
+  expect(merged.event).toBe(event);
+  expect(event.occurrences.some(s => s.date === '2026-11-11')).toBe(true);
+  expect(event.occurrences.some(s => s.date === '2026-11-09')).toBe(false);
+});
+
+it('after the origin day a published historical origin is left untouched and the destination is not invented', async () => {
+  const event = structuredClone(before[0]!);
+  const { merged } = await figaroAt(event, '2026-11-12');
+  expect(merged.ambiguousReason).toBeUndefined();
+  expect(occurrenceFacts(merged.event)).toEqual(occurrenceFacts(event));
+});
+
+it('a missing historical destination whose origin is also unpublished stays in review', async () => {
+  for (const day of ['2026-11-11', '2026-11-12']) {
+    const event = appliedFigaro();
+    event.occurrences = event.occurrences.filter(s => s.date !== '2026-11-09');
+    const { merged } = await figaroAt(event, day);
+    expect(merged.ambiguousReason, day).toContain('schedule-review');
+    expect(merged.event).toBe(event);
+    expect(event.occurrences.some(s => s.date === '2026-11-09' || s.date === '2026-11-11')).toBe(false);
+  }
+});
+
+it('same-day sessions that are not the moved performance keep their ids', async () => {
+  const event = appliedFigaro();
+  event.occurrences.push(
+    { id: 'occ_same_morning', date: '2026-11-12', time: '12:00', status: 'scheduled' },
+    { id: 'occ_same_destination_day', date: '2026-11-09', time: '12:00', status: 'scheduled' },
+  );
+  const { merged } = await figaroAt(event, '2026-11-11');
+  expect(merged.ambiguousReason).toBeUndefined();
+  expect(occurrenceFacts(merged.event)).toEqual(occurrenceFacts(event));
+});
+
+it('two published performances on the origin day make the undated move ambiguous', async () => {
+  const event = structuredClone(before[0]!);
+  event.occurrences.push({ id: 'occ_same_origin_day', date: '2026-11-11', time: '18:00', status: 'scheduled' });
+  const { merged } = await figaroAt(event, '2026-11-08');
+  expect(merged.ambiguousReason).toContain('schedule-review');
+  expect(merged.event).toBe(event);
+  expect(event.occurrences.filter(s => s.date === '2026-11-11')).toHaveLength(2);
+});
+
+it('an origin that is still published beside the destination is not applied twice', async () => {
+  const event = appliedFigaro();
+  event.occurrences.push({ id: 'occ_still_origin', date: '2026-11-11', time: '19:30', status: 'scheduled' });
+  const { merged } = await figaroAt(event, '2026-11-08');
+  expect(merged.ambiguousReason).toContain('schedule-review');
+  expect(merged.event).toBe(event);
+  expect(event.occurrences.filter(s => s.date === '2026-11-09' && s.time === '19:30')).toHaveLength(1);
+  expect(event.occurrences.some(s => s.id === 'occ_still_origin' && s.date === '2026-11-11')).toBe(true);
+});
+
+it('a cancelled destination and an unrelated cancellation stay cancelled and keep their ids', async () => {
+  const event = appliedFigaro();
+  event.occurrences.find(s => s.id === 'occ_teatro_real_bodas_figaro_02')!.status = 'cancelled';
+  event.occurrences.find(s => s.id === 'occ_teatro_real_bodas_figaro_08')!.status = 'cancelled';
+  const { merged } = await figaroAt(event, '2026-11-11');
+  expect(merged.ambiguousReason).toBeUndefined();
+  expect(occurrenceFacts(merged.event)).toEqual(occurrenceFacts(event));
+});
+
+it('the published Fígaro catalog on 11 Nov is already applied and is not a schedule review', async () => {
+  const published = catalog.events.find(event => event.id === 'evt_teatro_real_bodas_figaro');
+  expect(published?.occurrences.some(s => s.date === '2026-11-09' && s.time === '19:30')).toBe(true);
+  expect(published?.occurrences.some(s => s.date === '2026-11-11')).toBe(false);
+  const obs = await observation(0);
+  const at = noon('2026-11-11');
+  const result = reconcileHarvest({
+    catalog: { ...catalog, events: [structuredClone(published!)] },
+    now: at,
+    window: { from: '2026-11-11', to: '2027-07-31' },
+    observations: [obs],
+  });
+  expect(result.stats.ambiguous).toBe(0);
+  const event = result.candidates[0]?.event ?? published!;
+  expect(occurrenceFacts(event)).toEqual(occurrenceFacts(published!));
+  expect(result.byIndex.get(0)?.ambiguousReason).toBeUndefined();
+});

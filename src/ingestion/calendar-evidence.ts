@@ -67,13 +67,25 @@ export function planCalendar(
       sessionKey(change.to) === sessionKey(other.to))) return review();
   }
   for (const change of changes) {
-    if (change.from.date < today) continue; // historical sessions are immutable here
     const origins = current.filter(s => s.date === change.from.date &&
       (!change.from.time || s.time === change.from.time));
-    const destinations = next.filter(s => sessionKey(s) === sessionKey(change.to));
-    if (origins.length > 1 || destinations.length !== 1) return review();
-    if (!origins.length) continue; // already applied, or not previously published
-    if (current.some(s => s !== origins[0] && sessionKey(s) === sessionKey(change.to))) return review();
+    // The origin itself is not a second destination (same-day clock correction).
+    const publishedDestination = current.filter(s => sessionKey(s) === sessionKey(change.to) && !origins.includes(s));
+    const proposedDestination = next.filter(s => sessionKey(s) === sessionKey(change.to));
+    if (change.from.date < today) {
+      // A past origin is immutable. Once it is gone, the published destination is the
+      // only proof the move already happened; a filtered proposal no longer contains it.
+      if (!origins.length && publishedDestination.length !== 1 && proposedDestination.length !== 1) return review();
+      if (!origins.length && publishedDestination.length > 1) return review();
+      continue;
+    }
+    if (origins.length > 1 || publishedDestination.length > 1) return review();
+    if (!origins.length) {
+      if (publishedDestination.length === 1) continue; // already applied; do not recreate or duplicate
+      if (change.to.date >= today && proposedDestination.length === 1) continue; // not previously published
+      return review(); // historical destination absent: do not invent it
+    }
+    if (proposedDestination.length !== 1 || publishedDestination.length === 1) return review();
     const origin = origins[0]!;
     current.splice(current.indexOf(origin), 1);
     assigned.set(sessionKey(change.to), { ...origin, ...change.to });
@@ -104,5 +116,23 @@ export function planCalendar(
     assigned.set(sessionKey(s), { id, ...s, status: 'scheduled' });
   }
   const retained = current.filter(s => s.date < today || !inCalendarScope(s.date, evidence?.complete));
-  return { occurrences: [...retained, ...assigned.values()].sort((a, b) => sessionKey(a).localeCompare(sessionKey(b))) };
+  const updatedById = new Map([...assigned.values()].map(session => [session.id, session]));
+  const retainedIds = new Set(retained.map(session => session.id));
+  const result: Occurrence[] = [];
+  const seen = new Set<string>();
+  for (const session of existing) {
+    const updated = updatedById.get(session.id);
+    if (updated) {
+      result.push(updated);
+      seen.add(session.id);
+      continue;
+    }
+    if (retainedIds.has(session.id)) {
+      result.push(session);
+      seen.add(session.id);
+    }
+  }
+  const created = [...assigned.values()].filter(session => !seen.has(session.id))
+    .sort((a, b) => sessionKey(a).localeCompare(sessionKey(b)));
+  return { occurrences: [...result, ...created] };
 }
