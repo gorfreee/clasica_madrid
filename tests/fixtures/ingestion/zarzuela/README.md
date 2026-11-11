@@ -22,6 +22,11 @@ público utilizable: la exportación probada devolvió 403 o HTML. JEvents omite
 eventos del ciclo de lied y otras secciones y repite horarios de 19:30 incluso
 cuando las fichas declaran excepciones. Por eso no es el calendario primario.
 
+`live-2026-11-11/los-gavilanes.html` es el bloque K2 capturado el 11 de noviembre
+de 2026 (run 43056214891). Conserva la enumeración de enero y febrero de 2027,
+la nota de Radio Clásica, la visita táctil y la secuencia U+00C2 U+00C2 U+00C2
+U+00A0 tal como venía en el HTML. No es un evento inventado.
+
 Casos deliberadamente conservados: el 25 de septiembre duplicado en La verbena
 (no se inventa el 26); visitas táctiles que no son funciones; fechas con hora
 dominical distinta; sesiones dobles; calendario escolar independiente; rangos

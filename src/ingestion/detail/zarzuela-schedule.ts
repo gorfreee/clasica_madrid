@@ -307,9 +307,17 @@ function uniqueExplicitMonthYear(text: string): { monthName: string; year: numbe
   return { monthName: dated[0]![2]!, year: Number(dated[0]![3]) };
 }
 
-/** Date markers link to an editorial broadcast note, never another performance. */
+/**
+ * Date markers link to an editorial broadcast note, never another performance.
+ * Beside that note the captured fichas store U+00C2 once (2026-10-02) or three
+ * times (2026-11-11) immediately before U+00A0. Only that whole run is removed.
+ * One pass is enough: a second pass finds no U+00C2 before whitespace. Any other
+ * residue still fails closed. The tactile visit is not a show; the accessible
+ * function heading cuts it off after this step.
+ */
 function stripBroadcastFootnotes(text: string): string {
   const note = /\*\s*La funci[oó]n del \d{1,2} de (?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) se emitir[aá], en directo, a trav[eé]s de Radio Cl[aá]sica\.?/gi;
-  if (!note.test(text)) return text;
-  return text.replace(note, '').replace(/(?<=\d)\*(?=\s|,)/g, '').replace(/Â(?=\s)/g, '');
+  const withoutNote = text.replace(note, '');
+  if (withoutNote === text) return text;
+  return withoutNote.replace(/(?<=\d)\*(?=\s|,)/g, '').replace(/\u00C2+(?=\s)/g, '');
 }

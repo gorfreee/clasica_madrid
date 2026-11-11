@@ -73,6 +73,109 @@ describe('Zarzuela LIVE 2026-10-02: fechas con notas de emisión', () => {
   });
 });
 
+const GAVILANES_20261111 = [
+  '2027-01-28 19:30', '2027-01-29 19:30', '2027-01-30 19:30', '2027-01-31 18:00',
+  '2027-02-04 19:30', '2027-02-05 19:30', '2027-02-06 19:30', '2027-02-07 18:00',
+  '2027-02-10 19:30', '2027-02-11 19:30', '2027-02-12 19:30', '2027-02-13 19:30',
+];
+/** Run observed on 2026-11-11: U+00C2 three times, then U+00A0. October had a single U+00C2. */
+const TRIPLE_NBSP = '\u00C2\u00C2\u00C2\u00A0';
+
+function radioNote(day: number, month: string): string {
+  return `${TRIPLE_NBSP}* La función del ${day} de ${month} se emitirá, en directo, a través de Radio Clásica`;
+}
+
+function scheduleSessions(html: string): string[] {
+  return parseZarzuelaSchedule(html).map((o) => `${o.date} ${o.time}`);
+}
+
+describe('Zarzuela LIVE 2026-11-11: Los gavilanes', () => {
+  const live = () => readFile(new URL('./fixtures/ingestion/zarzuela/live-2026-11-11/los-gavilanes.html', import.meta.url), 'utf8');
+
+  it('conserva sólo las sesiones enumeradas, con la excepción dominical', async () => {
+    const html = await live();
+    const patch = parseZarzuelaDetail(raw('los-gavilanes'), html);
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual(GAVILANES_20261111);
+    expect(patch.occurrences).toHaveLength(12);
+    const again = parseZarzuelaDetail(raw('los-gavilanes'), html);
+    expect(again.occurrences).toEqual(patch.occurrences);
+  });
+
+  it('no rellena el intervalo del listado ni los días que sólo aparecen en el reparto', async () => {
+    const patch = parseZarzuelaDetail(raw('los-gavilanes'), await live());
+    const dates = patch.occurrences?.map((o) => o.date) ?? [];
+    for (const missing of ['2027-02-01', '2027-02-02', '2027-02-03', '2027-02-08', '2027-02-09']) {
+      expect(dates).not.toContain(missing);
+    }
+    expect(htmlMentionsCastDay(await live())).toBe(true);
+  });
+
+  it('no interpreta la hora de la visita táctil como un pase', async () => {
+    const html = await live();
+    expect(html).toContain('touch tour');
+    expect(html).toContain('a las 18:00');
+    const saturday = parseZarzuelaDetail(raw('los-gavilanes'), html).occurrences?.filter((o) => o.date === '2027-02-13');
+    expect(saturday).toEqual([expect.objectContaining({ time: '19:30' })]);
+    expect(() => scheduleSessions(
+      '<p>13 de febrero de 2027. 19:30 horas (visita táctil / touch tour a las 18:00).</p>',
+    )).toThrow(/horario no interpretable/);
+  });
+
+  it('agrupa varios meses y años con asterisco y nota de radiodifusión', () => {
+    expect(scheduleSessions(
+      `<p>28, 31 de enero y 4*, 7 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).${TRIPLE_NBSP}${radioNote(4, 'febrero')}</p>`,
+    )).toEqual(['2027-01-28 19:30', '2027-01-31 18:00', '2027-02-04 19:30', '2027-02-07 18:00']);
+    expect(scheduleSessions(
+      `<p>25, 29* de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).${TRIPLE_NBSP}${radioNote(29, 'noviembre')}</p>`,
+    )).toEqual(['2026-11-25 19:30', '2026-11-29 18:00', '2026-12-02 19:30']);
+    expect(scheduleSessions(
+      `<p>31 de diciembre y 1* de enero de 2027. 19:30 horas.${TRIPLE_NBSP}${radioNote(1, 'enero')}</p>`,
+    )).toEqual(['2026-12-31 19:30', '2027-01-01 19:30']);
+    expect(scheduleSessions(
+      `<p>5 de mayo de 2026, 2 de junio de 2026 y 9* de julio de 2027. 19:30 horas.${TRIPLE_NBSP}${radioNote(9, 'julio')}</p>`,
+    )).toEqual(['2026-05-05 19:30', '2026-06-02 19:30', '2027-07-09 19:30']);
+  });
+
+  it('no fabrica una función a partir de la nota ni del año que la nota menciona', () => {
+    expect(scheduleSessions(
+      `<p>28 y 29 de enero de 2027. 19:30 horas.${TRIPLE_NBSP}${radioNote(4, 'febrero')}</p>`,
+    )).toEqual(['2027-01-28 19:30', '2027-01-29 19:30']);
+  });
+
+  it('retiene errores genuinos aunque aparezca la misma secuencia', () => {
+    expect(() => scheduleSessions(
+      `<p>1* de octubre de 2026 19:30 horas ${TRIPLE_NBSP}* excepto festivos</p>`,
+    )).toThrow(/teatro-zarzuela/);
+    expect(() => scheduleSessions(
+      `<p>1 de octubre de 2026 19:30 horas.${TRIPLE_NBSP}* La función del 1 de octubre se emitirá, en directo, a través de Radio Clásica. excepto festivos</p>`,
+    )).toThrow(/horario no interpretable/);
+    expect(() => scheduleSessions(
+      `<p>31 de febrero de 2027 19:30 horas.${TRIPLE_NBSP}${radioNote(31, 'febrero')}</p>`,
+    )).toThrow(/teatro-zarzuela/);
+    expect(() => scheduleSessions(
+      `<p>9, 10 y 11. 19:30 horas.${TRIPLE_NBSP}${radioNote(10, 'febrero')}</p>`,
+    )).toThrow(/teatro-zarzuela/);
+    expect(() => scheduleSessions('<p>Del 28 de enero al 13 de febrero de 2027</p>')).toThrow(/teatro-zarzuela/);
+  });
+
+  it('es estable si la secuencia ya fue eliminada y al interpretar otra vez', async () => {
+    const html = await live();
+    const first = parseZarzuelaDetail(raw('los-gavilanes'), html).occurrences;
+    const cleaned = html.replace(/\u00C2+(?=\s)/g, '');
+    expect(cleaned).not.toContain('\u00C2');
+    expect(parseZarzuelaDetail(raw('los-gavilanes'), cleaned).occurrences).toEqual(first);
+    expect(parseZarzuelaDetail(raw('los-gavilanes'), cleaned.replace(/\u00C2+(?=\s)/g, '')).occurrences).toEqual(first);
+    const line = `<p>28, 31 de enero y 4* de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).${TRIPLE_NBSP}${radioNote(4, 'febrero')}</p>`;
+    const once = scheduleSessions(line);
+    expect(scheduleSessions(line)).toEqual(once);
+    expect(scheduleSessions(line.replace(/\u00C2+(?=\s)/g, ''))).toEqual(once);
+  });
+});
+
+function htmlMentionsCastDay(html: string): boolean {
+  return /3,\s*6 y 12 de febrero/.test(html);
+}
+
 const item = (id: number) => ({ id, slug: `concierto-${id}`, status: 'publish', link: `https://realhermandaddelrefugio.org/calendario-de-eventos/concierto-${id}/`, title: { rendered: `Concierto ${id}` }, 'categoria-eventos': [47] });
 const envelope = (items: unknown[], total: number) => JSON.stringify({ status: 200, headers: { 'X-WP-Total': total, 'X-WP-TotalPages': Math.ceil(total / 50) }, body: items });
 
