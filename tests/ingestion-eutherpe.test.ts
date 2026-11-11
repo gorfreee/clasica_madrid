@@ -134,6 +134,15 @@ describe('Eutherpe — detail facts and local conflicts', () => {
     expect(ignacio.programText).toContain('Sonata n°2 op.36');
     expect(ignacio.works).toHaveLength(7);
     expect(ignacio.works?.filter(work => work.composerName === 'S. Rachmaninoff')).toHaveLength(5);
+    expect(ignacio.composers?.map(item => item.name)).toEqual(['L.V. Beethoven', 'Bach', 'Busoni', 'S. Rachmaninoff']);
+    expect(ignacio.works?.find(work => work.title.includes('BWV 1004'))).not.toHaveProperty('composerName');
+    const espina = parseEutherpeDetail(await sample('alejandro-espina-piano-espana'), await live('alejandro-espina-piano-espana.html'));
+    expect(espina.works?.filter(work => work.composerName === 'Franz Liszt')).toHaveLength(2);
+    expect(espina.works?.find(work => work.title.startsWith('Après'))?.title).toContain('S. 161');
+    expect(espina.works?.filter(work => work.composerName === 'Nikolai Medtner')).toHaveLength(2);
+    const duo = parseEutherpeDetail(await sample('el-duo-carvajal-oltra'), await live('el-duo-carvajal-oltra.html'));
+    expect(duo.composers?.map(item => item.name)).toContain('J. Brahms');
+    expect(duo.composers?.map(item => item.name)).not.toContain('J. Brahms II');
   });
 
   it('hydrates each of the eight real identities with its own year, date, clock and repertoire', async () => {
@@ -212,6 +221,14 @@ describe('Eutherpe — production pipeline', () => {
     expect(second.summary.unchangedEvents).toBe(2);
     expect(second.summary.possiblyMissing).toBe(0);
     expect((await run(emptyCatalog(), pages, { from: '2026-11-11', to: '2026-12-31' })).summary.newEvents).toBe(0);
+  });
+  it('retains all eight real concerts with a longer window and never publishes a duplicate alias', async () => {
+    const season = await run(emptyCatalog(), pages, { from: '2026-11-11', to: '2027-11-11' });
+    expect(season.summary.newEvents).toBe(8);
+    expect(season.summary.batchDuplicates).toBe(0);
+    expect(season.summary.ambiguous).toBe(0);
+    expect(season.candidates.every(item => item.event.venueId === 'ven_shigeru_kawai_center')).toBe(true);
+    expect(season.candidates.flatMap(item => item.event.composers).map(item => item.name)).not.toContain('Bach-Busoni');
   });
   it('reports an unusable source and suppresses disappearances when required directory details fail', async () => {
     const first = await run();

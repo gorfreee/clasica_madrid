@@ -55,7 +55,11 @@ eras and access belong to the shared classification pipeline.
 Programme extraction reads every visible `programa-content` row, pairing its
 `text-block-39` composer with its own work block. Bold paragraph headings and
 dash-led works can be structured; movements and other text stay in the full
-`programText`. A work never inherits an author from a previous row. No biography,
+`programText`. A work never inherits an author from a previous row. Comma/colon continuations
+are kept together; a composite credit such as `Bach-Busoni` names two credited
+authors, not a person called Bach-Busoni, and does not invent which one wrote
+the underlying work. A trailing section numeral is removed only when the
+remaining credit is a known composer. No biography,
 hidden blocks or generic cycle text is mined for repertoire. Artist/role
 credits are read only from explicit soloist title syntax, not biographies.
 Source spellings and even source typos (e.g. Ignacio's `op.25` for the published

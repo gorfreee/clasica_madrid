@@ -2,6 +2,7 @@ import { parseObservedTime } from '../dates.ts';
 import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
+import { matchComposer } from '../knowledge/composers.ts';
 import { sourceConflict } from './conflicts.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
@@ -450,21 +451,32 @@ function programFrom(body: string): ObservedFactPatch {
   const composers: Array<{ name: string }> = [];
   const observedWorks: Array<{ title: string; composerName?: string }> = [];
   for (const row of rows) {
-    const composer = stripTags(/<div\b[^>]*class=["'][^"']*\btext-block-39\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(row)?.[1] ?? '');
+    const credit = stripTags(/<div\b[^>]*class=["'][^"']*\btext-block-39\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(row)?.[1] ?? '');
+    const composer = programmeComposerCredit(credit);
     const workBlocks = eutherpeBlocks(row, 'div', 'programa-de-concierto-1');
     const works = workBlocks.map(flattenHtmlBlocks).map(cleanText).filter(Boolean);
     if (!works.length) continue;
-    if (composer) composers.push({ name: composer });
+    const creditedNames = composer.split(/\s*[-–—]\s*/u);
+    const composite = creditedNames.length > 1 && creditedNames.every(name => matchComposer(name));
+    if (composer) composers.push(...(composite ? creditedNames : [composer]).map(name => ({ name })));
     for (const html of workBlocks) {
-      for (const paragraph of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
-        const content = paragraph[1]!;
+      const paragraphs = [...html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)];
+      for (let index = 0; index < paragraphs.length; index += 1) {
+        const content = paragraphs[index]![1]!;
         const text = cleanText(stripTags(content));
         // Explicit work headings and dash-led works only. Roman-numeral
         // movements and unmarked prose remain solely in programText.
         if ((!/<strong\b/i.test(content) && !/^[-–—]\s*\p{L}/u.test(text))
-          || /^(?:[IVXLCDM]+\.|[·•])\s*/u.test(text)) continue;
-        const title = text.replace(/^[-–—]\s*/, '');
-        if (title) observedWorks.push({ title, ...(composer ? { composerName: composer } : {}) });
+          || /^(?:[IVXLCDM]+\.)\s*/u.test(text)) continue;
+        let title = text.replace(/^[-–—·•]\s*/, '');
+        // A title continued over paragraphs is one work, not two headings.
+        while (/[, :]$/.test(title) && index + 1 < paragraphs.length) {
+          const next = cleanText(stripTags(paragraphs[index + 1]![1]!));
+          if (!next || /^(?:[IVXLCDM]+\.)\s*/u.test(next)) break;
+          title += ` ${next.replace(/^[·•]\s*/, '')}`;
+          index += 1;
+        }
+        if (title) observedWorks.push({ title, ...(composer && !composite ? { composerName: composer } : {}) });
       }
     }
     parts.push([composer, ...works].filter(Boolean).join('\n'));
@@ -675,4 +687,9 @@ function performerFromTitle(title: string): ObservedFactPatch {
   const match = /^([\p{L}][\p{L} .’'\-]+),\s*(piano|violín|viola|violonchelo|flauta|guitarra)(?:\s*\([^()]+\))?$/iu.exec(title);
   if (!match) return {};
   return { performers: [{ name: match[1]!.trim(), roleText: match[2]! }] };
+}
+
+function programmeComposerCredit(credit: string): string {
+  const withoutSection = credit.replace(/\s+[IVXLCDM]+$/u, '').trim();
+  return withoutSection !== credit && matchComposer(withoutSection) ? withoutSection : credit;
 }
