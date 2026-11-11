@@ -1,5 +1,5 @@
 import { normalizeText } from '../lib/domain/normalize.ts';
-import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
+import { compareMusicalFacts, editorialTitlesCompatible, musicalFactsFrom } from './musical-identity.ts';
 import type { IdentityFacts } from './identity.ts';
 
 /** Opt-in: these sources reuse both detail URLs and external identifiers. */
@@ -99,7 +99,7 @@ export function compareSourceIdentity(
   const continuity = sameTitle || explicitMusic.kind === 'match' ||
     music.kind === 'match' ||
     (explicitMusic.kind !== 'conflict' && music.kind !== 'conflict' &&
-      editorialTitlesCompatible(observed.title, existing.title));
+      editorialTitlesCompatible(observed, existing));
   // dateFromDetail means the detail supplied a calendar, not that another
   // published performance was rescheduled. Require actual postponement evidence.
   const postponed = hasApplicableCalendarChange(observed, existing) || observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
@@ -142,32 +142,6 @@ export function compareSourceIdentity(
   // Different editorial titles without explicit incompatible music are not
   // enough to distinguish a new event from a correction.
   return 'review';
-}
-
-const EDITORIAL_TITLE_PREFIX = /^(?:concierto|recital|gala|actuacion)\s+/u;
-const EDITORIAL_TITLE_GLUE = new Set([
-  'a', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'para', 'the', 'un', 'una', 'y',
-]);
-
-/**
- * «Concierto ECCE FINEM» and «Ecce finem — Vetus Carmina» share an editorial
- * name. A generic label, or a single leftover token, does not.
- */
-function editorialTitlesCompatible(left: string, right: string): boolean {
-  const a = editorialTitleCore(left);
-  const b = editorialTitleCore(right);
-  if (!a || !b) return false;
-  if (a === b) return true;
-  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
-  return longer.startsWith(`${shorter} `);
-}
-
-function editorialTitleCore(title: string): string {
-  const folded = normalizeText(title.replace(/^\[(?:aplazado|cancelado|pospuesto)\]\s*/iu, ''));
-  const tokens = folded.replace(EDITORIAL_TITLE_PREFIX, '').split(' ').filter((token) =>
-    token && !EDITORIAL_TITLE_GLUE.has(token) && !/^\d+$/.test(token));
-  if (tokens.length < 2) return '';
-  return tokens.join(' ');
 }
 
 function distinctiveTitle(title: string): string {

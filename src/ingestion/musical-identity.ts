@@ -23,7 +23,7 @@ export type SlotVerdict =
   | { kind: 'insufficient' };
 
 const TITLE_PREFIXES: RegExp[] = [
-  /^\[(?:aplazado|cancelado)\]\s*/iu,
+  /^\[(?:aplazado|cancelado|pospuesto)\]\s*/iu,
   /^[«“"']?Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo[»”"']?\.\s*/iu,
   /^CNDM\.\s*/iu,
   /^ORCAM\.\s+(?:Sinfónico|Tiempo de Cámara)\s+\d+\.\s*/iu,
@@ -86,8 +86,8 @@ export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): Sl
   }
   if (workHits.length > 0) return { kind: 'match', reasons };
   const workConflict = bothDistinctAndDisjoint(
-    worksForContradiction(left, a),
-    worksForContradiction(right, b),
+    worksForContradiction(left, right, a),
+    worksForContradiction(right, left, b),
     worksCompatible,
   );
   if (workConflict) {
@@ -463,10 +463,41 @@ function isEditorialConcertTitle(title: string): boolean {
   return true;
 }
 
-/** A title-only editorial label is absence, not an explicit programme. */
-function worksForContradiction(facts: MusicalFacts, signals: Signals): WorkSignal[] {
-  if (facts.works.length === 0 && isEditorialConcertTitle(facts.title)) return [];
+/** Only discard a whole editorial label corroborated by the other title.
+ * Quoted works and musical titles without that corroboration remain evidence. */
+function worksForContradiction(facts: MusicalFacts, other: MusicalFacts, signals: Signals): WorkSignal[] {
+  if (facts.works.length === 0 && isEditorialConcertTitle(facts.title) &&
+    editorialTitlesCompatible(facts, other)) {
+    const label = stripWorkDecorations(normalizeText(stripTitlePrefixes(facts.title)));
+    return signals.works.filter(work => work.core !== label);
+  }
   return signals.works;
+}
+
+const EDITORIAL_TITLE_PREFIX = /^(?:concierto|recital|gala|actuacion)\s+/u;
+const EDITORIAL_TITLE_GLUE = new Set([
+  'a', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'para', 'the', 'un', 'una', 'y',
+]);
+
+/** Exact editorial name, optionally followed by observed credits after a dash.
+ * Keep numbers, qualifiers and prepositions: they may distinguish editions. */
+export function editorialTitlesCompatible(
+  left: { title: string; performers?: Array<{ name: string }> },
+  right: { title: string; performers?: Array<{ name: string }> },
+): boolean {
+  const a = editorialTitleCore(left);
+  const b = editorialTitleCore(right);
+  return Boolean(a && b && a === b);
+}
+
+function editorialTitleCore(facts: { title: string; performers?: Array<{ name: string }> }): string {
+  const [head, ...credits] = stripTitlePrefixes(facts.title).split(/\s+[–—-]\s+/u);
+  if (credits.some(credit => !facts.performers?.some(performer =>
+    normalizeText(performer.name) === normalizeText(credit)))) return '';
+  const core = normalizeText(head!).replace(EDITORIAL_TITLE_PREFIX, '');
+  const content = core.split(' ').filter(token =>
+    token && !EDITORIAL_TITLE_GLUE.has(token) && !/^\d+$/.test(token));
+  return content.length >= 2 ? core : '';
 }
 
 function verifiedPair(

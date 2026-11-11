@@ -1,12 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
-import { defaultDataDir } from '../src/lib/repository/fs.ts';
 import type { Event } from '../src/lib/schemas/index.ts';
 import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
 import { auditorioIdentityRepresentationsEquivalent, matchEventIdentity } from '../src/ingestion/identity.ts';
 import { compareMusicalFacts } from '../src/ingestion/musical-identity.ts';
+import { compareSourceIdentity } from '../src/ingestion/source-identity-policy.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
 import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reconcile.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -45,7 +44,10 @@ type Excerpt = {
   publishedId: string;
 };
 
-const publishedCatalog = await loadCatalogFromDir(defaultDataDir());
+const publishedCatalog = JSON.parse(await readFile(
+  new URL('./fixtures/ingestion/false-continuity-20261111/published-catalog.json', import.meta.url),
+  'utf8',
+)) as Catalog;
 const excerpts = JSON.parse(await readFile(
   new URL('./fixtures/ingestion/false-continuity-20261111/observations.json', import.meta.url),
   'utf8',
@@ -334,6 +336,47 @@ describe('jerarquía de sede', () => {
 });
 
 describe('identidades que siguen sin fusionarse', () => {
+  it.each([
+    ['Gala Jóvenes Talentos 2026', 'Gala Jóvenes Talentos 2027'],
+    ['Gala Jóvenes Talentos', 'Gala Jóvenes Talentos infantil'],
+    ['Gala Jóvenes Talentos', 'Gala Jóvenes Talentos — sesión infantil'],
+  ])('no inventa continuidad editorial entre %s y %s sin sede', (title, otherTitle) => {
+    const bare = { ...facts(incoming()), performers: [], composers: [], works: [] };
+    expect(compareSourceIdentity({ ...bare, title }, { ...bare, title: otherTitle })).toBe('review');
+  });
+
+  it.each(['Concierto de Aranjuez', 'Concierto «Las cuatro estaciones»'])('conserva la evidencia musical del título %s', (title) => {
+    const bare = { title, performers: [{ name: 'Orquesta Ejemplo' }], composers: [], works: [] };
+    expect(compareMusicalFacts(bare, {
+      ...bare, title: 'Otro programa',
+      works: [{ title: 'The Planets', composerName: 'Gustav Holst' }],
+    }).kind).toBe('conflict');
+  });
+
+  it('conserva cada sala al repartir una observación de edificio entre varios eventos', () => {
+    const first = published();
+    const second = published({
+      id: 'evt_segundo_salon', slug: 'ecce-finem-segunda-sesion', venueId: SIBLING,
+      occurrences: [{ id: 'occ_segundo_salon', date: '2026-11-23', time: '18:00', status: 'scheduled' }],
+    });
+    const catalog = buildingCatalog([first, second]);
+    const event = incoming({ occurrences: [
+      { date: '2026-11-22', time: '18:00' }, { date: '2026-11-23', time: '18:00' },
+    ] });
+    expect(matchEventIdentity(catalog, facts(event), {
+      catalogSourceId: 'src_residencia_estudiantes', venueId: PARENT,
+    }).kind).toBe('matched-many');
+    const result = reconcileHarvest({ catalog, now: NOW, window: WINDOW, observations: [observation(event)] });
+    expect(result.stats.ambiguous).toBe(0);
+    expect(result.stats.newEvents).toBe(0);
+    expect(result.byIndex.get(0)?.eventIds).toEqual([first.id, second.id]);
+    for (const existing of [first, second]) {
+      const written = result.candidates.find(candidate => candidate.event.id === existing.id)?.event ?? existing;
+      expect(written.venueId).toBe(existing.venueId);
+      expect(written.occurrences).toEqual(existing.occurrences);
+    }
+  });
+
   it('no traslada el recital de septiembre de Alicia de Larrocha a noviembre por reutilizar el ID', () => {
     const existing = published({
       id: 'evt_larrocha',
@@ -416,7 +459,7 @@ describe('identidades que siguen sin fusionarse', () => {
   });
 });
 
-describe('run 43056214891 sobre el catálogo actual', () => {
+describe('run 43056214891 sobre la instantánea publicada', () => {
   function fromExcerpt(excerpt: Excerpt): NormalizedEvent {
     return {
       sourceId: excerpt.sourceId,

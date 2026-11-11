@@ -1,0 +1,511 @@
+{
+  "events": [
+    {
+      "schemaVersion": 1,
+      "id": "evt_residencia_estudiantes_32405",
+      "slug": "ecce-finem",
+      "title": "Ecce finem",
+      "status": "scheduled",
+      "venueId": "ven_residencia_estudiantes_salon_actos",
+      "organizerIds": [],
+      "seriesId": null,
+      "occurrences": [
+        {
+          "id": "occ_residencia_estudiantes_32405_01",
+          "date": "2026-11-22",
+          "time": "18:00",
+          "status": "scheduled"
+        }
+      ],
+      "performers": [
+        {
+          "name": "Vetus Carmina",
+          "role": "choir"
+        },
+        {
+          "name": "Arturo Moscoso",
+          "role": "conductor"
+        },
+        {
+          "name": "Madeleine Treilhou"
+        },
+        {
+          "name": "Sofía Chacón"
+        },
+        {
+          "name": "Iris Veestraeten"
+        },
+        {
+          "name": "Katelijne Malomgré"
+        },
+        {
+          "name": "Anna Dehaene"
+        },
+        {
+          "name": "Jan Van Elsacker"
+        },
+        {
+          "name": "Daniel Poncela"
+        },
+        {
+          "name": "Alejandro Barrientos-Rupérez"
+        },
+        {
+          "name": "Thomas Vandenabeele"
+        },
+        {
+          "name": "Marcos Molina"
+        },
+        {
+          "name": "Zep Heylen"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Johannes Ockeghem"
+        },
+        {
+          "name": "Antoine Busnois"
+        },
+        {
+          "name": "Andrés Poncela"
+        },
+        {
+          "name": "Cristóbal de Morales"
+        },
+        {
+          "name": "Jakob Obrecht"
+        },
+        {
+          "name": "Tomás Luis de Victoria"
+        },
+        {
+          "name": "Nicolas Gombert"
+        }
+      ],
+      "works": [
+        {
+          "title": "Kyrie de Fors seulement",
+          "composerName": "Johannes Ockeghem"
+        },
+        {
+          "title": "Gloria de L’homme armé",
+          "composerName": "Antoine Busnois"
+        },
+        {
+          "title": "Lamentaciones alrededor del fuego: I. Nos; II. Los sueños se enredan en nuestras gargantas; III. Hacia un cielo sin nombre",
+          "composerName": "Andrés Poncela"
+        },
+        {
+          "title": "Zain. Candidiores nazarei",
+          "composerName": "Cristóbal de Morales"
+        },
+        {
+          "title": "Mille quingentis",
+          "composerName": "Jakob Obrecht"
+        },
+        {
+          "title": "Sanctus de Ascendens Christus",
+          "composerName": "Tomás Luis de Victoria"
+        },
+        {
+          "title": "Tribulatio cordis mei",
+          "composerName": "Nicolas Gombert"
+        }
+      ],
+      "eras": [
+        "renaissance",
+        "contemporary"
+      ],
+      "formats": [
+        "choral"
+      ],
+      "kind": "alternative",
+      "access": "unknown",
+      "citations": [
+        {
+          "sourceId": "src_residencia_estudiantes",
+          "url": "https://residenciadeestudiantes.com/actividades/ecce-finem",
+          "checkedAt": "2026-11-10",
+          "externalId": "32405"
+        }
+      ],
+      "primarySourceId": "src_residencia_estudiantes",
+      "lastVerifiedAt": "2026-11-10"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "evt_auditorio_nacional_ojem_the_armed_man_20270609",
+      "slug": "orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+      "title": "Orquesta Juvenil Europea de Madrid. The Armed Man: A Mass For Peace",
+      "status": "scheduled",
+      "venueId": "ven_auditorio_nacional_sala_sinfonica",
+      "organizerIds": [],
+      "seriesId": null,
+      "occurrences": [
+        {
+          "id": "occ_auditorio_nacional_ojem_the_armed_man_20270609_01",
+          "date": "2027-06-09",
+          "time": "19:30",
+          "status": "scheduled"
+        }
+      ],
+      "performers": [
+        {
+          "name": "Orquesta Sinfónica OJEM",
+          "role": "orchestra"
+        },
+        {
+          "name": "Orquesta Junior LFM",
+          "role": "orchestra"
+        },
+        {
+          "name": "Escuela Coral OJEM",
+          "role": "choir"
+        },
+        {
+          "name": "Coros infantil y juvenil OJEM/LFM",
+          "role": "choir"
+        },
+        {
+          "name": "Adriana Tanus",
+          "role": "conductor"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Karl Jenkins"
+        }
+      ],
+      "works": [
+        {
+          "title": "The Armed Man: A Mass for Peace",
+          "composerName": "Karl Jenkins"
+        }
+      ],
+      "eras": [
+        "contemporary"
+      ],
+      "formats": [
+        "symphonic",
+        "choral"
+      ],
+      "kind": "established",
+      "access": "paid",
+      "citations": [
+        {
+          "sourceId": "src_auditorio_nacional",
+          "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+          "checkedAt": "2026-10-21",
+          "externalId": "orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace"
+        }
+      ],
+      "primarySourceId": "src_auditorio_nacional",
+      "lastVerifiedAt": "2026-10-21"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "evt_basilica_san_miguel_ecce_finem_20261121",
+      "slug": "ecce-finem-vetus-carmina-basilica-san-miguel",
+      "title": "Ecce finem — Vetus Carmina",
+      "status": "scheduled",
+      "venueId": "ven_basilica_pontificia_san_miguel",
+      "organizerIds": [],
+      "seriesId": null,
+      "occurrences": [
+        {
+          "id": "occ_basilica_san_miguel_ecce_finem_20261121_01",
+          "date": "2026-11-21",
+          "time": "19:30",
+          "status": "scheduled"
+        }
+      ],
+      "performers": [
+        {
+          "name": "Vetus Carmina",
+          "role": "choir"
+        },
+        {
+          "name": "Arturo Moscoso",
+          "role": "conductor"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Johannes Ockeghem"
+        },
+        {
+          "name": "Antoine Busnois"
+        },
+        {
+          "name": "Andrés Poncela"
+        },
+        {
+          "name": "Cristóbal de Morales"
+        },
+        {
+          "name": "Jakob Obrecht"
+        },
+        {
+          "name": "Tomás Luis de Victoria"
+        },
+        {
+          "name": "Nicolas Gombert"
+        }
+      ],
+      "works": [
+        {
+          "title": "Kyrie de Fors seulement",
+          "composerName": "Johannes Ockeghem"
+        },
+        {
+          "title": "Gloria de L’homme armé",
+          "composerName": "Antoine Busnois"
+        },
+        {
+          "title": "Lamentaciones alrededor del fuego: I. Nos; II. Los sueños se enredan en nuestras gargantas; III. Hacia un cielo sin nombre",
+          "composerName": "Andrés Poncela"
+        },
+        {
+          "title": "Zain. Candidiores nazarei",
+          "composerName": "Cristóbal de Morales"
+        },
+        {
+          "title": "Mille quingentis",
+          "composerName": "Jakob Obrecht"
+        },
+        {
+          "title": "Sanctus de Ascendens Christus",
+          "composerName": "Tomás Luis de Victoria"
+        },
+        {
+          "title": "Tribulatio cordis mei",
+          "composerName": "Nicolas Gombert"
+        }
+      ],
+      "eras": [
+        "renaissance",
+        "contemporary"
+      ],
+      "formats": [
+        "choral"
+      ],
+      "kind": "alternative",
+      "access": "paid",
+      "citations": [
+        {
+          "sourceId": "src_basilica_san_miguel",
+          "url": "https://basilicadesanmiguel.org/actividad/concierto-ecce-finem/",
+          "checkedAt": "2026-11-10",
+          "externalId": "4871"
+        },
+        {
+          "sourceId": "src_vivaticket_es",
+          "url": "https://www.vivaticket.es/ticket/eccefinem/ECCE1126",
+          "checkedAt": "2026-11-10",
+          "externalId": "ECCE1126"
+        }
+      ],
+      "primarySourceId": "src_vivaticket_es",
+      "lastVerifiedAt": "2026-11-10"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "evt_madrid_datos_50265531",
+      "slug": "iv-edicion-festival-alicia-de-larrocha",
+      "slugAliases": [
+        "victor-tretyakov-piano"
+      ],
+      "title": "IV Edición Festival Alicia de Larrocha",
+      "status": "scheduled",
+      "venueId": "ven_casa_vacas_retiro",
+      "organizerIds": [],
+      "seriesId": null,
+      "occurrences": [
+        {
+          "id": "occ_madrid_datos_50265531_01",
+          "date": "2026-09-12",
+          "time": "19:30",
+          "status": "scheduled"
+        }
+      ],
+      "performers": [
+        {
+          "name": "Victor Tretyakov"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Robert Schumann"
+        },
+        {
+          "name": "Frédéric Chopin"
+        },
+        {
+          "name": "Johannes Brahms"
+        },
+        {
+          "name": "Ludwig van Beethoven"
+        },
+        {
+          "name": "Maurice Ravel"
+        },
+        {
+          "name": "Franz Liszt"
+        },
+        {
+          "name": "Moritz Moszkowski"
+        }
+      ],
+      "works": [],
+      "eras": [
+        "classical",
+        "romantic",
+        "twentieth"
+      ],
+      "formats": [
+        "recital"
+      ],
+      "kind": "alternative",
+      "access": "free",
+      "citations": [
+        {
+          "sourceId": "src_ayuntamiento_madrid",
+          "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
+          "checkedAt": "2026-09-06",
+          "externalId": "50265531"
+        },
+        {
+          "sourceId": "src_fundacionpiumosso_com",
+          "url": "https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano",
+          "checkedAt": "2026-10-14",
+          "externalId": "2187"
+        }
+      ],
+      "primarySourceId": "src_ayuntamiento_madrid",
+      "lastVerifiedAt": "2026-10-14"
+    }
+  ],
+  "venues": [
+    {
+      "schemaVersion": 1,
+      "id": "ven_basilica_pontificia_san_miguel",
+      "slug": "basilica-pontificia-de-san-miguel",
+      "name": "Basílica Pontificia de San Miguel",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "address": "Calle de San Justo, 4, 28005 Madrid",
+      "url": "https://www.bsmiguel.es/",
+      "lastVerifiedAt": "2026-08-28"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ven_casa_vacas_retiro",
+      "slug": "casa-de-vacas-retiro",
+      "name": "Centro Cultural Casa de Vacas",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "address": "Paseo de Colombia, s/n, Parque de El Retiro, 28009 Madrid",
+      "url": "https://www.madrid.es/",
+      "lastVerifiedAt": "2026-08-28"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ven_auditorio_nacional_sala_sinfonica",
+      "slug": "auditorio-nacional-sala-sinfonica",
+      "name": "Auditorio Nacional de Música — Sala Sinfónica",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "address": "Calle del Príncipe de Vergara, 146, 28002 Madrid",
+      "url": "https://auditorionacional.inaem.gob.es/es",
+      "parentVenueId": "ven_auditorio_nacional",
+      "spaceName": "Sala Sinfónica",
+      "lastVerifiedAt": "2026-08-28"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ven_auditorio_nacional",
+      "slug": "auditorio-nacional-de-musica",
+      "name": "Auditorio Nacional de Música",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "address": "Calle del Príncipe de Vergara, 146, 28002 Madrid",
+      "url": "https://auditorionacional.inaem.gob.es/es",
+      "lastVerifiedAt": "2026-08-30"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ven_residencia_estudiantes",
+      "slug": "residencia-de-estudiantes",
+      "name": "Residencia de Estudiantes",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "address": "Calle del Pinar, 21-23, 28006 Madrid",
+      "url": "https://residenciadeestudiantes.com/",
+      "lastVerifiedAt": "2026-09-24"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ven_residencia_estudiantes_salon_actos",
+      "slug": "residencia-estudiantes-salon-actos",
+      "name": "Residencia de Estudiantes — Salón de actos",
+      "municipality": "Madrid",
+      "area": "madrid",
+      "parentVenueId": "ven_residencia_estudiantes",
+      "spaceName": "Salón de actos",
+      "lastVerifiedAt": "2026-10-21"
+    }
+  ],
+  "organizers": [],
+  "series": [],
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_vivaticket_es",
+      "slug": "vivaticket-espana",
+      "name": "Vivaticket España",
+      "kind": "official",
+      "url": "https://www.vivaticket.es/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_ayuntamiento_madrid",
+      "slug": "ayuntamiento-de-madrid",
+      "name": "Ayuntamiento de Madrid",
+      "kind": "official",
+      "url": "https://www.madrid.es/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_basilica_san_miguel",
+      "slug": "basilica-pontificia-de-san-miguel",
+      "name": "Basílica Pontificia de San Miguel",
+      "kind": "official",
+      "url": "https://basilicadesanmiguel.org/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_fundacionpiumosso_com",
+      "slug": "fundacion-piu-mosso",
+      "name": "Fundación Più Mosso",
+      "kind": "official",
+      "url": "https://www.fundacionpiumosso.com/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_residencia_estudiantes",
+      "slug": "residencia-de-estudiantes",
+      "name": "Residencia de Estudiantes",
+      "kind": "official",
+      "url": "https://residenciadeestudiantes.com/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_auditorio_nacional",
+      "slug": "auditorio-nacional-de-musica",
+      "name": "Auditorio Nacional de Música",
+      "kind": "official",
+      "url": "https://auditorionacional.inaem.gob.es/es"
+    }
+  ]
+}

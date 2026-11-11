@@ -216,7 +216,7 @@ export function reconcileHarvest(options: {
   }
 
   for (const item of shared) {
-    applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
+    applySharedSourceObservation(item, catalog, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
   }
 
   const freshGroups = groupNewObservations(fresh, catalog);
@@ -361,6 +361,7 @@ function applyExistingGroup(
 
 function applySharedSourceObservation(
   item: PreparedItem,
+  catalog: Catalog,
   now: Date,
   candidates: Candidate[],
   byIndex: Map<number, ObservationReconcile>,
@@ -399,10 +400,13 @@ function applySharedSourceObservation(
   for (const assignment of match.assigned) {
     if (!cancelAll && assignment.occurrences.length === 0) continue;
     const existing = assignment.event;
+    const venueId = preservePreciseVenue(item.proposal.venueId, existing.venueId, catalog.venues);
     seenEventIds.add(existing.id);
     eventIds.push(existing.id);
     const proposal: EventProposal = {
       ...item.proposal,
+      venueId,
+      venue: venueId === item.proposal.venueId ? item.proposal.venue : undefined,
       calendarEvidence: undefined, // A 1→N identity does not convey event-wide replacement authority.
       occurrences: cancelAll ? item.proposal.occurrences : assignment.occurrences,
     };
