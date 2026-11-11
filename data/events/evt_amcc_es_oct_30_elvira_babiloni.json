@@ -10,7 +10,7 @@
   "occurrences": [
     {
       "id": "occ_amcc_es_oct_30_elvira_babiloni_01",
-      "date": "2026-10-30",
+      "date": "2026-11-18",
       "time": "12:00",
       "status": "scheduled"
     }
@@ -76,10 +76,10 @@
     {
       "sourceId": "src_real_academia_bellas_artes_san_fernando",
       "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/coma26",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "coma26"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }
