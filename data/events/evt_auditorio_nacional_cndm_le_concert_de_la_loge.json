@@ -65,16 +65,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-le-concert-de-la-loge",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "cndm-le-concert-de-la-loge"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23813",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-12",
       "externalId": "23813"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

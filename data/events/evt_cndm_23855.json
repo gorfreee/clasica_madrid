@@ -31,6 +31,9 @@
     },
     {
       "name": "Òscar Colomina i Bosch"
+    },
+    {
+      "name": "Nino Rota"
     }
   ],
   "works": [
@@ -79,10 +82,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23855",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23855"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

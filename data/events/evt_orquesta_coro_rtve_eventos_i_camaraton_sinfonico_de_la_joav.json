@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_i_camaraton_sinfonico_de_la_joav",
+  "slug": "i-camaraton-sinfonico-de-la-joav",
+  "title": "I Camaratón Sinfónico de la Joav",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_i_camaraton_sinfonico_de_la_joav_01",
+      "date": "2026-11-22",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "l I Camaratón Sinfónico de la Joven Orquesta Allegro Vivace (JOAV) , bajo la direcciónartística de Coque Jiménez , ofrece una propuesta dedicada a la música de cámara como espacio de excelencia artística, colaboración y desarrollo musical para las nuevasgeneraciones de intérpretes."
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/i-camaraton-sinfonico-de-la-joav",
+      "checkedAt": "2026-11-12",
+      "externalId": "/eventos/i-camaraton-sinfonico-de-la-joav/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-11-12"
+}

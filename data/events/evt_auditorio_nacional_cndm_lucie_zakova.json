@@ -78,16 +78,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lucie-zakova",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "cndm-lucie-zakova"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23846",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-11-12",
       "externalId": "23846"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

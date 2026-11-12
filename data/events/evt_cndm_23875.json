@@ -36,7 +36,52 @@
       "name": "Ernesto Halffter"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Rondeña (1962)",
+      "composerName": "Regino Sainz de la Maza"
+    },
+    {
+      "title": "Canción y danza X (1953)",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "Canción y danza XIII (1972, arr. P. Mateo)",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "Canción y danza VI (1942, arr. A. Díaz y C. Trepat)",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "En los trigales (1938)",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Tiento antiguo (1942)",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Ya se van los pastores (1963)",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Española (1933)",
+      "composerName": "Rosa García Ascot"
+    },
+    {
+      "title": "Homenaje. Pour le tombeau de Claude Debussy (1920)",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Peacock pie (1923, arr. J. Riba)",
+      "composerName": "Ernesto Halffter"
+    },
+    {
+      "title": "Sonata (1933)",
+      "composerName": "Antonio José Martínez Palacios"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -49,10 +94,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23875",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23875"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

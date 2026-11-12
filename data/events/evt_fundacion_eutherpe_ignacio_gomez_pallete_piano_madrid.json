@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_eutherpe_ignacio_gomez_pallete_piano_madrid",
+  "slug": "ignacio-gomez-pallete-piano-madrid",
+  "title": "Ignacio Gómez-Pallete, piano (Madrid)",
+  "status": "scheduled",
+  "venueId": "ven_shigeru_kawai_center",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_eutherpe_ignacio_gomez_pallete_piano_madrid_01",
+      "date": "2027-02-04",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ignacio Gómez-Pallete"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Ferruccio Busoni"
+    },
+    {
+      "name": "S. Rachmaninoff"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano n°15 op.25 \"Pastorale\"",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Chaconaen Re menor, BWV 1004"
+    },
+    {
+      "title": "Prelude op.23 n°3 \"tempo di minuetto”",
+      "composerName": "S. Rachmaninoff"
+    },
+    {
+      "title": "Etude op.33 n°7",
+      "composerName": "S. Rachmaninoff"
+    },
+    {
+      "title": "Etude op.39 n°8",
+      "composerName": "S. Rachmaninoff"
+    },
+    {
+      "title": "Etude op.33 n°1",
+      "composerName": "S. Rachmaninoff"
+    },
+    {
+      "title": "Sonata n°2 op.36",
+      "composerName": "S. Rachmaninoff"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_eutherpe",
+      "url": "https://www.fundacioneutherpe.com/conciertos/ignacio-gomez-pallete-piano-madrid",
+      "checkedAt": "2026-11-12",
+      "externalId": "ignacio-gomez-pallete-piano-madrid"
+    }
+  ],
+  "primarySourceId": "src_fundacion_eutherpe",
+  "lastVerifiedAt": "2026-11-12"
+}

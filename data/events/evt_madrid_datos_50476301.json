@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50476301",
+  "slug": "tras-las-huellas-del-folclore-bartok-y-kodaly",
+  "title": "Tras las huellas del folclore: Bartók y Kodály",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6779450",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50476301_01",
+      "date": "2026-11-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=c525d4ffeb5a1a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-12",
+      "externalId": "50476301"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-12"
+}

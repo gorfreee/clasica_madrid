@@ -73,16 +73,16 @@
     {
       "sourceId": "src_tala_producciones_es",
       "url": "https://www.tala-producciones.es/salon-del-ateneo/kebyart-quartet-punto-di-fuga",
-      "checkedAt": "2026-09-21",
+      "checkedAt": "2026-11-12",
       "externalId": "1246"
     },
     {
       "sourceId": "src_ateneo_madrid",
       "url": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-kebyart-quartet-punto-di-fuga",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "64491"
     }
   ],
   "primarySourceId": "src_tala_producciones_es",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

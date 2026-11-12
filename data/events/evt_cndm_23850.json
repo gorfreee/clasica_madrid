@@ -21,8 +21,38 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Bernat CUCARELLA"
+    },
+    {
+      "name": "Adrián CRESPO"
+    },
+    {
+      "name": "Humberto DÍAZ"
+    },
+    {
+      "name": "Fran BARAJAS"
+    }
+  ],
+  "works": [
+    {
+      "title": "Apogeo (2026)",
+      "composerName": "Bernat CUCARELLA"
+    },
+    {
+      "title": "música de cambra (2026)",
+      "composerName": "Adrián CRESPO"
+    },
+    {
+      "title": "las casas que creamos, para seis instrumentos (2026)",
+      "composerName": "Humberto DÍAZ"
+    },
+    {
+      "title": "El olor de la guayaba 2c (2026)",
+      "composerName": "Fran BARAJAS"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
@@ -35,10 +65,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23850",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23850"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

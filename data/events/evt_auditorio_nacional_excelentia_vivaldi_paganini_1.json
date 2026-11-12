@@ -75,6 +75,9 @@
     {
       "title": "Carnival de Venice",
       "composerName": "Niccolò Paganini"
+    },
+    {
+      "title": "según San Mateo, BWV 244"
     }
   ],
   "eras": [
@@ -89,10 +92,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-vivaldi-paganini-1",
-      "checkedAt": "2026-11-01",
+      "checkedAt": "2026-11-12",
       "externalId": "excelentia-vivaldi-paganini-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-12"
 }

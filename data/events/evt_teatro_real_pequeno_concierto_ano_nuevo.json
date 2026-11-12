@@ -4,7 +4,7 @@
   "slug": "pequeno-concierto-de-ano-nuevo",
   "title": "Pequeño concierto de Año Nuevo",
   "status": "scheduled",
-  "venueId": "ven_real_teatro_retiro",
+  "venueId": "ven_real_teatro_retiro_sala_principal",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
@@ -37,10 +37,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/pequeno-concierto-ano-nuevo",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "pequeno-concierto-ano-nuevo"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

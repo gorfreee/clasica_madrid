@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_orcam_4960",
+  "slug": "concierto-de-navidad-un-dia-en-canciones-2",
+  "title": "Concierto de Navidad: Un día en canciones",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_orcam_4960_01",
+      "date": "2026-12-05",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_orcam_4960_02",
+      "date": "2026-12-06",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pequeños Cantores de la ORCAM"
+    },
+    {
+      "name": "Álvaro Martín"
+    },
+    {
+      "name": "Ana Hernández"
+    },
+    {
+      "name": "Ana González",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "David Azurza"
+    },
+    {
+      "name": "Bob Chilcott"
+    },
+    {
+      "name": "Ēriks Ešenvalds"
+    },
+    {
+      "name": "Ana González"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Joan Rigol"
+    },
+    {
+      "name": "Albert Hernández"
+    },
+    {
+      "name": "Karl Friedrich Zöllner"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Leroy Anderson"
+    },
+    {
+      "name": "Henry Mancini"
+    },
+    {
+      "name": "Silvestre Peñas Echeverría"
+    }
+  ],
+  "works": [
+    {
+      "title": "El perro de San Roque",
+      "composerName": "David Azurza"
+    },
+    {
+      "title": "Can you hear me?",
+      "composerName": "Bob Chilcott"
+    },
+    {
+      "title": "Trees",
+      "composerName": "Ēriks Ešenvalds"
+    },
+    {
+      "title": "Los números",
+      "composerName": "Ana González"
+    },
+    {
+      "title": "El cisne",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "La pelota",
+      "composerName": "Joan Rigol"
+    },
+    {
+      "title": "Calipso",
+      "composerName": "Albert Hernández"
+    },
+    {
+      "title": "Menudo menú!",
+      "composerName": "Karl Friedrich Zöllner"
+    },
+    {
+      "title": "Vamos a dar un concierto",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Plink, plank, plunk",
+      "composerName": "Leroy Anderson"
+    },
+    {
+      "title": "The Pink Panther",
+      "composerName": "Henry Mancini"
+    },
+    {
+      "title": "Navidad"
+    },
+    {
+      "title": "Ro mi niño",
+      "composerName": "Silvestre Peñas Echeverría"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/concierto-de-navidad-un-dia-de-canciones",
+      "checkedAt": "2026-11-12",
+      "externalId": "4960"
+    }
+  ],
+  "primarySourceId": "src_fundacion_orcam",
+  "lastVerifiedAt": "2026-11-12"
+}

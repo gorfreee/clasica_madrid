@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_87362",
+  "slug": "clasicos-divertidos-occident-el-cascanueces-grunon-6",
+  "title": "Clásicos Divertidos «Occident»: El Cascanueces gruñón",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_87362_01",
+      "date": "2026-12-13",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/clasicos-divertidos-occident-el-cascanueces-grunon-6",
+      "checkedAt": "2026-11-12",
+      "externalId": "87362"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-12"
+}

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_premio_infantil_de_piano_santa_cecilia_premio_hazen",
+  "slug": "premio-infantil-de-piano-santa-cecilia-premio-hazen",
+  "title": "Premio Infantil de Piano Santa Cecilia – Premio Hazen",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_premio_infantil_de_piano_santa_cecilia_premio_hazen_01",
+      "date": "2026-12-02",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Felix Mendelsshon"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    },
+    {
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
+  "works": [
+    {
+      "title": "Variaciones serias, Op. 54 en Re menor",
+      "composerName": "Felix Mendelsshon"
+    },
+    {
+      "title": "Preludio, Op. 23 nº 3 en Re menor",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Preludio, Op. 23 nº 5 en Sol menor",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "piano",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Sonata en Re menor, K. 141",
+      "composerName": "Domenico Scarlatti"
+    },
+    {
+      "title": "Estudio, Op. 25 nº 2",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Sonatina",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "piano",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "Preludio y Fuga BWV 866",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Un sospiro",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Estudio de Concierto, nº 3 “Un sospiro”",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Scherzo, Op. 31 nº 2",
+      "composerName": "Frédéric Chopin"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/premio-infantil-de-piano-santa-cecilia-premio-hazen",
+      "checkedAt": "2026-11-12",
+      "externalId": "premio-infantil-de-piano-santa-cecilia-premio-hazen"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-11-12"
+}

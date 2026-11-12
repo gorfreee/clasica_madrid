@@ -35,6 +35,15 @@
     },
     {
       "name": "Frederic Mompou"
+    },
+    {
+      "name": "Miguel Huertas-Camacho"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Xavier Montsalvatge"
     }
   ],
   "works": [
@@ -113,7 +122,7 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23798",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23798"
     },
     {
@@ -124,5 +133,5 @@
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

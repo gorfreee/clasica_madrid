@@ -74,8 +74,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid",
-      "checkedAt": "2026-10-21",
-      "externalId": "4a109642fd4845adbe1183b60720a4e1"
+      "checkedAt": "2026-11-12",
+      "externalId": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid"
     },
     {
       "sourceId": "src_amcc_es",
@@ -84,5 +84,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-12"
 }

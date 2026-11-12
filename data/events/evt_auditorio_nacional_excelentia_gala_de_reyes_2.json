@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_gala_de_reyes_2",
+  "slug": "excelentia-gala-de-reyes",
+  "title": "Excelentia. Gala de Reyes",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_gala_de_reyes_2_01",
+      "date": "2027-01-03",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ruth Terán"
+    },
+    {
+      "name": "Miguel Borrallo"
+    },
+    {
+      "name": "Manuel Mas"
+    },
+    {
+      "name": "Sergio Kuhlmann"
+    },
+    {
+      "name": "«Il Bacio» de L. Arditi"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-gala-de-reyes-2",
+      "checkedAt": "2026-11-12",
+      "externalId": "excelentia-gala-de-reyes-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-12"
+}

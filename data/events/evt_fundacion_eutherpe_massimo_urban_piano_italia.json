@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_eutherpe_massimo_urban_piano_italia",
+  "slug": "massimo-urban-piano-italia",
+  "title": "Massimo Urbán, piano (Italia)",
+  "status": "scheduled",
+  "venueId": "ven_shigeru_kawai_center",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_eutherpe_massimo_urban_piano_italia_01",
+      "date": "2027-05-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Massimo Urbán"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "R. Schumann"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "M. Urban"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata n. 27 op. 90 –15 minuti",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Allegro op. 8 – 12 minuti",
+      "composerName": "R. Schumann"
+    },
+    {
+      "title": "Notturno op. 9 n. 2 –5 minuti",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Grande Studio da Paganini S 161 n. 5, La Caccia - 5 min",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Improvvisazioni - 10 minuti",
+      "composerName": "M. Urban"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_eutherpe",
+      "url": "https://www.fundacioneutherpe.com/conciertos/massimo-urban-piano-italia",
+      "checkedAt": "2026-11-12",
+      "externalId": "massimo-urban-piano-italia"
+    }
+  ],
+  "primarySourceId": "src_fundacion_eutherpe",
+  "lastVerifiedAt": "2026-11-12"
+}

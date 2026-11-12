@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_la_7_a_de_beethoven_necko_vidal",
+  "slug": "la-7-de-beethoven-necko-vidal",
+  "title": "La 7.ª de Beethoven & Necko Vidal",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_la_7_a_de_beethoven_necko_vidal_01",
+      "date": "2026-11-22",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lucía Abad"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Valencia"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "early-music",
+    "symphonic",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/la-7-a-de-beethoven-necko-vidal",
+      "checkedAt": "2026-11-12",
+      "externalId": "/eventos/la-7-a-de-beethoven-necko-vidal/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-11-12"
+}

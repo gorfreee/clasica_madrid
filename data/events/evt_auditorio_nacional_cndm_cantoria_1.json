@@ -48,16 +48,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cantoria-1",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "cndm-cantoria-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23827",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-12",
       "externalId": "23827"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

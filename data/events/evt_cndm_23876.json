@@ -29,9 +29,42 @@
   "composers": [
     {
       "name": "Roberto Gerhard"
+    },
+    {
+      "name": "Adolfo Salazar"
+    },
+    {
+      "name": "Evaristo Fernández Blanco"
+    },
+    {
+      "name": "Juan José Mantecón"
+    },
+    {
+      "name": "José María Franco Bordons"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Arabia , boceto para piano y cuarteto de cuerda (1923)",
+      "composerName": "Adolfo Salazar"
+    },
+    {
+      "title": "Trío para violín, violonchelo y piano n.º 2 en la bemol mayor (1918-1919)",
+      "composerName": "Roberto Gerhard"
+    },
+    {
+      "title": "Trío para violín, violonchelo y piano en do mayor (1928)",
+      "composerName": "Evaristo Fernández Blanco"
+    },
+    {
+      "title": "Lento y elegiaco. Con sentimiento romántico, de Quinteto n.º 1 (1923)",
+      "composerName": "Juan José Mantecón"
+    },
+    {
+      "title": "Impresiones españolas , para quinteto, op. 21 (1923)",
+      "composerName": "José María Franco Bordons"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -45,10 +78,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23876",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-12",
       "externalId": "23876"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-12"
 }

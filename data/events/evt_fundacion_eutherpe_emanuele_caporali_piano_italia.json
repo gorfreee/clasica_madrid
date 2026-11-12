@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_eutherpe_emanuele_caporali_piano_italia",
+  "slug": "emanuele-caporali-piano-italia",
+  "title": "Emanuele Caporali, piano (Italia)",
+  "status": "scheduled",
+  "venueId": "ven_shigeru_kawai_center",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_eutherpe_emanuele_caporali_piano_italia_01",
+      "date": "2027-01-14",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Emanuele Caporali"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johan Sebastian Bach"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Serguéi Prokófiev"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio e fuga no.22 in sib min",
+      "composerName": "Johan Sebastian Bach"
+    },
+    {
+      "title": "Barcarola op.60",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Rapsodia Spagnola (Basada en la Nueva Jota Aragonesa,op.23, de Florencio Lahoz)",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Sonatanº8 op.84 en Si bM",
+      "composerName": "Serguéi Prokófiev"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_eutherpe",
+      "url": "https://www.fundacioneutherpe.com/conciertos/emanuele-caporali-piano-italia",
+      "checkedAt": "2026-11-12",
+      "externalId": "emanuele-caporali-piano-italia"
+    }
+  ],
+  "primarySourceId": "src_fundacion_eutherpe",
+  "lastVerifiedAt": "2026-11-12"
+}

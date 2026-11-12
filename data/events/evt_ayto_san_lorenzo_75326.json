@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_75326",
+  "slug": "concierto-festival-abantos-barroco-concierto-tocando-y-contando-a-bach-guillerm-gracia",
+  "title": "Concierto: Festival Abantos Barroco. Concierto Tocando y contando a Bach: Guillerm Grácia",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_75326_01",
+      "date": "2026-11-21",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-festival-abantos-barroco-concierto-tocado-y-contando-a-bach-guillerm-gracia",
+      "checkedAt": "2026-11-12",
+      "externalId": "75326"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-11-12"
+}
