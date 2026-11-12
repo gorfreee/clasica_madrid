@@ -52,3 +52,9 @@ Las URLs HTML con `?page=1` repiten la página cero; no se utilizan como prueba 
 
 Los workflows de sonda sólo existen temporalmente en el historial de la PR.
 La validación definitiva y el SHA probado quedan enlazados en su descripción.
+
+4. [Validación definitiva 43248803116](https://github.com/gorfreee/clasica_madrid/actions/runs/43248803116),
+   [artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43248803116/artifacts/13957228721),
+   código `5cde0534fbf37e4ebfd96b0b0cccd216078a08c2`: mismo dry-run real y prueba
+   adicional del endpoint Views GET con la programación general. Ambos pasos
+   correctos. Incluye `report.json`, `run.json`, `events.jsonl` y la respuesta AJAX.

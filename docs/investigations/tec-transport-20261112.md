@@ -98,6 +98,13 @@ que la clasificación descarta o mantiene inciertos. No se presentan como 15 alt
 clásicas. Health `degraded`: cobertura desconocida y taxonomía pendiente. Las fuentes
 no tienen fallos técnicos. [Fixtures, hashes y resultados HTTP](../../tests/fixtures/ingestion/cdcm/README.md).
 
+La [validación definitiva 43248803116](https://github.com/gorfreee/clasica_madrid/actions/runs/43248803116),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43248803116/artifacts/13957228721),
+ejecuta el código `5cde0534fbf37e4ebfd96b0b0cccd216078a08c2`: repite ese dry-run y
+comprueba además el GET Views de la programación general desde Actions. Ambos
+pasos son correctos. La última limpieza sólo retira las sondas temporales y añade
+estos enlaces; no modifica el código operativo ya probado.
+
 ## Validación y límites
 
 Tests positivos y negativos para ambas fuentes, cliente curl, calendario y zona
