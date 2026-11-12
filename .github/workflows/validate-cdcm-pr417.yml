@@ -52,6 +52,7 @@ jobs:
           assert not summary['sourcesFailed'], summary['sourcesFailed']
           assert summary['detailHydrationFailed'] == 0, summary['detailHydrationFailed']
           assert summary['possiblyMissing'] == 0
+          assert summary['ambiguous'] == 0, summary['ambiguous']
           for source in summary['sourceResults'].values():
               assert source['usable'] and source['temporalCoverage']['status'] == 'unknown'
               assert not source['disappearanceEligible']

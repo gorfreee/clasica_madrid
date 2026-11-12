@@ -15,7 +15,22 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Luis Miguel Méndez Chaves",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    },
+    {
+      "name": "Joven Orquesta de la Comunidad de Madrid (JORCAM)"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid (ORCAM)"
+    }
+  ],
   "composers": [
     {
       "name": "Ludwig van Beethoven"
@@ -38,8 +53,13 @@
       "url": "https://www.teatroscanal.com/espectaculo/sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid",
       "checkedAt": "2026-10-11",
       "externalId": "99117"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/joven-orquesta-comunidad-madrid-coro-comunidad-madrid",
+      "checkedAt": "2026-11-13"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-13"
 }

@@ -30,8 +30,13 @@
       "url": "https://www.teatroscanal.com/espectaculo/joven-camerata-de-la-orcam-concierto-fin-de-curso",
       "checkedAt": "2026-10-11",
       "externalId": "99906"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/joven-camerata-orcam-1",
+      "checkedAt": "2026-11-13"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-13"
 }

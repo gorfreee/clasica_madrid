@@ -28,9 +28,29 @@
     },
     {
       "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Javier Alfonso"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Sonata en Fa mayor, KV 533/494",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Fantasía en Do mayor, op. 17",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "El Albaicín",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Preludio y tocata",
+      "composerName": "Javier Alfonso"
+    }
+  ],
   "eras": [
     "baroque",
     "classical",
@@ -47,8 +67,13 @@
       "url": "https://www.teatroscanal.com/espectaculo/la-nota-silenciosa-laura-sierra-piano",
       "checkedAt": "2026-10-11",
       "externalId": "99597"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/laura-sierra-piano",
+      "checkedAt": "2026-11-13"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-13"
 }

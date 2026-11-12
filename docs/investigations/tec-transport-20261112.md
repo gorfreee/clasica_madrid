@@ -118,3 +118,44 @@ merge. Puede cambiar decisiones de clasificación; no cambia los hechos descarga
 El sitio puede volver a modificar su HTML o su política de acceso: esos casos
 siguen fallando de forma visible y conservan los eventos existentes. El entorno
 operativo necesita curl, incluido en los runners Ubuntu actuales de GitHub.
+
+## Seguimiento de publicación: PR #417
+
+La [publicación 43258972050](https://github.com/gorfreee/clasica_madrid/actions/runs/43258972050)
+leyó ambos listados, pero siete fichas de Canal devolvieron HTTP 502. Se conservaron
+los eventos publicados y no se evaluaron desapariciones. El problema ya no era el
+403 del antiguo WordPress: las fichas CDCM no tenían reintento de transporte.
+Ambos adapters reutilizan ahora la política conservadora del listing: un único
+reintento tras 750 ms ante error transitorio. El parseo queda fuera del reintento;
+un HTML bloqueado, identidad o calendario contradictorio sigue fallando.
+
+La primera repetición con el código corregido, [43325769698](https://github.com/gorfreee/clasica_madrid/actions/runs/43325769698),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43325769698/artifacts/13992901697),
+ejecutó la CLI de `e9626907b171e0e72674ffdb1d4f4ecf3f347845` en Node 22 y
+ubuntu-latest, con el pool Gemini habilitado y límite de 30 peticiones de IA.
+Trabajó sobre una copia aislada del catálogo de #417, sin publicar ni modificar
+el catálogo del checkout. Recuperó las 15 observaciones, con cero fallos HTTP,
+cero fichas fallidas y ambas fuentes utilizables. Todos los GET devolvieron 200:
+esta repetición verifica acceso y parser operativos, pero no contiene una
+recuperación de 502 real. Los tests inyectan 502 → 200 a través de getText/curl,
+comprueban memoización, espera, límite y contadores de intentos.
+
+La repetición detectó además un falso conflicto de Grupo Enigma después de guardar
+su URL nueva: la comparación genérica de créditos retenía el evento pese al alias
+revisado. El alias sigue vigente para su evento y fecha, antes y después de guardar
+la cita; no elimina conflictos con otro evento ni evita las protecciones de fuentes
+que reciclan identidades. Una fecha de otra temporada sigue sin usar el alias.
+El test de identidad usa ahora un catálogo controlado en lugar del catálogo mutable.
+
+Se revisaron las cinco propuestas de datos de esta repetición. Se incorporan las
+citas faltantes del dúo García/Morinière, las dos agrupaciones jóvenes de ORCAM y
+Laura Sierra, junto a los intérpretes y obras explícitos de las fichas. Se conserva
+el programa canónico de Donde nace la voz: se rechaza añadir Lucio Quarantotto como
+compositor de Con te partirò. La fuente mezcla créditos de autoría; la
+[web oficial de Francesco Sartori](https://francescosartori.net/canzoni-colonne-sonore/)
+incluye esta obra entre sus músicas. Esta revisión no fuerza una nueva atribución
+ni utiliza la clasificación de IA para corregir los datos musicales.
+
+Las decisiones inciertas de IA no crean eventos nuevos ni despublican los existentes.
+La cobertura de ambas fuentes sigue siendo `unknown`; recuperar todas las fichas
+del listado actual no acredita el calendario completo de la temporada.

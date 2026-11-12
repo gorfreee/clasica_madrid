@@ -220,10 +220,10 @@ describe('CDCM: programación y fichas actuales', () => {
   it('el alias de migración sólo une la fecha acreditada, sin depender del catálogo mutable', async () => {
     const raw = await sample('grupo-enigma-0');
     const event = makeEvent({
-      id: 'evt_teatros_canal_100116_2026_12_02', title: 'Grupo Enigma',
+      id: 'evt_teatros_canal_100116_2026_12_02', title: 'XVII Festival de Ensembles: Grupo Enigma',
       venueId: 'ven_teatros_canal_sala_verde',
       occurrences: [{ id: 'occ_enigma_20261202', date: '2026-12-02', time: '19:30', status: 'scheduled' }],
-      performers: [], composers: [], works: [],
+      performers: [{ name: 'Grupo Enigma' }], composers: [], works: [],
       citations: [{ sourceId: 'src_teatros_canal', url: 'https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026', checkedAt: '2026-09-08' }],
       primarySourceId: 'src_teatros_canal',
     });
@@ -238,7 +238,13 @@ describe('CDCM: programación y fichas actuales', () => {
     // After ingestion persists the new citation, URL identity must still withhold
     // a different season for review, rather than accepting it through the alias.
     const migrated = { ...catalog, events: [{ ...event, citations: [...event.citations, { sourceId: 'src_teatros_canal', url: raw.sourceUrl, checkedAt: '2026-11-12' }] }] };
+    const detail = parseCdcmDetail(raw, await fixture('grupo-enigma-0'));
+    const current = { ...observed, performers: detail.performers };
+    expect(matchEventIdentity(migrated, current, options)).toMatchObject({ kind: 'matched', method: 'alias', event: { id: event.id } });
+    expect(matchEventIdentity(migrated, current, { ...options, aliases: [] }).kind).toBe('ambiguous');
     expect(matchEventIdentity(migrated, nextYear, options)).toMatchObject({ kind: 'ambiguous', reason: expect.stringContaining('source-identity-review') });
     expect(matchEventIdentity(migrated, nextYear, { ...options, aliases: [] }).kind).toBe('ambiguous');
+    const competing = { ...migrated, events: [...migrated.events, { ...migrated.events[0]!, id: 'evt_enigma_competing', title: 'Grupo Enigma', performers: detail.performers ?? [] }] };
+    expect(matchEventIdentity(competing, current, options).kind).toBe('ambiguous');
   });
 });

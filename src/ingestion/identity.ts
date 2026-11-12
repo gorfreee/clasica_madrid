@@ -227,7 +227,11 @@ function guardSourceHits(
       observed, hit.event, options.venueId, hit.event.venueId, relation,
     );
     if (verdict === 'compatible') accepted.push(hit);
-    if (verdict === 'review') reviews.push(hit);
+    // Persisting the new URL must not undo an already reviewed alias for this
+    // exact event. Keep reviews for competing events and recyclable sources;
+    // date-bound aliases have already rejected missing/different-season dates.
+    const reviewedAlias = !recyclable && hits.some(other => other.method === 'alias' && other.event.id === hit.event.id);
+    if (verdict === 'review' && !reviewedAlias) reviews.push(hit);
     if (verdict === 'incompatible' && !recyclable) rejected.push(hit);
   }
   // A stale external ID competing with an independent strong match remains

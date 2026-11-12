@@ -15,7 +15,14 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Thibaut Garcia"
+    },
+    {
+      "name": "Antoine Morinière"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [
@@ -32,8 +39,13 @@
       "url": "https://www.teatroscanal.com/espectaculo/thibaut-garcia-antoine-moriniere-variaciones-goldberg",
       "checkedAt": "2026-10-11",
       "externalId": "99084"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/duo-thibaut-garcia-antoine-moriniere",
+      "checkedAt": "2026-11-13"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-13"
 }
