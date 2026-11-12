@@ -102,8 +102,8 @@ La [validación definitiva 43248803116](https://github.com/gorfreee/clasica_madr
 [artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43248803116/artifacts/13957228721),
 ejecuta el código `5cde0534fbf37e4ebfd96b0b0cccd216078a08c2`: repite ese dry-run y
 comprueba además el GET Views de la programación general desde Actions. Ambos
-pasos son correctos. La última limpieza sólo retira las sondas temporales y añade
-estos enlaces; no modifica el código operativo ya probado.
+pasos son correctos. La última limpieza sólo retira las sondas temporales, normaliza la sangría
+de fixtures y añade estos enlaces; no modifica el código operativo ya probado.
 
 ## Validación y límites
 

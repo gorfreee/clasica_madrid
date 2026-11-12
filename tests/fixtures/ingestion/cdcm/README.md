@@ -18,7 +18,7 @@ en canonical/schema de la misma ruta; todas las peticiones y citas usan el domin
 Los HTML son extractos estructurales: conservan canonical, JSON-LD, configuración
 Views y contenido de `main`, incluidos calendario, programa, reparto, sala y
 recomendaciones ajenas a la ficha. Se omiten imágenes/SVG y líneas vacías; se
-eliminan espacios al final de línea. No se modifican hechos ni se inventan eventos.
+eliminan espacios al final de línea y se normalizan tabulaciones de sangría. No se modifican hechos ni se inventan eventos.
 Los tests de paginación reparten las tarjetas reales en páginas sintéticas;
 las mutaciones de error son explícitas y no se atribuyen a la web.
 
