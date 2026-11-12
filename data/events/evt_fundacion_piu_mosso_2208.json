@@ -21,11 +21,7 @@
     }
   ],
   "composers": [],
-  "works": [
-    {
-      "title": "Alumnos del profesor Francisco Fierro"
-    }
-  ],
+  "works": [],
   "eras": [],
   "formats": [
     "recital"
@@ -42,8 +38,7 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-11-12",
-      "externalId": "50265531"
+      "checkedAt": "2026-11-12"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",

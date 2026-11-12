@@ -15,13 +15,13 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [
+  "performers": [
     {
-      "title": "Alumnado de piano del CPM Joaquín Turnia"
+      "name": "Alumnado de piano del CPM Joaquín Turina"
     }
   ],
+  "composers": [],
+  "works": [],
   "eras": [],
   "formats": [
     "recital"
