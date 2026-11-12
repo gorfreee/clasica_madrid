@@ -59,6 +59,9 @@
     },
     {
       "name": "Charles Gounod"
+    },
+    {
+      "name": "Paul Puget"
     }
   ],
   "works": [
@@ -148,10 +151,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23794",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23794"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

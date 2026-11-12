@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_i_camaraton_sinfonico_de_la_joav",
+  "slug": "i-camaraton-sinfonico-de-la-joav",
+  "title": "I Camaratón Sinfónico de la Joav",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_i_camaraton_sinfonico_de_la_joav_01",
+      "date": "2026-11-22",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joven Orquesta Allegro Vivace (JOAV)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Franz Doppler"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Irving Berlin"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Ernst von Dohnányi"
+    },
+    {
+      "name": "Gustav Holst"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Felix Mendelssohn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Morgen, op. 27",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Fantasía sobre aires húngaros, op. 35",
+      "composerName": "Franz Doppler"
+    },
+    {
+      "title": "Cuarteto de cuerda en do mayor, op. 76 n.º 3 «Emperador»: II. Poco adagio",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Trío con piano n.º 1 en si mayor, op. 8: I. Allegro con brio",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Serenata para instrumentos de viento, op. 44: I, II y III",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Puttin’ on the Ritz",
+      "composerName": "Irving Berlin"
+    },
+    {
+      "title": "Five Pieces for Two Violins and Piano",
+      "composerName": "Dmitri Shostakóvich"
+    },
+    {
+      "title": "Rapsodia húngara n.º 2 (arr. Luke)",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Quinteto con piano n.º 1 en do menor, op. 1: I. Allegro",
+      "composerName": "Ernst von Dohnányi"
+    },
+    {
+      "title": "St. Paul’s Suite, op. 29",
+      "composerName": "Gustav Holst"
+    },
+    {
+      "title": "Danse macabre, op. 40 (piano a cuatro manos)",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Octeto de cuerda en mi bemol mayor, op. 20: I. Allegro",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 8 en do menor, op. 110",
+      "composerName": "Dmitri Shostakóvich"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/i-camaraton-sinfonico-de-la-joav",
+      "checkedAt": "2026-11-12",
+      "externalId": "/eventos/i-camaraton-sinfonico-de-la-joav/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-11-12"
+}

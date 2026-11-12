@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_eutherpe_duo_antonio_ortiz_violin_y_antonio_ortiz_piano_espana",
+  "slug": "duo-antonio-ortiz-violin-y-antonio-ortiz-piano-espana",
+  "title": "DÚO: Antonio Ortiz, violín y Antonio Ortiz, piano (España)",
+  "status": "scheduled",
+  "venueId": "ven_shigeru_kawai_center",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_eutherpe_duo_antonio_ortiz_violin_y_antonio_ortiz_piano_espana_01",
+      "date": "2027-04-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Fritz Kreisler"
+    },
+    {
+      "name": "Pablo de Sarasate"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata nº 5 Op. 24 en Fa M",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Introducción y Rondó Caprichoso Op.28",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Old Viennese Dance nº2, Liebesleid",
+      "composerName": "Fritz Kreisler"
+    },
+    {
+      "title": "Aires Gitanos",
+      "composerName": "Pablo de Sarasate"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_eutherpe",
+      "url": "https://www.fundacioneutherpe.com/conciertos/duo-antonio-ortiz-violin-y-antonio-ortiz-piano-espana",
+      "checkedAt": "2026-11-12",
+      "externalId": "duo-antonio-ortiz-violin-y-antonio-ortiz-piano-espana"
+    }
+  ],
+  "primarySourceId": "src_fundacion_eutherpe",
+  "lastVerifiedAt": "2026-11-12"
+}

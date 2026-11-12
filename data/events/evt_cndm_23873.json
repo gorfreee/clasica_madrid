@@ -25,9 +25,29 @@
     },
     {
       "name": "Fernando Remacha"
+    },
+    {
+      "name": "María de Pablos"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 3, op. 22 (1958)",
+      "composerName": "Julián Bautista"
+    },
+    {
+      "title": "Sonata romántica para cuarteto de cuerda en la menor (1929)",
+      "composerName": "María de Pablos"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 2, op. 14 (1932)",
+      "composerName": "Salvador Bacarisse"
+    },
+    {
+      "title": "Cuarteto de cuerda (1924)",
+      "composerName": "Fernando Remacha"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -40,10 +60,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23873",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23873"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

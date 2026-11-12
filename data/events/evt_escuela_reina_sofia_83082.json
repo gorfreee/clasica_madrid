@@ -15,10 +15,94 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Cuarteto Goldberg"
+    },
+    {
+      "name": "Giacomo Lucato"
+    },
+    {
+      "name": "Jingzhi Zhang"
+    },
+    {
+      "name": "Matilde Simionato"
+    },
+    {
+      "name": "Martino Simionato"
+    },
+    {
+      "name": "Cuarteto Citadelle"
+    },
+    {
+      "name": "Meiko Nakahira"
+    },
+    {
+      "name": "Raphaël Garac"
+    },
+    {
+      "name": "Paolo Nicolas Schena"
+    },
+    {
+      "name": "Pauline Solange Eliane Boudon"
+    },
+    {
+      "name": "Trio Archai"
+    },
+    {
+      "name": "Ayla Sahin"
+    },
+    {
+      "name": "Finn Mannion"
+    },
+    {
+      "name": "Mar Valor Navarro"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Anton Webern"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda núm. 31 en si menor H III: 37 op 33 núm. 1",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "5 Movimientos para cuarteto de cuerda op 5",
+      "composerName": "Anton Webern"
+    },
+    {
+      "title": "Cuarteto de cuerda en re menor K 421",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Cuarteto de cuerda en mi bemol mayor op 74 \"Las arpas\"",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Trío con piano en re menor op 120",
+      "composerName": "Gabriel Fauré"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "chamber"
   ],
@@ -28,10 +112,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas-5",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-12",
       "externalId": "83082"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-12"
 }

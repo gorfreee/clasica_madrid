@@ -33,9 +33,33 @@
     },
     {
       "name": "Unsuk Chin"
+    },
+    {
+      "name": "Konstantia Gourzi"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Psalom (1985-1995)",
+      "composerName": "Arvo Pärt"
+    },
+    {
+      "title": "Concierto para piano (1951)",
+      "composerName": "Roberto Gerhard"
+    },
+    {
+      "title": "Im Frühlingsgarten , para nueve músicos (2002)",
+      "composerName": "Toshio Hosokawa"
+    },
+    {
+      "title": "Puzzles and games from ‘Alice in Wonderland’ (2017, arr. 2019)",
+      "composerName": "Unsuk Chin"
+    },
+    {
+      "title": "Helios (2026)",
+      "composerName": "Konstantia Gourzi"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
@@ -48,10 +72,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23857",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23857"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

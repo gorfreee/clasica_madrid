@@ -19,9 +19,39 @@
   "composers": [
     {
       "name": "Óscar Esplá"
+    },
+    {
+      "name": "José Ramón Moreno Gans"
+    },
+    {
+      "name": "Carlos Palacio"
+    },
+    {
+      "name": "Josu de Solaun"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Suite para piano en si menor (1939)",
+      "composerName": "José Ramón Moreno Gans"
+    },
+    {
+      "title": "Levante. Melodías y temas de danzas (1931)",
+      "composerName": "Óscar Esplá"
+    },
+    {
+      "title": "De España en mi corazón (1950-1970)",
+      "composerName": "Carlos Palacio"
+    },
+    {
+      "title": "Sonatina de ayer",
+      "composerName": "Carlos Palacio"
+    },
+    {
+      "title": "El soliloquio del farero (2026)",
+      "composerName": "Josu de Solaun"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -35,10 +65,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23874",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-12",
       "externalId": "23874"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

@@ -51,16 +51,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-celine-frisch",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-12",
       "externalId": "cndm-celine-frisch"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23840",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-12",
       "externalId": "23840"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-12"
 }

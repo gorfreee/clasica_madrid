@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_a_tempo_dce4e14f_5477_46e9_bfe8_ee455176e20e",
+  "slug": "recital-de-piano-solo-isabel-anders",
+  "title": "Recital de Piano-Solo Isabel Anders",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_a_tempo_dce4e14f_5477_46e9_bfe8_ee455176e20e_01",
+      "date": "2026-12-06",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/post/recital-de-piano-solo-isabel-anders",
+      "checkedAt": "2026-11-12",
+      "externalId": "dce4e14f-5477-46e9-bfe8-ee455176e20e"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-11-12"
+}

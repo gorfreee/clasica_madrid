@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_eutherpe_carlota_galli_italia",
+  "slug": "carlota-galli-italia",
+  "title": "Carlota Galli (Italia)",
+  "status": "scheduled",
+  "venueId": "ven_shigeru_kawai_center",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_eutherpe_carlota_galli_italia_01",
+      "date": "2027-06-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carlota Galli"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Maurice Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasia in Fa diesis minore op.28",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Ballata op. 52 n 4",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Gaspard de la nuit",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Ondine",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Le gibet",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Scarbo",
+      "composerName": "Maurice Ravel"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_eutherpe",
+      "url": "https://www.fundacioneutherpe.com/conciertos/carlota-galli-italia",
+      "checkedAt": "2026-11-12",
+      "externalId": "carlota-galli-italia"
+    }
+  ],
+  "primarySourceId": "src_fundacion_eutherpe",
+  "lastVerifiedAt": "2026-11-12"
+}

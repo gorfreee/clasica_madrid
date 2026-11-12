@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_87351",
+  "slug": "clasicos-divertidos-occident-el-cascanueces-grunon",
+  "title": "Clásicos Divertidos «Occident»: El Cascanueces gruñón",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_87351_01",
+      "date": "2026-12-06",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Andreas Prittwitz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Danza del Hada de Azúcar",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza rusa",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Vals de las flores",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/clasicos-divertidos-occident-el-cascanueces-grunon",
+      "checkedAt": "2026-11-12",
+      "externalId": "87351"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-12"
+}

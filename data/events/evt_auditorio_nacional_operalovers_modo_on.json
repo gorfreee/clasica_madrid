@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_operalovers_modo_on",
+  "slug": "operalovers-modo-on",
+  "title": "OperaLovers Modo ON",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_operalovers_modo_on_01",
+      "date": "2026-11-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pilar Jurado"
+    },
+    {
+      "name": "Orchestra della Scala Aretina"
+    },
+    {
+      "name": "Miquel Ortega",
+      "role": "conductor"
+    },
+    {
+      "name": "Coral Santiago Apóstol / Coro Encanto"
+    },
+    {
+      "name": "Mariano García Sánchez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Leonard Bernstein"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/operalovers-modo-on",
+      "checkedAt": "2026-11-12",
+      "externalId": "operalovers-modo-on"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-12"
+}

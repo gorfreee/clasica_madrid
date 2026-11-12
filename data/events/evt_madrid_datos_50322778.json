@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50322778",
+  "slug": "concierto-de-alumnado-de-piano-cpm-joaquin-turina",
+  "title": "Concierto de alumnado de piano CPM Joaquín Turina",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50322778_01",
+      "date": "2026-11-29",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alumnado de piano del CPM Joaquín Turina"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e47369e9396e910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-11-12",
+      "externalId": "50322778"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-12"
+}

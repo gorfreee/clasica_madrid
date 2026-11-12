@@ -33,15 +33,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-saint-saens-el-carnaval-de-los-animales",
-      "checkedAt": "2026-11-01",
+      "checkedAt": "2026-11-12",
       "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-saint-saens-el-carnaval-de-los-animales"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-12"
 }

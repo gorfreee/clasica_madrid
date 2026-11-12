@@ -15,10 +15,45 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Trio Archai"
+    },
+    {
+      "name": "Ayla Sahin"
+    },
+    {
+      "name": "Finn Mannion"
+    },
+    {
+      "name": "Mar Valor Navarro"
+    },
+    {
+      "name": "Cuarteto Citadelle"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío para violín, violonchelo y piano núm. 2 en fa mayor op 80",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Cuarteto de cuerda en mi bemol mayor op 127",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
   "formats": [
     "chamber"
   ],
@@ -28,10 +63,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas-6",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-12",
       "externalId": "83083"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-12"
 }

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_concierto_ano_nuevo_5",
+  "slug": "concierto-de-ano-nuevo-2",
+  "title": "Concierto de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_concierto_ano_nuevo_5_01",
+      "date": "2027-01-01",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia",
+      "role": "orchestra"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss"
+    },
+    {
+      "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Émile Waldteufel"
+    },
+    {
+      "name": "Franz von Suppé"
+    },
+    {
+      "name": "Hans Christian Lumbye"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/concierto-ano-nuevo-5",
+      "checkedAt": "2026-11-12",
+      "externalId": "concierto-ano-nuevo-5"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-11-12"
+}

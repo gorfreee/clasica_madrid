@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_del_atlantico_oda_falla_detras_del_paisaje",
+  "slug": "orquesta-sinfonica-del-atlantico-falla-detras-del-paisaje",
+  "title": "Orquesta Sinfónica del Atlántico. Falla Detrás del Paisaje",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_del_atlantico_oda_falla_detras_del_paisaje_01",
+      "date": "2027-06-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble de la Orquesta Sinfónica del Atlántico ODA"
+    },
+    {
+      "name": "Isabel Costes",
+      "role": "conductor"
+    },
+    {
+      "name": "Paula Costes"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ernesto Mateo"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pour le Tombeau de Manuel de Falla",
+      "composerName": "Ernesto Mateo"
+    },
+    {
+      "title": "Siete canciones populares españolas:",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "El paño moruno",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Seguidilla murciana",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "El corregidor y la molinera",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Los molineros y el mirlo",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Los celos",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Danza · Fandango",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Las uvas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La cena · Seguidilla",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La espera galante",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Los alguaciles · La despedida",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La copla del cuco",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "En guardia, caballero",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Garduña se multiplica",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "También la Corregidora es guapa",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-del-atlantico-oda-falla-detras-del-paisaje",
+      "checkedAt": "2026-11-12",
+      "externalId": "orquesta-sinfonica-del-atlantico-oda-falla-detras-del-paisaje"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-12"
+}
