@@ -23,6 +23,8 @@ export type EventIdentityAlias = {
   catalogSourceId?: string;
   externalId?: string;
   url?: string;
+  /** Reviewed platform migrations apply only to these observed representation dates. */
+  dates?: readonly string[];
 };
 
 /**
@@ -30,6 +32,26 @@ export type EventIdentityAlias = {
  * not a general mapping store and not a substitute for matching.
  */
 export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
+  // CDCM migration: URLs, dates, room and programme compared with the official
+  // fichas and published catalogue on 2026-11-12. Never applies to another season.
+  {
+    eventId: 'evt_teatros_canal_100116_2026_12_02',
+    catalogSourceId: 'src_teatros_canal',
+    url: 'https://www.cdcm.madrid/teatroscanal/espectaculo/grupo-enigma-0',
+    dates: ['2026-12-02'],
+  },
+  {
+    eventId: 'evt_teatros_canal_donde_nace_la_voz_20270324',
+    catalogSourceId: 'src_teatros_canal',
+    url: 'https://www.cdcm.madrid/teatroscanal/espectaculo/estibaliz-martyn-sergio-kuhlmann',
+    dates: ['2027-03-24'],
+  },
+  {
+    eventId: 'evt_fundacion_orcam_la_fundacion_orquesta_y_coro_de_la_comunidad_de_madrid_presenta_la_primera_temporada_de_su_ciclo_de',
+    catalogSourceId: 'src_teatro_auditorio_escorial',
+    url: 'https://www.cdcm.madrid/auditorioescorial/espectaculo/concierto-navidad-2026',
+    dates: ['2026-12-22'],
+  },
   {
     eventId: 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje',
     catalogSourceId: 'src_fundacion_orcam',
@@ -494,6 +516,8 @@ function aliasMatches(
   observed: IdentityFacts,
   catalogSourceId: string,
 ): boolean {
+  if (alias.dates && (!observed.occurrences.length || observed.occurrences.some(o => !alias.dates!.includes(o.date)))) return false;
+  if (alias.dates && alias.catalogSourceId !== catalogSourceId) return false;
   if (alias.url && urlsEquivalent(alias.url, observed.sourceUrl)) return true;
   if (
     alias.externalId &&

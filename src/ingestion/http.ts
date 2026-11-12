@@ -1,6 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { isRecoverableTransportError, isSiteGroundChallenge } from './listing-retry.ts';
-import { fetchRelayHosts, fetchTransportForHost } from './registry.ts';
+import { getCdcmWithCurl } from './curl-fetch.ts';
+import { httpClientForHost, fetchRelayHosts, fetchTransportForHost } from './registry.ts';
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
@@ -118,6 +119,17 @@ export type FetchRelayTarget = {
  * browser `Cookie`/`Set-Cookie`.
  */
 export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
+  if (httpClientForHost(new URL(url).hostname) === 'curl') {
+    const startedAtMs = performance.now();
+    try {
+      const body = await getCdcmWithCurl(url, timeoutMs);
+      recordAttempt({ url, transport: 'direct', startedAtMs, retry: false });
+      return body;
+    } catch (error) {
+      recordAttempt({ url, transport: 'direct', startedAtMs, retry: false, error });
+      throw error;
+    }
+  }
   if (transportStrategy(url) === 'relay-then-direct') {
     return await readRelayThenDirect(url, timeoutMs, env);
   }

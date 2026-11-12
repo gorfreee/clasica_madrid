@@ -1,0 +1,62 @@
+[
+  {
+    "file": "oscar-bueno.html",
+    "fullBodySha256": "96ee6803275bc944d9160c4867ca6c240dba17ae099190a6a58e8f76bc182a71"
+  },
+  {
+    "file": "oteyza.html",
+    "fullBodySha256": "28dabcdd3354a28ddefbe1c418622d80e1f36b38c098cbf2c24989ccaacbd9f7"
+  },
+  {
+    "file": "laura-sierra-piano.html",
+    "fullBodySha256": "635c257b735ad91cc825065e0220028b8c82ad1038fa62f80a81d14c88a79213"
+  },
+  {
+    "file": "duo-thibaut-garcia-antoine-moriniere.html",
+    "fullBodySha256": "ea21c3ec0c8048c6edaa8c5b8442a2f6d2c280361c5d090d5f99065ae5ae86b6"
+  },
+  {
+    "file": "cora-novoa.html",
+    "fullBodySha256": "47546dce59c7a4d205ff8219e547526dbcf1245b6c94216ed8fe5d44748f8b96"
+  },
+  {
+    "file": "navidad.html",
+    "fullBodySha256": "3fdd81c2f32775810c01858598f50943145ef659f77c109500e80e65c8a60d45"
+  },
+  {
+    "file": "xvii-festival-ensembles.html",
+    "fullBodySha256": "d701aa1f6d064d4ea8200423373ee37995433f1d2f20b2dcce86ec981f16d43e"
+  },
+  {
+    "file": "estibaliz-martyn-sergio-kuhlmann.html",
+    "fullBodySha256": "2b711e52441590756de35f87a48aee5bc764bb1f94f4c0bd7059afcc981342de"
+  },
+  {
+    "file": "suso-saiz-mfo.html",
+    "fullBodySha256": "3ebf5757b321838cf491af8e8c4eb592fe4d89ce8623a9335b07a0ad89f2b4c5"
+  },
+  {
+    "file": "escorial-list.html",
+    "fullBodySha256": "39e06af71794c644f58cbc67730804f8c9ee384b570f7be82b9503961ee8452d"
+  },
+  {
+    "file": "romain-dubois.html",
+    "fullBodySha256": "c57861832dddd13e8ab05e6a9fbb77cbc8394b957e7e4d66413e7e01bedf22cf"
+  },
+  {
+    "file": "joven-camerata-orcam-1.html",
+    "fullBodySha256": "c97a538d088ade384e8f8a96d666e2895e6c6fd8027f997639c9925abba70383"
+  },
+  {
+    "file": "joven-orquesta-comunidad-madrid-coro-comunidad-madrid.html",
+    "fullBodySha256": "b2e13b5d44c0cfb33b793eb9547d3365eca0dc82cb15c3741d1b484275590099"
+  },
+  {
+    "file": "grupo-enigma-0.html",
+    "fullBodySha256": "ba6bfa65cdf8d1009b586c093b01ae2f09baf190c4365563d2a4658bd4dd6f2b"
+  },
+  {
+    "file": "canal-list.html",
+    "fullBodySha256": "56edf2c3b6b2c509d24dc7b4a8e3ec72191c1ae1f8552ae39e21f4cdeef1c90d"
+  }
+]

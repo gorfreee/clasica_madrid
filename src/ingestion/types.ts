@@ -62,6 +62,8 @@ export type RawEvent = {
   /** Exact listing text, used only as a conservative hydration/window hint. */
   listingDateText?: string;
   /** Escorial TEC evidence; only that adapter interprets its all-day envelope. */
+  /** Other ficha URLs observed in the same CDCM listing; avoids cycle/child duplication. */
+  cdcmListingUrls?: string[];
   escorialCalendar?: { allDay: boolean; start: string; end: string };
   /**
    * Diagnostic only: which official listing surface produced this observation.
@@ -122,6 +124,8 @@ export type PipelineSource = {
 
 export type SourceDefinition = PipelineSource & {
   urls: string[];
+  /** Public-site HTTP client, verified in Actions; independent of relay routing. */
+  httpClient?: 'curl';
   adapterId: string;
   /**
    * Omit from ingest:sync when no --sources list is given (scheduled

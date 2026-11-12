@@ -2,7 +2,6 @@ name: CDCM live validation
 on:
   pull_request:
     paths:
-      - 'scripts/probe-cdcm.mjs'
       - '.github/workflows/cdcm-validation.yml'
 permissions:
   contents: read
@@ -19,9 +18,19 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/probe-cdcm.mjs
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - name: Run real adapters without publishing
+        run: node --import tsx src/cli/ingest.ts sync --sources teatros-canal,teatro-auditorio-escorial --dry-run --from 2026-11-12 --to 2027-08-31 --report ingestion/work/cdcm-live/report.json
+      - name: Assert recovered sources and catalogue boundary
+        run: |
+          node --input-type=module - <<'JS'
+          import { readFileSync } from 'node:fs';
+          const {summary:s}=JSON.parse(readFileSync('ingestion/work/cdcm-live/report.json','utf8'));
+          if(s.sourcesFailed.length || s.detailHydrationFailed || !s.detailHydrationSucceeded || s.possiblyMissing || s.newEvents) throw Error('CDCM not recovered conservatively');
+          for(const id of ['teatros-canal','teatro-auditorio-escorial']) if(!s.sourceResults[id].usable || s.sourceResults[id].disappearanceEligible) throw Error('invalid coverage');
+          JS
+          git diff --exit-code -- data/
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: cdcm-${{ github.run_id }}
-          path: ingestion/work/cdcm-probe/
+          name: cdcm-live-${{ github.run_id }}
+          path: ingestion/work/cdcm-live/

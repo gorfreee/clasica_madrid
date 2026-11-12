@@ -14,7 +14,7 @@ import { matchVenue } from '../src/ingestion/venues.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
-const source = getSourceDefinition(adapter.id);
+const source = { ...getSourceDefinition(adapter.id), urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'] };
 const listingUrl = adapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
 const fixture = (name: string) => readFile(path.join(import.meta.dirname, 'fixtures/ingestion/teatro-auditorio-escorial', name), 'utf8');
 const context: AdapterContext = { source, now: TEST_NOW, window: TEST_WINDOW, get: async () => { throw Error('sin red'); } };
@@ -90,7 +90,7 @@ describe('Teatro Auditorio El Escorial', () => {
       now: TEST_NOW, window: TEST_WINDOW, dryRun: true, sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'escorial-ingest-')),
       get: async (url: string) => {
-        if (url === listingUrl) return listing;
+        if (url === listingUrl || url.includes('/programacion')) return listing;
         const id = url.endsWith('/orquesta-sinfonica-carlos-cruz-diez') ? '10709' : url.endsWith('/la-tercera-de-mahler') ? '10994' : '';
         if (detail.has(id)) return detail.get(id)!;
         throw Error(`URL inesperada ${url}`);
@@ -110,7 +110,7 @@ describe('Teatro Auditorio El Escorial', () => {
     expect(again.summary.newEvents).toBe(0);
     expect(again.summary.possiblyMissing).toBe(0);
     const failure = await runIngest({ ...options, catalog, get: async (url: string) => {
-      if (url === listingUrl) return listing;
+      if (url === listingUrl || url.includes('/programacion')) return listing;
       if (url.endsWith('/orquesta-sinfonica-carlos-cruz-diez')) return detail.get('10709')!;
       throw Error('ficha no disponible');
     } });
@@ -268,7 +268,7 @@ describe('Teatro Auditorio El Escorial', () => {
     const base = emptyCatalog();
     const options = { now: new Date('2026-10-14T08:00:00Z'), window: { from: '2026-10-14', to: '2027-02-11' },
       dryRun: true, sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'escorial-live-')),
-      get: async (url: string) => url.includes('/wp-json/') ? listing : fixture(url.endsWith('la-tercera-de-mahler') ? 'mahler-20261014.html' : 'navidad-20261014.html') };
+      get: async (url: string) => (url.includes('/wp-json/') || url.includes('/programacion')) ? listing : fixture(url.endsWith('la-tercera-de-mahler') ? 'mahler-20261014.html' : 'navidad-20261014.html') };
     const first = await runIngest({ ...options, catalog: base });
     expect(first.candidates).toHaveLength(1);
     expect(first.summary.detailHydrationSucceeded).toBe(1);

@@ -22,7 +22,7 @@ for (const [id, prefix, fixtureDir, expectedCount, detailId, detailFile, detailD
   ['teatros-canal', 'canal', 'teatros-canal', 29, '99084', 'detail-goldberg.html', '2027-03-31'],
   ['teatro-auditorio-escorial', 'escorial', 'teatro-auditorio-escorial', 2, '10994', 'detail-10994.html', '2026-10-16'],
 ] as const) {
-  const source = getSourceDefinition(id);
+  const source = { ...getSourceDefinition(id), urls: [`https://www.${prefix === 'canal' ? 'teatroscanal.com' : 'teatroauditorioescorial.es'}/wp-json/tribe/events/v1/events`] };
   const adapter = getAdapter(source.adapterId);
   const listing = adapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
   const context = { source, now: TEST_NOW, window: TEST_WINDOW, get: async () => { throw Error('unexpected network'); } };
@@ -81,6 +81,13 @@ for (const [id, prefix, fixtureDir, expectedCount, detailId, detailFile, detailD
     if (redirect) expect(fetch.mock.calls.some(([url]) => url.startsWith('https://www.cdcm.madrid/'))).toBe(true);
   }
 
+  function legacyUrl(url: string): string {
+    if (!url.includes('cdcm.madrid/') || !url.includes('/programacion')) return url;
+    const result = new URL(listing);
+    result.searchParams.set('page', new URL(url).searchParams.get('page') ?? '1');
+    return result.href;
+  }
+
   async function assertRunPreserved() {
     const catalog = emptyCatalog();
     catalog.venues.push(makeVenue());
@@ -93,7 +100,7 @@ for (const [id, prefix, fixtureDir, expectedCount, detailId, detailFile, detailD
     const dir = await mkdtemp(path.join(os.tmpdir(), 'tec-live-block-'));
     temporaryDirs.push(dir);
     const result = await runIngest({ now: TEST_NOW, window: TEST_WINDOW, catalog, sourceIds: [id],
-      dryRun: true, dataDir: dir, get: url => getText(url, 5000) });
+      dryRun: true, dataDir: dir, get: url => getText(legacyUrl(url), 5000) });
     expect(result.summary.sourcesFailed.map(failure => failure.sourceId)).toEqual([id]);
     expect(result.summary.sourcesSucceeded).toEqual([]);
     expect(result.rawEvents).toEqual([]);

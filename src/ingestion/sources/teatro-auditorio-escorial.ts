@@ -1,3 +1,4 @@
+import { CDCM_ESCORIAL_LIST, extractCdcm, isCdcmUrl, parseCdcmDetail } from '../detail/cdcm.ts';
 import { sourceConflict, type HydrationDiscrepancy } from '../detail/conflicts.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
@@ -30,6 +31,7 @@ export const teatroAuditorioEscorialAdapter: SourceAdapter = {
   id: ID,
   requiresDetailSchedule: true,
   resolveFetchUrls(source: SourceDefinition, _now: Date, window: IngestWindow): string[] {
+    if (source.urls.length === 1 && source.urls[0] === CDCM_ESCORIAL_LIST) return [CDCM_ESCORIAL_LIST];
     if (source.urls.length !== 1 || source.urls[0] !== API) throw new Error(`${ID}: API inesperada`);
     const url = new URL(API);
     url.searchParams.set('categories', 'conciertos');
@@ -42,7 +44,8 @@ export const teatroAuditorioEscorialAdapter: SourceAdapter = {
   },
   fetchListing(url, ctx) { return createListingGet(ctx.get)(url); },
   async extract(body, url, ctx) {
-    if (new URL(url).origin !== ROOT || new URL(url).pathname !== '/wp-json/tribe/events/v1/events') {
+    if (isCdcmUrl(url) && body.trimStart().startsWith('<')) return extractCdcm(body, url, ctx);
+    if (!isCdcmUrl(url) && (new URL(url).origin !== ROOT || new URL(url).pathname !== '/wp-json/tribe/events/v1/events')) {
       throw new Error(`${ID}: listado fuera de la API oficial`);
     }
     const first = parseCalendar(body);
@@ -94,7 +97,7 @@ export const teatroAuditorioEscorialAdapter: SourceAdapter = {
     });
     return events.sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
   },
-  hydrate: parseEscorialDetail,
+  hydrate: (event, body) => isCdcmUrl(event.sourceUrl) ? parseCdcmDetail(event, body) : parseEscorialDetail(event, body),
 };
 
 function parseCalendar(body: string): { events: unknown[]; total: number; totalPages: number } {

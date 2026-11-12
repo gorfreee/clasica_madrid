@@ -1,3 +1,4 @@
+import { CDCM_CANAL_LIST, extractCdcm, isCdcmUrl, parseCdcmDetail, expandCdcm } from '../detail/cdcm.ts';
 import {
   canalEventUrl,
   expandTeatrosCanalEvent,
@@ -35,6 +36,7 @@ export const teatrosCanalAdapter: SourceAdapter = {
   requiresDetailSchedule: true,
   resolveFetchUrls(source: SourceDefinition, _now: Date, window: IngestWindow): string[] {
     const base = source.urls[0];
+    if (base === CDCM_CANAL_LIST) return [base];
     if (!base) throw new Error('teatros-canal: falta la URL del calendario JSON');
     const url = new URL(base);
     url.searchParams.set('categories', 'musica');
@@ -49,6 +51,7 @@ export const teatrosCanalAdapter: SourceAdapter = {
     return createListingGet(ctx.get)(url);
   },
   async extract(body, url, ctx) {
+    if (isCdcmUrl(url) && body.trimStart().startsWith('<')) return extractCdcm(body, url, ctx);
     const first = parseTecList(body);
     const pages = [first];
     const totalPages = first.totalPages;
@@ -83,8 +86,8 @@ export const teatrosCanalAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
-  hydrate: parseTeatrosCanalDetail,
-  expand: expandTeatrosCanalEvent,
+  hydrate: (event, body) => isCdcmUrl(event.sourceUrl) ? parseCdcmDetail(event, body) : parseTeatrosCanalDetail(event, body),
+  expand: (event, body) => isCdcmUrl(event.sourceUrl) ? expandCdcm(event, body) : expandTeatrosCanalEvent(event, body),
 };
 
 function parseTecList(body: string): { events: unknown[]; total: number; totalPages: number } {
