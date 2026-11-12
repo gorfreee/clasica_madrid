@@ -31,7 +31,7 @@
       "name": "Ferruccio Busoni"
     },
     {
-      "name": "S. Rachmaninoff"
+      "name": "Serguéi Rajmáninov"
     }
   ],
   "works": [
@@ -40,27 +40,28 @@
       "composerName": "Ludwig van Beethoven"
     },
     {
-      "title": "Chaconaen Re menor, BWV 1004"
+      "title": "Chacona en re menor, BWV 1004 (transcripción de Busoni)",
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Prelude op.23 n°3 \"tempo di minuetto”",
-      "composerName": "S. Rachmaninoff"
+      "composerName": "Serguéi Rajmáninov"
     },
     {
       "title": "Etude op.33 n°7",
-      "composerName": "S. Rachmaninoff"
+      "composerName": "Serguéi Rajmáninov"
     },
     {
       "title": "Etude op.39 n°8",
-      "composerName": "S. Rachmaninoff"
+      "composerName": "Serguéi Rajmáninov"
     },
     {
       "title": "Etude op.33 n°1",
-      "composerName": "S. Rachmaninoff"
+      "composerName": "Serguéi Rajmáninov"
     },
     {
       "title": "Sonata n°2 op.36",
-      "composerName": "S. Rachmaninoff"
+      "composerName": "Serguéi Rajmáninov"
     }
   ],
   "eras": [

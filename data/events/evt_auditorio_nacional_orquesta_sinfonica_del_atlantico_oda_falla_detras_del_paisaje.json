@@ -29,13 +29,16 @@
   ],
   "composers": [
     {
+      "name": "Ernesto Mateo"
+    },
+    {
       "name": "Manuel de Falla"
     }
   ],
   "works": [
     {
-      "title": "Pour le Tombeau (Homenaje contemporáneo a Manuel de Falla)",
-      "composerName": "Manuel de Falla"
+      "title": "Pour le Tombeau de Manuel de Falla",
+      "composerName": "Ernesto Mateo"
     },
     {
       "title": "Siete canciones populares españolas:",
@@ -54,10 +57,6 @@
       "composerName": "Manuel de Falla"
     },
     {
-      "title": "Cuadro primero:",
-      "composerName": "Manuel de Falla"
-    },
-    {
       "title": "Los molineros y el mirlo",
       "composerName": "Manuel de Falla"
     },
@@ -71,10 +70,6 @@
     },
     {
       "title": "Las uvas",
-      "composerName": "Manuel de Falla"
-    },
-    {
-      "title": "Cuadro segundo:",
       "composerName": "Manuel de Falla"
     },
     {

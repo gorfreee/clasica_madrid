@@ -18,7 +18,7 @@
   "performers": [],
   "composers": [
     {
-      "name": "Felix Mendelsshon"
+      "name": "Felix Mendelssohn"
     },
     {
       "name": "Serguéi Rajmáninov"
@@ -42,7 +42,7 @@
   "works": [
     {
       "title": "Variaciones serias, Op. 54 en Re menor",
-      "composerName": "Felix Mendelsshon"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Preludio, Op. 23 nº 3 en Re menor",
@@ -50,10 +50,6 @@
     },
     {
       "title": "Preludio, Op. 23 nº 5 en Sol menor",
-      "composerName": "Serguéi Rajmáninov"
-    },
-    {
-      "title": "piano",
       "composerName": "Serguéi Rajmáninov"
     },
     {
@@ -69,16 +65,8 @@
       "composerName": "Antón García Abril"
     },
     {
-      "title": "piano",
-      "composerName": "Antón García Abril"
-    },
-    {
       "title": "Preludio y Fuga BWV 866",
       "composerName": "Johann Sebastian Bach"
-    },
-    {
-      "title": "Un sospiro",
-      "composerName": "Franz Liszt"
     },
     {
       "title": "Estudio de Concierto, nº 3 “Un sospiro”",

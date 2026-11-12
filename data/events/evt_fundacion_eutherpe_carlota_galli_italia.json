@@ -15,10 +15,14 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Carlota Galli"
+    }
+  ],
   "composers": [
     {
-      "name": "F. Mendelssohn"
+      "name": "Felix Mendelssohn"
     },
     {
       "name": "Frédéric Chopin"
@@ -30,14 +34,14 @@
   "works": [
     {
       "title": "Fantasia in Fa diesis minore op.28",
-      "composerName": "F. Mendelssohn"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Ballata op. 52 n 4",
       "composerName": "Frédéric Chopin"
     },
     {
-      "title": "Gaspardde la Nuit",
+      "title": "Gaspard de la nuit",
       "composerName": "Maurice Ravel"
     },
     {

@@ -25,7 +25,7 @@
       "name": "Ludwig van Beethoven"
     },
     {
-      "name": "R. Schumann"
+      "name": "Robert Schumann"
     },
     {
       "name": "Frédéric Chopin"
@@ -34,34 +34,35 @@
       "name": "Franz Liszt"
     },
     {
-      "name": "M. Urban"
+      "name": "Massimo Urbán"
     }
   ],
   "works": [
     {
-      "title": "Sonata n. 27 op. 90 –15 minuti",
+      "title": "Sonata n. 27 op. 90",
       "composerName": "Ludwig van Beethoven"
     },
     {
-      "title": "Allegro op. 8 – 12 minuti",
-      "composerName": "R. Schumann"
+      "title": "Allegro op. 8",
+      "composerName": "Robert Schumann"
     },
     {
-      "title": "Notturno op. 9 n. 2 –5 minuti",
+      "title": "Notturno op. 9 n. 2",
       "composerName": "Frédéric Chopin"
     },
     {
-      "title": "Grande Studio da Paganini S 161 n. 5, La Caccia - 5 min",
+      "title": "Grande Studio da Paganini S 161 n. 5, La Caccia",
       "composerName": "Franz Liszt"
     },
     {
-      "title": "Improvvisazioni - 10 minuti",
-      "composerName": "M. Urban"
+      "title": "Improvvisazioni",
+      "composerName": "Massimo Urbán"
     }
   ],
   "eras": [
     "classical",
-    "romantic"
+    "romantic",
+    "contemporary"
   ],
   "formats": [
     "recital"
