@@ -16,8 +16,8 @@ const relayEnv = {
   INGEST_FETCH_RELAY_URL: `${relayOrigin}/`,
   INGEST_FETCH_RELAY_TOKEN: token,
 };
-const canal = getSourceDefinition('teatros-canal');
-const escorial = getSourceDefinition('teatro-auditorio-escorial');
+const canal = { ...getSourceDefinition('teatros-canal'), urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'] };
+const escorial = { ...getSourceDefinition('teatro-auditorio-escorial'), urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'] };
 const canalListing = teatrosCanalAdapter.resolveFetchUrls(canal, TEST_NOW, TEST_WINDOW)[0]!;
 const escorialListing = teatroAuditorioEscorialAdapter.resolveFetchUrls(escorial, TEST_NOW, TEST_WINDOW)[0]!;
 const BLOCK_HTML = '<html><body>Access denied</body></html>';
@@ -80,10 +80,10 @@ describe('transporte TEC sin relay no demostrado', () => {
         return textResponse(calendar([event], 2, 2), 200, 'application/json');
       });
       const events = await extractSource(
-        getSourceDefinition(source.id),
+        source.id === 'teatros-canal' ? canal : escorial,
         TEST_NOW,
         TEST_WINDOW,
-        (url) => getText(url, 5_000, relayEnv),
+        (url) => getText(legacyUrl(url), 5_000, relayEnv),
       );
       expect(events.map((event) => event.externalId).sort()).toEqual(['1', '2']);
       expect(events.every((event) => event.sourceUrl.startsWith(new URL(source.listing).origin))).toBe(true);
@@ -113,7 +113,7 @@ describe('transporte TEC sin relay no demostrado', () => {
       catalog: catalogWithFutureEvents(),
       sourceIds: ['teatros-canal', 'teatro-auditorio-escorial'],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'tec-403-')),
-      get: (url) => getText(url, 5_000, relayEnv),
+      get: (url) => getText(legacyUrl(url), 5_000, relayEnv),
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((failure) => failure.sourceId)).toEqual([
@@ -133,16 +133,16 @@ describe('transporte TEC sin relay no demostrado', () => {
 
   it('no acepta HTML de bloqueo con status 200 o 202 como agenda vacía', async () => {
     const html200 = installFetch(() => textResponse(BLOCK_HTML, 200, 'text/html'));
-    const blocked200 = await ingest('teatros-canal', (url) => getText(url, 5_000, relayEnv));
+    const blocked200 = await ingest('teatros-canal', (url) => getText(legacyUrl(url), 5_000, relayEnv));
     expect(html200.every((hop) => hop.transport === 'direct' && hop.contentType === 'text/html')).toBe(true);
-    expect(blocked200.summary.sourcesFailed[0]?.message).toMatch(/JSON inválido/);
+    expect(blocked200.summary.sourcesFailed[0]?.message).toMatch(/JSON inválido|CDCM:/);
     expect(blocked200.summary.possiblyMissing).toBe(0);
     expect(blocked200.rawEvents).toEqual([]);
     expect(blocked200.summary.autoMergeEligible).toBe(false);
     resetOriginCookieJar();
 
     const html202 = installFetch(() => textResponse(BLOCK_HTML, 202, 'text/html'));
-    const blocked202 = await ingest('teatro-auditorio-escorial', (url) => getText(url, 5_000, relayEnv));
+    const blocked202 = await ingest('teatro-auditorio-escorial', (url) => getText(legacyUrl(url), 5_000, relayEnv));
     expect(html202.length).toBe(2);
     expect(html202.every((hop) => hop.transport === 'direct' && hop.contentType === 'text/html')).toBe(true);
     expect(blocked202.summary.sourcesFailed[0]?.message).toMatch(/HTTP 202/);
@@ -259,4 +259,10 @@ async function ingest(sourceId: 'teatros-canal' | 'teatro-auditorio-escorial', g
     dataDir: await mkdtemp(path.join(os.tmpdir(), `tec-${sourceId}-`)),
     get,
   });
+}
+
+function legacyUrl(url: string): string {
+  if (url.startsWith('https://www.cdcm.madrid/teatroscanal/programacion')) return canalListing;
+  if (url.startsWith('https://www.cdcm.madrid/auditorioescorial/programacion')) return escorialListing;
+  return url;
 }

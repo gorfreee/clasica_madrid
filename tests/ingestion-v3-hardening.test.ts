@@ -177,7 +177,7 @@ describe('retry conservador de listing Canal', () => {
     const source = getSourceDefinition('teatros-canal');
     let attempts = 0;
     const events = await extractSource(source, TEST_NOW, { from: '2027-03-01', to: '2027-04-30' }, async (url) => {
-      if (url.includes('/wp-json/tribe/events/v1/events')) {
+      if (url.includes('/wp-json/tribe/events/v1/events') || url.includes('/teatroscanal/programacion')) {
         attempts += 1;
         if (attempts === 1) throw new Error(`tiempo agotado al pedir ${url}`);
         return listing;

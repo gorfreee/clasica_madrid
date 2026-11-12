@@ -187,7 +187,8 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
   {
     id: 'teatros-canal',
     name: 'Teatros del Canal',
-    urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'],
+    urls: ['https://www.cdcm.madrid/teatroscanal/programacion/categoria/musica'],
+    httpClient: 'curl',
     adapterId: teatrosCanalAdapter.id,
     catalogSourceId: 'src_teatros_canal',
     seedSource: {
@@ -501,7 +502,8 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
   {
     id: 'teatro-auditorio-escorial',
     name: 'Teatro Auditorio de San Lorenzo de El Escorial',
-    urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'],
+    urls: ['https://www.cdcm.madrid/auditorioescorial/programacion'],
+    httpClient: 'curl',
     adapterId: teatroAuditorioEscorialAdapter.id,
     catalogSourceId: 'src_teatro_auditorio_escorial',
     seedSource: {
@@ -596,6 +598,11 @@ export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_RE
     }
   }
   return [...hosts].sort();
+}
+
+export function httpClientForHost(hostname: string): 'fetch' | 'curl' {
+  return SOURCE_REGISTRY.some(source => source.httpClient === 'curl' &&
+    source.urls.some(url => new URL(url).hostname === hostname)) ? 'curl' : 'fetch';
 }
 
 export function fetchTransportForHost(

@@ -64,7 +64,7 @@ export async function hydrateEvents(
         if (discrepancies.length) meta = { ...meta, discrepancies };
         const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
         const expanded = adapter.expand?.(hydratedEvent, body);
-        if (expanded && expanded.length > 1) {
+        if (expanded && expanded.length > 0) {
           hydrated.push(...expanded.map((item) => withHydration(item, meta)));
           continue;
         }

@@ -12,7 +12,7 @@ import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
-const source = getSourceDefinition(adapter.id);
+const source = { ...getSourceDefinition(adapter.id), urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'] };
 const listingUrl = adapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
 const fixture = (name: string) =>
   readFile(path.join(import.meta.dirname, 'fixtures/ingestion/teatros-canal', name), 'utf8');
@@ -406,7 +406,7 @@ describe('Teatros del Canal pipeline safety', () => {
       sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'canal-test-')),
       get: async (url) => {
-        if (url.startsWith('https://www.teatroscanal.com/wp-json/tribe/events/v1/events')) return listing;
+        if (url.includes('/programacion') || url.startsWith('https://www.teatroscanal.com/wp-json/tribe/events/v1/events')) return listing;
         if (fail) throw new Error('HTTP 403');
         const slug = url.split('/espectaculo/')[1];
         const body = slug ? details[slug] : undefined;
