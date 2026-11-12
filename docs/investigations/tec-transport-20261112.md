@@ -177,6 +177,9 @@ ejecuta `0b03a100aaaeca974af1063d0fc1248bc64bfb30` sin IA. Incluye la restricci�
 final de la excepción a aliases con fechas revisadas, conserva los guards de
 aliases sin fechas y fuentes reciclables, y comprueba nuevamente cero ambigüedades,
 cero fallos de ficha y ambas fuentes utilizables sin evaluar desapariciones.
-Después de esta prueba sólo se actualiza esta evidencia y se retira el workflow
-temporal. No se incorpora ningún workflow operativo nuevo ni se modifica la CI
-del sitio. La CI completa del commit definitivo queda enlazada en #417.
+Después de esta prueba sólo se actualiza esta evidencia, se retira el workflow
+temporal y se ajusta un smoke E2E que utilizaba Laura Sierra como ficha sin programa:
+ahora selecciona un evento con la forma de datos necesaria, manteniendo las mismas
+aserciones de secciones vacías. No se cambia el código operativo ni se incorpora
+ningún workflow nuevo; la CI del sitio permanece igual. La CI completa del commit
+definitivo queda enlazada en #417.
