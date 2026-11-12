@@ -96,10 +96,15 @@
     {
       "sourceId": "src_teatro_auditorio_escorial",
       "url": "https://www.teatroauditorioescorial.es/espectaculo/concierto-de-navidad-3/",
-      "externalId": "11018",
-      "checkedAt": "2026-11-01"
+      "checkedAt": "2026-11-01",
+      "externalId": "11018"
+    },
+    {
+      "sourceId": "src_teatro_auditorio_escorial",
+      "url": "https://www.cdcm.madrid/auditorioescorial/espectaculo/concierto-navidad-2026",
+      "checkedAt": "2026-11-12"
     }
   ],
   "primarySourceId": "src_fundacion_orcam",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-12"
 }
