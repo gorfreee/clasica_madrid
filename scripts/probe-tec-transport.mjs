@@ -20,7 +20,7 @@ const results = [];
 // Sequential bounded public GETs; never log cookies, credentials or response headers wholesale.
 for (const [name, url] of endpoints) {
   for (const transport of ['direct', 'relay']) {
-    if (transport === 'relay' && !name.endsWith('-api')) continue;
+    if (transport === 'relay' && name.endsWith('page2')) continue;
     if (transport === 'relay' && (!process.env.INGEST_FETCH_RELAY_URL || !process.env.INGEST_FETCH_RELAY_TOKEN)) {
       results.push({ name, url, transport, error: 'relay not configured' }); continue;
     }
