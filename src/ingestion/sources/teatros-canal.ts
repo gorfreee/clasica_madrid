@@ -86,6 +86,9 @@ export const teatrosCanalAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
+  // CDCM's public fichas can return transient 502s independently of the listing.
+  // Retry transport only; parsing/identity/calendar errors must remain visible.
+  fetchDetail: (url, ctx) => isCdcmUrl(url) ? createListingGet(ctx.get)(url) : ctx.get(url),
   hydrate: (event, body) => isCdcmUrl(event.sourceUrl) ? parseCdcmDetail(event, body) : parseTeatrosCanalDetail(event, body),
   expand: (event, body) => isCdcmUrl(event.sourceUrl) ? expandCdcm(event, body) : expandTeatrosCanalEvent(event, body),
 };

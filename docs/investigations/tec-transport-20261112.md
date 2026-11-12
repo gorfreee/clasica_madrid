@@ -3,7 +3,8 @@
 **Resultado: ambos adapters recuperan la programación desde GitHub Actions.**
 La PR migra al portal público CDCM y utiliza el cliente HTTP que se ha demostrado
 funcional en ese entorno. No requiere desplegar infraestructura ni cambiar secretos.
-No modifica `data/**` ni hace merge.
+La recuperación técnica inicial (#416) no modificó `data/**`. La revisión de la
+publicación #417 y sus cambios de catálogo se documentan al final.
 
 ## Diagnóstico y estrategia
 
@@ -113,8 +114,72 @@ créditos musicales, continuidad de identidad e integridad del catálogo. Se man
 la suite de regresiones de los parsers anteriores. Los resultados definitivos de
 suite completa, typecheck, build y E2E se enlazan en la descripción de la PR.
 
-La prueba de producción con el pool de IA queda para la ingestión posterior al
-merge. Puede cambiar decisiones de clasificación; no cambia los hechos descargados.
+La recuperación inicial dejó la prueba con IA para la ingestión posterior al merge;
+los resultados de publicación y las repeticiones con Gemini se detallan abajo.
+La IA puede cambiar decisiones de clasificación; no cambia los hechos descargados.
 El sitio puede volver a modificar su HTML o su política de acceso: esos casos
 siguen fallando de forma visible y conservan los eventos existentes. El entorno
 operativo necesita curl, incluido en los runners Ubuntu actuales de GitHub.
+
+## Seguimiento de publicación: PR #417
+
+La [publicación 43258972050](https://github.com/gorfreee/clasica_madrid/actions/runs/43258972050)
+leyó ambos listados, pero siete fichas de Canal devolvieron HTTP 502. Se conservaron
+los eventos publicados y no se evaluaron desapariciones. El problema ya no era el
+403 del antiguo WordPress: las fichas CDCM no tenían reintento de transporte.
+Ambos adapters reutilizan ahora la política conservadora del listing: un único
+reintento tras 750 ms ante error transitorio. El parseo queda fuera del reintento;
+un HTML bloqueado, identidad o calendario contradictorio sigue fallando.
+
+La primera repetición con el código corregido, [43325769698](https://github.com/gorfreee/clasica_madrid/actions/runs/43325769698),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43325769698/artifacts/13992901697),
+ejecutó la CLI de `e9626907b171e0e72674ffdb1d4f4ecf3f347845` en Node 22 y
+ubuntu-latest, con el pool Gemini habilitado y límite de 30 peticiones de IA.
+Trabajó sobre una copia aislada del catálogo de #417, sin publicar ni modificar
+el catálogo del checkout. Recuperó las 15 observaciones, con cero fallos HTTP,
+cero fichas fallidas y ambas fuentes utilizables. Todos los GET devolvieron 200:
+esta repetición verifica acceso y parser operativos, pero no contiene una
+recuperación de 502 real. Los tests inyectan 502 → 200 a través de getText/curl,
+comprueban memoización, espera, límite y contadores de intentos.
+
+La repetición detectó además un falso conflicto de Grupo Enigma después de guardar
+su URL nueva: la comparación genérica de créditos retenía el evento pese al alias
+revisado. El alias sigue vigente para su evento y fecha, antes y después de guardar
+la cita; no elimina conflictos con otro evento ni evita las protecciones de fuentes
+que reciclan identidades. Una fecha de otra temporada sigue sin usar el alias.
+El test de identidad usa ahora un catálogo controlado en lugar del catálogo mutable.
+
+Se revisaron las cinco propuestas de datos de esta repetición. Se incorporan las
+citas faltantes del dúo García/Morinière, las dos agrupaciones jóvenes de ORCAM y
+Laura Sierra, junto a los intérpretes y obras explícitos de las fichas. Se conserva
+el programa canónico de Donde nace la voz: se rechaza añadir Lucio Quarantotto como
+compositor de Con te partirò. La fuente mezcla créditos de autoría; la
+[web oficial de Francesco Sartori](https://francescosartori.net/canzoni-colonne-sonore/)
+incluye esta obra entre sus músicas. Esta revisión no fuerza una nueva atribución
+ni utiliza la clasificación de IA para corregir los datos musicales.
+
+Las decisiones inciertas de IA no crean eventos nuevos ni despublican los existentes.
+La cobertura de ambas fuentes sigue siendo `unknown`; recuperar todas las fichas
+del listado actual no acredita el calendario completo de la temporada.
+
+La [segunda repetición con Gemini 43326576821](https://github.com/gorfreee/clasica_madrid/actions/runs/43326576821),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43326576821/artifacts/13993151575),
+ya sobre el catálogo revisado y con el conflicto de migración corregido, vuelve a
+recuperar 15/15 observaciones: cero fuentes/fichas fallidas, cero identidades
+ambiguas y cero altas/desapariciones. Grupo Enigma queda `unchanged` por el alias
+revisado. Health sigue `review` por clasificación editorial/taxonomía pendiente,
+sin fallos técnicos: los casos inciertos no se publican como eventos nuevos. La
+única propuesta material restante es la atribución musical rechazada arriba.
+
+La [validación final 43326915093](https://github.com/gorfreee/clasica_madrid/actions/runs/43326915093),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43326915093/artifacts/13991609790),
+ejecuta `0b03a100aaaeca974af1063d0fc1248bc64bfb30` sin IA. Incluye la restricción
+final de la excepción a aliases con fechas revisadas, conserva los guards de
+aliases sin fechas y fuentes reciclables, y comprueba nuevamente cero ambigüedades,
+cero fallos de ficha y ambas fuentes utilizables sin evaluar desapariciones.
+Después de esta prueba sólo se actualiza esta evidencia, se retira el workflow
+temporal y se ajusta un smoke E2E que utilizaba Laura Sierra como ficha sin programa:
+ahora selecciona un evento con la forma de datos necesaria, manteniendo las mismas
+aserciones de secciones vacías. No se cambia el código operativo ni se incorpora
+ningún workflow nuevo; la CI del sitio permanece igual. La CI completa del commit
+definitivo queda enlazada en #417.

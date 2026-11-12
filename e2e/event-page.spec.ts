@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
+import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
+import { defaultDataDir } from '../src/lib/repository/fs.ts';
 
 const FULL_EVENT = '/eventos/andromeda-y-perseo-publico-general/';
-const COMPOSERS_ONLY = '/eventos/laura-sierra-piano/';
 const UNKNOWN_ACCESS = '/eventos/orquesta-camerata-musicalis-mucho-mas-que-un-concierto-schubert/';
 const WITH_SPACE = '/eventos/cuarteto-cosmos-y-vicent-alberola-clarinete/';
 const LONG_VENUE = '/eventos/coma-26-trio-fernandez-apellaniz/';
@@ -183,7 +184,12 @@ test.describe('jerarquía de la ficha de evento', () => {
   });
 
   test('oculta las secciones musicales vacías y el acceso desconocido', async ({ page }) => {
-    await page.goto(COMPOSERS_ONLY);
+    // Ingestion can complete any particular concert's programme/cast. Select
+    // the required data shape, while keeping the rendered expectations strict.
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const composersOnly = catalog.events.find(event => event.composers.length > 0 && event.performers.length === 0 && event.works.length === 0);
+    expect(composersOnly, 'el smoke necesita una ficha con compositores y sin intérpretes ni obras').toBeDefined();
+    await page.goto(`/eventos/${composersOnly!.slug}/`);
     expect(await headingNames(page)).toEqual([
       'Fechas',
       'Sobre el concierto',

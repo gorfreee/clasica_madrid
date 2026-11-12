@@ -1,4 +1,6 @@
-/** Conservative listing-only retry. Must not import `http.ts` (http → registry → adapters). */
+/** Conservative transport retry for listings and explicitly opted-in fichas.
+ * Must not import `http.ts` (http → registry → adapters).
+ */
 
 export const LISTING_RETRY_DELAY_MS = 750;
 export const LISTING_TRANSIENT_STATUSES = new Set([202, 408, 429, 500, 502, 503, 504]);

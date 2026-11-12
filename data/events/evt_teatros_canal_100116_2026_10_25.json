@@ -42,8 +42,13 @@
       "url": "https://www.teatroscanal.com/espectaculo/taller-sonoro-festival-ensemble",
       "checkedAt": "2026-10-14",
       "externalId": "108186"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/xvii-festival-ensembles",
+      "checkedAt": "2026-11-12"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-12"
 }

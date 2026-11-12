@@ -199,7 +199,7 @@ export function matchEventIdentity(
 function guardSourceHits(
   hits: Array<{ event: Event; method: IdentityMethod }>,
   observed: IdentityFacts,
-  options: { catalogSourceId: string; venueId?: string },
+  options: { catalogSourceId: string; venueId?: string; aliases?: readonly EventIdentityAlias[] },
   catalog: Catalog,
 ): { kind: 'filtered'; hits: typeof hits; recyclable: boolean } | Extract<IdentityMatch, { kind: 'ambiguous' }> {
   const accepted: typeof hits = [];
@@ -227,7 +227,13 @@ function guardSourceHits(
       observed, hit.event, options.venueId, hit.event.venueId, relation,
     );
     if (verdict === 'compatible') accepted.push(hit);
-    if (verdict === 'review') reviews.push(hit);
+    // Persisting the new URL must not undo an already reviewed alias for this
+    // exact event. Keep reviews for competing events and recyclable sources;
+    // date-bound aliases have already rejected missing/different-season dates.
+    const reviewedAlias = !recyclable && (options.aliases ?? EVENT_IDENTITY_ALIASES).some(alias =>
+      alias.dates && alias.eventId === hit.event.id && aliasMatches(alias, observed, options.catalogSourceId),
+    );
+    if (verdict === 'review' && !reviewedAlias) reviews.push(hit);
     if (verdict === 'incompatible' && !recyclable) rejected.push(hit);
   }
   // A stale external ID competing with an independent strong match remains

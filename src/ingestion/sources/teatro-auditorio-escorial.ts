@@ -97,6 +97,7 @@ export const teatroAuditorioEscorialAdapter: SourceAdapter = {
     });
     return events.sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
   },
+  fetchDetail: (url, ctx) => isCdcmUrl(url) ? createListingGet(ctx.get)(url) : ctx.get(url),
   hydrate: (event, body) => isCdcmUrl(event.sourceUrl) ? parseCdcmDetail(event, body) : parseEscorialDetail(event, body),
 };
 
