@@ -17,23 +17,68 @@
   ],
   "performers": [
     {
-      "name": "Lucía Abad"
+      "name": "Joven Orquesta Allegro Vivace (JOAV)",
+      "role": "orchestra"
+    },
+    {
+      "name": "Lucía Abad",
+      "role": "soloist"
+    },
+    {
+      "name": "Necko Vidal",
+      "role": "soloist"
+    },
+    {
+      "name": "Coque Jiménez",
+      "role": "conductor"
     }
   ],
   "composers": [
     {
-      "name": "Valencia"
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Gaetano Donizetti"
+    },
+    {
+      "name": "Max Bruch"
+    },
+    {
+      "name": "Ludwig van Beethoven"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "La flauta mágica, K. 620: Obertura",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "La flauta mágica, K. 620: «O zittre nicht, mein lieber Sohn»",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "La flauta mágica, K. 620: «Der Hölle Rache kocht in meinem Herzen»",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "La fille du régiment: «Il faut partir»",
+      "composerName": "Gaetano Donizetti"
+    },
+    {
+      "title": "Kol Nidrei, op. 47",
+      "composerName": "Max Bruch"
+    },
+    {
+      "title": "Sinfonía n.º 7 en la mayor, op. 92",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
   ],
   "formats": [
-    "early-music",
-    "symphonic",
-    "opera"
+    "symphonic"
   ],
   "kind": "established",
   "access": "paid",

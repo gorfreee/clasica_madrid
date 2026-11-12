@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_87512",
+  "slug": "concierto-academico-de-la-catedra-de-trompeta",
+  "title": "Concierto Académico de la Cátedra de Trompeta | Profesor Reinhold Friedrich",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_87512_01",
+      "date": "2026-11-18",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/concierto-academico-de-la-catedra-de-trompeta-profesor-reinhold-friedrich-4",
+      "checkedAt": "2026-11-12",
+      "externalId": "87512"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-12"
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50466867",
+  "slug": "concierto-femenino-lirica-femina",
+  "title": "Concierto femenino",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_el_pozo_tio_raimundo",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50466867_01",
+      "date": "2026-11-29",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lírica Fémina"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=62828676a1d71a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-12",
+      "externalId": "50466867"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-12"
+}

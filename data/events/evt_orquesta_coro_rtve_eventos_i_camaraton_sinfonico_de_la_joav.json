@@ -17,20 +17,107 @@
   ],
   "performers": [
     {
-      "name": "l I Camaratón Sinfónico de la Joven Orquesta Allegro Vivace (JOAV) , bajo la direcciónartística de Coque Jiménez , ofrece una propuesta dedicada a la música de cámara como espacio de excelencia artística, colaboración y desarrollo musical para las nuevasgeneraciones de intérpretes."
+      "name": "Joven Orquesta Allegro Vivace (JOAV)"
     }
   ],
   "composers": [
     {
       "name": "Richard Strauss"
+    },
+    {
+      "name": "Franz Doppler"
+    },
+    {
+      "name": "Joseph Haydn"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Irving Berlin"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Ernő Dohnányi"
+    },
+    {
+      "name": "Gustav Holst"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Felix Mendelssohn"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Morgen, op. 27",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Fantasía sobre aires húngaros, op. 35",
+      "composerName": "Franz Doppler"
+    },
+    {
+      "title": "Cuarteto de cuerda en do mayor, op. 76 n.º 3 «Emperador»: II. Poco adagio",
+      "composerName": "Joseph Haydn"
+    },
+    {
+      "title": "Trío con piano n.º 1 en si mayor, op. 8: I. Allegro con brio",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Serenata para instrumentos de viento, op. 44: I, II y III",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Puttin’ on the Ritz",
+      "composerName": "Irving Berlin"
+    },
+    {
+      "title": "Five Pieces for Two Violins and Piano",
+      "composerName": "Dmitri Shostakóvich"
+    },
+    {
+      "title": "Rapsodia húngara n.º 2 (arr. Luke)",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Quinteto con piano n.º 1 en do menor, op. 1: I. Allegro",
+      "composerName": "Ernő Dohnányi"
+    },
+    {
+      "title": "St. Paul’s Suite, op. 29",
+      "composerName": "Gustav Holst"
+    },
+    {
+      "title": "Danse macabre, op. 40 (piano a cuatro manos)",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Octeto de cuerda en mi bemol mayor, op. 20: I. Allegro",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 8 en do menor, op. 110",
+      "composerName": "Dmitri Shostakóvich"
+    }
+  ],
   "eras": [
-    "romantic"
+    "classical",
+    "romantic",
+    "twentieth"
   ],
   "formats": [
-    "symphonic",
     "chamber"
   ],
   "kind": "established",

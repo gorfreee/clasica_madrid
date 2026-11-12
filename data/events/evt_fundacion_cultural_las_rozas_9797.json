@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_cultural_las_rozas_9797",
+  "slug": "concierto-de-navidad-de-la-escuela-de-musica",
+  "title": "Concierto de Navidad de la Escuela de Música",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_cultural_las_rozas_9797_01",
+      "date": "2026-12-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alumnado y profesorado de la Escuela Municipal de Música Joaquín Rodrigo"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/concierto-de-navidad-de-la-escuela-de-musica/",
+      "checkedAt": "2026-11-12",
+      "externalId": "9797"
+    }
+  ],
+  "primarySourceId": "src_fundacion_cultural_las_rozas",
+  "lastVerifiedAt": "2026-11-12"
+}
