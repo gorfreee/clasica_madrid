@@ -25,9 +25,10 @@ Actions fueron 403. Los bodies completos de todas las rutas están en los artifa
 
 ## Entorno local (otra salida de red)
 
-Los `*-redirect-200.html` son extractos literales de las portadas nuevas recibidas
+Los `*-redirect-200.html` son extractos de las portadas nuevas recibidas
 siguiendo las URLs antiguas de TEC. Se conservaron canonical, JSON-LD, h1 y **la
 primera tarjeta**; se omitieron el resto de tarjetas, navegación, scripts y assets.
+Se eliminan los espacios al final de línea; los textos y campos se conservan.
 No son listados exhaustivos ni fixtures positivos de TEC. URLs finales:
 
 - https://www.cdcm.madrid/teatroscanal
