@@ -242,6 +242,9 @@ describe('CDCM: programación y fichas actuales', () => {
     const current = { ...observed, performers: detail.performers };
     expect(matchEventIdentity(migrated, current, options)).toMatchObject({ kind: 'matched', method: 'alias', event: { id: event.id } });
     expect(matchEventIdentity(migrated, current, { ...options, aliases: [] }).kind).toBe('ambiguous');
+    // Undated aliases keep the previous generic URL guard; this exception is
+    // only for migrations whose source and representation dates were reviewed.
+    expect(matchEventIdentity(migrated, current, { ...options, aliases: [{ eventId: event.id, catalogSourceId: options.catalogSourceId, url: raw.sourceUrl }] }).kind).toBe('ambiguous');
     expect(matchEventIdentity(migrated, nextYear, options)).toMatchObject({ kind: 'ambiguous', reason: expect.stringContaining('source-identity-review') });
     expect(matchEventIdentity(migrated, nextYear, { ...options, aliases: [] }).kind).toBe('ambiguous');
     const competing = { ...migrated, events: [...migrated.events, { ...migrated.events[0]!, id: 'evt_enigma_competing', title: 'Grupo Enigma', performers: detail.performers ?? [] }] };

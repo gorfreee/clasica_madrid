@@ -199,7 +199,7 @@ export function matchEventIdentity(
 function guardSourceHits(
   hits: Array<{ event: Event; method: IdentityMethod }>,
   observed: IdentityFacts,
-  options: { catalogSourceId: string; venueId?: string },
+  options: { catalogSourceId: string; venueId?: string; aliases?: readonly EventIdentityAlias[] },
   catalog: Catalog,
 ): { kind: 'filtered'; hits: typeof hits; recyclable: boolean } | Extract<IdentityMatch, { kind: 'ambiguous' }> {
   const accepted: typeof hits = [];
@@ -230,7 +230,9 @@ function guardSourceHits(
     // Persisting the new URL must not undo an already reviewed alias for this
     // exact event. Keep reviews for competing events and recyclable sources;
     // date-bound aliases have already rejected missing/different-season dates.
-    const reviewedAlias = !recyclable && hits.some(other => other.method === 'alias' && other.event.id === hit.event.id);
+    const reviewedAlias = !recyclable && (options.aliases ?? EVENT_IDENTITY_ALIASES).some(alias =>
+      alias.dates && alias.eventId === hit.event.id && aliasMatches(alias, observed, options.catalogSourceId),
+    );
     if (verdict === 'review' && !reviewedAlias) reviews.push(hit);
     if (verdict === 'incompatible' && !recyclable) rejected.push(hit);
   }

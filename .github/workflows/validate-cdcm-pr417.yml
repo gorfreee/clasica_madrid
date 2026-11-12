@@ -22,12 +22,6 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Ingest into an isolated catalog copy
-        env:
-          AI_PROVIDER: pool
-          AI_ZERO_COST_ONLY: 'true'
-          AI_MAX_REQUESTS: '30'
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          AI_STATE_DIR: ${{ github.workspace }}/.local/ai-pr417
         shell: bash
         run: |
           set -euo pipefail
