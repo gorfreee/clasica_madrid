@@ -1,3 +1,4 @@
+import http2 from 'node:http2';
 import { chromium } from 'playwright-core';
 import { spawnSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -28,10 +29,24 @@ try {
       await save(name, 'chrome', url, response?.status(), await page.content(), response?.headers()['content-type'], page.url());
     } catch(e) { console.log(JSON.stringify({name,transport:'chrome',error:e.name})); }
     finally { await page.close(); }
-    const curl = spawnSync('curl', ['--http2', '-L', '--max-time', '30', '-sS', '-w', '\n%{http_code} %{content_type} %{url_effective}', url], { encoding: 'utf8', maxBuffer: 3000000 });
-    const cut = curl.stdout.lastIndexOf('\n');
-    const meta = curl.stdout.slice(cut+1).split(' ');
-    await save(name, 'curl-http2', url, Number(meta[0]), curl.stdout.slice(0,cut), meta[1], meta[2]);
+    for (const version of ['--http1.1', '--http2']) {
+      for (const ua of ['curl', 'ingestion']) {
+        const args = [version, '-L', '--max-time', '30', '-sS', '-w', '\n%{json}', ...(ua === 'ingestion' ? ['-A','ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)'] : []), url];
+        const curl = spawnSync('curl', args, { encoding:'utf8',maxBuffer:3000000 });
+        const cut=curl.stdout.lastIndexOf('\n');
+        try { const meta=JSON.parse(curl.stdout.slice(cut+1)); await save(name, `${version.slice(2)}-${ua}`,url,meta.http_code,curl.stdout.slice(0,cut),meta.content_type,meta.url_effective); }
+        catch {console.log(JSON.stringify({name,error:'curl-metadata',exit:curl.status}));}
+      }
+    }
+    try {
+      const parsed=new URL(url);const client=http2.connect(parsed.origin);client.on('error',()=>{});
+      await new Promise((resolve,reject)=>{
+        const req=client.request({':path':parsed.pathname, 'user-agent':'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)'});
+        let status,type;let body='';req.setEncoding('utf8');req.on('response',h=>{status=h[':status'];type=h['content-type'];});
+        req.on('data',c=>body+=c);req.on('error',reject);req.setTimeout(15000,()=>req.close());
+        req.on('end',()=>save(name,'node-http2',url,status,body,type,url).then(resolve,reject));req.end();
+      }).finally(()=>client.close());
+    }catch(e){console.log(JSON.stringify({name,transport:'node-http2',error:e.name}));}
   }
 } finally { await browser.close(); }
 await writeFile(`${dir}/responses.json`, JSON.stringify(rows,null,2));
