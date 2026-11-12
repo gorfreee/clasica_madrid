@@ -20,6 +20,20 @@ jobs:
       - run: npm ci
       - name: Run real adapters without publishing
         run: node --import tsx src/cli/ingest.ts sync --sources teatros-canal,teatro-auditorio-escorial --dry-run --from 2026-11-12 --to 2027-08-31 --report ingestion/work/cdcm-live/report.json
+      - name: Verify official Views pagination transport
+        run: |
+          node --import tsx --input-type=module - <<'JS'
+          import {writeFile} from 'node:fs/promises';
+          import {getText} from './src/ingestion/http.ts';
+          import {CDCM_CANAL_LIST,cdcmAjaxUrl} from './src/ingestion/detail/cdcm.ts';
+          const html=await getText(CDCM_CANAL_LIST.replace('/categoria/musica',''));
+          const settings=JSON.parse(/data-drupal-selector="drupal-settings-json">([\s\S]*?)<\/script>/.exec(html)[1]);
+          const view=Object.values(settings.views.ajaxViews)[0];
+          const body=await getText(cdcmAjaxUrl(view,1));
+          const commands=JSON.parse(body);
+          if(!commands.some(c=>c.command==='insert'&&c.method==='infiniteScrollInsertView'&&c.selector===`.js-view-dom-id-${view.view_dom_id}`))throw Error('Views contract unavailable');
+          await writeFile('ingestion/work/cdcm-live/views-page1.json',body);
+          JS
       - name: Assert recovered sources and catalogue boundary
         run: |
           node --input-type=module - <<'JS'

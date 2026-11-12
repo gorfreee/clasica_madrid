@@ -66,6 +66,11 @@ function emptyEutherpeListing(): string {
 }
 
 async function fixtureGet(url: string): Promise<string> {
+  if (url.startsWith('https://www.cdcm.madrid/')) {
+    const file = url.includes('/programacion') ? (url.includes('/teatroscanal/') ? 'canal-list' : 'escorial-list') : url.endsWith('/concierto-navidad-2026') ? 'navidad' : new URL(url).pathname.split('/').at(-1);
+    return readFile(path.join(fixtures,'cdcm',`${file}.html`),'utf8');
+  }
+
   if (url === 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid') return emptyEutherpeListing();
   if (url === 'https://www.circulobellasartes.com/eventos/') {
     return '<body class="archive category category-eventos category-63 fl-theme-builder-archive-categoria-evento-es"><h1>Eventos</h1><div class="fl-post-grid" itemscope="itemscope" itemtype="https://schema.org/Collection"></div><a class="fl-button" href="pasado/"><span class="fl-button-text">Ver el histórico de Eventos</span></a></body>';

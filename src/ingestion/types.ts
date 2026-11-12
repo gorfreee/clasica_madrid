@@ -62,8 +62,8 @@ export type RawEvent = {
   /** Exact listing text, used only as a conservative hydration/window hint. */
   listingDateText?: string;
   /** Escorial TEC evidence; only that adapter interprets its all-day envelope. */
-  /** Other ficha URLs observed in the same CDCM listing; avoids cycle/child duplication. */
-  cdcmListingUrls?: string[];
+  /** Peer ficha identities/dates observed in the CDCM listing; avoids cycle/child duplication. */
+  cdcmListingEvents?: Array<{ url: string; title: string; dates: string[] }>;
   escorialCalendar?: { allDay: boolean; start: string; end: string };
   /**
    * Diagnostic only: which official listing surface produced this observation.
@@ -269,7 +269,8 @@ export type SourceAdapter = {
   /**
    * After a successful hydrate, optionally replace the listing item with
    * several observations (a festival ficha that names distinct concerts).
-   * Return at least two events to take effect.
+   * Return at least one replacement; a cycle may have one remaining concert
+   * after its other sessions are represented by standalone fichas.
    */
   expand?(event: RawEvent, body: string): RawEvent[] | undefined;
 };
