@@ -15,17 +15,36 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Andreas Prittwitz"
+    }
+  ],
   "composers": [
     {
       "name": "Piotr Ilich Chaikovski"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Danza del Hada de Azúcar",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza rusa",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Vals de las flores",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
   "eras": [
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [
