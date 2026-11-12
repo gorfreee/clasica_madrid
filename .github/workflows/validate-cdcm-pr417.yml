@@ -1,0 +1,65 @@
+name: Validate CDCM PR 417
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event.pull_request.number == 417 && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ingest into an isolated catalog copy
+        env:
+          AI_PROVIDER: pool
+          AI_ZERO_COST_ONLY: 'true'
+          AI_MAX_REQUESTS: '30'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_STATE_DIR: ${{ github.workspace }}/.local/ai-pr417
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ingestion/reports/pr417
+          cp -R data ingestion/work/pr417-data
+          npm run ingest:sync -- --sources teatros-canal,teatro-auditorio-escorial --from 2026-11-12 --to 2027-08-31 --data-dir ingestion/work/pr417-data --report ingestion/reports/pr417/report.json --observability-dir ingestion/reports/pr417 2>&1 | tee ingestion/reports/pr417/run.log
+      - name: Assert recovery and collect reviewable changes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = Path('ingestion/reports/pr417')
+          changes = []
+          for updated in sorted(Path('ingestion/work/pr417-data').rglob('*.json')):
+              relative = updated.relative_to('ingestion/work/pr417-data')
+              original = Path('data') / relative
+              if not original.exists() or json.loads(original.read_text()) != json.loads(updated.read_text()):
+                  changes.append({'path': str(original), 'content': updated.read_text()})
+          (report / 'proposed-changes.json').write_text(json.dumps(changes, ensure_ascii=False, indent=2) + '\n')
+          summary = json.loads((report / 'report.json').read_text())['summary']
+          assert not summary['sourcesFailed'], summary['sourcesFailed']
+          assert summary['detailHydrationFailed'] == 0, summary['detailHydrationFailed']
+          assert summary['possiblyMissing'] == 0
+          for source in summary['sourceResults'].values():
+              assert source['usable'] and source['temporalCoverage']['status'] == 'unknown'
+              assert not source['disappearanceEligible']
+          print(json.dumps({'observations': summary['rawEvents'], 'hydrationSucceeded': summary['detailHydrationSucceeded'], 'changes': [c['path'] for c in changes]}, ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: cdcm-pr417-${{ github.run_id }}
+          path: ingestion/reports/pr417
+          retention-days: 30

@@ -1,11 +1,13 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { extractSource, runIngest } from '../src/ingestion/pipeline.ts';
 import { getAdapter, getSourceDefinition, httpClientForHost } from '../src/ingestion/registry.ts';
 import { extractCdcm, parseCdcmDetail, expandCdcm, CDCM_CANAL_LIST, CDCM_ESCORIAL_LIST } from '../src/ingestion/detail/cdcm.ts';
-import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { hydrateEvents, memoizeGet } from '../src/ingestion/hydrate.ts';
+import { LISTING_RETRY_DELAY_MS } from '../src/ingestion/listing-retry.ts';
+import { makeEvent } from './helpers.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
@@ -17,7 +19,7 @@ const fixture = (name: string) => readFile(path.join(root, `${name}.html`), 'utf
 const now = new Date('2026-11-12T12:00:00Z');
 const window = { from: '2026-11-12', to: '2027-08-31' };
 const dirs: string[] = [];
-afterEach(async () => { await Promise.all(dirs.splice(0).map(dir => rm(dir, { recursive: true, force: true }))); });
+afterEach(async () => { vi.useRealTimers(); await Promise.all(dirs.splice(0).map(dir => rm(dir, { recursive: true, force: true }))); });
 function context(id = 'teatros-canal'): AdapterContext { return { source: getSourceDefinition(id), now, window, get: async () => { throw Error('unexpected network'); } }; }
 async function sample(slug: string, id = 'teatros-canal') {
   const ctx = context(id); const events = await extractCdcm(await fixture(id === 'teatros-canal' ? 'canal-list' : 'escorial-list'), ctx.source.urls[0]!, ctx);
@@ -148,6 +150,63 @@ describe('CDCM: programación y fichas actuales', () => {
     expect(result.find(e => e.sourceUrl.endsWith('/laura-sierra-piano'))?.hydration?.status).toBe('failed');
     expect(result.filter(e => e.hydration?.status === 'succeeded').length).toBeGreaterThan(10);
   });
+  for (const [id, slug] of [['teatros-canal', 'grupo-enigma-0'], ['teatro-auditorio-escorial', 'concierto-navidad-2026']]) {
+    for (const error of [Object.assign(Error('HTTP 502'), { status: 502 }), Error('tiempo agotado con curl')]) {
+      it(`${id}: recupera la ficha tras ${error.message}, incluso con memoización`, async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        const ctx = context(id); const event = await sample(slug!, id);
+        const get = vi.fn().mockRejectedValueOnce(error).mockImplementation(offline);
+        const pending = hydrateEvents([event], getAdapter(ctx.source.adapterId), { ...ctx, get: memoizeGet(get) });
+        await vi.advanceTimersByTimeAsync(LISTING_RETRY_DELAY_MS - 1);
+        expect(get).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(1);
+        const [result] = await pending;
+        expect(get).toHaveBeenCalledTimes(2);
+        expect(get.mock.calls.map(args => args[0])).toEqual([event.sourceUrl, event.sourceUrl]);
+        expect(result?.hydration?.status).toBe('succeeded');
+        expect(result?.observed.occurrences[0]?.time).toBe(id === 'teatros-canal' ? '19:30' : '19:00');
+      });
+    }
+    for (const [status, attempts] of [[403, 1], [503, 2]]) {
+      it(`${id}: un HTTP ${status} persistente permanece fallido tras ${attempts} intento(s)`, async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        const ctx = context(id); const event = await sample(slug!, id);
+        const get = vi.fn().mockRejectedValue(Object.assign(Error(`HTTP ${status}`), { status }));
+        const pending = hydrateEvents([event], getAdapter(ctx.source.adapterId), { ...ctx, get: memoizeGet(get) });
+        await vi.runAllTimersAsync();
+        const [result] = await pending;
+        expect(get).toHaveBeenCalledTimes(attempts!);
+        expect(result?.hydration).toMatchObject({ status: 'failed', message: `HTTP ${status}` });
+        expect(result?.observed).toEqual(event.observed);
+      });
+    }
+    it(`${id}: no reintenta un documento bloqueado o un calendario contradictorio`, async () => {
+      const ctx = context(id); const event = await sample(slug!, id);
+      for (const body of ['<html>Access denied</html>', (await offline(event.sourceUrl)).replaceAll('2026-12-', '2027-12-')]) {
+        const get = vi.fn().mockResolvedValue(body);
+        const [result] = await hydrateEvents([event], getAdapter(ctx.source.adapterId), { ...ctx, get });
+        expect(get).toHaveBeenCalledTimes(1);
+        expect(result?.hydration?.status).toBe('failed');
+      }
+    });
+  }
+  it('si persisten los fallos de ficha en ambas fuentes, no acredita cobertura ni pierde eventos', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    const catalog = await loadCatalogFromDir(path.join(import.meta.dirname, '../data'));
+    const dir = await mkdtemp(path.join(os.tmpdir(), 'cdcm-failed-test-')); dirs.push(dir);
+    const listings = new Map([[CDCM_CANAL_LIST, await fixture('canal-list')], [CDCM_ESCORIAL_LIST, await fixture('escorial-list')]]);
+    const pending = runIngest({ catalog, now, window, sourceIds: ['teatros-canal', 'teatro-auditorio-escorial'], dryRun: true, dataDir: dir, get: async url => {
+      if (listings.has(url)) return listings.get(url)!;
+      throw Object.assign(Error('HTTP 503'), { status: 503 });
+    } });
+    await vi.runAllTimersAsync();
+    const result = await pending;
+    expect(result.summary.sourcesFailed.map(f => f.sourceId).sort()).toEqual(['teatro-auditorio-escorial', 'teatros-canal']);
+    for (const source of Object.values(result.summary.sourceResults)) expect(source).toMatchObject({ temporalCoverage: { status: 'unknown' }, hydrationIncomplete: true, hydrationSevere: true, disappearanceEligible: false, usable: false });
+    expect(result.summary.newEvents).toBe(0); expect(result.summary.possiblyMissing).toBe(0); expect(result.apply.written).toEqual([]);
+    const facts = ({ citations, lastVerifiedAt, ...event }: (typeof catalog.events)[number]) => event;
+    expect(result.apply.proposed.events.map(facts)).toEqual(catalog.events.map(facts));
+  });
   it('reconcilia con el catálogo publicado sin crear duplicados ni cambiar slugs o borrar eventos', async () => {
     const catalog = await loadCatalogFromDir(path.join(import.meta.dirname, '../data')); const before = structuredClone(catalog);
     const dir = await mkdtemp(path.join(os.tmpdir(), 'cdcm-test-')); dirs.push(dir);
@@ -158,9 +217,28 @@ describe('CDCM: programación y fichas actuales', () => {
     for(const e of before.events) { const after = r.apply.proposed.events.find(x => x.id === e.id)!; expect(after).toBeDefined(); expect(after.slug).toBe(e.slug); }
     expect(catalog).toEqual(before);
   });
-  it('los alias de migración no se aplican a otro año', async () => {
-    const catalog = await loadCatalogFromDir(path.join(import.meta.dirname, '../data'));
+  it('el alias de migración sólo une la fecha acreditada, sin depender del catálogo mutable', async () => {
     const raw = await sample('grupo-enigma-0');
-    expect(matchEventIdentity(catalog, { sourceUrl: raw.sourceUrl, title: 'Grupo Enigma', occurrences: [{ date: '2027-12-02', time: '19:30' }] }, { catalogSourceId: 'src_teatros_canal', venueId: 'ven_teatros_canal_sala_verde', allowSlot: false }).kind).toBe('unmatched');
+    const event = makeEvent({
+      id: 'evt_teatros_canal_100116_2026_12_02', title: 'Grupo Enigma',
+      venueId: 'ven_teatros_canal_sala_verde',
+      occurrences: [{ id: 'occ_enigma_20261202', date: '2026-12-02', time: '19:30', status: 'scheduled' }],
+      performers: [], composers: [], works: [],
+      citations: [{ sourceId: 'src_teatros_canal', url: 'https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026', checkedAt: '2026-09-08' }],
+      primarySourceId: 'src_teatros_canal',
+    });
+    const catalog = { ...emptyCatalog(), events: [event] };
+    const options = { catalogSourceId: 'src_teatros_canal', venueId: event.venueId, allowSlot: false };
+    const observed = { sourceUrl: raw.sourceUrl, title: 'Grupo Enigma', occurrences: [{ date: '2026-12-02', time: '19:30' }] };
+    expect(matchEventIdentity(catalog, observed, options)).toMatchObject({ kind: 'matched', method: 'alias', event: { id: event.id } });
+    const nextYear = { ...observed, occurrences: [{ date: '2027-12-02', time: '19:30' }] };
+    expect(matchEventIdentity(catalog, nextYear, options)).toEqual({ kind: 'unmatched' });
+    expect(matchEventIdentity(catalog, { ...observed, occurrences: [] }, options)).toEqual({ kind: 'unmatched' });
+
+    // After ingestion persists the new citation, URL identity must still withhold
+    // a different season for review, rather than accepting it through the alias.
+    const migrated = { ...catalog, events: [{ ...event, citations: [...event.citations, { sourceId: 'src_teatros_canal', url: raw.sourceUrl, checkedAt: '2026-11-12' }] }] };
+    expect(matchEventIdentity(migrated, nextYear, options)).toMatchObject({ kind: 'ambiguous', reason: expect.stringContaining('source-identity-review') });
+    expect(matchEventIdentity(migrated, nextYear, { ...options, aliases: [] }).kind).toBe('ambiguous');
   });
 });

@@ -4,6 +4,9 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getCdcmWithCurl } from '../src/ingestion/curl-fetch.ts';
 import { getText, resetOriginCookieJar, takeRecordedHttpAttempts } from '../src/ingestion/http.ts';
+import { runIngest } from '../src/ingestion/pipeline.ts';
+import { startObservability } from '../src/ingestion/observability.ts';
+import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 const url = 'https://www.cdcm.madrid/auditorioescorial/programacion';
 const dirs: string[] = [];
 afterEach(async () => { vi.unstubAllEnvs(); resetOriginCookieJar(); await Promise.all(dirs.splice(0).map(dir => rm(dir, { recursive: true, force: true }))); });
@@ -35,4 +38,32 @@ describe('cliente HTTP curl limitado al portal público CDCM', () => {
     await fakeCurl({ http_code: 403 }); await expect(getText(url, 1000)).rejects.toMatchObject({ status: 403 }); expect(takeRecordedHttpAttempts()[0]).toMatchObject({ url, transport: 'direct', status: 403 });
   });
   it('un fallo de curl permanece visible sin convertirlo en vacío', async () => { await fakeCurl({}, '', 28); await expect(getCdcmWithCurl(url, 1000)).rejects.toThrow(/tiempo agotado/); });
+  it('la recuperación real getText → curl contabiliza el 502 y el reintento correcto', async () => {
+    const dir = await fakeCurl({});
+    const root = path.join(import.meta.dirname, 'fixtures/ingestion/cdcm');
+    const listing = await readFile(path.join(root, 'escorial-list.html'), 'utf8');
+    const detail = await readFile(path.join(root, 'navidad.html'), 'utf8');
+    const state = path.join(dir, 'attempt.txt');
+    await writeFile(path.join(dir, 'curl'), `#!/usr/bin/env node
+const fs = require('node:fs');
+const url = process.argv.at(-1);
+let status = 200;
+if (url.includes('/espectaculo/')) {
+  const attempt = fs.existsSync(${JSON.stringify(state)}) ? 2 : 1;
+  fs.writeFileSync(${JSON.stringify(state)}, String(attempt));
+  if (attempt === 1) status = 502;
+}
+process.stdout.write((url.endsWith('/programacion') ? ${JSON.stringify(listing)} : ${JSON.stringify(detail)}) + '\\n' + JSON.stringify({ http_code: status, content_type: 'text/html', url_effective: url }));
+`, { mode: 0o755 });
+    const obs = startObservability({ directory: path.join(dir, 'obs'), mode: 'dry-run', sources: ['teatro-auditorio-escorial'], window: { from: '2026-11-12', to: '2027-08-31' } })!;
+    try {
+      const result = await runIngest({ catalog: await loadCatalogFromDir(path.join(import.meta.dirname, '../data')), dataDir: path.join(dir, 'data'), now: new Date('2026-11-12T12:00:00Z'), window: { from: '2026-11-12', to: '2027-08-31' }, sourceIds: ['teatro-auditorio-escorial'], dryRun: true, observability: obs });
+      obs.complete();
+      expect(result.summary.sourcesFailed).toEqual([]);
+      expect(result.summary.detailHydrationSucceeded).toBe(1);
+      const manifest = JSON.parse(await readFile(path.join(dir, 'obs/run.json'), 'utf8'));
+      expect(manifest.timings.sources['teatro-auditorio-escorial'].http).toMatchObject({ requests: 3, retries: 1, statusCounts: { '200': 2, '502': 1 } });
+      expect(result.apply.written).toEqual([]);
+    } finally { obs.close(); }
+  });
 });

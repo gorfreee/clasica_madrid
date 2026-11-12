@@ -921,7 +921,7 @@ function recordInstrumentedHttp(
 ): void {
   const recorded = takeRecordedHttpAttempts(url);
   if (recorded.length > 0) {
-    for (const attempt of recorded) observability.recordHttp({ sourceId, ...attempt });
+    for (const attempt of recorded) observability.recordHttp({ sourceId, ...attempt, retry: retry || attempt.retry });
     return;
   }
   if (error) takeRelayRecoveries(url);
