@@ -15,7 +15,20 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Zihao Zou",
+      "role": "soloist"
+    },
+    {
+      "name": "Elune Iricibar",
+      "role": "soloist"
+    },
+    {
+      "name": "Gael Chamorro Iglesias",
+      "role": "soloist"
+    }
+  ],
   "composers": [
     {
       "name": "Felix Mendelssohn"

@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Camerata Antonio Soler"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
