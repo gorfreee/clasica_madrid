@@ -3,7 +3,8 @@
 **Resultado: ambos adapters recuperan la programación desde GitHub Actions.**
 La PR migra al portal público CDCM y utiliza el cliente HTTP que se ha demostrado
 funcional en ese entorno. No requiere desplegar infraestructura ni cambiar secretos.
-No modifica `data/**` ni hace merge.
+La recuperación técnica inicial (#416) no modificó `data/**`. La revisión de la
+publicación #417 y sus cambios de catálogo se documentan al final.
 
 ## Diagnóstico y estrategia
 
@@ -113,8 +114,9 @@ créditos musicales, continuidad de identidad e integridad del catálogo. Se man
 la suite de regresiones de los parsers anteriores. Los resultados definitivos de
 suite completa, typecheck, build y E2E se enlazan en la descripción de la PR.
 
-La prueba de producción con el pool de IA queda para la ingestión posterior al
-merge. Puede cambiar decisiones de clasificación; no cambia los hechos descargados.
+La recuperación inicial dejó la prueba con IA para la ingestión posterior al merge;
+los resultados de publicación y las repeticiones con Gemini se detallan abajo.
+La IA puede cambiar decisiones de clasificación; no cambia los hechos descargados.
 El sitio puede volver a modificar su HTML o su política de acceso: esos casos
 siguen fallando de forma visible y conservan los eventos existentes. El entorno
 operativo necesita curl, incluido en los runners Ubuntu actuales de GitHub.
@@ -159,3 +161,22 @@ ni utiliza la clasificación de IA para corregir los datos musicales.
 Las decisiones inciertas de IA no crean eventos nuevos ni despublican los existentes.
 La cobertura de ambas fuentes sigue siendo `unknown`; recuperar todas las fichas
 del listado actual no acredita el calendario completo de la temporada.
+
+La [segunda repetición con Gemini 43326576821](https://github.com/gorfreee/clasica_madrid/actions/runs/43326576821),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43326576821/artifacts/13993151575),
+ya sobre el catálogo revisado y con el conflicto de migración corregido, vuelve a
+recuperar 15/15 observaciones: cero fuentes/fichas fallidas, cero identidades
+ambiguas y cero altas/desapariciones. Grupo Enigma queda `unchanged` por el alias
+revisado. Health sigue `review` por clasificación editorial/taxonomía pendiente,
+sin fallos técnicos: los casos inciertos no se publican como eventos nuevos. La
+única propuesta material restante es la atribución musical rechazada arriba.
+
+La [validación final 43326915093](https://github.com/gorfreee/clasica_madrid/actions/runs/43326915093),
+[artifact](https://github.com/gorfreee/clasica_madrid/actions/runs/43326915093/artifacts/13991609790),
+ejecuta `0b03a100aaaeca974af1063d0fc1248bc64bfb30` sin IA. Incluye la restricción
+final de la excepción a aliases con fechas revisadas, conserva los guards de
+aliases sin fechas y fuentes reciclables, y comprueba nuevamente cero ambigüedades,
+cero fallos de ficha y ambas fuentes utilizables sin evaluar desapariciones.
+Después de esta prueba sólo se actualiza esta evidencia y se retira el workflow
+temporal. No se incorpora ningún workflow operativo nuevo ni se modifica la CI
+del sitio. La CI completa del commit definitivo queda enlazada en #417.
