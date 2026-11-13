@@ -17,20 +17,24 @@
   ],
   "performers": [
     {
-      "name": "NEWCO – The New Chamber Orchestra"
+      "name": "NEWCO – The New Chamber Orchestra",
+      "role": "orchestra"
     },
     {
-      "name": "Tatiana Samouil"
+      "name": "Tatiana Samouil",
+      "role": "conductor"
     },
     {
-      "name": "Coro Easo Voces Mixtas"
+      "name": "Coro Easo Voces Mixtas",
+      "role": "choir"
     },
     {
       "name": "Gorka Miranda",
       "role": "conductor"
     },
     {
-      "name": "Iker Murillo Studio 24"
+      "name": "Iker Murillo Studio 24",
+      "role": "other"
     }
   ],
   "composers": [

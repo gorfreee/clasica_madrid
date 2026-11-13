@@ -17,20 +17,24 @@
   ],
   "performers": [
     {
-      "name": "Víctor Perea"
+      "name": "Víctor Perea",
+      "role": "soloist"
     },
     {
-      "name": "Coro Xenakis"
+      "name": "Coro Xenakis",
+      "role": "choir"
     },
     {
-      "name": "Coro Voces de Toledo"
+      "name": "Coro Voces de Toledo",
+      "role": "choir"
     },
     {
       "name": "Aiblín Brito",
       "role": "conductor"
     },
     {
-      "name": "Juan Carlos Zamudio"
+      "name": "Juan Carlos Zamudio",
+      "role": "conductor"
     }
   ],
   "composers": [],
@@ -41,7 +45,7 @@
     "organ"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_esmadrid",

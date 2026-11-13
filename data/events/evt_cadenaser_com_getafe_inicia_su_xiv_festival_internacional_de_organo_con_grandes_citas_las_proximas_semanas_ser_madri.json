@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_cadenaser_com_getafe_inicia_su_xiv_festival_internacional_de_organo_con_grandes_citas_las_proximas_semanas_ser_madri",
   "slug": "xiv-festival-internacional-de-organo-enrique-martin-laguna",
-  "title": "XIV Festival Internacional de Órgano — Enrique Martín-Laguna",
+  "title": "Enrique Martín-Laguna — XIV Festival Internacional de Órgano",
   "status": "scheduled",
   "venueId": "ven_catedral_de_santa_maria_magdalena_de_getafe",
   "organizerIds": [],
@@ -17,7 +17,8 @@
   ],
   "performers": [
     {
-      "name": "Enrique Martín-Laguna"
+      "name": "Enrique Martín-Laguna",
+      "role": "soloist"
     }
   ],
   "composers": [],

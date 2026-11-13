@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_ecos_marinos_santa_cecilia_20261121",
+  "slug": "ecos-marinos-santa-cecilia",
+  "title": "Ecos Marinos. Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_municipal_paco_de_lucia_alcala_de_henares",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_ecos_marinos_santa_cecilia_20261121_01",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica Complutense",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Brian Hogg"
+    },
+    {
+      "name": "Jacob de Haan"
+    },
+    {
+      "name": "Hans Zimmer"
+    },
+    {
+      "name": "Thiemo Kraas"
+    },
+    {
+      "name": "Rossano Galante"
+    },
+    {
+      "name": "José Alberto Pina"
+    }
+  ],
+  "works": [
+    {
+      "title": "In Stillness",
+      "composerName": "Brian Hogg"
+    },
+    {
+      "title": "Pacific Dreams",
+      "composerName": "Jacob de Haan"
+    },
+    {
+      "title": "At World’s End",
+      "composerName": "Hans Zimmer"
+    },
+    {
+      "title": "Abendmond",
+      "composerName": "Thiemo Kraas"
+    },
+    {
+      "title": "Sailing with Whales",
+      "composerName": "Rossano Galante"
+    },
+    {
+      "title": "The Ghost Ship",
+      "composerName": "José Alberto Pina"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/ecos-marinos-santa-cecilia/",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-11-13"
+}

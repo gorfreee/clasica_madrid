@@ -17,19 +17,24 @@
   ],
   "performers": [
     {
-      "name": "Grupo Arsys"
+      "name": "Grupo Arsys",
+      "role": "ensemble"
     },
     {
-      "name": "Sinfonietta Coral"
+      "name": "Sinfonietta Coral",
+      "role": "choir"
     },
     {
-      "name": "Ángeles Luque"
+      "name": "Ángeles Luque",
+      "role": "soloist"
     },
     {
-      "name": "Víctor Fernández"
+      "name": "Víctor Fernández",
+      "role": "soloist"
     },
     {
-      "name": "Valentyna Naida"
+      "name": "Valentyna Naida",
+      "role": "soloist"
     },
     {
       "name": "Raúl Trincado",

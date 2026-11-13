@@ -17,7 +17,8 @@
   ],
   "performers": [
     {
-      "name": "Ángel Montero"
+      "name": "Ángel Montero",
+      "role": "soloist"
     }
   ],
   "composers": [],
@@ -27,7 +28,7 @@
     "organ"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_esmadrid",
