@@ -5,7 +5,9 @@
   "title": "Escenario Joven",
   "status": "scheduled",
   "venueId": "ven_md_fac_1921",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_escuela_superior_musica_katarina_gurska"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -15,12 +17,78 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Marta García"
+    },
+    {
+      "name": "Anna Mirakyan"
+    },
+    {
+      "name": "Petro Poznianskyi"
+    },
+    {
+      "name": "María Jesús Cáceres Velasco"
+    },
+    {
+      "name": "Víctor Orts Langa"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ernest Chausson"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Niccolò Paganini"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Alberto Posadas"
+    }
+  ],
+  "works": [
+    {
+      "title": "Poème, Op. 25",
+      "composerName": "Ernest Chausson"
+    },
+    {
+      "title": "Adagio y Fuga de la Sonata n.º 1 en sol menor, BWV 1001",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Capricho n.º 13, Op. 1",
+      "composerName": "Niccolò Paganini"
+    },
+    {
+      "title": "Suite Iberia: IV. Rondeña y V. Almería",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Sonata para flauta en la menor, Wq. 132, H. 562",
+      "composerName": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "title": "Fragmentos fracturados (2014)",
+      "composerName": "Alberto Posadas"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
   "formats": [
-    "chamber"
+    "chamber",
+    "recital"
   ],
   "kind": "alternative",
   "access": "free",
@@ -30,8 +98,14 @@
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa16ece578cf0a10VgnVCM100000891ecb1aRCRD",
       "checkedAt": "2026-11-12",
       "externalId": "50441364"
+    },
+    {
+      "sourceId": "src_katarinagurska_com",
+      "url": "https://katarinagurska.com/evento/escenario-joven-17-noviembre-2026",
+      "checkedAt": "2026-11-13",
+      "externalId": "27377"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-13"
 }
