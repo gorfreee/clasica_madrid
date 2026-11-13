@@ -66,6 +66,9 @@ function emptyEutherpeListing(): string {
 }
 
 async function fixtureGet(url: string): Promise<string> {
+  if (url.startsWith('https://katarinagurska.com/wp-json/tribe/events/v1/events?')) {
+    return JSON.stringify({ events: [], total: 0, total_pages: 0, rest_url: url });
+  }
   if (url.startsWith('https://www.cdcm.madrid/')) {
     const file = url.includes('/programacion') ? (url.includes('/teatroscanal/') ? 'canal-list' : 'escorial-list') : url.endsWith('/concierto-navidad-2026') ? 'navidad' : new URL(url).pathname.split('/').at(-1);
     return readFile(path.join(fixtures,'cdcm',`${file}.html`),'utf8');
@@ -266,7 +269,7 @@ describe('aislamiento de fallos por fuente', () => {
       'orquesta-ciudad-getafe',
       'fundacion-cultural-las-rozas',
     ]);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial', 'fundacion-eutherpe']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial', 'fundacion-eutherpe', 'katarina-gurska']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -286,7 +289,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas', 'fundacion-eutherpe',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas', 'fundacion-eutherpe', 'katarina-gurska',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);

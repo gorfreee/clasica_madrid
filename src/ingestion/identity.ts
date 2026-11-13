@@ -32,6 +32,15 @@ export type EventIdentityAlias = {
  * not a general mapping store and not a substitute for matching.
  */
 export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
+  // KG's official ficha and the published municipal listing identify the same
+  // Escenario Joven at Galileo, 17/11/2026 19:00. Keep the published slug.
+  {
+    eventId: 'evt_madrid_datos_50441364',
+    catalogSourceId: 'src_katarinagurska_com',
+    externalId: '27377',
+    url: 'https://katarinagurska.com/evento/escenario-joven-17-noviembre-2026/',
+    dates: ['2026-11-17'],
+  },
   // CDCM migration: URLs, dates, room and programme compared with the official
   // fichas and published catalogue on 2026-11-12. Never applies to another season.
   {
