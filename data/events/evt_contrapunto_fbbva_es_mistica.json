@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_mistica",
+  "slug": "mistica",
+  "title": "Mística",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_mistica_01",
+      "date": "2027-02-19",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Capella de Ministrers",
+      "role": "ensemble"
+    },
+    {
+      "name": "Beatriz Lafont"
+    },
+    {
+      "name": "Manuel Minguillón"
+    },
+    {
+      "name": "Carles Magraner",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Moxica"
+    },
+    {
+      "name": "Mateo Flecha"
+    },
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "name": "Tarquinio Merula"
+    },
+    {
+      "name": "Enríquez de Valderrábano"
+    },
+    {
+      "name": "Giovanni Felice Sances"
+    },
+    {
+      "name": "Francisco Correa de Arauxo"
+    },
+    {
+      "name": "Francisco Guerrero"
+    },
+    {
+      "name": "Juan García de Zéspedes"
+    },
+    {
+      "name": "Joan Cererols"
+    },
+    {
+      "name": "Lucas Ruiz de Ribayaz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dama, mi gran querer",
+      "composerName": "Moxica"
+    },
+    {
+      "title": "Si amores me han de matar (versión de Miguel de Fuenllana)",
+      "composerName": "Mateo Flecha"
+    },
+    {
+      "title": "¿Quién te traxo, cavallero?",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Salve Regina",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Pulchra es amica mea (versión instrumental glosada por Francesco Rognoni)",
+      "composerName": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "title": "Canzonetta Spirituale «Hor ch’è tempo di dormire»",
+      "composerName": "Tarquinio Merula"
+    },
+    {
+      "title": "Fantasía sobre un Benedictus",
+      "composerName": "Enríquez de Valderrábano"
+    },
+    {
+      "title": "Senhora del mundo (villancico anónimo portugués del s. XVI)"
+    },
+    {
+      "title": "Pianto della Madonna",
+      "composerName": "Giovanni Felice Sances"
+    },
+    {
+      "title": "Tres glosas sobre el canto de la Inmaculada Concepción",
+      "composerName": "Francisco Correa de Arauxo"
+    },
+    {
+      "title": "Niño Dios d’amor herido",
+      "composerName": "Francisco Guerrero"
+    },
+    {
+      "title": "Madre, la de los primores"
+    },
+    {
+      "title": "Danzas a lo divino: Marizápalos y Xácara"
+    },
+    {
+      "title": "Juguete a 4 y Guaracha «Ay que me abraso»",
+      "composerName": "Juan García de Zéspedes"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/mistica",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_accioncultural_es_musae_20262027_3",
+  "slug": "duo-vesta-musae",
+  "title": "Dúo Vesta — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_nacional_de_artes_decorativas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_accioncultural_es_musae_20262027_3_01",
+      "date": "2027-03-09",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Vesta"
+    },
+    {
+      "name": "Elena Doménech Lorente"
+    },
+    {
+      "name": "Marina Gallego Tortajada"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Marie Jaëll"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_accioncultural_es",
+      "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_accioncultural_es",
+  "lastVerifiedAt": "2026-11-13"
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_la_generacion_leonardo_y_oriente",
+  "slug": "la-generacion-leonardo-y-oriente",
+  "title": "La generación Leonardo y Oriente",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_la_generacion_leonardo_y_oriente_01",
+      "date": "2027-01-29",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PluralEnsemble",
+      "role": "ensemble"
+    },
+    {
+      "name": "Fabián Panisello",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis Tabuenca"
+    },
+    {
+      "name": "Unsuk Chin"
+    },
+    {
+      "name": "Ping Jin"
+    },
+    {
+      "name": "Toshio Hosokawa"
+    },
+    {
+      "name": "Carlos de Castellarnau"
+    },
+    {
+      "name": "Deqing Wen"
+    }
+  ],
+  "works": [
+    {
+      "title": "Soplones",
+      "composerName": "Luis Tabuenca"
+    },
+    {
+      "title": "Piano Etudes (selección: in C; Sequenzen; Grains)",
+      "composerName": "Unsuk Chin"
+    },
+    {
+      "title": "Ecstatic Lotus",
+      "composerName": "Ping Jin"
+    },
+    {
+      "title": "Stunden-Blumen — hommage à Olivier Messiaen",
+      "composerName": "Toshio Hosokawa"
+    },
+    {
+      "title": "Bas-relief",
+      "composerName": "Carlos de Castellarnau"
+    },
+    {
+      "title": "Advice from a Caterpillar",
+      "composerName": "Unsuk Chin"
+    },
+    {
+      "title": "Drinking Song",
+      "composerName": "Deqing Wen"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/la-generacion-leonardo-y-oriente",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}

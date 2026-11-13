@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_accioncultural_es_musae_20262027_2",
+  "slug": "duo-hegan-musae",
+  "title": "Dúo Hegan — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_sorolla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_accioncultural_es_musae_20262027_2_01",
+      "date": "2027-02-24",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Hegan"
+    },
+    {
+      "name": "Patricia Ruiz Asperilla"
+    },
+    {
+      "name": "Itxaso Sáinz de la Maza"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Philippe Gaubert"
+    },
+    {
+      "name": "Jules Mouquet"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Hamilton Harty"
+    },
+    {
+      "name": "Serge Prokofiev"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_accioncultural_es",
+      "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_accioncultural_es",
+  "lastVerifiedAt": "2026-11-13"
+}

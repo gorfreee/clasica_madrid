@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_solo",
+  "slug": "solo",
+  "title": "Solo",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_solo_01",
+      "date": "2026-12-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alban Gerhardt"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Zoltán Kodály"
+    },
+    {
+      "name": "Gaspar Cassadó"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite n.º 1 para violonchelo solo, op. 72",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Sonata para violonchelo solo, op. 8",
+      "composerName": "Zoltán Kodály"
+    },
+    {
+      "title": "Suite para violonchelo solo",
+      "composerName": "Gaspar Cassadó"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/solo",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}

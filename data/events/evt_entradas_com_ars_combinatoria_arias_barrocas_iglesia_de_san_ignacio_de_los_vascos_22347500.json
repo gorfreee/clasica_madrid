@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradas_com_ars_combinatoria_arias_barrocas_iglesia_de_san_ignacio_de_los_vascos_22347500",
+  "slug": "ars-combinatoria-arias-barrocas",
+  "title": "Ars Combinatoria — Arias Barrocas",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_san_ignacio_de_los_vascos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradas_com_ars_combinatoria_arias_barrocas_iglesia_de_san_ignacio_de_los_vascos_22347500_01",
+      "date": "2027-02-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ars Combinatoria",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Nueve arias alemanas",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradas_com",
+      "url": "https://www.entradas.com/event/ars-combinatoria-arias-barrocas-iglesia-de-san-ignacio-de-los-vascos-22347500",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_entradas_com",
+  "lastVerifiedAt": "2026-11-13"
+}

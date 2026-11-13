@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquestafilarmonia_com_concierto_de_navidad",
+  "slug": "concierto-de-navidad-filarmonia",
+  "title": "Concierto de Navidad — Filarmonía",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquestafilarmonia_com_concierto_de_navidad_01",
+      "date": "2026-12-16",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Filarmonía de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Coro Filarmonía de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
+    },
+    {
+      "name": "Israel Fernández"
+    }
+  ],
+  "composers": [
+    {
+      "name": "L. Anderson"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "A. Saunders"
+    },
+    {
+      "name": "Juan J. Colomer"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "K. K. Davis"
+    },
+    {
+      "name": "J. Williams"
+    },
+    {
+      "name": "N. Hooper"
+    },
+    {
+      "name": "Franz Lehár"
+    },
+    {
+      "name": "A. Adam"
+    },
+    {
+      "name": "Émile Waldteufel"
+    },
+    {
+      "name": "J. Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "Christmas Festival Medley",
+      "composerName": "L. Anderson"
+    },
+    {
+      "title": "Nun seid ihr wohl gerochen, de Christmas Oratorio",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "A Christmas Fantasy",
+      "composerName": "A. Saunders"
+    },
+    {
+      "title": "Sleigh Ride",
+      "composerName": "L. Anderson"
+    },
+    {
+      "title": "Dime Niño",
+      "composerName": "Juan J. Colomer"
+    },
+    {
+      "title": "And the Glory of the Lord, de Messiah",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "El Tamborilero",
+      "composerName": "K. K. Davis"
+    },
+    {
+      "title": "Christmas at Hogwarts, de Harry Potter and the Philosopher’s Stone",
+      "composerName": "J. Williams"
+    },
+    {
+      "title": "In Noctem, de Harry Potter",
+      "composerName": "N. Hooper"
+    },
+    {
+      "title": "Nechledil March",
+      "composerName": "Franz Lehár"
+    },
+    {
+      "title": "Cantique de Noël",
+      "composerName": "A. Adam"
+    },
+    {
+      "title": "Les Patineurs",
+      "composerName": "Émile Waldteufel"
+    },
+    {
+      "title": "Dry Your Tears, Afrika, de Amistad",
+      "composerName": "J. Williams"
+    },
+    {
+      "title": "Fiesta Navideña",
+      "composerName": "Juan J. Colomer"
+    },
+    {
+      "title": "An der schönen blauen Donau (El Bello Danubio Azul)",
+      "composerName": "J. Strauss"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_orquestafilarmonia_com",
+      "url": "https://www.orquestafilarmonia.com/concierto/concierto-de-navidad",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_orquestafilarmonia_com",
+  "lastVerifiedAt": "2026-11-13"
+}

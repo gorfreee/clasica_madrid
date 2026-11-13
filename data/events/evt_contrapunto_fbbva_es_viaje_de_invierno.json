@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_viaje_de_invierno",
+  "slug": "viaje-de-invierno",
+  "title": "Viaje de invierno",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_viaje_de_invierno_01",
+      "date": "2027-02-26",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ferran Albrich"
+    },
+    {
+      "name": "Victoria Guerrero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Winterreise, D. 911",
+      "composerName": "Franz Schubert"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/viaje-de-invierno",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}

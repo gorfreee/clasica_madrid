@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradas_com_ars_combinatoria_de_venecia_a_leipzig_iglesia_de_san_ignacio_de_los_vascos_22091821",
+  "slug": "ars-combinatoria-de-venecia-a-leipzig",
+  "title": "Ars Combinatoria — De Venecia a Leipzig",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_san_ignacio_de_los_vascos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradas_com_ars_combinatoria_de_venecia_a_leipzig_iglesia_de_san_ignacio_de_los_vascos_22091821_01",
+      "date": "2027-01-16",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ars Combinatoria",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Castello"
+    },
+    {
+      "name": "Arcangelo Corelli"
+    },
+    {
+      "name": "Tomaso Albinoni"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradas_com",
+      "url": "https://www.entradas.com/event/ars-combinatoria-de-venecia-a-leipzig-iglesia-de-san-ignacio-de-los-vascos-22091821",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_entradas_com",
+  "lastVerifiedAt": "2026-11-13"
+}

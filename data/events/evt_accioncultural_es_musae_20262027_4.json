@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_accioncultural_es_musae_20262027_4",
+  "slug": "paula-rocosa-musae",
+  "title": "Paula Rocosa — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_sorolla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_accioncultural_es_musae_20262027_4_01",
+      "date": "2027-03-10",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Paula Rocosa"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "Marc Migó"
+    },
+    {
+      "name": "Martí Cristià"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "György Ligeti"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_accioncultural_es",
+      "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_accioncultural_es",
+  "lastVerifiedAt": "2026-11-13"
+}

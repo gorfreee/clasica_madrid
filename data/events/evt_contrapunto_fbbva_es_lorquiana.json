@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_lorquiana",
+  "slug": "lorquiana",
+  "title": "Lorquiana",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_lorquiana_01",
+      "date": "2026-11-20",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana María Valderrama"
+    },
+    {
+      "name": "David Kadouch"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Alicia Terzian"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Federico García Lorca"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violín, FP 119",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Tres retratos del Libro de canciones de Lorca (selección: Verlaine; Debussy)",
+      "composerName": "Alicia Terzian"
+    },
+    {
+      "title": "Sonata para violín y piano, CD 148",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Danza española n.º 1 de La vida breve (versión de Fritz Kreisler)",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Canciones populares españolas (selección para violín y piano, versión de Alberto Martín)",
+      "composerName": "Federico García Lorca"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/lorquiana",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}
