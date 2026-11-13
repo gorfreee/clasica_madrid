@@ -6,7 +6,7 @@
   "status": "scheduled",
   "venueId": "ven_parroquia_de_santa_cruz",
   "organizerIds": [],
-  "seriesId": null,
+  "seriesId": "ser_ii_ciclo_organo_santa_cecilia_2026",
   "occurrences": [
     {
       "id": "occ_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_01",
