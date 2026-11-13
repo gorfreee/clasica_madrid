@@ -17,6 +17,10 @@
   ],
   "performers": [
     {
+      "name": "Trío Alborada",
+      "role": "ensemble"
+    },
+    {
       "name": "Vicente Romero Carrilero"
     },
     {
@@ -53,11 +57,16 @@
     "recital"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_accioncultural_es",
       "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-13"
+    },
+    {
+      "sourceId": "src_musae_es",
+      "url": "https://www.musae.es/programacion",
       "checkedAt": "2026-11-13"
     }
   ],

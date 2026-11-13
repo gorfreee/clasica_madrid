@@ -15,16 +15,21 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Cuarteto Iberia",
+      "role": "ensemble"
+    }
+  ],
   "composers": [
     {
       "name": "Anton Webern"
     },
     {
-      "name": "B. Britten"
+      "name": "Benjamin Britten"
     },
     {
-      "name": "D. Shostakovich"
+      "name": "Dmitri Shostakovich"
     }
   ],
   "works": [
@@ -34,11 +39,11 @@
     },
     {
       "title": "Simple Symphony, op. 4",
-      "composerName": "B. Britten"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "Cuarteto n.º 8 en do menor, op. 110",
-      "composerName": "D. Shostakovich"
+      "composerName": "Dmitri Shostakovich"
     }
   ],
   "eras": [
