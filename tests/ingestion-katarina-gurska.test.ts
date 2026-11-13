@@ -99,6 +99,7 @@ describe('Katarina Gurska — calendario oficial TEC', () => {
     ]);
     const matines = events.find(e => e.externalId === '27433')!;
     expect(matines.observed.title).toContain('– FUTURE TONES –');
+    expect(matines.observed.categoryText).toBe('Actividad gratuita; Matinés Musicales');
     expect(matines.venueAddress).toContain('Real Sitio de San Ildefonso');
     expect(matines.observed.programText).toContain('Domenico Scarlatti');
     expect(matines.observed.programText).not.toContain('Karel Komárek');
@@ -115,6 +116,11 @@ describe('Katarina Gurska — calendario oficial TEC', () => {
       .toBe('2026-11-16 00:00:00 / 2026-11-22 23:59:59');
     expect(events.find(e => e.externalId === '27379')!.observed.occurrences)
       .toEqual([{ raw: '2026-11-24 19:00:00', date: '2026-11-24', time: '19:00' }]);
+    // 00:00 is a genuine time for a timed event, unlike all-day TEC envelopes.
+    const midnight = { ...await sample(), start_date: '2026-11-17 00:00:00', end_date: '2026-11-17 01:00:00' };
+    const [atMidnight] = await adapter.extract(document([midnight]), listingUrl, context());
+    expect(atMidnight!.observed.occurrences)
+      .toEqual([{ raw: '2026-11-17 00:00:00', date: '2026-11-17', time: '00:00' }]);
   });
 
   it('recorre todas las páginas y rechaza páginas incompletas, repetidas o totales cambiantes', async () => {
