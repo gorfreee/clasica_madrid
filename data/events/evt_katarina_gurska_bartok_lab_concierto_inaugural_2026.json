@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_katarina_gurska_bartok_lab_concierto_inaugural_2026",
+  "slug": "bartok-creative-lab-concierto-inaugural-2026",
+  "title": "Concierto inaugural del Bartók Creative Lab",
+  "status": "scheduled",
+  "venueId": "ven_centro_superior_katarina_gurska_auditorio",
+  "organizerIds": [
+    "org_escuela_superior_musica_katarina_gurska"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_katarina_gurska_bartok_lab_concierto_inaugural_2026_01",
+      "date": "2026-11-17",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_katarinagurska_com",
+      "url": "https://katarinagurska.com/novedad-educativa/bartok-creative-lab-2026/",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_katarinagurska_com",
+  "lastVerifiedAt": "2026-11-13"
+}
