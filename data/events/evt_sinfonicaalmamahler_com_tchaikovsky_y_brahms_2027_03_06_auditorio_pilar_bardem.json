@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_sinfonicaalmamahler_com_tchaikovsky_y_brahms_2027_03_06_auditorio_pilar_bardem",
+  "slug": "tchaikovsky-y-brahms",
+  "title": "Tchaikovsky y Brahms",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_pilar_bardem",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_sinfonicaalmamahler_com_tchaikovsky_y_brahms_2027_03_06_auditorio_pilar_bardem_01",
+      "date": "2027-03-06",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Rivas Alma Mahler"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Rosa G. Ascot"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_sinfonicaalmamahler_com",
+      "url": "https://www.sinfonicaalmamahler.com/conciertos",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_sinfonicaalmamahler_com",
+  "lastVerifiedAt": "2026-11-13"
+}

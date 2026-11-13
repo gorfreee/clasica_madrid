@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_2",
+  "slug": "victor-perea-y-coros-ii-ciclo-de-organo-santa-cecilia",
+  "title": "Víctor Perea y coros — II Ciclo de Órgano Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_santa_cruz",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_2_01",
+      "date": "2026-11-21",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Víctor Perea"
+    },
+    {
+      "name": "Coro Xenakis"
+    },
+    {
+      "name": "Coro Voces de Toledo"
+    },
+    {
+      "name": "Aiblín Brito",
+      "role": "conductor"
+    },
+    {
+      "name": "Juan Carlos Zamudio"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral",
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_esmadrid",
+      "url": "https://www.esmadrid.com/agenda/ciclo-organo-santa-cecilia-parroquia-santa-cruz",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_esmadrid",
+  "lastVerifiedAt": "2026-11-13"
+}
