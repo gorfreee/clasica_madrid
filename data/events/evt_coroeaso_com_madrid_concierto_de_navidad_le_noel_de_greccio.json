@@ -42,7 +42,7 @@
       "name": "P. Aldave"
     },
     {
-      "name": "P. I. Chaikovski"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
       "name": "Aita Donostia"
@@ -55,7 +55,7 @@
     },
     {
       "title": "Serenata para cuerdas en do mayor, op. 48",
-      "composerName": "P. I. Chaikovski"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Basatsoritsu",
@@ -95,11 +95,16 @@
     "chamber"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_coroeaso_com",
       "url": "https://coroeaso.com/eventos/madrid-concierto-de-navidad-le-noel-de-greccio",
+      "checkedAt": "2026-11-13"
+    },
+    {
+      "sourceId": "src_oeoficina_com",
+      "url": "https://www.oeoficina.com/es/evento/0168-2026-12-21-concierto-de-navidad-basilica-de-jesus-de-medinaceli-madrid",
       "checkedAt": "2026-11-13"
     }
   ],
