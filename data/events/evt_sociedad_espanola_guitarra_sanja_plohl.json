@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_sociedad_espanola_guitarra_sanja_plohl",
+  "slug": "recital-de-guitarra-sanja-plohl",
+  "title": "Recital de guitarra — Sanja Plohl",
+  "status": "scheduled",
+  "venueId": "ven_real_conservatorio_superior_musica_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_sociedad_espanola_guitarra_sanja_plohl_01",
+      "date": "2027-01-16",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sanja Plohl",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_sociedad_espanola_guitarra",
+      "url": "https://www.xn--sociedadespaoladelaguitarra-0uc.com/index.php/actividades",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_sociedad_espanola_guitarra",
+  "lastVerifiedAt": "2026-11-13"
+}

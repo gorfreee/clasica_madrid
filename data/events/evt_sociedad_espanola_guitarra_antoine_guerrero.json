@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_sociedad_espanola_guitarra_antoine_guerrero",
+  "slug": "recital-de-guitarra-antoine-guerrero",
+  "title": "Recital de guitarra — Antoine Guerrero",
+  "status": "scheduled",
+  "venueId": "ven_real_conservatorio_superior_musica_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_sociedad_espanola_guitarra_antoine_guerrero_01",
+      "date": "2027-02-14",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Antoine Guerrero",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_sociedad_espanola_guitarra",
+      "url": "https://www.xn--sociedadespaoladelaguitarra-0uc.com/index.php/actividades/135-antoine-guerrero-14-de-febrero-de-2027",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_sociedad_espanola_guitarra",
+  "lastVerifiedAt": "2026-11-13"
+}
