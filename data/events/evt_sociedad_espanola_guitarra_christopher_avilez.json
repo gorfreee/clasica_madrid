@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_sociedad_espanola_guitarra_christopher_avilez",
+  "slug": "recital-de-guitarra-christopher-avilez",
+  "title": "Recital de guitarra — Christopher Avilez",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_sociedad_espanola_guitarra_christopher_avilez_01",
+      "date": "2027-02-21",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Christopher Avilez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_sociedad_espanola_guitarra",
+      "url": "https://www.xn--sociedadespaoladelaguitarra-0uc.com/index.php/actividades/136-christopher-avilez-21-de-febrero-de-2027",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_sociedad_espanola_guitarra",
+  "lastVerifiedAt": "2026-11-13"
+}

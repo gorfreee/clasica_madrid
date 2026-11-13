@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_sociedad_espanola_guitarra_haruna_miyagawa",
+  "slug": "recital-de-guitarra-haruna-miyagawa",
+  "title": "Recital de guitarra — Haruna Miyagawa",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_sociedad_espanola_guitarra_haruna_miyagawa_01",
+      "date": "2026-11-29",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Haruna Miyagawa",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_sociedad_espanola_guitarra",
+      "url": "https://www.xn--sociedadespaoladelaguitarra-0uc.com/index.php/actividades/132-haruna-miyagawa-29-de-noviembre-de-2026",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_sociedad_espanola_guitarra",
+  "lastVerifiedAt": "2026-11-13"
+}

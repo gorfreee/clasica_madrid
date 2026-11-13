@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_en_modo_de_chacona",
+  "slug": "en-modo-de-chacona",
+  "title": "En modo de chacona",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_en_modo_de_chacona_01",
+      "date": "2027-02-12",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Silvia Márquez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bernardo Storace"
+    },
+    {
+      "name": "Michelangelo Rossi"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "György Ligeti"
+    },
+    {
+      "name": "Louis Couperin"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Alessandro Scarlatti"
+    },
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Roberto Sierra"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ciaccona",
+      "composerName": "Bernardo Storace"
+    },
+    {
+      "title": "Partite sopra la Romanesca",
+      "composerName": "Michelangelo Rossi"
+    },
+    {
+      "title": "Differencias sobre las Vacas",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Hungarian Rock (Chaconne)",
+      "composerName": "György Ligeti"
+    },
+    {
+      "title": "Chaconne la Complaignante",
+      "composerName": "Louis Couperin"
+    },
+    {
+      "title": "Chacona en sol menor, HWV 486",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Folia",
+      "composerName": "Alessandro Scarlatti"
+    },
+    {
+      "title": "12 variaciones sobre la Folía de España, Wq. 118/9",
+      "composerName": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "title": "Montuno en forma de chacona",
+      "composerName": "Roberto Sierra"
+    },
+    {
+      "title": "Chacona de la Partita para violín solo n.º 2, BWV 1004 (transcripción para clave de Lars Ulrik Mortensen)",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "classical",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/en-modo-de-chacona",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}

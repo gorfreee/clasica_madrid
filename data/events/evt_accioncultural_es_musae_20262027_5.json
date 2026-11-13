@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_accioncultural_es_musae_20262027_5",
+  "slug": "laia-terre-y-laura-mingo-musae",
+  "title": "Laia Terré y Laura Mingo — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_arqueologico_nacional",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_accioncultural_es_musae_20262027_5_01",
+      "date": "2027-03-13",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Laia Terré García"
+    },
+    {
+      "name": "Laura Mingo Pérez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francesco Geminiani"
+    },
+    {
+      "name": "Evaristo Felice Dall’Abaco"
+    },
+    {
+      "name": "Salvatore Lanzetti"
+    },
+    {
+      "name": "Giuseppe Maria Jacchini"
+    },
+    {
+      "name": "Martin Berteau"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_accioncultural_es",
+      "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-13"
+    },
+    {
+      "sourceId": "src_musae_es",
+      "url": "https://www.musae.es/programacion",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_accioncultural_es",
+  "lastVerifiedAt": "2026-11-13"
+}

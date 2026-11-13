@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museolazarogaldiano_es_concierto_del_cuarteto_iberia",
+  "slug": "concierto-del-cuarteto-iberia",
+  "title": "Concierto del Cuarteto Iberia",
+  "status": "scheduled",
+  "venueId": "ven_museo_lazaro_galdiano_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museolazarogaldiano_es_concierto_del_cuarteto_iberia_01",
+      "date": "2026-11-29",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Iberia",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Anton Webern"
+    },
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fünf Sätze für Streichquartett, op. 5",
+      "composerName": "Anton Webern"
+    },
+    {
+      "title": "Simple Symphony, op. 4",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Cuarteto n.º 8 en do menor, op. 110",
+      "composerName": "Dmitri Shostakóvich"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museolazarogaldiano_es",
+      "url": "https://www.museolazarogaldiano.es/actividades/concierto-del-cuarteto-iberia",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_museolazarogaldiano_es",
+  "lastVerifiedAt": "2026-11-13"
+}

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contrapunto_fbbva_es_eotvos_saariaho_y_la_generacion_leonardo",
+  "slug": "eotvos-saariaho-y-la-generacion-leonardo",
+  "title": "Eötvos, Saariaho y la generación Leonardo",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_bbva_palacio_del_marques_de_salamanca",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contrapunto_fbbva_es_eotvos_saariaho_y_la_generacion_leonardo_01",
+      "date": "2027-03-05",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PluralEnsemble",
+      "role": "ensemble"
+    },
+    {
+      "name": "Fabián Panisello",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Péter Eötvös"
+    },
+    {
+      "name": "Javier Quislant"
+    },
+    {
+      "name": "José Luis Turina"
+    },
+    {
+      "name": "Kaija Saariaho"
+    },
+    {
+      "name": "Hermes Luaces"
+    },
+    {
+      "name": "Núria Núñez Hierro"
+    }
+  ],
+  "works": [
+    {
+      "title": "Now, Miss!",
+      "composerName": "Péter Eötvös"
+    },
+    {
+      "title": "Primitive Root Modules",
+      "composerName": "Javier Quislant"
+    },
+    {
+      "title": "Dedicatoria",
+      "composerName": "José Luis Turina"
+    },
+    {
+      "title": "Cendres",
+      "composerName": "Kaija Saariaho"
+    },
+    {
+      "title": "Mil auroras florecen sobre tus manos",
+      "composerName": "Hermes Luaces"
+    },
+    {
+      "title": "Atlas coelestis",
+      "composerName": "Núria Núñez Hierro"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_contrapunto_fbbva_es",
+      "url": "https://www.contrapunto-fbbva.es/eventos/eotvos-saariaho-y-la-generacion-leonardo",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_contrapunto_fbbva_es",
+  "lastVerifiedAt": "2026-11-13"
+}
