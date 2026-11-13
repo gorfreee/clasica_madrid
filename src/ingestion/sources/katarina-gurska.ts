@@ -159,7 +159,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent {
   const venueAddress = venue
     ? [venue.address, venue.city, venue.province].filter(Boolean).map(v => flattenHtmlBlocks(v!)).join(', ')
     : '';
-  const categoryText = item.categories.map(c => flattenHtmlBlocks(c.name)).filter(Boolean).join('; ');
+  const categoryText = [...new Set(item.categories.map(c => flattenHtmlBlocks(c.name)).filter(Boolean))].join('; ');
   const organizerText = [...new Set(item.organizer.map(o => flattenHtmlBlocks(o.organizer)))].filter(Boolean).join('; ');
   const accessText = flattenHtmlBlocks(item.cost);
   const programText = programFromDescription(item.description);
@@ -178,7 +178,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent {
       // TEC start/end describe an interval, not daily performances. Keep its
       // explicit start only; all-day midnight never becomes a concert clock.
       occurrences: [{ raw: item.start_date, date: start.date,
-        ...(!item.all_day && start.time && start.time !== '00:00' ? { time: start.time } : {}) }],
+        ...(!item.all_day && start.time ? { time: start.time } : {}) }],
       ...emptyObservedLists(),
       composers: [...new Set((programText ?? '').split('\n').flatMap(line => {
         const match = /^([\p{L} .’'-]+)\s*\(\d{4}\s*[-–]\s*\d{0,4}\)(?:\s*[-–]|$)/u.exec(line);
