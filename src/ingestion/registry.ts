@@ -1,3 +1,4 @@
+import { katarinaGurskaAdapter } from './sources/katarina-gurska.ts';
 import { fundacionEutherpeAdapter } from './sources/fundacion-eutherpe.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Source } from '../lib/schemas/index.ts';
@@ -67,6 +68,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [culturalcalaAdapter.id]: culturalcalaAdapter,
   [orquestaCiudadGetafeAdapter.id]: orquestaCiudadGetafeAdapter,
   [fundacionCulturalLasRozasAdapter.id]: fundacionCulturalLasRozasAdapter,
+  [katarinaGurskaAdapter.id]: katarinaGurskaAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -575,6 +577,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Eutherpe',
       kind: 'official',
       url: 'https://www.fundacioneutherpe.com/',
+    },
+  },
+  {
+    id: 'katarina-gurska',
+    name: 'Katarina Gurska',
+    urls: ['https://katarinagurska.com/wp-json/tribe/events/v1/events'],
+    adapterId: katarinaGurskaAdapter.id,
+    catalogSourceId: 'src_katarinagurska_com',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_katarinagurska_com',
+      slug: 'katarina-gurska',
+      name: 'Katarina Gurska',
+      kind: 'official',
+      url: 'https://katarinagurska.com/',
     },
   },
 ];
