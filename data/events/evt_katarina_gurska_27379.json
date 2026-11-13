@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_katarina_gurska_27379",
+  "slug": "escenario-joven-24-noviembre-2026",
+  "title": "Escenario Joven | 24-noviembre-2026",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1921",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_katarina_gurska_27379_01",
+      "date": "2026-11-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marina Añino"
+    },
+    {
+      "name": "Miguel Ángel González-Vallés"
+    },
+    {
+      "name": "Mario Jiménez Sánchez"
+    },
+    {
+      "name": "Jaime Vares Carrillo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "César Franck"
+    },
+    {
+      "name": "Miguel Llobet"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Giulio Regondi"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_katarinagurska_com",
+      "url": "https://katarinagurska.com/evento/escenario-joven-24-noviembre-2026",
+      "checkedAt": "2026-11-13",
+      "externalId": "27379"
+    }
+  ],
+  "primarySourceId": "src_katarinagurska_com",
+  "lastVerifiedAt": "2026-11-13"
+}

@@ -15,10 +15,50 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Marta García"
+    },
+    {
+      "name": "Anna Mirakyan"
+    },
+    {
+      "name": "Petro Poznianskyi"
+    },
+    {
+      "name": "María Jesús Cáceres Velasco"
+    },
+    {
+      "name": "Víctor Orts Langa"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ernest Chausson"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Niccolò Paganini"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Alberto Posadas"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
   "formats": [
     "chamber"
   ],
@@ -30,8 +70,14 @@
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa16ece578cf0a10VgnVCM100000891ecb1aRCRD",
       "checkedAt": "2026-11-12",
       "externalId": "50441364"
+    },
+    {
+      "sourceId": "src_katarinagurska_com",
+      "url": "https://katarinagurska.com/evento/escenario-joven-17-noviembre-2026",
+      "checkedAt": "2026-11-13",
+      "externalId": "27377"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-13"
 }
