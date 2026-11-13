@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_majadahonda_org_informacion_cultural_3261969",
+  "slug": "santa-cecilia-en-el-ballet",
+  "title": "Santa Cecilia en el ballet",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_cultura_carmen_conde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_majadahonda_org_informacion_cultural_3261969_01",
+      "date": "2026-11-13",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Municipal de Música de Majadahonda",
+      "role": "ensemble"
+    },
+    {
+      "name": "Miguel Fernández de la Peña",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romeo y Julieta"
+    },
+    {
+      "title": "El lago de los cisnes",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Estancias"
+    },
+    {
+      "title": "La consagración de la primavera",
+      "composerName": "Ígor Stravinski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cultura_majadahonda_org",
+      "url": "https://cultura.majadahonda.org/informacion-cultural?p_p_id=CalendarSuite_INSTANCE_STa3SHI1sEeH&p_r_p_calendarBookingId=3261969&p_r_p_calendarPath=/html/suite/displays/detail.jsp",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_cultura_majadahonda_org",
+  "lastVerifiedAt": "2026-11-13"
+}

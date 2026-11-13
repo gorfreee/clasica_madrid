@@ -11,7 +11,7 @@
     {
       "id": "occ_teatro_alcobendas_org_concierto_navidad_banda_coral_20261213_01",
       "date": "2026-12-13",
-      "time": null,
+      "time": "19:00",
       "status": "scheduled"
     }
   ],
@@ -33,14 +33,19 @@
     "other"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_alcobendas_org",
       "url": "https://teatro.alcobendas.org/es/actividad/concierto-de-navidad-2026",
       "checkedAt": "2026-10-14"
+    },
+    {
+      "sourceId": "src_teatro_alcobendas_org",
+      "url": "https://www.giglon.com/todos?idEvent=concierto-navidad-banda-y-coral-de-alcobendas-alcobendas",
+      "checkedAt": "2026-11-13"
     }
   ],
   "primarySourceId": "src_teatro_alcobendas_org",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-13"
 }

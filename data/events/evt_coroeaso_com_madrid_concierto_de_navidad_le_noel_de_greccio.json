@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_coroeaso_com_madrid_concierto_de_navidad_le_noel_de_greccio",
+  "slug": "concierto-de-navidad-le-noel-de-greccio",
+  "title": "Concierto de Navidad: Le Noël de Greccio",
+  "status": "scheduled",
+  "venueId": "ven_basilica_jesus_medinaceli",
+  "organizerIds": [],
+  "seriesId": "ser_iv_festival_aita_donostia_2026",
+  "occurrences": [
+    {
+      "id": "occ_coroeaso_com_madrid_concierto_de_navidad_le_noel_de_greccio_01",
+      "date": "2026-12-21",
+      "time": "20:45",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "NEWCO – The New Chamber Orchestra",
+      "role": "orchestra"
+    },
+    {
+      "name": "Tatiana Samouil",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro Easo Voces Mixtas",
+      "role": "choir"
+    },
+    {
+      "name": "Gorka Miranda",
+      "role": "conductor"
+    },
+    {
+      "name": "Iker Murillo Studio 24",
+      "role": "other"
+    }
+  ],
+  "composers": [
+    {
+      "name": "P. Aldave"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Aita Donostia"
+    }
+  ],
+  "works": [
+    {
+      "title": "Oi Bethleem!",
+      "composerName": "P. Aldave"
+    },
+    {
+      "title": "Serenata para cuerdas en do mayor, op. 48",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Basatsoritsu",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Santa Nit",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Vientecico murmurador",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Lili eder bat",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Oi Bethleem",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Basoilarrak",
+      "composerName": "Aita Donostia"
+    },
+    {
+      "title": "Le Noël de Greccio",
+      "composerName": "Aita Donostia"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "choral",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_coroeaso_com",
+      "url": "https://coroeaso.com/eventos/madrid-concierto-de-navidad-le-noel-de-greccio",
+      "checkedAt": "2026-11-13"
+    },
+    {
+      "sourceId": "src_oeoficina_com",
+      "url": "https://www.oeoficina.com/es/evento/0168-2026-12-21-concierto-de-navidad-basilica-de-jesus-de-medinaceli-madrid",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_coroeaso_com",
+  "lastVerifiedAt": "2026-11-13"
+}

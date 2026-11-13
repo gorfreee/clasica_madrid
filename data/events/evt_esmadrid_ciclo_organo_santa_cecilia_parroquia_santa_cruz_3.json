@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_3",
+  "slug": "angel-montero-ii-ciclo-de-organo-santa-cecilia",
+  "title": "Ángel Montero — II Ciclo de Órgano Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_santa_cruz",
+  "organizerIds": [],
+  "seriesId": "ser_ii_ciclo_organo_santa_cecilia_2026",
+  "occurrences": [
+    {
+      "id": "occ_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_3_01",
+      "date": "2026-11-28",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ángel Montero",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_esmadrid",
+      "url": "https://www.esmadrid.com/agenda/ciclo-organo-santa-cecilia-parroquia-santa-cruz",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_esmadrid",
+  "lastVerifiedAt": "2026-11-13"
+}
