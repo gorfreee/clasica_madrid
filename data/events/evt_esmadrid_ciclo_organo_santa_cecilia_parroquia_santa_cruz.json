@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz",
+  "slug": "mikel-ansola-ii-ciclo-de-organo-santa-cecilia",
+  "title": "Mikel Ansola — II Ciclo de Órgano Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_santa_cruz",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_esmadrid_ciclo_organo_santa_cecilia_parroquia_santa_cruz_01",
+      "date": "2026-11-14",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mikel Ansola"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_esmadrid",
+      "url": "https://www.esmadrid.com/agenda/ciclo-organo-santa-cecilia-parroquia-santa-cruz",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_esmadrid",
+  "lastVerifiedAt": "2026-11-13"
+}

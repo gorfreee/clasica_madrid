@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_admanum_org_requiem_gabriel_faure",
+  "slug": "requiem-gabriel-faure",
+  "title": "Requiem Gabriel Fauré",
+  "status": "scheduled",
+  "venueId": "ven_real_colegiata_de_san_isidro_y_nuestra_senora_del_buen_consejo",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_admanum_org_requiem_gabriel_faure_01",
+      "date": "2026-11-21",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo Arsys"
+    },
+    {
+      "name": "Sinfonietta Coral"
+    },
+    {
+      "name": "Ángeles Luque"
+    },
+    {
+      "name": "Víctor Fernández"
+    },
+    {
+      "name": "Valentyna Naida"
+    },
+    {
+      "name": "Raúl Trincado",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Réquiem",
+      "composerName": "Gabriel Fauré"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "choral",
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_admanum_org",
+      "url": "https://admanum.org/event/requiem-gabriel-faure",
+      "checkedAt": "2026-11-13"
+    }
+  ],
+  "primarySourceId": "src_admanum_org",
+  "lastVerifiedAt": "2026-11-13"
+}
