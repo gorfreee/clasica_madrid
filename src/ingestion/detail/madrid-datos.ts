@@ -30,6 +30,31 @@ export function parseMadridDatosDetail(html: string): ObservedFactPatch {
   );
 }
 
+/** The official dataset already carries the ficha's editorial copy as plain
+ * text. Extract explicit credits there before attempting optional HTML detail;
+ * no markup or successful HTTP response is fabricated from this surface. */
+export function parseMadridDatosEditorialText(text: string): ObservedFactPatch {
+  if (!text.trim()) return {};
+  const currentProgram = currentProgrammeCredit([text]);
+  const creditLines = text
+    .replace(/\s+(?=(?:Formaci[oó]n|Director(?:a)?)\s*:)/giu, '\n')
+    .split(/\r?\n|(?<!\b\p{Lu})[.;]\s+/u);
+  return {
+    description: text,
+    ...(currentProgram ? { programText: currentProgram } : {}),
+    performers: normalizePersonList([
+      ...performersFromEditorial(text), ...formationCredits(creditLines),
+    ]),
+    composers: normalizeComposerList([
+      ...(currentProgram ? attributedProgrammeComposers(currentProgram) : []),
+      ...composersFromEditorial(text),
+    ]),
+    // Flat descriptions do not retain the programme's HTML list hierarchy.
+    // Keep the complete text, without guessing individual work boundaries.
+    works: [],
+  };
+}
+
 function isProductionPage(html: string): boolean {
   return (
     /\bclass="[^"]*\bdetalle\b/i.test(html) ||
@@ -61,14 +86,18 @@ function factsFromEditorial(editorialHtml: string, pageHtml: string): ObservedFa
   const paragraphs = editorialParagraphs(editorialHtml);
   const description = joinEditorial(paragraphs);
   const structuredProgram = parseHeadingProgram(editorialHtml);
-  const programText = structuredProgram.programText ?? description;
+  const currentProgram = currentProgrammeCredit(flattenHtmlBlocks(editorialHtml).split('\n'));
+  const programText = structuredProgram.programText ?? currentProgram ?? description;
   const performers = normalizePersonList([
     ...paragraphs.flatMap((paragraph) => performersFromEditorial(paragraph)),
+    ...formationCredits(flattenHtmlBlocks(editorialHtml).split('\n')),
     ...allCaptures(editorialHtml, /<(?:p|li)\b[^>]*>([\s\S]*?)<\/(?:p|li)>/gi)
       .flatMap((block) => extractExplicitPerformanceCredits(stripTags(block))),
   ]);
   const composers = normalizeComposerList(
-    [...structuredProgram.composers, ...paragraphs.flatMap((paragraph) => composersFromEditorial(paragraph))],
+    [...structuredProgram.composers,
+      ...(currentProgram ? attributedProgrammeComposers(currentProgram) : []),
+      ...paragraphs.flatMap((paragraph) => composersFromEditorial(paragraph))],
   );
   const works = structuredProgram.programText ? structuredProgram.works : worksFromEditorial(editorialHtml);
   const seriesText =
@@ -84,6 +113,63 @@ function factsFromEditorial(editorialHtml: string, pageHtml: string): ObservedFa
     composers: composers.length > 0 ? composers : composersFromWorks(works),
     works,
   };
+}
+
+/** A current-programme sentence is stronger than a career mention. Keep a
+ * comma-separated credit together when the editor split it across paragraphs. */
+function currentProgrammeCredit(lines: readonly string[]): string | undefined {
+  const credits: string[] = [];
+  const cue = /\b(?:interpretar[aá]n?|interpretan)\s+(?:obras|m[uú]sica|piezas)\s+de\b|\ben esta ocasi[oó]n\b[^.]{0,100}\b(?:programa|repertorio)\s+(?:con\s+|incluye\s+)?obras\s+de\b/iu;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]!;
+    const match = cue.exec(line);
+    if (!match) continue;
+    let credit = line.slice(match.index).split(/\b(?:Formaci[oó]n\s*:|Todos los p[uú]blicos|Edad recomendada\s*:|Duraci[oó]n\s*:|Entrada gratuita|Se ruega)/iu)[0]!.trim();
+    // The JSON surface has lost paragraph boundaries. A finished sentence
+    // must not attach the following biography; initials inside names are not
+    // sentence boundaries (R. Gerhard, F. Obradors, J. Turina).
+    while (/[,;]\s*$/u.test(credit) && index + 1 < lines.length) {
+      const continuation = lines[index + 1]!;
+      if (/^(?:formaci[oó]n|programa|repertorio|biograf[ií]a|int[eé]rpretes|director)\s*:/iu.test(continuation)) break;
+      const firstName = continuation.split(/\s*,\s*|\s+y\s+|\s+as[ií]\s+como\b/iu)[0]!.replace(/[.]$/u, '');
+      if (!isPlausiblePersonName(firstName) && !matchComposer(firstName)) break;
+      credit += ` ${continuation}`;
+      index += 1;
+    }
+    const sentenceEnd = /(?<!\b\p{Lu})\.(?=\s|$)/u.exec(credit);
+    if (sentenceEnd) credit = credit.slice(0, sentenceEnd.index + 1);
+    credits.push(credit);
+  }
+  return credits.length ? credits.join('\n') : undefined;
+}
+
+/** Extended roles are accepted only inside the ficha's explicit cast block.
+ * A biography or staff list elsewhere is not a cast list for this concert. */
+function formationCredits(lines: readonly string[]): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  let formation = false;
+  const role = /^(?:voz|piano|clarinete|viol[ií]n|viola|violonchelo|flauta|oboe|fagot|guitarra|arpa|[oó]rgano|clave|soprano|mezzosoprano|contralto|tenor|bar[ií]tono|bajo|director(?:a)?|direcci[oó]n|dramaturgia|baile)$/iu;
+  for (const line of lines) {
+    const label = /^Formaci[oó]n\s*:\s*(.*)$/iu.exec(line);
+    if (label) formation = true;
+    const text = (label ? label[1]! : line).replace(/[.]\s*$/u, '').trim();
+    const conductor = /^Director(?:a)?\s*:\s*(.+)$/iu.exec(text);
+    if (conductor && isPlausiblePersonName(conductor[1]!)) {
+      people.push({ name: conductor[1]!, roleText: 'director' });
+    }
+    if (!formation || !text) continue;
+    const comma = text.indexOf(',');
+    if (comma < 0) { formation = false; continue; }
+    const roleText = text.slice(comma + 1).trim();
+    const roles = roleText.split(/\s*,\s*|\s+y\s+/u);
+    const names = text.slice(0, comma).split(/\s+y\s+|\s+e\s+(?=\p{Lu})/u);
+    if (!roles.length || !roles.every(item => role.test(item)) || !names.every(isPlausiblePersonName)) {
+      formation = false;
+      continue;
+    }
+    for (const name of names) people.push({ name, roleText });
+  }
+  return people;
 }
 
 /** Ordered programme after an explicit heading. List markup may contain
@@ -234,13 +320,14 @@ function personPrefix(value: string): string | undefined {
     }
     break;
   }
+  while (kept.length && NAME_PARTICLE.test(kept.at(-1)!)) kept.pop();
   const name = kept.join(' ');
   return isPlausiblePersonName(name) ? name : undefined;
 }
 
 function isPlausiblePersonName(value: string): boolean {
   if (!value || value.length < 3 || value.length > 80) return false;
-  if (isAdministrativeLine(value) || looksLikeProse(value)) return false;
+  if (isAdministrativeLine(value) || looksLikeProse(value.replace(/\b\p{Lu}\./gu, ''))) return false;
   if (/\d/.test(value)) return false;
   const words = value.split(/\s+/).filter(Boolean);
   if (words.length < 2 || words.length > 6) return false;

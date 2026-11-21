@@ -1,4 +1,4 @@
-import { parseMadridDatosDetail } from '../detail/madrid-datos.ts';
+import { parseMadridDatosDetail, parseMadridDatosEditorialText } from '../detail/madrid-datos.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { collapseWhitespace } from '../html.ts';
 import { formatMadridDatosAddress } from '../venues.ts';
@@ -20,9 +20,10 @@ import {
 
 /**
  * Madrid Datos JSON-LD is the primary source for identity, date/time, venue,
- * facilityId, access and URL. The official Madrid.es ficha often adds
- * editorial/musical evidence (description, repertorio, intérpretes) that the
- * listing JSON omits. Hydration enriches those fields only.
+ * facilityId, access and URL. Its editorial description is parsed directly
+ * for explicit musical credits. Optional HTML hydration preserves programme
+ * markup and adds evidence absent from that dataset, without replacing its
+ * calendar, venue, access or identity.
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
@@ -175,6 +176,8 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
   const venueFacilityId = facilityIdFromRelation(item.relation);
   const venueAddress = addressFromListing(item.address);
+  const description = asNonEmptyString(item.description);
+  const editorial = description ? parseMadridDatosEditorialText(description) : {};
   return {
     sourceId: ctx.source.id,
     sourceUrl: httpsUrl,
@@ -182,12 +185,13 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
     ...(venueFacilityId ? { venueFacilityId } : {}),
     ...(venueAddress ? { venueAddress } : {}),
     observed: {
+      ...emptyObservedLists(),
+      ...editorial,
       title,
-      description: asNonEmptyString(item.description),
+      description,
       occurrences: [{ raw: dtstart, date: parsed.date, ...(time ? { time } : {}) }],
       venueText,
       accessText: item.free === 1 || item.free === '1' ? 'free' : item.free === 0 || item.free === '0' ? 'paid' : undefined,
-      ...emptyObservedLists(),
     },
   };
 }
