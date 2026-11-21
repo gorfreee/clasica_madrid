@@ -249,3 +249,40 @@ describe('madrid-datos: pipeline completo con fichas municipales recicladas', ()
     expect(run.apply.written).toEqual([]);
   });
 });
+
+describe('madrid-datos: essential facts are sufficient for publication', () => {
+  it('plans a new classical concert despite a blocked ficha and no performer or work credits', async () => {
+    // Synthetic classical performance using the verified directory venue; the
+    // separate current-detail regression covers the real Christmas title.
+    const url = 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=abcd1234VgnVCM200000f921e388RCRD';
+    const listing = JSON.stringify({ '@graph': [{
+      id: '50999991',
+      title: 'Concierto de música clásica en Parroquia Sagrados Corazones',
+      description: '',
+      dtstart: '2026-12-21 18:30:00.0',
+      time: '18:30',
+      link: url,
+      'event-location': '',
+      free: 1,
+    }] });
+    const run = await runIngest({
+      dataDir: await tempDataDir(), catalog: emptyCatalog(), now: TEST_NOW,
+      dryRun: true, sourceIds: ['madrid-datos'],
+      get: async request => {
+        if (request.includes('agenda-eventos-culturales-100')) return listing;
+        throw new Error('HTTP 403');
+      },
+    });
+    expect(run.summary).toMatchObject({ newEvents: 1, updatedEvents: 0, sourcesFailed: [], detailHydrationFailed: 1 });
+    expect(run.apply.report.ok).toBe(true);
+    expect(run.apply.written).toEqual([]);
+    const published = run.apply.proposed.events[0]!;
+    expect(published).toMatchObject({
+      title: 'Concierto de música clásica en Parroquia Sagrados Corazones',
+      occurrences: [expect.objectContaining({ date: '2026-12-21', time: '18:30' })],
+      performers: [], composers: [], works: [],
+      citations: [expect.objectContaining({ externalId: '50999991' })],
+    });
+    expect(run.apply.proposed.venues.find(v => v.id === published.venueId)?.address).toBe('Paseo de la Habana, 31, 28036 Madrid');
+  });
+});
