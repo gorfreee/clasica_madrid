@@ -15,10 +15,142 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Coro Schola Cantorum",
+      "role": "choir"
+    },
+    {
+      "name": "José María Abad Bolufer",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Vásquez"
+    },
+    {
+      "name": "Juan de Anchieta"
+    },
+    {
+      "name": "Josquin des Prés"
+    },
+    {
+      "name": "Mateo Flecha"
+    },
+    {
+      "name": "Orlando di Lasso"
+    },
+    {
+      "name": "Francisco Guerrero"
+    },
+    {
+      "name": "José Uruñuela"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Eduardo Martínez Torner"
+    },
+    {
+      "name": "Antonio Pérez Moya"
+    },
+    {
+      "name": "Pablo Sorozábal"
+    },
+    {
+      "name": "Miguel Groba"
+    },
+    {
+      "name": "Luis Farreny"
+    },
+    {
+      "name": "Antonio Pérez"
+    },
+    {
+      "name": "Oriol Martín"
+    },
+    {
+      "name": "Francisco Civil"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dindiríndin (Cancionero de Palacio)"
+    },
+    {
+      "title": "Ay linda amiga (Cancionero de Palacio)"
+    },
+    {
+      "title": "¿De dónde venís, amores?",
+      "composerName": "Juan Vásquez"
+    },
+    {
+      "title": "Con amores, la mi madre",
+      "composerName": "Juan de Anchieta"
+    },
+    {
+      "title": "El Grillo",
+      "composerName": "Josquin des Prés"
+    },
+    {
+      "title": "Teresica hermana",
+      "composerName": "Mateo Flecha"
+    },
+    {
+      "title": "Matona mia cara",
+      "composerName": "Orlando di Lasso"
+    },
+    {
+      "title": "Niño Dios d’amor herido",
+      "composerName": "Francisco Guerrero"
+    },
+    {
+      "title": "Maitia nun zira",
+      "composerName": "José Uruñuela"
+    },
+    {
+      "title": "Balaio",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "El Baile",
+      "composerName": "Eduardo Martínez Torner"
+    },
+    {
+      "title": "El Rossinyol",
+      "composerName": "Antonio Pérez Moya"
+    },
+    {
+      "title": "Maite",
+      "composerName": "Pablo Sorozábal"
+    },
+    {
+      "title": "O voso galo comadre",
+      "composerName": "Miguel Groba"
+    },
+    {
+      "title": "Campana sobre campana",
+      "composerName": "Luis Farreny"
+    },
+    {
+      "title": "Dime niño ¿de quién eres?",
+      "composerName": "Antonio Pérez"
+    },
+    {
+      "title": "Chiqirriquitín",
+      "composerName": "Oriol Martín"
+    },
+    {
+      "title": "Hacia Belén va una burra",
+      "composerName": "Francisco Civil"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "twentieth"
+  ],
   "formats": [
     "choral"
   ],

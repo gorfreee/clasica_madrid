@@ -17,22 +17,28 @@
   ],
   "performers": [
     {
-      "name": "Fabio Muro Ruiz"
+      "name": "Fabio Muro Ruiz",
+      "role": "soloist"
     },
     {
-      "name": "Tomás Alegre"
+      "name": "Tomás Alegre",
+      "role": "soloist"
     },
     {
-      "name": "Miguel Ribeiro Martins"
+      "name": "Miguel Ribeiro Martins",
+      "role": "soloist"
     },
     {
-      "name": "Diego Sánchez Mangas"
+      "name": "Diego Sánchez Mangas",
+      "role": "soloist"
     },
     {
-      "name": "Raphael Gisbertz"
+      "name": "Raphael Gisbertz",
+      "role": "soloist"
     },
     {
-      "name": "Issey Martínez Imai"
+      "name": "Issey Martínez Imai",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -79,7 +85,8 @@
     "romantic"
   ],
   "formats": [
-    "recital"
+    "recital",
+    "chamber"
   ],
   "kind": "alternative",
   "access": "unknown",

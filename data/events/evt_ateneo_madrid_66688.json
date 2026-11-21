@@ -4,7 +4,7 @@
   "slug": "conversando-con-melismas-ciclo-de-conciertos-manuel-de-falla",
   "title": "«Conversando con melismas» Ciclo de Conciertos Manuel de Falla",
   "status": "scheduled",
-  "venueId": "ven_ateneo_madrid",
+  "venueId": "ven_ateneo_madrid_catedra_mayor",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
@@ -15,11 +15,22 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Paloma Gutiérrez del Arroyo",
+      "role": "soloist"
+    },
+    {
+      "name": "Christos Kanellos Malamás",
+      "role": "soloist"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "paid",
   "citations": [

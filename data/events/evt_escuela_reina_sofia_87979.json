@@ -17,22 +17,28 @@
   ],
   "performers": [
     {
-      "name": "Jonah Kartman"
+      "name": "Jonah Kartman",
+      "role": "soloist"
     },
     {
-      "name": "Tomás Alegre"
+      "name": "Tomás Alegre",
+      "role": "soloist"
     },
     {
-      "name": "Inés Dupont Gil"
+      "name": "Inés Dupont Gil",
+      "role": "soloist"
     },
     {
-      "name": "David Martínez González"
+      "name": "David Martínez González",
+      "role": "soloist"
     },
     {
-      "name": "Theodor Kaskiv"
+      "name": "Theodor Kaskiv",
+      "role": "soloist"
     },
     {
-      "name": "Gustavo Gil"
+      "name": "Gustavo Gil",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -99,7 +105,10 @@
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "recital",
+    "chamber"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [

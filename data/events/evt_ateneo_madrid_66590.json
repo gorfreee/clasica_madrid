@@ -15,10 +15,54 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Juan Luis Jiménez Vinau",
+      "role": "soloist"
+    },
+    {
+      "name": "Andrei Enou Pânzariu",
+      "role": "soloist"
+    },
+    {
+      "name": "Mikhail Tolstov",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "George Enescu"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Balada n.º 3 en la bemol mayor, op. 47",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Estudio n.º 7 en do sostenido menor, op. 25",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Rapsodia rumana n.º 1 en la mayor, op. 11 (arreglo a cuatro manos de Marius Sireteanu)",
+      "composerName": "George Enescu"
+    },
+    {
+      "title": "Sonata para piano n.º 32 en do menor, op. 111",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "recital"
   ],

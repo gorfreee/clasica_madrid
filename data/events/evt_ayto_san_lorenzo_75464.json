@@ -15,7 +15,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Camerata Lírica",
+      "role": "ensemble"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],

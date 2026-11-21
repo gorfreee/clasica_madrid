@@ -17,19 +17,24 @@
   ],
   "performers": [
     {
-      "name": "Orquesta Sinfónica, Coro y Escolanía JMJ"
+      "name": "Orquesta Sinfónica, Coro y Escolanía JMJ",
+      "role": "ensemble"
     },
     {
-      "name": "Sergio M. Zangróniz, director Coro JMJ"
+      "name": "Sergio M. Zangróniz",
+      "role": "conductor"
     },
     {
-      "name": "David de la Calle, director Escolanía JMJ"
+      "name": "David de la Calle",
+      "role": "conductor"
     },
     {
-      "name": "Andrey Yaroshinsky"
+      "name": "Andrey Yaroshinsky",
+      "role": "soloist"
     },
     {
-      "name": "Iliana Sánchez"
+      "name": "Iliana Sánchez",
+      "role": "soloist"
     },
     {
       "name": "Borja Quintas",
@@ -38,7 +43,7 @@
   ],
   "composers": [
     {
-      "name": "S. Prokofiev"
+      "name": "Serguéi Prokófiev"
     },
     {
       "name": "Nikolai Rimsky-Korsakov"
@@ -46,11 +51,11 @@
   ],
   "works": [
     {
-      "title": "Concierto para piano y orquesta nº1 en Reb M op. 10",
-      "composerName": "S. Prokofiev"
+      "title": "Concierto para piano y orquesta n.º 1 en re bemol mayor, op. 10",
+      "composerName": "Serguéi Prokófiev"
     },
     {
-      "title": "Capricho español op. 34",
+      "title": "Capricho español, op. 34",
       "composerName": "Nikolai Rimsky-Korsakov"
     }
   ],

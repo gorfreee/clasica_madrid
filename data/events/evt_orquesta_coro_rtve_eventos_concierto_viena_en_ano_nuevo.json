@@ -17,30 +17,56 @@
   ],
   "performers": [
     {
-      "name": "Vienna Salon Orchestra"
+      "name": "Orquesta Kursalon de Viena",
+      "role": "orchestra"
     },
     {
-      "name": "Orquesta de Cámara Iberoamericana"
+      "name": "Orquesta de Cámara Iberoamericana",
+      "role": "orchestra"
     },
     {
-      "name": "Verena Tranker"
+      "name": "Verena Tranker",
+      "role": "soloist"
     },
     {
-      "name": "Clemens Kerschbaumer"
+      "name": "Clemens Kerschbaumer",
+      "role": "soloist"
     },
     {
-      "name": "Guillaume Pasch"
-    },
-    {
-      "name": "La Vienna Salon Orchestra llega por primera vez a España, y su gira empieza en Madrid."
+      "name": "Guillaume Pasch",
+      "role": "conductor"
     }
   ],
   "composers": [
     {
       "name": "Franz von Suppé"
+    },
+    {
+      "name": "Johann Strauss II"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "O du mein Österreich",
+      "composerName": "Franz von Suppé"
+    },
+    {
+      "title": "El murciélago: obertura",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Frühlingsstimmen, op. 410",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Auf der Jagd, op. 373",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "El Danubio azul",
+      "composerName": "Johann Strauss II"
+    }
+  ],
   "eras": [
     "romantic"
   ],

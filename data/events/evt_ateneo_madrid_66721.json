@@ -15,7 +15,16 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Mattea Musso",
+      "role": "soloist"
+    },
+    {
+      "name": "Karina Azizova",
+      "role": "soloist"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
@@ -24,7 +33,7 @@
     "lied"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_ateneo_madrid",

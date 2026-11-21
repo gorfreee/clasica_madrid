@@ -15,10 +15,50 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Grupo de Castañuelas del Centro Cultural Fernando de los Ríos",
+      "role": "ensemble"
+    },
+    {
+      "name": "Olga Bustamante",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Amadeo Vives"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carmen: Habanera",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Doña Francisquita: fandango",
+      "composerName": "Amadeo Vives"
+    },
+    {
+      "title": "El Vito"
+    },
+    {
+      "title": "Gitanería"
+    },
+    {
+      "title": "Francisco Alegre"
+    },
+    {
+      "title": "El Choclo"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "chamber",
     "opera",
