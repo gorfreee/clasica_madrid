@@ -87,6 +87,14 @@ describe('Madrid Datos: current official musical detail', () => {
     expect(datasetFacts.programText).toBeUndefined();
   });
 
+  it.each(['No interpretarán obras de Mozart.', 'Nunca interpretará obras de Bach.'])('does not promote negative repertoire assertions: %s', (text) => {
+    const facts = parseMadridDatosEditorialText(text);
+    expect(facts.programText).toBeUndefined();
+    expect(facts.composers).toEqual([]);
+    const htmlFacts = parseMadridDatosDetail(`<article><h1>Concierto</h1><p>${text}</p></article>`);
+    expect(htmlFacts.composers).toEqual([]);
+  });
+
   it('does not extend a dangling composer list into the next biographical paragraph', () => {
     const facts = parseMadridDatosDetail(`<article><h1>Concierto</h1>
       <p>Interpretará obras de Beethoven,</p>
@@ -255,6 +263,12 @@ describe('Madrid Datos: catalogue essentials without HTML', () => {
     expect(classify(jazz.event!.observed).eligibility.value).toBe('exclude');
     const generic = await extract({ title: 'Concierto de Navidad en Parroquia Sagrados Corazones' });
     expect(classify(generic.event!.observed).eligibility.value).toBe('uncertain');
+  });
+
+  it.each(['Recital de música clásica', 'Actuación música. Música clásica'])('keeps the explicit event identity: %s', async (title) => {
+    const { event } = await extract({ title, '@type': undefined, 'event-location': 'Auditorio Nacional de Música' });
+    expect(event?.observed.categoryText?.toLowerCase()).toBe('música clásica');
+    expect(classify(event!.observed).eligibility.value).toBe('include');
   });
 
   it('keeps the official zarzuela subtype as eligibility evidence independently of credits', async () => {
