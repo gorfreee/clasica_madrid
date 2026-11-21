@@ -34,6 +34,7 @@ import {
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
 /** Official municipal concert label, also used when the kos @type is a street-activity bucket. */
+const EXPLICIT_CLASSICAL_TITLE = /^(?:concierto|recital)\s+(?:de\s+)?m[uú]sica\s+cl[aá]sica\b/iu;
 const MUSIC_PERFORMANCE_TITLE = /^actuaci[oó]n m[uú]sica(l)?\b/i;
 const MUSIC_PERFORMANCE_ID = /(?:^|-)actuacion-musica(l)?(?:-|\.json|$)/i;
 
@@ -183,7 +184,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const venueFacilityId = listedVenue ? facilityIdFromRelation(item.relation) : undefined;
   const description = asNonEmptyString(item.description);
   const venueAddress = listedVenue ? addressFromListing(item.address) ?? explicitAddress(description) : undefined;
-  const categoryText = municipalMusicCategory(item['@type']);
+  const categoryText = municipalMusicCategory(item['@type']) ?? EXPLICIT_CLASSICAL_TITLE.exec(title)?.[0];
   const editorial = description ? parseMadridDatosEditorialText(description) : {};
   return {
     sourceId: ctx.source.id,
@@ -216,7 +217,7 @@ function venueFromTitle(title: string): ProposedVenueFacts | undefined {
   if (!match) return undefined;
   const name = match[1]!.trim();
   const key = name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ');
-  const verified = TITLE_VENUES[key];
+  const verified = Object.hasOwn(TITLE_VENUES, key) ? TITLE_VENUES[key] : undefined;
   if (!verified && !/^(?:concierto|recital|actuaci[oó]n|coro|coral|ensemble)\b/iu.test(title)) return undefined;
   return { name: verified?.name ?? name, municipality: 'Madrid', area: 'madrid',
     ...(verified ? { address: verified.address, url: verified.url } : {}) };
@@ -277,7 +278,7 @@ function isMadridDatosMusicActivity(item: GraphEvent): boolean {
   if (MUSICA_TYPE.test(type)) return true;
   const title = asNonEmptyString(item.title);
   if (title && (MUSIC_PERFORMANCE_TITLE.test(title) ||
-      /^(?:concierto|recital)\s+(?:de\s+)?m[uú]sica\s+cl[aá]sica\b/iu.test(title))) return true;
+      EXPLICIT_CLASSICAL_TITLE.test(title))) return true;
   const jsonLdId = asNonEmptyString(item['@id']);
   return Boolean(jsonLdId && MUSIC_PERFORMANCE_ID.test(jsonLdId));
 }
