@@ -7,6 +7,7 @@ import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { TEST_NOW, TEST_WINDOW, makeCatalog, makeVenue } from './helpers.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
+import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
@@ -218,7 +219,7 @@ describe('Madrid Datos: catalogue essentials without HTML', () => {
     const normalized = normalizeRawEvent(hydrated!)!;
     const classification = classify(normalized);
     expect(classification.eligibility.value).toBe('include');
-    if (classification.eligibility.value !== 'include') throw new Error('expected included concert');
+    if (!isPublishableInclude(classification)) throw new Error('expected included concert');
     const built = toCandidate(normalized, source, makeCatalog({ venues: [], events: [] }), TEST_NOW, new Set(), new Set(), classification, TEST_WINDOW);
     expect(built.candidate?.event).toMatchObject({
       performers: [], composers: [], works: [],
