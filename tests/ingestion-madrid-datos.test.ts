@@ -158,11 +158,11 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     expect(match).toMatchObject({ kind: 'matched', method: 'url', event: { id: 'evt_sonidos_universo_20260927' } });
   });
 
-  it('el concierto real deja de ser possiblyMissing y uno ausente sigue siéndolo', async () => {
+  it('reconoce el concierto real y no evalúa desapariciones con cobertura no acreditada', async () => {
     const listing = await readFile(path.join(fixtures, 'madrid-agenda-sonidos-universo.json'), 'utf8');
     const run = await runMadridDatos(listing);
     expect(run.rawEvents.some((event) => event.externalId === '50379624')).toBe(true);
-    expect(run.possiblyMissing.map((item) => item.eventId)).toEqual(['evt_madrid_datos_ausente']);
+    expect(run.possiblyMissing).toEqual([]);
     expect(run.possiblyMissing.some((item) => item.eventId === 'evt_sonidos_universo_20260927')).toBe(false);
     expect(run.possiblyMissing.some((item) => item.eventId === 'evt_ocne_existente')).toBe(false);
     const seen = run.decisions.find((item) => item.identity?.eventId === 'evt_sonidos_universo_20260927');
@@ -170,7 +170,7 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     expect(seen?.externalId).toBe('50379624');
   });
 
-  it('un feed de música sin ese concierto sí marca possiblyMissing', async () => {
+  it('un feed de música sin ese concierto no prueba una desaparición', async () => {
     const listing = JSON.stringify({
       '@graph': [
         {
@@ -186,10 +186,8 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     });
     const run = await runMadridDatos(listing);
     expect(run.rawEvents).toHaveLength(1);
-    expect(run.possiblyMissing.map((item) => item.eventId).sort()).toEqual([
-      'evt_madrid_datos_ausente',
-      'evt_sonidos_universo_20260927',
-    ]);
+    expect(run.possiblyMissing).toEqual([]);
+    expect(run.summary.healthReasons).toContain('source-coverage-unknown:madrid-datos');
   });
 
   it('el resto de sources sigue evaluando desapariciones por su propia cobertura', () => {
