@@ -1,5 +1,5 @@
 import { parseSpanishCalendarDate } from '../dates.ts';
-import { orcamDiv, orcamOccurrence, parseOrcamDetail } from '../detail/fundacion-orcam.ts';
+import { expandOrcamDetail, orcamDiv, orcamOccurrence, parseOrcamDetail } from '../detail/fundacion-orcam.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { reportAdapterDiscard, type RawEvent, type SourceAdapter } from '../types.ts';
@@ -34,7 +34,8 @@ export const fundacionOrcamAdapter: SourceAdapter = {
       throw new Error('fundacion-orcam: calendario paginado no soportado');
     }
     const events = new Map<string, RawEvent>();
-    const actual = new Map<string, number>();
+    const cardMonths: string[][] = [];
+    const seen = new Set<string>();
     const cardMarker = /<div\b[^>]*data-elementor-type=["']loop-item["'][^>]*>/gi;
     for (const match of grid.matchAll(cardMarker)) {
       const id = /\be-loop-item-(\d+)\b/.exec(match[0])?.[1];
@@ -44,14 +45,17 @@ export const fundacionOrcamAdapter: SourceAdapter = {
       const titleBlock = orcamDiv(card, /<div\b[^>]*data-widget_type=["']theme-post-title\.default["'][^>]*>/i);
       const title = stripTags(titleBlock ?? '');
       const headings = [...card.matchAll(/<p\b[^>]*class=["'][^"']*\belementor-heading-title\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/gi)].map((m) => stripTags(m[1]!));
-      if (!id || !sourceUrl || !title) throw new Error('fundacion-orcam: tarjeta incompleta');
+      if (!id || !sourceUrl || !title) throw new Error(`fundacion-orcam: tarjeta incompleta (${id ?? 'sin ID'}; ${sourceUrl ?? 'sin URL'})`);
       // One card is one concert for the month counter, even when the card
       // prints a same-month range. Sessions come only from the ficha.
       // An unreadable card still fails the listing: it is not dropped to
       // force the monthly totals to match.
-      const schedule = listingSchedule(headings);
-      if (events.has(id) || [...events.values()].some((e) => e.sourceUrl === sourceUrl)) throw new Error('fundacion-orcam: tarjeta duplicada');
-      actual.set(schedule.month, (actual.get(schedule.month) ?? 0) + 1);
+      let schedule: ReturnType<typeof listingSchedule>;
+      try { schedule = listingSchedule(headings); }
+      catch (error) { throw new Error(`${error instanceof Error ? error.message : String(error)} (${id}; ${sourceUrl})`); }
+      if (seen.has(id) || seen.has(sourceUrl)) throw new Error('fundacion-orcam: tarjeta duplicada');
+      seen.add(id); seen.add(sourceUrl);
+      cardMonths.push(schedule.months);
       // The individual ficha for 4861 still contradicts both the ORCAM
       // season programme and Auditorio Nacional (10 May, Tenerife orchestra).
       // Keep counting the card for coverage, but do not hydrate or reconcile
@@ -77,24 +81,31 @@ export const fundacionOrcamAdapter: SourceAdapter = {
     }
     // Month counts are disjoint, unlike cycle/ensemble counts. This detects
     // infinite-scroll truncation, a missed card or a silently changed template.
-    if ([...new Set([...counts.keys(), ...actual.keys()])].some((month) => (counts.get(month) ?? 0) !== (actual.get(month) ?? 0)) ||
+    if (!matchesMonthCounts(cardMonths, counts) ||
         (!events.size && /\/conciertos\//.test(grid))) {
       throw new Error('fundacion-orcam: cobertura distinta del contador mensual del calendario');
     }
     return [...events.values()].sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
   },
   hydrate: parseOrcamDetail,
+  expand: expandOrcamDetail,
 };
 
-/** Dated card, or a same-month range used only as a hydration hint. */
-function listingSchedule(headings: string[]): { listingDateText: string; month: string; date?: string } {
+/** A dated card or an explicitly scoped date summary, only a hydration hint. */
+function listingSchedule(headings: string[]): { listingDateText: string; months: string[]; date?: string } {
   if (headings.length === 2) {
     const occurrence = orcamOccurrence(headings[0]!, headings[1]!);
-    return { listingDateText: occurrence.raw, month: occurrence.date!.slice(0, 7), date: occurrence.date };
+    return { listingDateText: occurrence.raw, months: [occurrence.date!.slice(0, 7)], date: occurrence.date };
   }
   if (headings.length === 1) {
     const month = sameMonthRange(headings[0]!);
-    if (month) return { listingDateText: headings[0]!, month };
+    if (month) return { listingDateText: headings[0]!, months: [month] };
+    // A broad card summary still has a ficha. It never supplies sessions.
+    const range = /^([a-záéíóú]+) y ([a-záéíóú]+) (\d{4})$/i.exec(headings[0]!);
+    if (range) {
+      const dates = [range[1], range[2]].map((name) => parseSpanishCalendarDate(`1 de ${name} de ${range[3]}`));
+      if (dates[0] && dates[1] && dates[0] < dates[1]) return { listingDateText: headings[0]!, months: dates.map((date) => date!.slice(0, 7)) };
+    }
   }
   throw new Error('fundacion-orcam: tarjeta incompleta');
 }
@@ -107,6 +118,29 @@ function sameMonthRange(text: string): string | undefined {
   const end = parseSpanishCalendarDate(`${match[2]} de ${match[3]} de ${match[4]}`);
   if (!start || !end || start >= end || start.slice(0, 7) !== end.slice(0, 7)) return undefined;
   return start.slice(0, 7);
+}
+
+
+/** Each card occupies exactly one CMS month bucket. Multi-month summaries
+ * may fit either named month; a matching must still account for every card
+ * and every counter slot. No assignment becomes a performance date. */
+function matchesMonthCounts(cards: string[][], counts: Map<string, number>): boolean {
+  if (cards.length !== [...counts.values()].reduce((sum, count) => sum + count, 0)) return false;
+  if ([...counts.values()].some((count) => count > cards.length)) return false;
+  const slots = [...counts].flatMap(([month, count]) => Array<string>(count).fill(month));
+  const owners = Array<number>(slots.length).fill(-1);
+  function assign(card: number, visited: Set<number>): boolean {
+    for (let slot = 0; slot < slots.length; slot += 1) {
+      if (visited.has(slot) || !cards[card]!.includes(slots[slot]!)) continue;
+      visited.add(slot);
+      if (owners[slot] === -1 || assign(owners[slot]!, visited)) {
+        owners[slot] = card;
+        return true;
+      }
+    }
+    return false;
+  }
+  return cards.every((_, card) => assign(card, new Set()));
 }
 
 function monthCounts(html: string): Map<string, number> {

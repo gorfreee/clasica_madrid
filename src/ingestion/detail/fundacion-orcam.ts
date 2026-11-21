@@ -1,6 +1,6 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
 import { explicitAccessText } from './access-evidence.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, normalizeWorkList, type ObservedComposer, type ObservedFactPatch, type ObservedWork } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import { canonicalizeComposerName } from '../composer-name.ts';
@@ -14,7 +14,7 @@ import type { RawEvent, RawOccurrence } from '../types.ts';
 const FIELDS = {
   venue: '5f3fcfb', room: '22f4028', date: '871b27b', time: 'fe5230b',
   sessions: 'a80013c',
-  ensembles: 'dbd05b3', soloists: '80cb47e', conductor: 'e38a1b0', program: '102ff6f',
+  ensembles: 'dbd05b3', guests: 'f67f6d6', soloists: '80cb47e', conductor: 'e38a1b0', program: '102ff6f',
   tickets: 'd9fd9af',
 } as const;
 
@@ -38,7 +38,7 @@ export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPat
   const room = stripTags(field('room') ?? '');
   const classicDate = stripTags(field('date') ?? '');
   const classicTime = stripTags(field('time') ?? '');
-  const sessionLines = explicitSessions(field('sessions'));
+  const sessionLines = explicitSessions(field('sessions'), event.listingDateText);
   const classic = Boolean(classicDate || classicTime);
   if (classic && sessionLines.length) throw new Error('fundacion-orcam: la ficha mezcla plantillas de calendario');
   if (!venue) throw new Error('fundacion-orcam: ficha sin sede explícita');
@@ -54,7 +54,8 @@ export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPat
     // A room is used only when its widget is present. The building alone is
     // not a room, and the address widget is not one either.
     occurrences = sessionLines;
-    venueText = room ? `${venue} ${room}` : venue;
+    const placements = datedVenues(venue, room, sessionLines);
+    venueText = placements ? '' : room ? `${venue} ${room}` : venue;
     const dates = occurrences.map((item) => item.date!).sort();
     calendarEvidence = {
       complete: { from: dates[0]!, to: dates.at(-1)! },
@@ -62,23 +63,37 @@ export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPat
     };
   }
   const program = field('program');
-  const { composers, works } = /<h5\b/i.test(program ?? '')
+  let { composers, works } = /<h5\b/i.test(program ?? '')
     ? programmeFromHeadings(program ?? '')
     : programmeFromCredits(program ?? '');
-  const performers = ['ensembles', 'soloists', 'conductor'].flatMap((key) =>
+  const performers = ['ensembles', 'guests', 'soloists', 'conductor'].flatMap((key) =>
     (field(key as keyof typeof FIELDS) ?? '').split(/<br\s*\/?>|<\/p>/i).flatMap((line) => {
       const text = stripTags(line);
       if (!text) return [];
       const credit = /^(.+),\s*([^,]+)$/.exec(text);
+      const ensembleCredit = key === 'conductor' ? /^(.+?)\s+\(([^)]+)\)$/.exec(text) : null;
+      if (ensembleCredit) return [{ name: ensembleCredit[1]!, roleText: `Dirección (${ensembleCredit[2]})` }];
       return [{ name: credit?.[1] ?? text, ...(credit ? { roleText: credit[2] } : {}) }];
     }),
   );
   const description = orcamDiv(detail, /<div\b[^>]*data-widget_type=["']theme-post-content\.default["'][^>]*>/i);
+  if (!program && description) {
+    // Explicit authorship labels belong to the musical work; librettists and
+    // production credits remain descriptive text. No mining of biographies.
+    composers = flattenHtmlBlocks(description).split('\n').flatMap((line) => {
+      const match = /^M[úu]sica\s+de\s+(.+)$/iu.exec(line.trim());
+      const name = match && canonicalizeComposerName(match[1]!);
+      return name ? [{ name }] : [];
+    });
+    if (composers.length === 1 && /(?:^|\s)[óo]pera\s+en\s+[^.]+actos\b/iu.test(stripTags(description))) {
+      works = [{ title: event.observed.title, composerName: composers[0]!.name }];
+    }
+  }
   const accessText = explicitAccessText(stripTags(field('tickets') ?? ''));
   return {
     occurrences,
     ...(calendarEvidence ? { calendarEvidence } : {}),
-    venueText,
+    ...(venueText ? { venueText } : {}),
     description: description ? stripTags(description) || undefined : undefined,
     programText: program ? stripTags(program) || undefined : undefined,
     ...(accessText ? { accessText } : {}),
@@ -88,10 +103,12 @@ export function parseOrcamDetail(event: RawEvent, body: string): ObservedFactPat
   };
 }
 
-function explicitSessions(html: string | undefined): RawOccurrence[] {
+function explicitSessions(html: string | undefined, listingDateText?: string): RawOccurrence[] {
   if (html === undefined) return [];
   const lines = html.split(/<br\s*\/?>|<\/p>/i).map((line) => stripTags(line)).filter(Boolean);
   if (!lines.length) return [];
+  const summary = compactSessions(lines, listingDateText);
+  if (summary) return summary;
   const occurrences: RawOccurrence[] = [];
   const seen = new Set<string>();
   for (const line of lines) {
@@ -139,10 +156,12 @@ function programmeFromCredits(program: string): { composers: ObservedComposer[];
     if (!strong) continue;
     const title = stripTags(para[1]!.slice(0, strong.index));
     const credit = stripTags(strong[1]!);
-    const after = stripTags(para[1]!.slice(strong.index + strong[0].length));
-    if (!title || !credit || after) continue;
+    const afterHtml = para[1]!.slice(strong.index + strong[0].length);
+    const after = stripTags(afterHtml);
+    const movements = afterHtml.split(/<br\s*\/?>/i).map((part) => stripTags(part)).filter(Boolean);
+    if (!title || !credit || (after && !movements.every((line) => /^(?:[IVX]+\.\s+.+)(?:\s*\/\s*[IVX]+\.\s+.+)?$/u.test(line)))) continue;
     const composerName = orcamComposerCredit(credit);
-    works.push({ title, ...(composerName ? { composerName } : {}) });
+    works.push({ title: after ? `${title} — ${movements.join('; ')}` : title, ...(composerName ? { composerName } : {}) });
   }
   return { composers: works.flatMap((work) => work.composerName ? [{ name: work.composerName }] : []), works };
 }
@@ -178,4 +197,86 @@ export function orcamDiv(html: string, marker: RegExp): string | undefined {
     if (depth === 0) return html.slice(offset, offset + tag.index);
   }
   throw new Error('fundacion-orcam: sección HTML incompleta');
+}
+
+/** Explicit compact calendars in the same ACF session widget. The listing
+ * supplies only an explicitly printed year when the month/day widget omits it. */
+function compactSessions(lines: string[], listingDateText?: string): RawOccurrence[] | undefined {
+  const text = lines.join(' ');
+  const paired = /^(\d{1,2}) y (\d{1,2}) ([a-záéíóú]+) (\d{4}) \((\d{1,2}:\d{2})h\)$/i.exec(text);
+  if (paired) return checkedSessions([paired[1]!, paired[2]!].map((day) => ({
+    raw: text, date: parseSpanishCalendarDate(`${day} de ${paired[3]} de ${paired[4]}`), time: parseObservedTime(paired[5]!),
+  })));
+  const clock = /^(\d{1,2}:\d{2}) horas(?: \(domingos (\d{1,2}:\d{2}) horas\))?$/i.exec(lines.at(-1) ?? '');
+  if (!clock || lines.length < 2) return undefined;
+  const years = [...new Set(listingDateText?.match(/\b20\d{2}\b/g) ?? [])];
+  if (years.length !== 1) throw new Error('fundacion-orcam: calendario por meses sin año explícito único');
+  const result: RawOccurrence[] = [];
+  for (const line of lines.slice(0, -1)) {
+    const group = /^([a-záéíóú]+):\s*(\d{1,2}(?:(?:,\s*(?:y\s+)?|\s+y\s+)\d{1,2})*)$/i.exec(line);
+    if (!group) throw new Error('fundacion-orcam: calendario por meses ilegible');
+    if (!new RegExp(`\\b${group[1]}\\b`, 'i').test(listingDateText ?? '')) throw new Error('fundacion-orcam: mes de ficha incompatible con resumen del calendario');
+    for (const day of group[2]!.match(/\d+/g)!) {
+      const date = parseSpanishCalendarDate(`${day} de ${group[1]} de ${years[0]}`);
+      const sunday = date && new Date(`${date}T12:00:00Z`).getUTCDay() === 0;
+      const time = parseObservedTime((sunday && clock[2]) || clock[1]!);
+      result.push(...checkedSessions([{ raw: `${line}; ${lines.at(-1)}`, date, time }]));
+    }
+  }
+  return checkedSessions(result);
+}
+
+function checkedSessions(items: Array<{ raw: string; date?: string | null; time?: string | null }>): RawOccurrence[] {
+  const seen = new Set<string>();
+  const result: RawOccurrence[] = [];
+  for (const item of items) {
+    if (!item.date || !item.time) throw new Error('fundacion-orcam: sesión explícita ilegible');
+    const key = `${item.date}|${item.time}`;
+    if (seen.has(key)) throw new Error('fundacion-orcam: sesión duplicada');
+    seen.add(key);
+    result.push({ raw: item.raw, date: item.date, time: item.time });
+  }
+  return result.sort((left, right) => `${left.date}|${left.time}`.localeCompare(`${right.date}|${right.time}`));
+}
+
+type Placement = { venueText: string; occurrences: RawOccurrence[] };
+
+/** Some fichas put a day + venue in each of the venue/room widgets. Those
+ * are distinct performances, never a building and its room concatenated. */
+function datedVenues(venue: string, room: string, occurrences: RawOccurrence[]): Placement[] | undefined {
+  const texts = [venue, room].filter(Boolean);
+  const pattern = /^(\d{1,2}) ([a-záéíóú]+)\s*[–—-]\s*(.+)$/i;
+  if (!texts.some((text) => pattern.test(text))) return undefined;
+  const seen = new Set<string>();
+  const placements = texts.map((text) => {
+    const match = pattern.exec(text);
+    if (!match) throw new Error('fundacion-orcam: sede fechada ilegible');
+    const matching = occurrences.filter((item) => {
+      const year = item.date?.slice(0, 4);
+      return year && item.date === parseSpanishCalendarDate(`${match[1]} de ${match[2]} de ${year}`);
+    });
+    if (!matching.length) throw new Error('fundacion-orcam: sede sin sesión coincidente');
+    const dates = new Set(matching.map((item) => item.date!));
+    if ([...dates].some((date) => seen.has(date))) throw new Error('fundacion-orcam: varias sedes para una misma sesión');
+    for (const date of dates) seen.add(date);
+    return { venueText: match[3]!, occurrences: matching };
+  });
+  if (occurrences.some((item) => !seen.has(item.date!))) throw new Error('fundacion-orcam: sesión sin sede asignada');
+  return placements;
+}
+
+export function expandOrcamDetail(event: RawEvent, body: string): RawEvent[] | undefined {
+  const main = orcamDiv(body, /<div\b[^>]*data-elementor-type=["']single-post["'][^>]*>/i)!;
+  const detail = main.split(/<div\b[^>]*data-widget_type=["']loop-carousel\./i)[0]!;
+  const venue = stripTags(orcamDiv(detail, /<div\b[^>]*data-id=["']5f3fcfb["'][^>]*>/i) ?? '');
+  const room = stripTags(orcamDiv(detail, /<div\b[^>]*data-id=["']22f4028["'][^>]*>/i) ?? '');
+  const placements = datedVenues(venue, room, event.observed.occurrences);
+  return placements?.map(({ venueText, occurrences }) => ({
+    ...event,
+    calendarEvidence: {
+      complete: { from: occurrences.map((item) => item.date!).sort()[0]!, to: occurrences.map((item) => item.date!).sort().at(-1)! },
+      evidence: 'sesiones y sedes fechadas explícitas de la ficha',
+    },
+    observed: { ...event.observed, venueText, occurrences },
+  }));
 }

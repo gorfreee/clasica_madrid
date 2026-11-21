@@ -13,7 +13,7 @@ import { matchEventIdentity, newObservationKeys } from '../src/ingestion/identit
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { Event } from '../src/lib/schemas/index.ts';
 import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
-import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
+import { makeVenue, TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
 const listingUrl = source.urls[0]!;
@@ -608,4 +608,139 @@ describe('ORCAM pipeline safety', () => {
     ]);
     expect(absent.occurrences[0]?.date).toBe('2026-12-20');
   });
+});
+
+describe('ORCAM calendar regression from 21 Nov 2026 (#423)', () => {
+  async function current(id: string) {
+    return (await adapter.extract(await fixture('listing-20261121'), listingUrl, ctx)).find((event) => event.externalId === id)!;
+  }
+
+  it('recovers every card including the broad two-month summary without creating listing sessions', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const events = await adapter.extract(await fixture('listing-20261121'), listingUrl, { ...ctx, reportDiscard: (item) => discards.push(item) });
+    expect(events).toHaveLength(18);
+    expect(new Set(events.map((item) => item.externalId)).size).toBe(18);
+    expect(events.every((item) => item.observed.occurrences.length === 0)).toBe(true);
+    expect(events.find((item) => item.externalId === '4978')).toMatchObject({
+      listingDateText: 'Noviembre y diciembre 2026', observed: { title: 'Las trece rosas rojas' },
+    });
+    expect(discards).toEqual([expect.objectContaining({ externalId: '4861', reason: 'stale-conflicting-schedule' })]);
+  });
+
+  it('keeps exact month coverage checks even when total cardinality matches', async () => {
+    const cards = [await loopCard('listing-20261121', '4978'), await loopCard('listing-20261121', '4844')];
+    expect(adapter.extract(listingWith(cards, [{ value: '2026-11-01', count: 2 }]), listingUrl, ctx)).toHaveLength(2);
+    expect(adapter.extract(listingWith(cards, [{ value: '2026-11-01', count: 1 }, { value: '2026-12-01', count: 1 }]), listingUrl, ctx)).toHaveLength(2);
+    for (const counts of [
+      [{ value: '2026-12-01', count: 2 }],
+      [{ value: '2026-11-01', count: 1 }, { value: '2027-01-01', count: 1 }],
+      [{ value: '2026-11-01', count: 1 }],
+    ]) expect(() => adapter.extract(listingWith(cards, counts), listingUrl, ctx)).toThrow(/cobertura/);
+    expect(() => adapter.extract(listingWith([cards[0]!, cards[0]!], [{ value: '2026-11-01', count: 2 }]), listingUrl, ctx)).toThrow(/duplicada/);
+    expect(() => adapter.extract(listingWith([cards[0]!.replace('Noviembre y diciembre  2026', 'Noviembre y febrero 2026')], [{ value: '2026-11-01', count: 1 }]), listingUrl, ctx)).toThrow(/tarjeta incompleta/);
+  });
+
+  it('reads all opera dates with the explicit Sunday exception and the music credit', async () => {
+    const patch = parseOrcamDetail(await current('4978'), await fixture('detail-rosas'));
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map(({ date, time }) => [date, time])).toEqual([
+      ['2026-11-25', '19:30'], ['2026-11-26', '19:30'], ['2026-11-27', '19:30'],
+      ['2026-11-28', '19:30'], ['2026-11-29', '18:00'], ['2026-12-02', '19:30'],
+    ]);
+    expect(patch.calendarEvidence?.complete).toEqual({ from: '2026-11-25', to: '2026-12-02' });
+    expect(patch.composers).toEqual([{ name: 'Cecilia Bercovich' }]);
+    expect(patch.works).toEqual([{ title: 'Las trece rosas rojas', composerName: 'Cecilia Bercovich' }]);
+    expect(patch.performers).toContainEqual({ name: 'Luis Miguel Méndez', roleText: 'DIRECTOR' });
+  });
+
+  it('rejects ungrounded years, invalid/duplicate dates and unknown clock exceptions', async () => {
+    const event = await current('4978');
+    const html = await fixture('detail-rosas');
+    for (const broken of [
+      html.replace('25, 26, 27, 28, y 29', '25, 25'),
+      html.replace('DICIEMBRE: 2', 'DICIEMBRE: 32'),
+      html.replace('DICIEMBRE: 2', 'ENERO: 2'),
+      html.replace('domingos 18:00', 'sábados 18:00'),
+      html.replace('domingos 18:00', 'domingos 28:00'),
+      html.replace('DICIEMBRE: 2', 'DICIEMBRE: del 2 al 4'),
+    ]) expect(() => parseOrcamDetail(event, broken)).toThrow(/fundacion-orcam/);
+    expect(() => parseOrcamDetail({ ...event, listingDateText: 'noviembre y diciembre' }, html)).toThrow(/año explícito/);
+    expect(() => parseOrcamDetail({ ...event, listingDateText: 'noviembre 2026 diciembre 2027' }, html)).toThrow(/año explícito/);
+  });
+
+  it('expands the two venues with their own dates and keeps ensembles, directors and movement repertoire', async () => {
+    const [madrid, alcorcon] = await hydrateEvents([await current('5004')], adapter, { ...ctx, get: async () => fixture('detail-grillos') });
+    expect(madrid?.hydration?.status).toBe('succeeded');
+    expect(alcorcon?.hydration?.status).toBe('succeeded');
+    expect(madrid?.observed).toMatchObject({ venueText: 'Sede ORCAM, Sala General', occurrences: [{ date: '2026-12-12', time: '12:00' }] });
+    expect(alcorcon?.observed).toMatchObject({ venueText: 'Conservatorio de música Manuel de Falla de Alcorcón', occurrences: [{ date: '2026-12-13', time: '12:00' }] });
+    expect(madrid?.externalId).toBe('5004');
+    expect(alcorcon?.externalId).toBe('5004');
+    expect(madrid?.observed.performers).toContainEqual({ name: 'Orquesta Grillos de Misiones (Argentina)' });
+    expect(madrid?.observed.performers).toContainEqual({ name: 'ANNE-MARIE NORTH', roleText: 'Dirección (Joven Camerata de la ORCAM)' });
+    expect(madrid?.observed.works).toContainEqual({ title: 'Serenade para cuerdas en Mi menor, op. 22. — IV. Larghetto; II. Tempo di Valse / V. Finale: allegro vivace', composerName: 'Antonín Dvořák' });
+    expect(madrid?.observed.composers.some((item) => /Villancico|Grillos|arr\.|Larghetto|Finale/.test(item.name))).toBe(false);
+    expect(madrid?.calendarEvidence?.complete).toEqual({ from: '2026-12-12', to: '2026-12-12' });
+  });
+
+  it('requires an unambiguous venue assignment for every session', async () => {
+    const event = await current('5004');
+    const html = await fixture('detail-grillos');
+    for (const broken of [
+      html.replace('13 Diciembre', '12 Diciembre'),
+      html.replace('13 Diciembre', '14 Diciembre'),
+      html.replace('13 Diciembre', 'Conservatorio'),
+      html.replace('12 y 13 diciembre 2026 (12:00h)', '12 y 13 diciembre 2026 (25:00h)'),
+      html.replace('12 y 13 diciembre 2026 (12:00h)', '12 y 12 diciembre 2026 (12:00h)'),
+    ]) {
+      const [failed] = await hydrateEvents([event], adapter, { ...ctx, get: async () => broken });
+      expect(failed?.hydration?.status).toBe('failed');
+      expect(failed?.observed.occurrences).toEqual([]);
+      expect(failed?.observed.venueText).toBeUndefined();
+    }
+  });
+
+  it('allows two explicit times on one day at the same venue and orders calendar bounds', async () => {
+    const event = await current('5004');
+    const html = (await fixture('detail-grillos')).replace('12 y 13 diciembre 2026 (12:00h)',
+      'Domingo 13 de diciembre de 2026, 12:00 horas<br />Sábado 12 de diciembre de 2026, 17:00 horas<br />Sábado 12 de diciembre de 2026, 12:00 horas');
+    const [madrid, alcorcon] = await hydrateEvents([event], adapter, { ...ctx, get: async () => html });
+    expect(madrid?.hydration?.status).toBe('succeeded');
+    expect(madrid?.observed.occurrences).toHaveLength(2);
+    expect(madrid?.calendarEvidence?.complete).toEqual({ from: '2026-12-12', to: '2026-12-12' });
+    expect(alcorcon?.observed.occurrences).toHaveLength(1);
+  });
+  it('keeps both venue observations separate through publication and repeated reconciliation', async () => {
+    const listing = listingWith([await loopCard('listing-20261121', '5004')], [{ value: '2026-12-01', count: 1 }]);
+    const catalog = emptyCatalog();
+    // Catalog stubs model the explicitly named places; the adapter does not
+    // invent addresses or create unknown venues from a bare place name.
+    catalog.venues = [
+      makeVenue({ id: 'ven_orcam_sede', slug: 'sede-orcam', name: 'Sede ORCAM, Sala General' }),
+      makeVenue({ id: 'ven_falla_alcorcon', slug: 'falla-alcorcon', name: 'Conservatorio de música Manuel de Falla de Alcorcón', municipality: 'Alcorcón', area: 'nearby' }),
+    ];
+    const run = async (tree: Catalog) => runIngest({
+      now: TEST_NOW, dryRun: true, catalog: tree, window: TEST_WINDOW,
+      sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'orcam-venues-')),
+      get: async (url) => url === listingUrl ? listing : fixture('detail-grillos'),
+    });
+    const first = await run(catalog);
+    expect(first.summary.sourcesFailed).toEqual([]);
+    expect(first.summary.ambiguous).toBe(0);
+    expect(first.summary.batchDuplicates).toBe(0);
+    expect(first.candidates).toHaveLength(2);
+    expect(first.candidates.map((item) => [item.event.venueId, item.event.occurrences.map(({ date, time }) => [date, time])])).toEqual([
+      ['ven_orcam_sede', [['2026-12-12', '12:00']]],
+      ['ven_falla_alcorcon', [['2026-12-13', '12:00']]],
+    ]);
+    expect(new Set(first.candidates.map((item) => item.event.id)).size).toBe(2);
+    const merged = mergeCandidateBatch(catalog, first.candidates).catalog;
+    expect(merged.events).toHaveLength(2);
+    const repeated = await run(merged);
+    expect(repeated.summary.ambiguous).toBe(0);
+    expect(repeated.summary.newEvents).toBe(0);
+    expect(repeated.summary.updatedEvents).toBe(0);
+    expect(repeated.summary.unchangedEvents).toBe(2);
+  });
+
 });
