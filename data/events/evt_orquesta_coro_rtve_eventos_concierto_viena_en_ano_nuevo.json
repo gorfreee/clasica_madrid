@@ -43,6 +43,15 @@
     },
     {
       "name": "Johann Strauss II"
+    },
+    {
+      "name": "Franz Lehár"
+    },
+    {
+      "name": "Carl Zeller"
+    },
+    {
+      "name": "Josef Strauss"
     }
   ],
   "works": [
@@ -63,12 +72,45 @@
       "composerName": "Johann Strauss II"
     },
     {
-      "title": "El Danubio azul",
+      "title": "Dein ist mein ganzes Herz (Das Land des Lächelns)",
+      "composerName": "Franz Lehár"
+    },
+    {
+      "title": "Wiener Blut, op. 354",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Csárdás (Ritter Pásmán)",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Tausend und eine Nacht, op. 346",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Schenkt man sich Rosen in Tirol (Der Vogelhändler)",
+      "composerName": "Carl Zeller"
+    },
+    {
+      "title": "Im Feuerstrom der Reben (Die Fledermaus)",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Spanischer Marsch, op. 433",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Feuerfest!, op. 269",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "El Danubio azul, op. 314",
       "composerName": "Johann Strauss II"
     }
   ],
   "eras": [
-    "romantic"
+    "romantic",
+    "twentieth"
   ],
   "formats": [
     "symphonic",

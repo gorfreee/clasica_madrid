@@ -11,7 +11,7 @@
     {
       "id": "occ_patrimonio_nacional_concierto_navidad_coro_ferrocarriles_20261218_01",
       "date": "2026-12-18",
-      "time": null,
+      "time": "20:00",
       "status": "scheduled"
     }
   ],
@@ -21,21 +21,106 @@
       "role": "choir"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "John Rutter"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Ramón Medina"
+    },
+    {
+      "name": "Adolphe Adam"
+    },
+    {
+      "name": "Franz Xaver Gruber"
+    },
+    {
+      "name": "Irving Berlin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Adorar al niño"
+    },
+    {
+      "title": "Laudate Dominum",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Chiquirritín"
+    },
+    {
+      "title": "No la debemos dormir"
+    },
+    {
+      "title": "Christmas Lullaby",
+      "composerName": "John Rutter"
+    },
+    {
+      "title": "De la Virgen",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Fun, Fun, Fun"
+    },
+    {
+      "title": "Haurtxo Polita"
+    },
+    {
+      "title": "Las campanas de la mezquita",
+      "composerName": "Ramón Medina"
+    },
+    {
+      "title": "O Holy Night",
+      "composerName": "Adolphe Adam"
+    },
+    {
+      "title": "Noche de paz",
+      "composerName": "Franz Xaver Gruber"
+    },
+    {
+      "title": "Suite comercial navideña"
+    },
+    {
+      "title": "Blanca Navidad",
+      "composerName": "Irving Berlin"
+    },
+    {
+      "title": "La cuesta del reventón",
+      "composerName": "Ramón Medina"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "choral"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/noticias/patrimonio-nacional-recorre-la-musica-espanola-del-siglo-de-oro-al-clasicismo",
       "checkedAt": "2026-10-14"
+    },
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/concierto-de-navidad-santa-isabel-2026-2026-12-18",
+      "checkedAt": "2026-11-21",
+      "externalId": "2fb21e41-4eb6-4647-884d-11bee965597e"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-21"
 }
