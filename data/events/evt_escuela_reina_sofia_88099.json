@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_88099",
+  "slug": "concierto-academico-catedra-violonchelo-2026-11-26",
+  "title": "Concierto Académico de la Cátedra de Violonchelo | Profesor Jens Peter Maintz",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_88099_01",
+      "date": "2026-11-26",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/concierto-academico-de-la-catedra-de-violonchelo-profesor-jens-peter-maintz-4",
+      "checkedAt": "2026-11-21",
+      "externalId": "88099"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-21"
+}

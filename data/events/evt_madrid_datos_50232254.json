@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50232254",
+  "slug": "concierto-de-castanuelas",
+  "title": "Concierto de castañuelas",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1955",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50232254_01",
+      "date": "2026-11-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo de Castañuelas del Centro Cultural Fernando de los Ríos",
+      "role": "ensemble"
+    },
+    {
+      "name": "Olga Bustamante",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Amadeo Vives"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carmen: Habanera",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Doña Francisquita: fandango",
+      "composerName": "Amadeo Vives"
+    },
+    {
+      "title": "El Vito"
+    },
+    {
+      "title": "Gitanería"
+    },
+    {
+      "title": "Francisco Alegre"
+    },
+    {
+      "title": "El Choclo"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "opera",
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=dac6f39af6a7c910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-21",
+      "externalId": "50232254"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-21"
+}

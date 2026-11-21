@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_66688",
+  "slug": "conversando-con-melismas-ciclo-de-conciertos-manuel-de-falla",
+  "title": "«Conversando con melismas» Ciclo de Conciertos Manuel de Falla",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid_catedra_mayor",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_66688_01",
+      "date": "2026-12-13",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Paloma Gutiérrez del Arroyo",
+      "role": "soloist"
+    },
+    {
+      "name": "Christos Kanellos Malamás",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/conversando-con-melismas-ciclo-de-conciertos-manuel-de-falla",
+      "checkedAt": "2026-11-21",
+      "externalId": "66688"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-11-21"
+}

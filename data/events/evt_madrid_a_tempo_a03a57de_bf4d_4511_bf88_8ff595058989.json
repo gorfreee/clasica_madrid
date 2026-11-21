@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_a_tempo_a03a57de_bf4d_4511_bf88_8ff595058989",
+  "slug": "concierto-de-piano-v-aniversario-madrid-a-tempo-20261212",
+  "title": "Concierto de piano – V Aniversario Madrid a Tempo",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_a_tempo_a03a57de_bf4d_4511_bf88_8ff595058989_01",
+      "date": "2026-12-12",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sergio Rastrilla Tabernero",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio y fuga n.º 18 en sol sostenido menor, BWV 887",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Estudio op. 25 n.º 5",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Scherzo n.º 1 en si menor, op. 20",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Estudio op. 25 n.º 12",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Momento musical n.º 4, op. 16",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/post/concierto-de-piano-v-aniversario-mat",
+      "checkedAt": "2026-11-21",
+      "externalId": "a03a57de-bf4d-4511-bf88-8ff595058989"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-11-21"
+}

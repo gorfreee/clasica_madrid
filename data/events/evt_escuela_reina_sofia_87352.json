@@ -18,25 +18,68 @@
   "performers": [
     {
       "name": "Andreas Prittwitz"
+    },
+    {
+      "name": "Fabio Muro Ruiz",
+      "role": "soloist"
+    },
+    {
+      "name": "Abel Gómez-Antequera Ábalos",
+      "role": "soloist"
+    },
+    {
+      "name": "Geonwoo Yi",
+      "role": "soloist"
     }
   ],
   "composers": [
     {
       "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Nikolai Rimsky-Korsakov"
     }
   ],
   "works": [
     {
-      "title": "Danza del Hada de Azúcar",
+      "title": "Obertura en miniatura (El Cascanueces, arreglo de Mario Mora)",
       "composerName": "Piotr Ilich Chaikovski"
     },
     {
-      "title": "Danza rusa",
+      "title": "Marcha (El Cascanueces, arreglo de HJ Bosma)",
       "composerName": "Piotr Ilich Chaikovski"
     },
     {
-      "title": "Vals de las flores",
+      "title": "Danza del Hada de Azúcar (El Cascanueces, arreglo de HJ Bosma)",
       "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Trepak (El Cascanueces, arreglo de Mario Mora)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza árabe (El Cascanueces, arreglo de HJ Bosma)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza de los copos de nieve (El Cascanueces, arreglo de Andreas Prittwitz)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza china (El Cascanueces, arreglo de Mario Mora)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Danza de los mirlitones (El Cascanueces)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Vals de las flores (El Cascanueces, arreglo de HJ Bosma)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "El vuelo del moscardón (arreglo de Uwe Rössler)",
+      "composerName": "Nikolai Rimsky-Korsakov"
     }
   ],
   "eras": [
@@ -51,10 +94,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/clasicos-divertidos-occident-el-cascanueces-grunon-2",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "87352"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

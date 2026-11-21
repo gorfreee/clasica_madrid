@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_concierto_viena_en_ano_nuevo",
+  "slug": "concierto-viena-en-ano-nuevo",
+  "title": "Concierto Viena en Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_concierto_viena_en_ano_nuevo_01",
+      "date": "2027-01-07",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Kursalon de Viena",
+      "role": "orchestra"
+    },
+    {
+      "name": "Orquesta de Cámara Iberoamericana",
+      "role": "orchestra"
+    },
+    {
+      "name": "Verena Tranker",
+      "role": "soloist"
+    },
+    {
+      "name": "Clemens Kerschbaumer",
+      "role": "soloist"
+    },
+    {
+      "name": "Guillaume Pasch",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz von Suppé"
+    },
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Franz Lehár"
+    },
+    {
+      "name": "Carl Zeller"
+    },
+    {
+      "name": "Josef Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "O du mein Österreich",
+      "composerName": "Franz von Suppé"
+    },
+    {
+      "title": "El murciélago: obertura",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Frühlingsstimmen, op. 410",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Auf der Jagd, op. 373",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Dein ist mein ganzes Herz (Das Land des Lächelns)",
+      "composerName": "Franz Lehár"
+    },
+    {
+      "title": "Wiener Blut, op. 354",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Csárdás (Ritter Pásmán)",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Tausend und eine Nacht, op. 346",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Schenkt man sich Rosen in Tirol (Der Vogelhändler)",
+      "composerName": "Carl Zeller"
+    },
+    {
+      "title": "Im Feuerstrom der Reben (Die Fledermaus)",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Spanischer Marsch, op. 433",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Feuerfest!, op. 269",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "El Danubio azul, op. 314",
+      "composerName": "Johann Strauss II"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/concierto-viena-en-ano-nuevo",
+      "checkedAt": "2026-11-21",
+      "externalId": "/eventos/concierto-viena-en-ano-nuevo/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-11-21"
+}

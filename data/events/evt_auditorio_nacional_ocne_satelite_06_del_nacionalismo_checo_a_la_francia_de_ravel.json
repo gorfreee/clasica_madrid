@@ -10,7 +10,7 @@
   "occurrences": [
     {
       "id": "occ_auditorio_nacional_ocne_satelite_06_del_nacionalismo_checo_a_la_francia_de_ravel_01",
-      "date": "2026-11-24",
+      "date": "2027-06-14",
       "time": "19:30",
       "status": "scheduled"
     }
@@ -69,10 +69,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel",
-      "checkedAt": "2026-11-01",
-      "externalId": "ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel"
+      "checkedAt": "2026-11-21",
+      "externalId": "0355e2623c5b47e79aa1fa899cec3a9e"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-21"
 }

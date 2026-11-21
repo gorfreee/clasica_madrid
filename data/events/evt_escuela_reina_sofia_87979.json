@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_87979",
+  "slug": "concierto-academico-de-la-catedra-de-violin-profesor-christoph-poppen",
+  "title": "Concierto Académico de la Cátedra de Violín | Profesor Christoph Poppen",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_87979_01",
+      "date": "2026-11-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jonah Kartman",
+      "role": "soloist"
+    },
+    {
+      "name": "Tomás Alegre",
+      "role": "soloist"
+    },
+    {
+      "name": "Inés Dupont Gil",
+      "role": "soloist"
+    },
+    {
+      "name": "David Martínez González",
+      "role": "soloist"
+    },
+    {
+      "name": "Theodor Kaskiv",
+      "role": "soloist"
+    },
+    {
+      "name": "Gustavo Gil",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Nicolò Paganini"
+    },
+    {
+      "name": "Eugène-Auguste Ysaye"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Karol Szymanowski"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violín y piano núm. 2 en la mayor op 100",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Tzigane, rapsodia de concierto para violín y piano",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Introducción y rondó caprichoso para violín solo y orquesta en la menor op 28 (reducción para violín y piano)",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "24 Caprichos para violín solo op 1",
+      "composerName": "Nicolò Paganini"
+    },
+    {
+      "title": "Caprice d'après l'Étude en forme de valse de Saint-Saëns (Capricho sobre el Estudio en forma de vals de Saint-Saëns) para violín y orquesta (reducción para violín y piano)",
+      "composerName": "Eugène-Auguste Ysaye"
+    },
+    {
+      "title": "Vals-scherzo para violín y orquesta en do mayor op 34 (arreglo para violín y piano)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Nocturno y tarantella para violín y piano op 28",
+      "composerName": "Karol Szymanowski"
+    },
+    {
+      "title": "Concierto para violín y orquesta núm. 2 Sz 112 BB 117 (reducción para violín y piano)",
+      "composerName": "Béla Bartók"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/concierto-academico-de-la-catedra-de-violin-profesor-christoph-poppen-7",
+      "checkedAt": "2026-11-21",
+      "externalId": "87979"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-21"
+}

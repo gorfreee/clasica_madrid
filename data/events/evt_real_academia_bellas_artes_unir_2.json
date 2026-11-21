@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_unir_2",
+  "slug": "concierto-laureados-master-composicion-musical-unir-2026",
+  "title": "VIII Edición del Concierto de Laureados del Máster en Composición Musical de la UNIR",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_unir_2_01",
+      "date": "2026-11-27",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo Modus Novus",
+      "role": "ensemble"
+    },
+    {
+      "name": "Santiago Serrate",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ángel Cobos"
+    },
+    {
+      "name": "Carmelo Tejero"
+    },
+    {
+      "name": "Sara Navarro"
+    },
+    {
+      "name": "Manuel Bonet"
+    },
+    {
+      "name": "Laura Pastor"
+    },
+    {
+      "name": "Marcel Chirilov"
+    },
+    {
+      "name": "Javier Fuentes"
+    },
+    {
+      "name": "José Antonio Burgos"
+    },
+    {
+      "name": "Eunice Quezada"
+    },
+    {
+      "name": "Hans Huarkaya"
+    },
+    {
+      "name": "Diego Vázquez"
+    },
+    {
+      "name": "Alberto González"
+    },
+    {
+      "name": "Juan Manuel Cañizares"
+    }
+  ],
+  "works": [
+    {
+      "title": "Donde arde la tarde",
+      "composerName": "Ángel Cobos"
+    },
+    {
+      "title": "Umbral Sonoro",
+      "composerName": "Carmelo Tejero"
+    },
+    {
+      "title": "Palíndromos del Mare Nostrum",
+      "composerName": "Sara Navarro"
+    },
+    {
+      "title": "Botas Nuevas",
+      "composerName": "Manuel Bonet"
+    },
+    {
+      "title": "Teix",
+      "composerName": "Laura Pastor"
+    },
+    {
+      "title": "Factor F",
+      "composerName": "Marcel Chirilov"
+    },
+    {
+      "title": "A los que juegan sin tierra",
+      "composerName": "Javier Fuentes"
+    },
+    {
+      "title": "Simplemente Música",
+      "composerName": "José Antonio Burgos"
+    },
+    {
+      "title": "Camino",
+      "composerName": "Eunice Quezada"
+    },
+    {
+      "title": "Luz de Noche",
+      "composerName": "Hans Huarkaya"
+    },
+    {
+      "title": "Morphé",
+      "composerName": "Diego Vázquez"
+    },
+    {
+      "title": "Inmersión",
+      "composerName": "Alberto González"
+    },
+    {
+      "title": "Prisma",
+      "composerName": "Juan Manuel Cañizares"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/unir-2/",
+      "checkedAt": "2026-11-21",
+      "externalId": "unir-2"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-11-21"
+}

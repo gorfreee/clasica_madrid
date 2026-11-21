@@ -67,16 +67,16 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-21",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23793",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-21",
       "externalId": "23793"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-21"
 }

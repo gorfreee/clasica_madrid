@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_88100",
+  "slug": "concierto-academico-catedra-canto-2026-11-26",
+  "title": "Concierto Académico de la Cátedra de Canto | Profesora Juliane Banse",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_88100_01",
+      "date": "2026-11-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/concierto-academico-de-la-catedra-de-canto-profesora-juliane-banse-4",
+      "checkedAt": "2026-11-21",
+      "externalId": "88100"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-21"
+}

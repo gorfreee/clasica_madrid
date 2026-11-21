@@ -67,11 +67,15 @@
     },
     {
       "name": "Gonzalo Roig"
+    },
+    {
+      "name": "Francesco Sartori"
     }
   ],
   "works": [
     {
-      "title": "Con te partirò"
+      "title": "Con te partirò",
+      "composerName": "Francesco Sartori"
     },
     {
       "title": "La traviata: Libiamo ne’ lieti calici",
@@ -158,9 +162,9 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/estibaliz-martyn-sergio-kuhlmann",
-      "checkedAt": "2026-11-13"
+      "checkedAt": "2026-11-21"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-11-13"
+  "lastVerifiedAt": "2026-11-21"
 }

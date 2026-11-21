@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_goethe_concierto_adviento_madrid_2026",
+  "slug": "concierto-de-adviento-fundacion-goethe-madrid-2026",
+  "title": "Concierto de Adviento en Madrid – ¡Resonad, timbales! ¡Sonad, trompetas!",
+  "status": "scheduled",
+  "venueId": "ven_basilica_la_milagrosa_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_goethe_concierto_adviento_madrid_2026_01",
+      "date": "2026-12-02",
+      "time": "21:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Francisco Manuel Anguas Rodríguez",
+      "role": "soloist"
+    },
+    {
+      "name": "Pedro Henrique de Souza Rosa",
+      "role": "soloist"
+    },
+    {
+      "name": "Santiago Gervasoni",
+      "role": "soloist"
+    },
+    {
+      "name": "Sophia Kälber",
+      "role": "soloist"
+    },
+    {
+      "name": "Pedro José Cases Sánchez",
+      "role": "soloist"
+    },
+    {
+      "name": "Coro Nox",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_goethe",
+      "url": "https://www.fundaciongoethe.org/es/eventos/concierto-adviento-madrid-2026/",
+      "checkedAt": "2026-11-21",
+      "externalId": "concierto-adviento-madrid-2026"
+    }
+  ],
+  "primarySourceId": "src_fundacion_goethe",
+  "lastVerifiedAt": "2026-11-21"
+}

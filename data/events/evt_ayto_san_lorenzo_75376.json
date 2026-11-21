@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_75376",
+  "slug": "concierto-de-navidad-coro-schola-cantorum-director-musical-jose-maria-abad-bolufer",
+  "title": "Concierto de Navidad: Coro Schola Cantorum. Director musical: José María Abad Bolufer",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_75376_01",
+      "date": "2026-12-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Schola Cantorum",
+      "role": "choir"
+    },
+    {
+      "name": "José María Abad Bolufer",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Vásquez"
+    },
+    {
+      "name": "Juan de Anchieta"
+    },
+    {
+      "name": "Josquin des Prés"
+    },
+    {
+      "name": "Mateo Flecha"
+    },
+    {
+      "name": "Orlande de Lassus"
+    },
+    {
+      "name": "Francisco Guerrero"
+    },
+    {
+      "name": "José Uruñuela"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Eduardo Martínez Torner"
+    },
+    {
+      "name": "Antonio Pérez Moya"
+    },
+    {
+      "name": "Pablo Sorozábal"
+    },
+    {
+      "name": "Miguel Groba"
+    },
+    {
+      "name": "Luis Farreny"
+    },
+    {
+      "name": "Antonio Pérez"
+    },
+    {
+      "name": "Oriol Martín"
+    },
+    {
+      "name": "Francisco Civil"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dindiríndin (Cancionero de Palacio)"
+    },
+    {
+      "title": "Ay linda amiga (Cancionero de Palacio)"
+    },
+    {
+      "title": "¿De dónde venís, amores?",
+      "composerName": "Juan Vásquez"
+    },
+    {
+      "title": "Con amores, la mi madre",
+      "composerName": "Juan de Anchieta"
+    },
+    {
+      "title": "El Grillo",
+      "composerName": "Josquin des Prés"
+    },
+    {
+      "title": "Teresica hermana",
+      "composerName": "Mateo Flecha"
+    },
+    {
+      "title": "Matona mia cara",
+      "composerName": "Orlande de Lassus"
+    },
+    {
+      "title": "Niño Dios d’amor herido",
+      "composerName": "Francisco Guerrero"
+    },
+    {
+      "title": "Maitia nun zira",
+      "composerName": "José Uruñuela"
+    },
+    {
+      "title": "Balaio",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "El Baile",
+      "composerName": "Eduardo Martínez Torner"
+    },
+    {
+      "title": "El Rossinyol",
+      "composerName": "Antonio Pérez Moya"
+    },
+    {
+      "title": "Maite",
+      "composerName": "Pablo Sorozábal"
+    },
+    {
+      "title": "O voso galo comadre",
+      "composerName": "Miguel Groba"
+    },
+    {
+      "title": "Campana sobre campana",
+      "composerName": "Luis Farreny"
+    },
+    {
+      "title": "Dime niño ¿de quién eres?",
+      "composerName": "Antonio Pérez"
+    },
+    {
+      "title": "Chiqirriquitín",
+      "composerName": "Oriol Martín"
+    },
+    {
+      "title": "Hacia Belén va una burra",
+      "composerName": "Francisco Civil"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "twentieth"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-navidad-coro-schola-cantorum-director-musical-jose-maria-abad-bolufer",
+      "checkedAt": "2026-11-21",
+      "externalId": "75376"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-11-21"
+}

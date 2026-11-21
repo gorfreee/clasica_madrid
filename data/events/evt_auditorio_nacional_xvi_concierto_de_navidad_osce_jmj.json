@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xvi_concierto_de_navidad_osce_jmj",
+  "slug": "xvi-concierto-de-navidad-osce-jmj",
+  "title": "XVI Concierto de Navidad Osce-Jmj",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xvi_concierto_de_navidad_osce_jmj_01",
+      "date": "2026-12-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica, Coro y Escolanía JMJ",
+      "role": "ensemble"
+    },
+    {
+      "name": "Sergio M. Zangróniz",
+      "role": "conductor"
+    },
+    {
+      "name": "David de la Calle",
+      "role": "conductor"
+    },
+    {
+      "name": "Andrey Yaroshinsky",
+      "role": "soloist"
+    },
+    {
+      "name": "Iliana Sánchez",
+      "role": "soloist"
+    },
+    {
+      "name": "Borja Quintas",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Serguéi Prokófiev"
+    },
+    {
+      "name": "Nikolai Rimsky-Korsakov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano y orquesta n.º 1 en re bemol mayor, op. 10",
+      "composerName": "Serguéi Prokófiev"
+    },
+    {
+      "title": "Capricho español, op. 34",
+      "composerName": "Nikolai Rimsky-Korsakov"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xvi-concierto-de-navidad-osce-jmj",
+      "checkedAt": "2026-11-21",
+      "externalId": "xvi-concierto-de-navidad-osce-jmj"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-21"
+}
