@@ -124,6 +124,10 @@ function currentProgrammeCredit(lines: readonly string[]): string | undefined {
     const line = lines[index]!;
     const match = cue.exec(line);
     if (!match) continue;
+    // Do not turn an explicitly negated repertoire claim into an affirmative
+    // attribution by dropping the words before the matched cue.
+    const left = line.slice(0, match.index).split(/(?<!\b\p{Lu})[.!?;]\s*/u).at(-1) ?? '';
+    if (/\b(?:no|nunca|tampoco)\s*(?:se\s+)?$/iu.test(left)) continue;
     let credit = line.slice(match.index).split(/\b(?:Formaci[oó]n\s*:|Todos los p[uú]blicos|Edad recomendada\s*:|Duraci[oó]n\s*:|Entrada gratuita|Se ruega)/iu)[0]!.trim();
     // The JSON surface has lost paragraph boundaries. A finished sentence
     // must not attach the following biography; initials inside names are not
