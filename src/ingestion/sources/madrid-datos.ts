@@ -29,12 +29,13 @@ import {
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
  * facility that is not yet in the catalog may become a new Venue on the Candidate
- * when the listing also carries a physical `address.area`.
+ * when the listing supplies an explicit physical address. A missing venue can
+ * be recovered from a named title location with independent directory evidence.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
 /** Official municipal concert label, also used when the kos @type is a street-activity bucket. */
-const EXPLICIT_CLASSICAL_TITLE = /^(?:concierto|recital)\s+(?:de\s+)?m[uú]sica\s+cl[aá]sica\b/iu;
+const EXPLICIT_CLASSICAL_TITLE = /^(?:(?:concierto|recital)\s+(?:de\s+)?|actuaci[oó]n\s+m[uú]sica(?:l)?[.:]\s*)(m[uú]sica\s+cl[aá]sica)\b/iu;
 const MUSIC_PERFORMANCE_TITLE = /^actuaci[oó]n m[uú]sica(l)?\b/i;
 const MUSIC_PERFORMANCE_ID = /(?:^|-)actuacion-musica(l)?(?:-|\.json|$)/i;
 
@@ -184,7 +185,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const venueFacilityId = listedVenue ? facilityIdFromRelation(item.relation) : undefined;
   const description = asNonEmptyString(item.description);
   const venueAddress = listedVenue ? addressFromListing(item.address) ?? explicitAddress(description) : undefined;
-  const categoryText = municipalMusicCategory(item['@type']) ?? EXPLICIT_CLASSICAL_TITLE.exec(title)?.[0];
+  const categoryText = municipalMusicCategory(item['@type']) ?? EXPLICIT_CLASSICAL_TITLE.exec(title)?.[1];
   const editorial = description ? parseMadridDatosEditorialText(description) : {};
   return {
     sourceId: ctx.source.id,
