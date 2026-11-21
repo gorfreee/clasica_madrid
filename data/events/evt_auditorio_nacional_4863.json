@@ -50,6 +50,14 @@
     {
       "title": "La noche de los mayas",
       "composerName": "Silvestre Revueltas"
+    },
+    {
+      "title": "++ Estreno en España",
+      "composerName": "Silvestre Revueltas"
+    },
+    {
+      "title": "+ Primera vez ORCAM",
+      "composerName": "Silvestre Revueltas"
     }
   ],
   "eras": [
@@ -59,12 +67,12 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-12-reina-roja",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-sinfonico-12-reina-roja"
     },
     {
@@ -75,5 +83,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

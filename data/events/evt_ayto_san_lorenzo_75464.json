@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_75464",
+  "slug": "concierto-de-ano-nuevo-valses-polkas-y-musica-sacra-de-mozart-a-strauss",
+  "title": "Concierto de Año Nuevo: Valses, polkas y música sacra de Mozart a Strauss",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_75464_01",
+      "date": "2027-01-04",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-ano-nuevo-valses-polkas-y-musica-sacra-de-mozart-a-strauss",
+      "checkedAt": "2026-11-21",
+      "externalId": "75464"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-11-21"
+}

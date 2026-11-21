@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_75376",
+  "slug": "concierto-de-navidad-coro-schola-cantorum-director-musical-jose-maria-abad-bolufer",
+  "title": "Concierto de Navidad: Coro Schola Cantorum. Director musical: José María Abad Bolufer",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_75376_01",
+      "date": "2026-12-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-navidad-coro-schola-cantorum-director-musical-jose-maria-abad-bolufer",
+      "checkedAt": "2026-11-21",
+      "externalId": "75376"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-11-21"
+}

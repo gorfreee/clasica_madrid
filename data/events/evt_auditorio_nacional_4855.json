@@ -53,6 +53,10 @@
     {
       "title": "Concierto para orquesta, Sz. 116",
       "composerName": "Béla Bartók"
+    },
+    {
+      "title": "+ Primera vez ORCAM",
+      "composerName": "Béla Bartók"
     }
   ],
   "eras": [
@@ -62,12 +66,12 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-8-duelo-de-sombras",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-sinfonico-8-duelo-de-sombras"
     },
     {
@@ -78,5 +82,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

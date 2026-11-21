@@ -63,12 +63,12 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-9-arquitecturas-del-espiritu",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-sinfonico-9-arquitecturas-del-espiritu"
     },
     {
@@ -79,5 +79,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

@@ -68,6 +68,10 @@
     {
       "title": "Misa para doble coro a capella",
       "composerName": "Frank Martin"
+    },
+    {
+      "title": "+ Primera vez ORCAM",
+      "composerName": "Frank Martin"
     }
   ],
   "eras": [
@@ -77,12 +81,12 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-1",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-tiempo-de-camara-1"
     },
     {
@@ -93,5 +97,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

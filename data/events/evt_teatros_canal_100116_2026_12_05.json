@@ -40,9 +40,14 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/xvii-festival-ensembles",
-      "checkedAt": "2026-11-12"
+      "checkedAt": "2026-11-21"
+    },
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.cdcm.madrid/teatroscanal/espectaculo/ensemble-teatro-arte-sonoro-2",
+      "checkedAt": "2026-11-21"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

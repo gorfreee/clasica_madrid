@@ -78,6 +78,10 @@
     {
       "title": "Canto espiritual, op. 30",
       "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "+ Primera vez ORCAM",
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [
@@ -89,12 +93,12 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-5-las-tres-b",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-tiempo-de-camara-5-las-tres-b"
     },
     {
@@ -105,5 +109,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_88359",
+  "slug": "concierto-academico-de-la-catedra-de-violin-profesor-christoph-poppen-2",
+  "title": "Concierto Académico de la Cátedra de Violín | Profesor Christoph Poppen",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_88359_01",
+      "date": "2026-11-27",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Fabio Muro Ruiz"
+    },
+    {
+      "name": "Tomás Alegre"
+    },
+    {
+      "name": "Miguel Ribeiro Martins"
+    },
+    {
+      "name": "Diego Sánchez Mangas"
+    },
+    {
+      "name": "Raphael Gisbertz"
+    },
+    {
+      "name": "Issey Martínez Imai"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Felix Mendelssohn"
+    },
+    {
+      "name": "Louis Spohr"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín y orquesta núm. 1 en si bemol mayor K 207 (reducción para violín y piano)",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Concierto para violín y orquesta de cuerda en re menor (reducción para violín y piano)",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Concierto para violín y orquesta núm. 8 en la menor op 47 \"en forma de escena cantada\" (reducción para violín y piano)",
+      "composerName": "Louis Spohr"
+    },
+    {
+      "title": "Rondó para violín y piano en si menor D 895 op 70",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Concierto para violín y orquesta en re mayor op 35 (reducción para violín y piano)",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/concierto-academico-de-la-catedra-de-violin-profesor-christoph-poppen-8",
+      "checkedAt": "2026-11-21",
+      "externalId": "88359"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-11-21"
+}

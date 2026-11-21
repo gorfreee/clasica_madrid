@@ -88,6 +88,14 @@
     {
       "title": "Scherzo, Op. 31 nº 2",
       "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "piano",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Un sospiro",
+      "composerName": "Franz Liszt"
     }
   ],
   "eras": [
@@ -104,10 +112,10 @@
     {
       "sourceId": "src_real_academia_bellas_artes_san_fernando",
       "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/premio-infantil-de-piano-santa-cecilia-premio-hazen",
-      "checkedAt": "2026-11-12",
+      "checkedAt": "2026-11-21",
       "externalId": "premio-infantil-de-piano-santa-cecilia-premio-hazen"
     }
   ],
   "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
-  "lastVerifiedAt": "2026-11-12"
+  "lastVerifiedAt": "2026-11-21"
 }

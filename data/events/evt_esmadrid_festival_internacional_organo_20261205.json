@@ -16,13 +16,20 @@
     }
   ],
   "performers": [
-    { "name": "Gonzalo Muñoz" },
-    { "name": "Marta Misztal" }
+    {
+      "name": "Gonzalo Muñoz"
+    },
+    {
+      "name": "Marta Misztal"
+    }
   ],
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": ["organ", "recital"],
+  "formats": [
+    "organ",
+    "recital"
+  ],
   "kind": "alternative",
   "access": "paid",
   "citations": [
@@ -30,8 +37,14 @@
       "sourceId": "src_esmadrid",
       "url": "https://www.esmadrid.com/agenda/festival-internacional-organo-iglesia-san-antonio-alemanes",
       "checkedAt": "2026-09-24"
+    },
+    {
+      "sourceId": "src_real_hermandad_refugio",
+      "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-gonzalo-munoz-fernandez-y-marta-misztal-bloc",
+      "checkedAt": "2026-11-21",
+      "externalId": "10633"
     }
   ],
   "primarySourceId": "src_esmadrid",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-11-21"
 }

@@ -72,12 +72,12 @@
     "choral"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-13-geometrias-sonoras",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-sinfonico-13-geometrias-sonoras"
     },
     {
@@ -88,5 +88,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-21"
 }

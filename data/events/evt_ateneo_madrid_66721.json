@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_66721",
+  "slug": "heures-exquises-correspondencias-amor-canto-y-simbolismo-en-los-tiempos-de-marcel-proust",
+  "title": "Heures exquises – Correspondencias. Amor, canto y simbolismo en los tiempos de Marcel Proust",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_66721_01",
+      "date": "2026-11-29",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/heures-exquises-correspondencias-amor-canto-y-simbolismo-en-los-tiempos-de-marcel-proust",
+      "checkedAt": "2026-11-21",
+      "externalId": "66721"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-11-21"
+}

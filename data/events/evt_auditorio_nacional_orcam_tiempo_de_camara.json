@@ -53,6 +53,10 @@
     {
       "title": "Siete villancicos tradicionales españoles",
       "composerName": "Albert Guinovart"
+    },
+    {
+      "title": "+ Primera vez ORCAM",
+      "composerName": "Albert Guinovart"
     }
   ],
   "eras": [
@@ -64,12 +68,12 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara",
-      "checkedAt": "2026-11-01",
+      "checkedAt": "2026-11-21",
       "externalId": "orcam-tiempo-de-camara"
     },
     {
@@ -80,5 +84,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-21"
 }
