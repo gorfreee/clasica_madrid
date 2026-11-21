@@ -17,7 +17,8 @@
   ],
   "performers": [
     {
-      "name": "Escolanía de El Escorial"
+      "name": "Escolanía del Real Monasterio de San Lorenzo de El Escorial",
+      "role": "choir"
     }
   ],
   "composers": [
@@ -150,10 +151,16 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/concierto-de-navidad-escorial-2026-2026-12-19",
-      "checkedAt": "2026-11-01",
+      "checkedAt": "2026-11-21",
       "externalId": "cb1333b8-a158-49d5-856c-dd27c209905b"
+    },
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-navidad-escolania-del-real-monasterio-de-san-lorenzo-de-el-escorial/",
+      "externalId": "75379",
+      "checkedAt": "2026-11-21"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-11-01"
+  "lastVerifiedAt": "2026-11-21"
 }
