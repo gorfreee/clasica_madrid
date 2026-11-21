@@ -36,3 +36,34 @@ excerpts for malformed dates, unknown structures, off-site links, missing
 coverage, failed hydration and cross-source identity. The small Auditorio
 article in the cross-source test is a synthetic structural equivalent of
 the same programme.
+
+Captured on 2026-11-21 to reproduce the extraction failure in run
+44923203270 / PR #423:
+
+- `listing-20261121.html`: the complete `<main>` from
+  https://fundacionorcam.org/programacion/ (19 cards and the original month
+  counters). The new card 4978 says `Noviembre y diciembre 2026`, not an
+  individual date. That summary must not become an occurrence or make the
+  other cards disappear. Each card occupies one month-counter slot; a broad
+  summary is compatible with either of its explicitly named months. Missing
+  cards, incompatible buckets and duplicate IDs still fail validation.
+- `detail-rosas.html`: the widgets from
+  https://fundacionorcam.org/conciertos/2026-27/las-trece-rosas-rojas/ . The
+  year is printed in the listing summary, while the ficha names November
+  25–29 and December 2 individually. Its 19:30 clock has an explicit Sunday
+  exception at 18:00. The music credit is Cecilia Bercovich; Félix Bispo is
+  credited for the libretto, not as a composer.
+- `detail-grillos.html`: the widgets from
+  https://fundacionorcam.org/conciertos/2026-27/encuentro-orquesta-grillos-de-misiones-y-joven-camerata/ .
+  December 12 and 13 share the explicit 12:00 clock but have different
+  dated venues. Hydration expands them into separate observations using the
+  same official URL and CMS identity. The programme also has movements
+  after the Dvořák credit, guest ensemble widget and conductor/ensemble
+  annotations; these are retained without treating movements or the label
+  `Villancico` as composers.
+
+A live extraction on this date fetched and parsed all 18 remaining fichas
+successfully (the existing, documented Final del viaje conflict remains an
+explicit adapter discard), producing 19 observations after venue expansion.
+This confirms transport/parser behaviour, not automatic publication of
+unresolved venues or editorial classification.
