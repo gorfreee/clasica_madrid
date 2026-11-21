@@ -4,14 +4,14 @@
   "slug": "concierto-piano-escuela-superior-de-alto-rendimiento-esmar",
   "title": "Concierto piano – Escuela Superior de Alto Rendimiento (ESMAR)",
   "status": "scheduled",
-  "venueId": "ven_ateneo_madrid",
+  "venueId": "ven_ateneo_madrid_cacharreria",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
     {
       "id": "occ_ateneo_madrid_66590_01",
       "date": "2026-11-22",
-      "time": "12:00",
+      "time": "19:00",
       "status": "scheduled"
     }
   ],

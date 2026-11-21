@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_ateneo_madrid_cacharreria",
+  "slug": "ateneo-madrid-cacharreria",
+  "name": "Ateneo de Madrid — La Cacharrería",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_ateneo_madrid",
+  "spaceName": "La Cacharrería",
+  "lastVerifiedAt": "2026-11-21"
+}
