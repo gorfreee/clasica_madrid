@@ -213,10 +213,11 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
  */
 function venueFromTitle(title: string): ProposedVenueFacts | undefined {
   const match = /\ben\s+(?:la\s+|el\s+)?((?:parroquia|iglesia|mercado|plaza|parque|auditorio|centro cultural)\s+[\p{L}\d][\p{L}\d\s().,'’\-]+)$/iu.exec(title.trim());
-  if (!match || !/^(?:concierto|recital|actuaci[oó]n|coro|coral|ensemble|matritum cantat|l[ií]rica time)\b/iu.test(title)) return undefined;
+  if (!match) return undefined;
   const name = match[1]!.trim();
   const key = name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ');
   const verified = TITLE_VENUES[key];
+  if (!verified && !/^(?:concierto|recital|actuaci[oó]n|coro|coral|ensemble)\b/iu.test(title)) return undefined;
   return { name: verified?.name ?? name, municipality: 'Madrid', area: 'madrid',
     ...(verified ? { address: verified.address, url: verified.url } : {}) };
 }
@@ -238,6 +239,10 @@ const TITLE_VENUES: Record<string, { name: string; address: string; url: string 
   'mercado chamartin': {
     name: 'Mercado municipal de Chamartín', address: 'Calle Bolivia, 9, 28016 Madrid',
     url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Direcciones-y-telefonos/Mercado-municipal-de-Chamartin/?vgnextchannel=b562d47ffee28010VgnVCM100000dc0ca8c0RCRD&vgnextoid=5bc5e1635561c010VgnVCM1000000b205a0aRCRD',
+  },
+  'mercado prosperidad': {
+    name: 'Mercado municipal de Prosperidad', address: 'Calle López de Hoyos, 81, 28002 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Mercado-municipal-de-Prosperidad/?vgnextchannel=19e2ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextoid=ffe872081661c010VgnVCM1000000b205a0aRCRD',
   },
   'mercado san cristobal': {
     name: 'Mercado municipal de San Cristóbal', address: 'Calle Conde de Torralba, 11, 28046 Madrid',
@@ -271,7 +276,8 @@ function isMadridDatosMusicActivity(item: GraphEvent): boolean {
   const type = typeof item['@type'] === 'string' ? item['@type'] : '';
   if (MUSICA_TYPE.test(type)) return true;
   const title = asNonEmptyString(item.title);
-  if (title && MUSIC_PERFORMANCE_TITLE.test(title)) return true;
+  if (title && (MUSIC_PERFORMANCE_TITLE.test(title) ||
+      /^(?:concierto|recital)\s+(?:de\s+)?m[uú]sica\s+cl[aá]sica\b/iu.test(title))) return true;
   const jsonLdId = asNonEmptyString(item['@id']);
   return Boolean(jsonLdId && MUSIC_PERFORMANCE_ID.test(jsonLdId));
 }
