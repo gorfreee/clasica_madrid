@@ -40,7 +40,7 @@ export type HydrationMeta = {
 };
 
 /**
- * Venue facts supplied by discovery when the place may not be in the catalog.
+ * Venue facts supplied by discovery or a source adapter with explicit venue evidence when the place may not be in the catalog.
  * Not ObservedFacts: never sent to classification. Matching uses exact name
  * plus compatible municipality. A new root also needs a physical address;
  * an explicit address is otherwise only used to disambiguate homonyms.
@@ -93,7 +93,7 @@ export type RawEvent = {
    */
   venueAddress?: string;
   /**
-   * Discovery-only proposed venue. Harvest adapters leave this unset.
+   * Proposed venue backed by explicit source evidence. Harvest adapters normally leave this unset.
    * Matching prefers an existing catalog/known venue over creating one.
    */
   proposedVenue?: ProposedVenueFacts;
