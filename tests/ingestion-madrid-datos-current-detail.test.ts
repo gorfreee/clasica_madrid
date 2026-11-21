@@ -5,7 +5,12 @@ import { parseMadridDatosDetail, parseMadridDatosEditorialText } from '../src/in
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
-import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
+import { TEST_NOW, TEST_WINDOW, makeCatalog, makeVenue } from './helpers.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
+import { toCandidate } from '../src/ingestion/to-candidate.ts';
+import { matchVenue } from '../src/ingestion/venues.ts';
+import type { SourceTemporalCoverage, AdapterDiscardReport } from '../src/ingestion/types.ts';
 
 const fixtureDir = path.join(import.meta.dirname, 'fixtures/ingestion/madrid-datos-20261121');
 const fixture = (id: string) => readFile(path.join(fixtureDir, `${id}.html`), 'utf8');
@@ -160,5 +165,101 @@ describe('Madrid Datos: current official musical detail', () => {
     }
     expect(hydrated.flatMap(event => event.observed.performers)).toContainEqual({ name: 'Marta Toba', roleText: 'voz, dramaturgia y dirección' });
     expect(hydrated.flatMap(event => event.observed.composers)).toContainEqual({ name: 'Ludwig van Beethoven' });
+  });
+});
+
+describe('Madrid Datos: catalogue essentials without HTML', () => {
+  const source = getSourceDefinition('madrid-datos');
+  const base = {
+    '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+    id: '50487693',
+    title: 'Concierto de Navidad en Parroquia Sagrados Corazones',
+    dtstart: '2026-12-21 18:30:00.0',
+    time: '18:30',
+    link: 'http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5a838b08df4e1a10VgnVCM200000f921e388RCRD',
+    'event-location': '',
+    free: 1,
+  };
+  const extract = async (item: Record<string, unknown>) => {
+    const coverage: SourceTemporalCoverage[] = [];
+    const discards: AdapterDiscardReport[] = [];
+    const ctx = { source, now: TEST_NOW, window: TEST_WINDOW,
+      get: async () => { throw new Error('HTTP 403'); },
+      reportTemporalCoverage: (value: SourceTemporalCoverage) => coverage.push(value),
+      reportDiscard: (value: AdapterDiscardReport) => discards.push(value),
+    };
+    // A valid unrelated musical record ensures a rejected row is observable
+    // without tripping the adapter's existing zero-extraction protection.
+    const events = await madridDatosAdapter.extract(JSON.stringify({ '@graph': [
+      { ...base, id: 'control', title: 'Control', link: 'https://www.madrid.es/control', 'event-location': 'Auditorio Nacional de Música' },
+      { ...base, ...item },
+    ] }), source.urls[0]!, ctx);
+    const event = events.find(e => e.externalId !== 'control');
+    return { event, ctx, coverage, discards };
+  };
+
+  it('recovers a real named parish without assigning an unrelated facility ID', async () => {
+    const { event, coverage, ctx } = await extract({ relation: { '@id': 'https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/999-organizer.json' } });
+    expect(event?.observed.venueText).toBe('Parroquia Sagrados Corazones');
+    expect(event?.venueFacilityId).toBeUndefined();
+    expect(event?.proposedVenue).toMatchObject({ name: 'Parroquia Sagrados Corazones', municipality: 'Madrid', area: 'madrid', address: 'Paseo de la Habana, 31, 28036 Madrid' });
+    expect(coverage).toEqual([expect.objectContaining({ status: 'unknown' })]);
+    const [hydrated] = await hydrateEvents([event!], madridDatosAdapter, ctx);
+    expect(hydrated?.hydration?.status).toBe('failed');
+    expect(hydrated?.observed.occurrences).toEqual([{ raw: base.dtstart, date: '2026-12-21', time: '18:30' }]);
+    expect(hydrated?.sourceUrl).toBe(base.link.replace('http:', 'https:'));
+    const venue = matchVenue({ proposed: hydrated?.proposedVenue }, makeCatalog({ venues: [] }));
+    expect(venue?.venue.address).toBe('Paseo de la Habana, 31, 28036 Madrid');
+  });
+
+  it('publishes a clearly classical performance with no optional musical credits after a 403', async () => {
+    const { event, ctx } = await extract({ '@type': undefined, title: 'Concierto de música clásica en Parroquia Sagrados Corazones' });
+    const [hydrated] = await hydrateEvents([event!], madridDatosAdapter, ctx);
+    const normalized = normalizeRawEvent(hydrated!)!;
+    const classification = classify(normalized);
+    expect(classification.eligibility.value).toBe('include');
+    if (classification.eligibility.value !== 'include') throw new Error('expected included concert');
+    const built = toCandidate(normalized, source, makeCatalog({ venues: [], events: [] }), TEST_NOW, new Set(), new Set(), classification, TEST_WINDOW);
+    expect(built.candidate?.event).toMatchObject({
+      performers: [], composers: [], works: [],
+      occurrences: [expect.objectContaining({ date: '2026-12-21', time: '18:30' })],
+      citations: [expect.objectContaining({ externalId: base.id })],
+    });
+    expect(built.candidate?.venue?.address).toBe('Paseo de la Habana, 31, 28036 Madrid');
+  });
+
+  it('uses a listed venue before title recovery and retains a labelled physical address', async () => {
+    const { event } = await extract({ 'event-location': 'Parroquia Nuestra Señora de la Merced', description: 'Dirección: Calle Corregidor Juan Francisco de Luján, 101',
+      relation: { '@id': 'https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/3636-parroquia.json' } });
+    expect(event?.observed.venueText).toBe('Parroquia Nuestra Señora de la Merced');
+    expect(event?.proposedVenue).toBeUndefined();
+    expect(event?.venueFacilityId).toBe('3636');
+    expect(event?.venueAddress).toBe('Calle Corregidor Juan Francisco de Luján, 101, Madrid');
+  });
+
+  it('does not fabricate an address for an unknown place; can reuse an exact existing venue', async () => {
+    const { event } = await extract({ title: 'Concierto en Iglesia San Ejemplo' });
+    expect(event?.proposedVenue).toMatchObject({ name: 'Iglesia San Ejemplo', municipality: 'Madrid' });
+    expect(event?.proposedVenue?.address).toBeUndefined();
+    expect(matchVenue({ proposed: event?.proposedVenue }, makeCatalog({ venues: [] }))).toBeUndefined();
+    const known = makeVenue({ name: 'Iglesia San Ejemplo' });
+    expect(matchVenue({ proposed: event?.proposedVenue }, makeCatalog({ venues: [known] }))?.venue.id).toBe(known.id);
+  });
+
+  it('does not treat a neighbourhood or nonclassical genre as sufficient evidence', async () => {
+    const missing = await extract({ title: 'Concierto en Chamartín' });
+    expect(missing.event).toBeUndefined();
+    expect(missing.discards).toContainEqual(expect.objectContaining({ reason: 'missing-venue' }));
+    const jazz = await extract({ title: 'Concierto de jazz en Parroquia Sagrados Corazones' });
+    expect(classify(jazz.event!.observed).eligibility.value).toBe('exclude');
+    const generic = await extract({ title: 'Concierto de Navidad en Parroquia Sagrados Corazones' });
+    expect(classify(generic.event!.observed).eligibility.value).toBe('uncertain');
+  });
+
+  it('keeps the official zarzuela subtype as eligibility evidence independently of credits', async () => {
+    const { event } = await extract({ '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica/Zarzuela',
+      title: 'Un recital', 'event-location': 'Auditorio Nacional de Música' });
+    expect(event?.observed.categoryText).toBe('Zarzuela');
+    expect(classify(event!.observed).eligibility.value).toBe('include');
   });
 });
