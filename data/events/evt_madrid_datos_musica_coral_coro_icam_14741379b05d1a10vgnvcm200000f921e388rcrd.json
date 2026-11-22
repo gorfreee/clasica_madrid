@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_musica_coral_coro_icam_14741379b05d1a10vgnvcm200000f921e388rcrd",
+  "slug": "concierto-de-navidad-del-coro-icam",
+  "title": "Concierto de Navidad del Coro ICAM",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_santo_nino_del_cebu",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_musica_coral_coro_icam_14741379b05d1a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-12-18",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro ICAM",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Servicios-sociales-y-salud/Salud/Actividades-y-eventos/Musica-coral-coro-ICAM/?vgnextfmt=default&vgnextoid=14741379b05d1a10VgnVCM200000f921e388RCRD&vgnextchannel=56a88fb9458fe410VgnVCM1000000b205a0aRCRD",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-22"
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_musica_coral_galileo_1",
+  "slug": "concierto-de-alumnos-del-centro-katarina-gurska",
+  "title": "Concierto de alumnos del Centro Katarina Gurska",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1921",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_musica_coral_galileo_1_01",
+      "date": "2026-12-01",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alumnado del Centro Katarina Gurska"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Servicios-sociales-y-salud/Salud/Actividades-y-eventos/Musica-coral-Galileo-1?vgnextfmt=default&vgnextoid=5e8ffd8b035d1a10VgnVCM200000f921e388RCRD&vgnextchannel=56a88fb9458fe410VgnVCM1000000b205a0aRCRD",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-22"
+}

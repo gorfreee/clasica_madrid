@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_uc3m_es_concierto_de_navidad",
+  "slug": "concierto-de-navidad-de-la-orquesta-uc3m",
+  "title": "Concierto de Navidad de la Orquesta UC3M",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_uc3m",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_uc3m_es_concierto_de_navidad_01",
+      "date": "2026-12-19",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Universidad Carlos III de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Jerónimo Marín",
+      "role": "conductor"
+    },
+    {
+      "name": "Coral Cristóbal de Morales",
+      "role": "choir"
+    },
+    {
+      "name": "Coro Xenakis",
+      "role": "choir"
+    },
+    {
+      "name": "Aiblín Brito Pérez",
+      "role": "conductor"
+    },
+    {
+      "name": "Carmina Sánchez",
+      "role": "soloist"
+    },
+    {
+      "name": "Belén Herrero",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel García"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Benjamin Britten"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de La figlia dell’aria",
+      "composerName": "Manuel García"
+    },
+    {
+      "title": "Gloria en re mayor, RV 589",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Guía de orquesta para jóvenes, op. 34",
+      "composerName": "Benjamin Britten"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cultura_uc3m_es",
+      "url": "https://cultura.uc3m.es/eventos/concierto-de-navidad",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_cultura_uc3m_es",
+  "lastVerifiedAt": "2026-11-22"
+}

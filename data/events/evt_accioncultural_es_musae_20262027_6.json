@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_accioncultural_es_musae_20262027_6",
+  "slug": "ebenum-duo-musae",
+  "title": "Ebenum Dúo — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_sorolla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_accioncultural_es_musae_20262027_6_01",
+      "date": "2027-03-17",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ebenum Dúo"
+    },
+    {
+      "name": "Arabela de Miguel"
+    },
+    {
+      "name": "Claudia Fernández"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Eduardo Toldrá"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Lili Boulanger"
+    },
+    {
+      "name": "Enrique Granados"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_accioncultural_es",
+      "url": "https://www.accioncultural.es/es/musae-20262027",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_accioncultural_es",
+  "lastVerifiedAt": "2026-11-22"
+}

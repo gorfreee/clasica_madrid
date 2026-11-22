@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_navidadmadrid_com_moises_p_sanchez_feat_ana_maria_valderrama_y_pablo_m_caminero_falla_imaginado",
+  "slug": "falla-imaginado",
+  "title": "Falla Imaginado",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_nuestra_senora_del_perpetuo_socorro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_navidadmadrid_com_moises_p_sanchez_feat_ana_maria_valderrama_y_pablo_m_caminero_falla_imaginado_01",
+      "date": "2026-12-17",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Moisés P. Sánchez"
+    },
+    {
+      "name": "Ana María Valderrama"
+    },
+    {
+      "name": "Pablo M. Caminero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_navidadmadrid_com",
+      "url": "https://www.navidadmadrid.com/evento/moises-p-sanchez-feat-ana-maria-valderrama-y-pablo-m-caminero-falla-imaginado",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_navidadmadrid_com",
+  "lastVerifiedAt": "2026-11-22"
+}
