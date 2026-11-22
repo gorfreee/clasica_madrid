@@ -33,13 +33,16 @@
       "role": "choir"
     },
     {
-      "name": "Aiblín Brito Pérez"
+      "name": "Aiblín Brito Pérez",
+      "role": "conductor"
     },
     {
-      "name": "Carmina Sánchez"
+      "name": "Carmina Sánchez",
+      "role": "soloist"
     },
     {
-      "name": "Belén Herrero"
+      "name": "Belén Herrero",
+      "role": "soloist"
     }
   ],
   "composers": [
