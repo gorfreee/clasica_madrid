@@ -1,0 +1,211 @@
+{
+  "@graph": [
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50467097-banda-musica-moratalaz.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50467097",
+      "title": "Banda de música de Moratalaz",
+      "description": "BANDA DE MÚSICA MORATALAZ      Director: Carlos Aguado Aguado.     Sinopsis: Música Española, tales como Zarzuelas, Pasodobles de Concierto, Pasodobles populares y música en general de distintos compositores internacionalmente conocidos.",
+      "free": 1,
+      "price": "",
+      "dtstart": "2026-11-26 18:00:00.0",
+      "dtend": "2026-11-26 23:59:00.0",
+      "time": "18:00",
+      "excluded-days": "",
+      "audience": "Niños,PoblaciónGeneral",
+      "uid": "50467097",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3d0ac4c0a5d71a10VgnVCM200000f921e388RCRD",
+      "event-location": "Centro Cultural el Torito (Moratalaz)",
+      "references": {
+        "@id": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=7929395148d08910VgnVCM200000f921e388RCRD"
+      },
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1940-centro-cultural-torito-moratalaz-.json"
+      },
+      "address": {
+        "district": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moratalaz"
+        },
+        "area": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moratalaz/Barrio/Vinateros",
+          "locality": "MADRID",
+          "postal-code": "28030",
+          "street-address": "AVENIDA MORATALAZ 130"
+        }
+      },
+      "location": {
+        "latitude": 40.40610655994401,
+        "longitude": -3.646521482592748
+      },
+      "organization": {
+        "organization-name": "Centro Cultural el Torito (Moratalaz)",
+        "accesibility": "1"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50463299-ecos-mi-alma.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50463299",
+      "title": "Ecos de mi alma",
+      "description": "José Rafael Capellán Fernández Bajo el título 'Ecos de mi alma', la confección de este programa responde a una selección profundamente personal reflejo directo del universo interior del intérprete. Al intercalar suspropias composiciones con algunas de las grandes obras maestras del piano, Rafael Capellán abre una ventana a su biografía sentimental. Interpretará obras de Beethoven, Chopin, Schubert y Capellán. Todos los públicos.  Duración: 80 minutos",
+      "free": 1,
+      "price": "",
+      "dtstart": "2026-11-22 18:30:00.0",
+      "dtend": "2026-11-22 23:59:00.0",
+      "time": "18:30",
+      "excluded-days": "",
+      "uid": "50463299",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0ba3e56a59771a10VgnVCM100000891ecb1aRCRD",
+      "event-location": "Centro Cultural Buenavista (Salamanca)",
+      "references": {
+        "@id": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=9b3b34ade7a86710VgnVCM2000001f4a900aRCRD"
+      },
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/64851-centro-cultural-buenavista-salamanca-.json"
+      },
+      "address": {
+        "district": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Salamanca"
+        },
+        "area": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Salamanca/Barrio/Guindalera",
+          "locality": "MADRID",
+          "postal-code": "28028",
+          "street-address": "AVENIDA TOREROS 5"
+        }
+      },
+      "location": {
+        "latitude": 40.43200001609297,
+        "longitude": -3.670904677285496
+      },
+      "organization": {
+        "organization-name": "Centro Cultural Buenavista (Salamanca)",
+        "accesibility": "1,5,6"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50457819-magia-zarzuela.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica/Zarzuela",
+      "id": "50457819",
+      "title": "La magia de la Zarzuela",
+      "description": "MÚSICA. MARTA TOBA. Espectáculo que aúna los números más célebres de la zarzuela y la música española con la clave del amor y el humor. La romanza de los claveles, el Barberillo de Lavapiés, la Habanera de Carmen, el Café de Chinitas…entre otras piezas para evocar y reír.    Formación: Marta Toba, voz, dramaturgia y dirección. Alberto Joya, piano. Gema Barón y Carlos Huedo, baile.    Entrada gratuita previa reserva pinchando este enlace  Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "free": 1,
+      "price": "",
+      "dtstart": "2026-11-21 19:00:00.0",
+      "dtend": "2026-11-21 23:59:00.0",
+      "time": "19:00",
+      "excluded-days": "",
+      "audience": "Niños",
+      "uid": "50457819",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa936fe10f761a10VgnVCM200000f921e388RCRD",
+      "event-location": "Centro Cultural Juan Genovés (Moncloa - Aravaca)",
+      "references": {
+        "@id": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=1e2c76b571be8910VgnVCM200000f921e388RCRD"
+      },
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1919-centro-cultural-juan-genoves-moncloa-aravaca-.json"
+      },
+      "address": {
+        "district": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca"
+        },
+        "area": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca/Barrio/Aravaca",
+          "locality": "MADRID",
+          "postal-code": "28023",
+          "street-address": "TRAVESIA CA&amp;Ntilde;O 5"
+        }
+      },
+      "location": {
+        "latitude": 40.45867841791346,
+        "longitude": -3.7863499043313373
+      },
+      "organization": {
+        "organization-name": "Centro Cultural Juan Genovés (Moncloa - Aravaca)",
+        "accesibility": "1"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50461425-lirico-amor.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica/Zarzuela",
+      "id": "50461425",
+      "title": "Un lírico amor",
+      "description": "MÚSICA. ÓPERA Y ZARZUELA. TRÍO CARMEN GAVILÁN, ABELARDO CÁRDENAS Y ELOÍSA CANO-HUTTON.    Un viaje musical por sus múltiples formas y contradicciones para adentrarse en historias de amor que nacen con timidez, se encienden con pasión o se quiebran entre celos, destino y libertad. Desde el amor apasionado y libre de La Revoltosa, el tierno amor de Bohemios, hasta el amor sacrificado y desgarrado de El Caserio. Arias, Romanzas, y Dúos se suceden en un mosaico emocional y una celebración de la lírica como lenguaje universal de los sentimientos.    Formación: Cermen Gavilán, soprano. Abelardo Cárdenas, barítono. Eloisa Cano-Hutton, piano.    Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "free": 1,
+      "price": "",
+      "dtstart": "2026-11-26 19:00:00.0",
+      "dtend": "2026-11-26 23:59:00.0",
+      "time": "19:00",
+      "excluded-days": "",
+      "uid": "50461425",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=266ab21f37861a10VgnVCM200000f921e388RCRD",
+      "event-location": "Fundación Fran Daurel",
+      "references": {
+        "@id": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=6e7899d9d2be8910VgnVCM200000f921e388RCRD"
+      },
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/10567868-fundacion-fran-daurel.json"
+      },
+      "address": {
+        "district": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca"
+        },
+        "area": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca/Barrio/Aravaca",
+          "locality": "MADRID",
+          "postal-code": "28023",
+          "street-address": "CALLE FUENTE DEL REY 11"
+        }
+      },
+      "location": {
+        "latitude": 40.45529252796688,
+        "longitude": -3.770356911495524
+      },
+      "organization": {
+        "organization-name": "Fundación Fran Daurel",
+        "accesibility": "1"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50457423-voces-espana.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50457423",
+      "title": "Voces de España",
+      "description": "MÚSICA CLÁSICOS EN RUTA. AIE. Dúo que forma parte de la selección de formaciones para el 2026 de la AIE, Sociedad de Artistas e Intérprete de España dentro de su prestigioso programa Clásicos en Ruta. Brisalia es un dúo de voz y piano nacido en 2022, fruto del encuentro entre dos músicas apasionadas por la interpretación y la colaboración artística. Las dos jóvenes han ofrecido diferentes conciertos, llevando su música a diferentes localidades de su tierra natal, Cantabria, como Puente Viesgo, Pesquera, Astillero o Comillas, y consolidándose como una formación emergente en el panorama musical de la región. En 2024, su talento y dedicación fueron reconocidos en el IX Certamen Internacional de Lied y Canción de Concierto Primavera-Albox, donde obtuvieron el segundo premio. Recientemente han ofrecido un concierto dentro del festival Guadix Clásica, en Granada, así como un concierto en Mascate (Omán) organizado por la Embajada Española. En esta ocasión realizan un programa con obras de R. Gerhard, F. Obradors, J. Turina, así como una selección de piezas de zarzuela.    Formación:  Sofía Gutiérrez-Tobar, soprano. María Argüeso Vega, piano. Entrada gratuita previa reserva pinchando este enlace  Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "free": 1,
+      "price": "",
+      "dtstart": "2026-11-27 19:00:00.0",
+      "dtend": "2026-11-27 23:59:00.0",
+      "time": "19:00",
+      "excluded-days": "",
+      "uid": "50457423",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=fbc24483c4461a10VgnVCM200000f921e388RCRD",
+      "event-location": "Auditorio Joaquín Rosado (Moncloa-Aravaca)",
+      "references": {
+        "@id": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=ba6e99d9d2be8910VgnVCM200000f921e388RCRD"
+      },
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/11832607-auditorio-joaquin-rosado-moncloa-aravaca-.json"
+      },
+      "address": {
+        "district": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca"
+        },
+        "area": {
+          "@id": "https://datos.madrid.es/egob/kos/Provincia/Madrid/Municipio/Madrid/Distrito/Moncloa-Aravaca/Barrio/CasaCampo",
+          "locality": "MADRID",
+          "postal-code": "28008",
+          "street-address": "CALLE SANTA POLA 22"
+        }
+      },
+      "location": {
+        "latitude": 40.432243310641894,
+        "longitude": -3.7366613378902462
+      },
+      "organization": {
+        "organization-name": "Auditorio Joaquín Rosado (Moncloa-Aravaca)",
+        "accesibility": "1,6"
+      }
+    }
+  ]
+}

@@ -158,11 +158,11 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     expect(match).toMatchObject({ kind: 'matched', method: 'url', event: { id: 'evt_sonidos_universo_20260927' } });
   });
 
-  it('el concierto real deja de ser possiblyMissing y uno ausente sigue siéndolo', async () => {
+  it('reconoce el concierto real y no evalúa desapariciones con cobertura no acreditada', async () => {
     const listing = await readFile(path.join(fixtures, 'madrid-agenda-sonidos-universo.json'), 'utf8');
     const run = await runMadridDatos(listing);
     expect(run.rawEvents.some((event) => event.externalId === '50379624')).toBe(true);
-    expect(run.possiblyMissing.map((item) => item.eventId)).toEqual(['evt_madrid_datos_ausente']);
+    expect(run.possiblyMissing).toEqual([]);
     expect(run.possiblyMissing.some((item) => item.eventId === 'evt_sonidos_universo_20260927')).toBe(false);
     expect(run.possiblyMissing.some((item) => item.eventId === 'evt_ocne_existente')).toBe(false);
     const seen = run.decisions.find((item) => item.identity?.eventId === 'evt_sonidos_universo_20260927');
@@ -170,7 +170,7 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     expect(seen?.externalId).toBe('50379624');
   });
 
-  it('un feed de música sin ese concierto sí marca possiblyMissing', async () => {
+  it('un feed de música sin ese concierto no prueba una desaparición', async () => {
     const listing = JSON.stringify({
       '@graph': [
         {
@@ -186,10 +186,8 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     });
     const run = await runMadridDatos(listing);
     expect(run.rawEvents).toHaveLength(1);
-    expect(run.possiblyMissing.map((item) => item.eventId).sort()).toEqual([
-      'evt_madrid_datos_ausente',
-      'evt_sonidos_universo_20260927',
-    ]);
+    expect(run.possiblyMissing).toEqual([]);
+    expect(run.summary.healthReasons).toContain('source-coverage-unknown:madrid-datos');
   });
 
   it('el resto de sources sigue evaluando desapariciones por su propia cobertura', () => {
@@ -249,5 +247,42 @@ describe('madrid-datos: pipeline completo con fichas municipales recicladas', ()
     expect(run.apply.proposed.events.filter((event) => historicalIds.includes(event.id))).toEqual(before);
     expect(run.apply.proposed.events).toHaveLength(4);
     expect(run.apply.written).toEqual([]);
+  });
+});
+
+describe('madrid-datos: essential facts are sufficient for publication', () => {
+  it('plans a new classical concert despite a blocked ficha and no performer or work credits', async () => {
+    // Synthetic classical performance using the verified directory venue; the
+    // separate current-detail regression covers the real Christmas title.
+    const url = 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=abcd1234VgnVCM200000f921e388RCRD';
+    const listing = JSON.stringify({ '@graph': [{
+      id: '50999991',
+      title: 'Concierto de música clásica en Parroquia Sagrados Corazones',
+      description: '',
+      dtstart: '2026-12-21 18:30:00.0',
+      time: '18:30',
+      link: url,
+      'event-location': '',
+      free: 1,
+    }] });
+    const run = await runIngest({
+      dataDir: await tempDataDir(), catalog: emptyCatalog(), now: TEST_NOW,
+      dryRun: true, sourceIds: ['madrid-datos'],
+      get: async request => {
+        if (request.includes('agenda-eventos-culturales-100')) return listing;
+        throw new Error('HTTP 403');
+      },
+    });
+    expect(run.summary).toMatchObject({ newEvents: 1, updatedEvents: 0, sourcesFailed: [], detailHydrationFailed: 1 });
+    expect(run.apply.report.ok).toBe(true);
+    expect(run.apply.written).toEqual([]);
+    const published = run.apply.proposed.events[0]!;
+    expect(published).toMatchObject({
+      title: 'Concierto de música clásica en Parroquia Sagrados Corazones',
+      occurrences: [expect.objectContaining({ date: '2026-12-21', time: '18:30' })],
+      performers: [], composers: [], works: [],
+      citations: [expect.objectContaining({ externalId: '50999991' })],
+    });
+    expect(run.apply.proposed.venues.find(v => v.id === published.venueId)?.address).toBe('Paseo de la Habana, 31, 28036 Madrid');
   });
 });

@@ -1,4 +1,4 @@
-import { parseMadridDatosDetail } from '../detail/madrid-datos.ts';
+import { parseMadridDatosDetail, parseMadridDatosEditorialText } from '../detail/madrid-datos.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { collapseWhitespace } from '../html.ts';
 import { formatMadridDatosAddress } from '../venues.ts';
@@ -14,24 +14,28 @@ import {
   type AdapterContext,
   type AdapterDiscardReport,
   type RawEvent,
+  type ProposedVenueFacts,
   type SourceAdapter,
   type SourceDefinition,
 } from '../types.ts';
 
 /**
  * Madrid Datos JSON-LD is the primary source for identity, date/time, venue,
- * facilityId, access and URL. The official Madrid.es ficha often adds
- * editorial/musical evidence (description, repertorio, intérpretes) that the
- * listing JSON omits. Hydration enriches those fields only.
+ * facilityId, access and URL. Its editorial description is parsed directly
+ * for explicit musical credits. Optional HTML hydration preserves programme
+ * markup and adds evidence absent from that dataset, without replacing its
+ * calendar, venue, access or identity.
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
  * facility that is not yet in the catalog may become a new Venue on the Candidate
- * when the listing also carries a physical `address.area`.
+ * when the listing supplies an explicit physical address. A missing venue can
+ * be recovered from a named title location with independent directory evidence.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
 /** Official municipal concert label, also used when the kos @type is a street-activity bucket. */
+const EXPLICIT_CLASSICAL_TITLE = /^(?:(?:concierto|recital)\s+(?:de\s+)?|actuaci[oó]n\s+m[uú]sica(?:l)?[.:]\s*)(m[uú]sica\s+cl[aá]sica)\b/iu;
 const MUSIC_PERFORMANCE_TITLE = /^actuaci[oó]n m[uú]sica(l)?\b/i;
 const MUSIC_PERFORMANCE_ID = /(?:^|-)actuacion-musica(l)?(?:-|\.json|$)/i;
 
@@ -91,6 +95,9 @@ export const madridDatosAdapter: SourceAdapter = {
     if (graph.length > 0 && events.length === 0) {
       throw new Error('madrid-datos: no hay eventos de música con fecha, título, URL, identificador y lugar');
     }
+    // The rolling municipal feed does not certify an exact complete interval in its payload.
+    // Do not infer coverage from the last concert or evaluate disappearances outside it.
+    ctx.reportTemporalCoverage?.({ status: 'unknown', evidence: 'Madrid Datos: rolling 100-day catalogue without an explicit coverage interval in the payload' });
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
   hydrate(event, body) {
@@ -129,7 +136,9 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const title = asNonEmptyString(item.title);
   const link = asNonEmptyString(item.link);
   const dtstart = asNonEmptyString(item.dtstart);
-  const venueText = asNonEmptyString(item['event-location']);
+  const listedVenue = asNonEmptyString(item['event-location']);
+  const recoveredVenue = !listedVenue && title ? venueFromTitle(title) : undefined;
+  const venueText = listedVenue ?? recoveredVenue?.name;
   const id = asNonEmptyString(item.id) ?? asNonEmptyString(item.uid);
   const discard = (reason: string) =>
     discardMadridDatos(ctx, reason, { title, link, id });
@@ -173,23 +182,88 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   // sentinel. Do not invent 00:00; omit RawOccurrence.time so normalize yields null.
   const time = explicitTime ?? (parsed.time && parsed.time !== '00:00' ? parsed.time : undefined);
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
-  const venueFacilityId = facilityIdFromRelation(item.relation);
-  const venueAddress = addressFromListing(item.address);
+  const venueFacilityId = listedVenue ? facilityIdFromRelation(item.relation) : undefined;
+  const description = asNonEmptyString(item.description);
+  const venueAddress = listedVenue ? addressFromListing(item.address) ?? explicitAddress(description) : undefined;
+  const categoryText = municipalMusicCategory(item['@type']) ?? EXPLICIT_CLASSICAL_TITLE.exec(title)?.[1];
+  const editorial = description ? parseMadridDatosEditorialText(description) : {};
   return {
     sourceId: ctx.source.id,
     sourceUrl: httpsUrl,
     externalId: id,
     ...(venueFacilityId ? { venueFacilityId } : {}),
     ...(venueAddress ? { venueAddress } : {}),
+    ...(recoveredVenue ? { proposedVenue: recoveredVenue } : {}),
     observed: {
+      ...emptyObservedLists(),
+      ...editorial,
       title,
-      description: asNonEmptyString(item.description),
+      ...(categoryText ? { categoryText } : {}),
+      description,
       occurrences: [{ raw: dtstart, date: parsed.date, ...(time ? { time } : {}) }],
       venueText,
       accessText: item.free === 1 || item.free === '1' ? 'free' : item.free === 0 || item.free === '0' ? 'paid' : undefined,
-      ...emptyObservedLists(),
     },
   };
+}
+
+/** Only explicit, named places at the end of a performance title.
+ * Never treat a district, an organizer, or an arbitrary "en ..." as a venue.
+ * Known physical addresses below are verified against the municipal directory;
+ * other named locations can match an existing venue but cannot create one
+ * without a verified address.
+ */
+function venueFromTitle(title: string): ProposedVenueFacts | undefined {
+  const match = /\ben\s+(?:la\s+|el\s+)?((?:parroquia|iglesia|mercado|plaza|parque|auditorio|centro cultural)\s+[\p{L}\d][\p{L}\d\s().,'’\-]+)$/iu.exec(title.trim());
+  if (!match) return undefined;
+  const name = match[1]!.trim();
+  const key = name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ');
+  const verified = Object.hasOwn(TITLE_VENUES, key) ? TITLE_VENUES[key] : undefined;
+  if (!verified && !/^(?:concierto|recital|actuaci[oó]n|coro|coral|ensemble)\b/iu.test(title)) return undefined;
+  return { name: verified?.name ?? name, municipality: 'Madrid', area: 'madrid',
+    ...(verified ? { address: verified.address, url: verified.url } : {}) };
+}
+
+// Municipal directory, not event IDs: reusable for later events at these sites.
+const TITLE_VENUES: Record<string, { name: string; address: string; url: string }> = {
+  'parroquia nuestra senora santisimo sacramento': {
+    name: 'Parroquia Nuestra Señora del Santísimo Sacramento', address: 'Calle Clara del Rey, 38, 28002 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Direcciones-y-telefonos/Parroquia-Nuestra-Senora-del-Santisimo-Sacramento/?vgnextchannel=b562d47ffee28010VgnVCM100000dc0ca8c0RCRD&vgnextoid=4251ef4d7f71c010VgnVCM1000000b205a0aRCRD',
+  },
+  'parroquia sagrados corazones': {
+    name: 'Parroquia Sagrados Corazones', address: 'Paseo de la Habana, 31, 28036 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Direcciones-y-telefonos/Parroquia-Sagrados-Corazones/?vgnextchannel=b562d47ffee28010VgnVCM100000dc0ca8c0RCRD&vgnextoid=9342ef4d7f71c010VgnVCM1000000b205a0aRCRD',
+  },
+  'parroquia san antonio maria claret': {
+    name: 'Parroquia San Antonio María Claret', address: 'Calle Corazón de María, 1, 28002 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/Cultura-ocio-y-deporte/Direcciones-y-telefonos/Parroquia-San-Antonio-Maria-Claret/?vgnextchannel=df22f073808fe410VgnVCM2000000c205a0aRCRD&vgnextoid=cb1713db5b71c010VgnVCM1000000b205a0aRCRD',
+  },
+  'mercado chamartin': {
+    name: 'Mercado municipal de Chamartín', address: 'Calle Bolivia, 9, 28016 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Direcciones-y-telefonos/Mercado-municipal-de-Chamartin/?vgnextchannel=b562d47ffee28010VgnVCM100000dc0ca8c0RCRD&vgnextoid=5bc5e1635561c010VgnVCM1000000b205a0aRCRD',
+  },
+  'mercado prosperidad': {
+    name: 'Mercado municipal de Prosperidad', address: 'Calle López de Hoyos, 81, 28002 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Mercado-municipal-de-Prosperidad/?vgnextchannel=19e2ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextoid=ffe872081661c010VgnVCM1000000b205a0aRCRD',
+  },
+  'mercado san cristobal': {
+    name: 'Mercado municipal de San Cristóbal', address: 'Calle Conde de Torralba, 11, 28046 Madrid',
+    url: 'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Chamartin/Direcciones-y-telefonos/Mercado-municipal-de-San-Cristobal/?vgnextchannel=b562d47ffee28010VgnVCM100000dc0ca8c0RCRD&vgnextoid=398972081661c010VgnVCM1000000b205a0aRCRD',
+  },
+};
+
+/** Only an entire explicitly labelled physical address, not prose mentioning a street. */
+function explicitAddress(description: string | undefined): string | undefined {
+  if (!description) return undefined;
+  const match = /^Direcci[oó]n:\s*((?:calle|paseo|avenida|plaza|traves[ií]a)\s+[\p{L}\s.'’\-]+,\s*\d+)\.?$/iu.exec(description.trim());
+  return match ? collapseWhitespace(match[1]!) + ', Madrid' : undefined;
+}
+
+/** Exact official KOS subtype is evidence; generic music is not classical. */
+function municipalMusicCategory(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  if (/\/actividades\/Musica\/Zarzuela\/?$/i.test(value)) return 'Zarzuela';
+  return undefined;
 }
 
 /**
@@ -204,7 +278,8 @@ function isMadridDatosMusicActivity(item: GraphEvent): boolean {
   const type = typeof item['@type'] === 'string' ? item['@type'] : '';
   if (MUSICA_TYPE.test(type)) return true;
   const title = asNonEmptyString(item.title);
-  if (title && MUSIC_PERFORMANCE_TITLE.test(title)) return true;
+  if (title && (MUSIC_PERFORMANCE_TITLE.test(title) ||
+      EXPLICIT_CLASSICAL_TITLE.test(title))) return true;
   const jsonLdId = asNonEmptyString(item['@id']);
   return Boolean(jsonLdId && MUSIC_PERFORMANCE_ID.test(jsonLdId));
 }
