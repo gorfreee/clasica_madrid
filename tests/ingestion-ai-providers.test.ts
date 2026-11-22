@@ -170,6 +170,14 @@ describe('factory multi-provider zero cost', () => {
     })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
   });
 
+  it('admite los alias Gemini únicamente cuando se configuran', () => {
+    const env = { AI_ZERO_COST_ONLY: 'true', GEMINI_API_KEY: 'gemini-key' };
+    const aliases = ['gemini-3.7-flash', 'gemini-3.5-flash'];
+    expect(createFreeRoutesFromEnv(env).map((route) => route.model)).toContain('gemini-4-hydrogen');
+    expect(createFreeRoutesFromEnv({ ...env, GEMINI_MODELS: aliases.join(',') }).map((route) => route.model))
+      .toEqual(aliases);
+  });
+
   it('construye routes ordenadas y endpoints oficiales sin mezclar providers', () => {
     const routes = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
@@ -197,6 +205,7 @@ describe('factory multi-provider zero cost', () => {
     expect(identity(routes, 'cloudflare').baseUrl).toBe(
       'https://api.cloudflare.com/client/v4/accounts/account-id/ai/v1',
     );
+    expect(routes.find((route) => route.routeId === 'cloudflare:@cf/qwen/qwen3.8-27b')).toBeDefined();
     expect(routes.some((route) => route.provider === 'kilo')).toBe(false);
     expect(identity(routes, 'openrouter').baseUrl).toBe(OPENROUTER_DEFAULT_BASE_URL);
   });
@@ -482,6 +491,22 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body).not.toHaveProperty('reasoning_effort');
     expect(body).not.toHaveProperty('chat_template_kwargs');
     expect(body).not.toHaveProperty('thinking');
+  });
+
+  it('Cloudflare Qwen pide JSON con el contrato en el prompt y usa el esfuerzo bajo documentado', async () => {
+    const model = '@cf/qwen/qwen3.8-27b';
+    const body = await captureBody('cloudflare', model);
+    expect(body).toMatchObject({
+      model,
+      max_completion_tokens: 2_048,
+      reasoning_effort: 'low',
+      messages: expect.arrayContaining([
+        { role: 'system', content: expect.stringContaining(OUTPUT_CONTRACT_INSTRUCTION) },
+      ]),
+    });
+    expect(body).not.toHaveProperty('max_tokens');
+    expect(body).not.toHaveProperty('response_format');
+    expect(body).not.toHaveProperty('chat_template_kwargs');
   });
 
   it('Mistral Ministral usa JSON Schema estricto y service_tier=standard_only', async () => {

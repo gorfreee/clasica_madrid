@@ -89,15 +89,19 @@ Las tareas del pool piden JSON corto. Cada route declara sus capacidades en `ope
 
 | Route | Structured output | Reasoning / thinking | Tokens | Nota |
 |---|---|---|---|---|
-| Gemini Flash / Gemma configurados | schema del purpose en Interactions API | según el profile Gemini existente | `max_output_tokens` | Sin cambios en esta revisión. |
+| Gemini Flash / Gemma configurados | schema del purpose en Interactions API | según el perfil de cada modelo | `max_output_tokens` | |
+| `gemini:gemini-4-hydrogen` | schema del purpose en Interactions API | `thinking_level: low` | `max_output_tokens` | Respaldo tras 3.8 Flash y 3.6 Flash. |
 | Groq GPT-OSS 20B/120B | `json_schema`, `strict: true` | `reasoning_effort: low`, output reasoning oculto | `max_tokens` | Constrained decoding documentado. |
 | `groq:qwen/qwen3.8-27b` | `json_schema`, `strict: false` | `reasoning_effort: none` | `max_tokens` | Best-effort conservador. |
 | Mistral `ministral-14b-2512`, `8b`, `3b` | `json_schema`, `strict: true` | no se envía | `max_tokens` | `service_tier=standard_only`. |
 | Z.AI `glm-4.7-flash`, `glm-4.6v-flash`, `glm-4.5-flash` | `json_object` | `thinking.type=disabled` | `max_tokens` | JSON mode + validación local. |
 | Cloudflare GLM/Gemma | sin `response_format` | thinking desactivado con los flags documentados para esos IDs | `max_completion_tokens` | Prompt + validación local; no están en la allowlist oficial de JSON Mode. |
 | `cloudflare:@cf/openai/gpt-oss-20b` | sin `response_format` | no se envían flags GLM/Gemma | `max_tokens` | Profile separado para no mandar parámetros no documentados. |
+| `cloudflare:@cf/qwen/qwen3.8-27b` | contrato JSON en el prompt y validación local | `reasoning_effort: low` | `max_completion_tokens` | Mínimo de 2.048 tokens en el límite de completado para dejar margen al razonamiento. |
 | OpenRouter Gemma 4 26B / 31B Free | `json_object` | `reasoning.effort=none` | `max_tokens` | `provider.require_parameters=true` y techo de precio $0. |
 | OpenRouter quarantined | conserva el profile histórico | según cada ID | `max_tokens` | Sólo diagnóstico explícito; no participa en el default. |
+
+Google redirige `gemini-3.7-flash` a `gemini-3.8-flash` y `gemini-3.5-flash` a `gemini-3.6-flash`. El pool por defecto usa los IDs de destino. Las selecciones explícitas de los alias siguen admitidas por compatibilidad.
 
 
 ## Vercel AI Gateway (revisado 2026-09-29)
@@ -357,6 +361,8 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Cloudflare `@cf/zai-org/glm-4.7-flash` (`max_completion_tokens`, `reasoning_effort`, `chat_template_kwargs`, `response_format`): <https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/>
 - Cloudflare `@cf/google/gemma-4-26b-a4b-it`: <https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/>
 - Cloudflare `@cf/openai/gpt-oss-20b`: <https://developers.cloudflare.com/workers-ai/models/gpt-oss-20b/>
+- Cloudflare Qwen 3.8 27B — <https://developers.cloudflare.com/workers-ai/models/qwen3.8-27b/>
+- Gemini 4 Hydrogen — <https://aistudio.google.com/docs/whats-new-gemini-4-hydrogen>
 - Gemini thinking (`thinking_level`): <https://ai.google.dev/gemini-api/docs/thinking>
 - Vercel AI Gateway: <https://vercel.com/docs/ai-gateway>
 - Vercel autenticación: <https://vercel.com/docs/ai-gateway/authentication-and-byok/authentication>

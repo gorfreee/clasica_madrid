@@ -371,7 +371,7 @@ describe('concurrency and cancellation', () => {
     expect(peak).toBe(2);
     expect(events).toHaveLength(5);
     expect(events.find((e) => e.title === 'Concierto 0')?.diagnostics.model).toBe('gemini-3.8-flash');
-    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.7-flash');
+    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.6-flash');
     expect(events.every((e) => e.diagnostics.attempts === 1)).toBe(true);
   });
 
@@ -596,6 +596,7 @@ describe('recoverable unusable output and thinking', () => {
   it.each(['eligibility', 'taxonomy'] as const)('envía thinking admitido por ID para %s', async (purpose) => {
     const cases = [
       ['gemini-3.8-flash', 'low'],
+      ['gemini-4-hydrogen', 'low'],
       ['gemini-3.7-flash', 'low'],
       ['gemini-3.6-flash', 'minimal'],
       ['gemini-3.5-flash', 'minimal'],
@@ -632,7 +633,7 @@ describe('recoverable unusable output and thinking', () => {
     expect(thinkingConfigForModel('')).toBeUndefined();
   });
 
-  it('el payload Gemini usa el schema del purpose y no sube max_output_tokens', () => {
+  it.each(['gemini-3.8-flash', 'gemini-4-hydrogen'])('el payload de %s usa el schema y el presupuesto del purpose', (model) => {
     const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
     const cases = [
       ['eligibility', AI_ELIGIBILITY_JSON_SCHEMA],
@@ -642,7 +643,7 @@ describe('recoverable unusable output and thinking', () => {
     ] as const;
     for (const [purpose, schema] of cases) {
       const request = buildAiRequest(observed, purpose);
-      const body = buildGeminiRequestBody('gemini-3.8-flash', request);
+      const body = buildGeminiRequestBody(model, request);
       expect(body.response_format).toEqual({
         type: 'text', mime_type: 'application/json', schema,
       });
@@ -653,7 +654,7 @@ describe('recoverable unusable output and thinking', () => {
       });
       expect(body.generation_config.max_output_tokens).toBe(request.generation.maxOutputTokens);
     }
-    expect(geminiModelProfile('gemini-3.8-flash')).toEqual({
+    expect(geminiModelProfile(model)).toEqual({
       structuredOutput: 'schema', thinking: { thinking_level: 'low' },
     });
     expect(geminiModelProfile('gemma-4-26b-a4b-it')).toEqual({ structuredOutput: 'schema' });
