@@ -106,12 +106,11 @@ function classifier(
 }
 
 describe('Gemini config', () => {
-  it('usa el pool gratuito de Flash y Gemma en orden de preferencia por defecto', () => {
+  it('usa el pool gratuito de Gemini y Gemma en orden de preferencia por defecto', () => {
     expect(GEMINI_DEFAULT_MODELS).toEqual([
       'gemini-3.8-flash',
-      'gemini-3.7-flash',
       'gemini-3.6-flash',
-      'gemini-3.5-flash',
+      'gemini-4-hydrogen',
       'gemini-3-flash-preview',
       'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
@@ -134,6 +133,7 @@ describe('Gemini config', () => {
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.8-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.7-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.6-flash']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-4-hydrogen']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.5-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3-flash-preview']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-2.5-flash']).toEqual(flash);

@@ -3,6 +3,7 @@ export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
   'gemini-3.8-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.7-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.6-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
+  'gemini-4-hydrogen': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.5-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3-flash-preview': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-2.5-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
@@ -16,15 +17,21 @@ export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
 // schedule them by default: this project's API rejects them with permanent 404s.
 export const GEMINI_DEFAULT_MODELS = [
   'gemini-3.8-flash',
-  'gemini-3.7-flash',
   'gemini-3.6-flash',
-  'gemini-3.5-flash',
+  'gemini-4-hydrogen',
   'gemini-3-flash-preview',
   'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
   'gemma-4-31b-it',
   'gemma-4-26b-a4b-it',
 ];
+// Google redirects these aliases to 3.8 and 3.6 Flash. Keep explicit overrides
+// working without scheduling a second route for either model by default.
+export const GEMINI_ZERO_COST_MODELS = [
+  ...GEMINI_DEFAULT_MODELS,
+  'gemini-3.7-flash',
+  'gemini-3.5-flash',
+] as const;
 export const GEMINI_DEFAULT_MODEL = GEMINI_DEFAULT_MODELS[0]!;
 export const GEMINI_DEFAULT_RPM = 12;
 export const GEMINI_DEFAULT_CONCURRENCY = 8;
@@ -47,7 +54,7 @@ export type GeminiModelProfile = {
  * Explicit IDs only: future models must not inherit another model's levels.
  * Interactions API levels checked 2026-09-12:
  * https://ai.google.dev/gemini-api/docs/thinking
- * - 3.8 / 3.7 Flash and 2.5 Flash: low is the lowest documented level
+ * - 4 Hydrogen, 3.8 / 3.7 Flash and 2.5 Flash: low is the lowest documented level
  *   (minimal is not in the allowed set).
  * - 3.6 / 3.5 Flash, 3-flash-preview, 3.5-flash-lite: minimal.
  * - Gemma, 2.5 Flash-Lite and unknown IDs: omit thinking_level.
@@ -57,6 +64,7 @@ export type GeminiModelProfile = {
 export function thinkingConfigForModel(model: string): GeminiThinkingConfig | undefined {
   const name = model.trim().toLowerCase();
   switch (name) {
+    case 'gemini-4-hydrogen':
     case 'gemini-3.8-flash':
     case 'gemini-3.7-flash':
     case 'gemini-2.5-flash':

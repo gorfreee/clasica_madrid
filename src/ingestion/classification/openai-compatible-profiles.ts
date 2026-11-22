@@ -182,6 +182,18 @@ const CLOUDFLARE_GPT_OSS_PROMPT: OpenAiCompatibleModelProfile = {
   extraBody: {},
 };
 
+/** Qwen uses the documented low effort and shares its cap with reasoning.
+ * Workers AI does not list this ID under supported JSON Mode models.
+ * https://developers.cloudflare.com/workers-ai/models/qwen3.8-27b/
+ */
+const CLOUDFLARE_QWEN_PROMPT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_completion_tokens',
+  extraBody: { reasoning_effort: 'low' },
+  minMaxOutputTokens: 2_048,
+};
+
 /**
  * Vercel Ling 3.0 Flash VL Free: GET /v1/models lists `reasoning` and
  * `include_reasoning`, not `response_format`. Gateway json_schema exists,
@@ -362,6 +374,7 @@ export function openaiCompatibleModelProfile(
     case 'cloudflare':
       if (CLOUDFLARE_PROMPT_MODELS.has(name)) return CLOUDFLARE_PROMPT;
       if (CLOUDFLARE_GPT_OSS_MODELS.has(name)) return CLOUDFLARE_GPT_OSS_PROMPT;
+      if (name === '@cf/qwen/qwen3.8-27b') return CLOUDFLARE_QWEN_PROMPT;
       return { responseFormat: 'none', jsonSchemaStrict: false, tokenParameter: 'max_completion_tokens', extraBody: {} };
     case 'vercel':
       return VERCEL_LING_FLASH_VL_MODELS.has(name) ? VERCEL_LING_FLASH_VL : JSON_OBJECT;

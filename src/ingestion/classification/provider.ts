@@ -4,7 +4,7 @@ import { AI_POOL_MAX_RETRIES, AiPoolClassifier } from './ai-pool.ts';
 import { UTC_DAILY_RESET } from './ai-state.ts';
 import { makeRoute, type AiRoute, type AiRouteLimits } from './ai-transport.ts';
 import { createGeminiRoutes, GeminiClassifier, resolveGeminiConfig } from './gemini.ts';
-import { GEMINI_DEFAULT_MODELS, type GeminiConfigEnv } from './gemini-config.ts';
+import { GEMINI_ZERO_COST_MODELS, type GeminiConfigEnv } from './gemini-config.ts';
 import { openaiCompatibleModelProfile } from './openai-compatible-profiles.ts';
 import {
   OpenAiCompatibleTransport,
@@ -63,6 +63,7 @@ export const CLOUDFLARE_ZERO_COST_MODELS = [
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
   '@cf/openai/gpt-oss-20b',
+  '@cf/qwen/qwen3.8-27b',
 ] as const;
 /**
  * Re-checked 2026-09-29 after the live smoke:
@@ -451,7 +452,7 @@ function geminiFreeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
   if (!geminiKey) return [];
   const config = resolveGeminiConfig(env);
   const selected = zeroCost
-    ? validateAllowlist('GEMINI_MODELS', config.models, GEMINI_DEFAULT_MODELS)
+    ? validateAllowlist('GEMINI_MODELS', config.models, GEMINI_ZERO_COST_MODELS)
     : config.models;
   return createGeminiRoutes({ apiKey: geminiKey, ...config, models: selected });
 }
@@ -596,7 +597,7 @@ function geminiFromEnv(env: AiEnv, pinnedModel?: string, zeroCost = false): AiCl
   const config = resolveGeminiConfig(env);
   const configured = pinnedModel ? [pinnedModel] : config.models;
   const selected = zeroCost
-    ? validateAllowlist('GEMINI_MODELS', configured, GEMINI_DEFAULT_MODELS)
+    ? validateAllowlist('GEMINI_MODELS', configured, GEMINI_ZERO_COST_MODELS)
     : configured;
   const cache = (env.AI_CACHE ?? env.GEMINI_CACHE)?.trim();
   if (cache && !['on', 'off'].includes(cache)) throw new Error('AI_CACHE debe ser on u off');
