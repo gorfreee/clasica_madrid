@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_navidadmadrid_com_bach_madrid_project_j_s_bach_oratorio_de_navidad_bwv_248_cantatas_i_iv_y_vi",
+  "slug": "bach-madrid-project-oratorio-de-navidad-bwv-248",
+  "title": "Bach Madrid Project — Oratorio de Navidad (BWV 248)",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_jeronimo_el_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_navidadmadrid_com_bach_madrid_project_j_s_bach_oratorio_de_navidad_bwv_248_cantatas_i_iv_y_vi_01",
+      "date": "2026-12-23",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Bach Madrid Project",
+      "role": "ensemble"
+    },
+    {
+      "name": "Oscar Gershensohn",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Oratorio de Navidad, BWV 248 — cantatas I, IV y VI",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_navidadmadrid_com",
+      "url": "https://www.navidadmadrid.com/evento/bach-madrid-project-j-s-bach-oratorio-de-navidad-bwv-248-cantatas-i-iv-y-vi",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_navidadmadrid_com",
+  "lastVerifiedAt": "2026-11-22"
+}

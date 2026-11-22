@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_musica_coral_coro_veredas_d59efd8b035d1a10vgnvcm200000f921e388rcrd",
+  "slug": "concierto-del-coro-veredas",
+  "title": "Concierto del Coro Veredas",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_nuestra_senora_del_perpetuo_socorro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_musica_coral_coro_veredas_d59efd8b035d1a10vgnvcm200000f921e388rcrd_01",
+      "date": "2027-01-08",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Veredas",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Servicios-sociales-y-salud/Salud/Actividades-y-eventos/Musica-coral-Coro-Veredas?vgnextfmt=default&vgnextoid=d59efd8b035d1a10VgnVCM200000f921e388RCRD&vgnextchannel=56a88fb9458fe410VgnVCM1000000b205a0aRCRD",
+      "checkedAt": "2026-11-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-22"
+}
