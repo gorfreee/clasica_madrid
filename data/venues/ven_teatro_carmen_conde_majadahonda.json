@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_carmen_conde_majadahonda",
+  "slug": "teatro-carmen-conde-majadahonda",
+  "name": "Casa de la Cultura Carmen Conde — Teatro Carmen Conde",
+  "municipality": "Majadahonda",
+  "area": "nearby",
+  "address": "Plaza de Colón, s/n, 28220 Majadahonda, Madrid",
+  "url": "https://cultura.majadahonda.org/informacion-cultural",
+  "lastVerifiedAt": "2026-11-23",
+  "parentVenueId": "ven_casa_de_la_cultura_carmen_conde",
+  "spaceName": "Teatro Carmen Conde"
+}
