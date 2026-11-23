@@ -97,7 +97,9 @@
     "classical",
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
