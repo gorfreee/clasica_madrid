@@ -79,9 +79,12 @@
   ],
   "eras": [
     "baroque",
+    "classical",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
