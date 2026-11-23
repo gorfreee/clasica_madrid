@@ -44,7 +44,6 @@
   "formats": [
     "symphonic",
     "choral",
-    "organ",
     "early-music"
   ],
   "kind": "alternative",
