@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_piano_meets_vibraphone_stojkovic_vera_20261201",
+  "slug": "piano-meets-vibraphone-jelena-stojkovic-carlos-vera",
+  "title": "Piano meets vibraphone — Jelena Stojkovic y Carlos Vera",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_piano_meets_vibraphone_stojkovic_vera_20261201_01",
+      "date": "2026-12-01",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jelena Stojkovic"
+    },
+    {
+      "name": "Carlos Vera"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/piano-meets-vibraphone-jelena-stojkovic-carlos-vera",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-23"
+}
