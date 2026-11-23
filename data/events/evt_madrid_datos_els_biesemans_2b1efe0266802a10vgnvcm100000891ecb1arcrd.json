@@ -65,7 +65,8 @@
     }
   ],
   "eras": [
-    "baroque"
+    "baroque",
+    "classical"
   ],
   "formats": [
     "organ",
