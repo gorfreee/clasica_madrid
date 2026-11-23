@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_audicion_flauta_pico",
+  "slug": "audicion-de-flauta-de-pico",
+  "title": "Audición de flauta de pico",
+  "status": "scheduled",
+  "venueId": "ven_real_conservatorio_superior_de_musica_de_madrid_auditorio_cubiles",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_audicion_flauta_pico_01",
+      "date": "2026-11-24",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Payá"
+    },
+    {
+      "name": "David Lluva"
+    },
+    {
+      "name": "Paula Navas"
+    },
+    {
+      "name": "Sabina Novillo"
+    },
+    {
+      "name": "Gonzalo Aranda"
+    },
+    {
+      "name": "Ana Férez"
+    },
+    {
+      "name": "Blanca Cantero"
+    },
+    {
+      "name": "Eva del Campo"
+    },
+    {
+      "name": "Consort de flautas de pico del RCSMM"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Josquin des Prez"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Giovanni Battista Fontana"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "Girolamo Frescobaldi"
+    },
+    {
+      "name": "Jacques-Martin Hotteterre"
+    },
+    {
+      "name": "Jacob van Eyck"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Giovanni Gabrieli"
+    }
+  ],
+  "works": [
+    {
+      "title": "Glosa sobre Mille Regretz (Han Tol)",
+      "composerName": "Josquin des Prez"
+    },
+    {
+      "title": "Sonatas BWV 1034 y 1030",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Conciertos RV 441 y 445",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Trotto e In Pro (anónimos)"
+    },
+    {
+      "title": "Sonata prima y Sonata sesta",
+      "composerName": "Giovanni Battista Fontana"
+    },
+    {
+      "title": "Sonata en do mayor, TWV 41:C5",
+      "composerName": "Georg Philipp Telemann"
+    },
+    {
+      "title": "Canzona terza",
+      "composerName": "Girolamo Frescobaldi"
+    },
+    {
+      "title": "Suite n.º 1 en re mayor",
+      "composerName": "Jacques-Martin Hotteterre"
+    },
+    {
+      "title": "Doen Daphne",
+      "composerName": "Jacob van Eyck"
+    },
+    {
+      "title": "Sonata n.º 4, op. 1, HWV 362",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Proch Dolor (atribución dudosa a Josquin Desprez)"
+    },
+    {
+      "title": "Canzon VI",
+      "composerName": "Giovanni Gabrieli"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/audicion-flauta-pico",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-23"
+}

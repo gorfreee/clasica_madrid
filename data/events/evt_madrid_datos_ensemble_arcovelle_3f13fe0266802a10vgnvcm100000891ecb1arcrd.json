@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_ensemble_arcovelle_3f13fe0266802a10vgnvcm100000891ecb1arcrd",
+  "slug": "ensemble-arcovelle",
+  "title": "Ensemble Arcovelle",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_ensemble_arcovelle_3f13fe0266802a10vgnvcm100000891ecb1arcrd_01",
+      "date": "2026-12-19",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Arcovelle",
+      "role": "ensemble"
+    },
+    {
+      "name": "Mila Haydon",
+      "role": "soloist"
+    },
+    {
+      "name": "Sandra Hager"
+    },
+    {
+      "name": "Lorena Sainz León"
+    },
+    {
+      "name": "Yiqi Chen"
+    },
+    {
+      "name": "Alina Artemyeva"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giuseppe Torelli"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Alessandro Marcello"
+    },
+    {
+      "name": "Heinrich Ignaz Franz von Biber"
+    },
+    {
+      "name": "Tomaso Albinoni"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto en do menor, op. 6 n.º 6",
+      "composerName": "Giuseppe Torelli"
+    },
+    {
+      "title": "La primavera, RV 269",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en re menor, S. Z799",
+      "composerName": "Alessandro Marcello"
+    },
+    {
+      "title": "Fidicinium sacro-profanum: sonatas IX y X",
+      "composerName": "Heinrich Ignaz Franz von Biber"
+    },
+    {
+      "title": "Concierto en si bemol mayor, op. 7 n.º 10",
+      "composerName": "Tomaso Albinoni"
+    },
+    {
+      "title": "El invierno, RV 297",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El verano, RV 315",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La Follia, RV 63",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Cultura-ocio-y-deporte/Actividades-y-eventos/Ensemble-Arcovelle?vgnextfmt=default&vgnextoid=3f13fe0266802a10VgnVCM100000891ecb1aRCRD&vgnextchannel=6381f073808fe410VgnVCM2000000c205a0aRCRD",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-23"
+}

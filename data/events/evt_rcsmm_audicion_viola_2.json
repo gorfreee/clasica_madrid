@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_audicion_viola_2",
+  "slug": "audicion-de-viola-24-de-noviembre",
+  "title": "Audición de viola — 24 de noviembre",
+  "status": "scheduled",
+  "venueId": "ven_real_conservatorio_superior_de_musica_de_madrid_auditorio_tomas_luis_de_victoria",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_audicion_viola_2_01",
+      "date": "2026-11-24",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Victoria Claudia Ruz Marzo"
+    },
+    {
+      "name": "Julián Aleksandr García Walarowska"
+    },
+    {
+      "name": "Julia Cardiel García"
+    },
+    {
+      "name": "Susana Yolanda Ávalos Pacheco"
+    },
+    {
+      "name": "Iván Eduardo Jiménez Carpintero"
+    },
+    {
+      "name": "Carmen Imelda Rodríguez Díez"
+    },
+    {
+      "name": "Darío Bayo Fuentes"
+    },
+    {
+      "name": "Pascual Encarnación Garrido"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Rodolphe Kreutzer"
+    },
+    {
+      "name": "Carl Stamitz"
+    },
+    {
+      "name": "Paul Hindemith"
+    }
+  ],
+  "works": [
+    {
+      "title": "Partita n.º 2 (Allemande y Courante)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Estudios n.º 4, 7 y 8",
+      "composerName": "Rodolphe Kreutzer"
+    },
+    {
+      "title": "Suites n.º 2, 3 y 6 (preludios)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Concierto para viola en re mayor (Allegro y Andante)",
+      "composerName": "Carl Stamitz"
+    },
+    {
+      "title": "Sonata para viola sola, op. 25 n.º 1",
+      "composerName": "Paul Hindemith"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/index%2Ephp/audicion-viola-2",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-23"
+}

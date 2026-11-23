@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_a_tempo_concierto_de_piano_maurizio_arroyo_hinves_pianos",
+  "slug": "concierto-de-piano-maurizio-arroyo",
+  "title": "Concierto de piano — Maurizio Arroyo",
+  "status": "scheduled",
+  "venueId": "ven_hinves_pianos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_a_tempo_concierto_de_piano_maurizio_arroyo_hinves_pianos_01",
+      "date": "2026-12-13",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Maurizio Arroyo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jean-Philippe Rameau"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite en re mayor, de Pièces de clavecin",
+      "composerName": "Jean-Philippe Rameau"
+    },
+    {
+      "title": "Les soirées de Nazelles, FP. 84",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Variaciones sobre un tema de Chopin, op. 22",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/post/concierto-de-piano-maurizio-arroyo-hinves-pianos",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-11-23"
+}

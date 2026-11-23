@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_els_biesemans_2b1efe0266802a10vgnvcm100000891ecb1arcrd",
+  "slug": "els-biesemans",
+  "title": "Els Biesemans",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_els_biesemans_2b1efe0266802a10vgnvcm100000891ecb1arcrd_01",
+      "date": "2026-12-12",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Els Biesemans"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Nicolas Séjan"
+    },
+    {
+      "name": "Jean-François Dandrieu"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio y fuga, BWV 552",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Wachet auf, ruft uns die Stimme, BWV 645",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata en sol mayor, BWV 529",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Variaciones sobre Noël Suisse",
+      "composerName": "Nicolas Séjan"
+    },
+    {
+      "title": "Pastorella, BWV 590",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Variations de Noël",
+      "composerName": "Jean-François Dandrieu"
+    },
+    {
+      "title": "Hallelujah",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Cultura-ocio-y-deporte/Actividades-y-eventos/Els-Biesemans?vgnextfmt=default&vgnextoid=2b1efe0266802a10VgnVCM100000891ecb1aRCRD&vgnextchannel=6381f073808fe410VgnVCM2000000c205a0aRCRD",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-23"
+}
