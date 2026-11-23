@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_coro_y_orquesta_clasica_santa_cecilia_20b7fdee85802a10vgnvcm100000891ecb1arcrd",
+  "slug": "coro-y-orquesta-clasica-santa-cecilia",
+  "title": "Coro y Orquesta Clásica Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_coro_y_orquesta_clasica_santa_cecilia_20b7fdee85802a10vgnvcm100000891ecb1arcrd_01",
+      "date": "2026-11-28",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro y Orquesta Clásica Santa Cecilia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite orquestal n.º 1 en do mayor, BWV 1066",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "El Mesías, HWV 56 (selección de números corales e instrumentales)",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Cultura-ocio-y-deporte/Actividades-y-eventos/Coro-y-Orquesta-Clasica-Santa-Cecilia?vgnextfmt=default&vgnextoid=20b7fdee85802a10VgnVCM100000891ecb1aRCRD&vgnextchannel=6381f073808fe410VgnVCM2000000c205a0aRCRD",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-23"
+}

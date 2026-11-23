@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_audicion_violin",
+  "slug": "audicion-de-violin",
+  "title": "Audición de violín",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_audicion_violin_01",
+      "date": "2026-11-24",
+      "time": "10:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Juan Diego Cardozo"
+    },
+    {
+      "name": "Pedro Molina"
+    },
+    {
+      "name": "Javier García"
+    },
+    {
+      "name": "Iago Castell"
+    },
+    {
+      "name": "Elsa de Benito"
+    },
+    {
+      "name": "Javier Gómez"
+    },
+    {
+      "name": "Ferrán García"
+    },
+    {
+      "name": "Paz Carpintero"
+    },
+    {
+      "name": "Lucía Delgado"
+    },
+    {
+      "name": "Álvaro Vargas"
+    },
+    {
+      "name": "Blanca Herguera"
+    },
+    {
+      "name": "María Moreno"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Niccolò Paganini"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Henryk Wieniawski"
+    },
+    {
+      "name": "Max Bruch"
+    }
+  ],
+  "works": [
+    {
+      "title": "Conciertos para violín n.º 3 K. 216, n.º 4 K. 218 y n.º 5 K. 219 (selección)",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Caprichos n.º 13 y 16, op. 1",
+      "composerName": "Niccolò Paganini"
+    },
+    {
+      "title": "Sonata para violín n.º 1 BWV 1001 (Adagio) y n.º 2 BWV 1004 (Grave)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Capricho n.º 3, op. 18",
+      "composerName": "Henryk Wieniawski"
+    },
+    {
+      "title": "Concierto para violín n.º 1, op. 26 (Vorspiel – Allegro moderato)",
+      "composerName": "Max Bruch"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/audicion-violin",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-23"
+}

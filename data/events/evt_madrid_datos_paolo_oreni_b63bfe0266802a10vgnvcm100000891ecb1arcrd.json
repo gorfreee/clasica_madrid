@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_paolo_oreni_b63bfe0266802a10vgnvcm100000891ecb1arcrd",
+  "slug": "paolo-oreni",
+  "title": "Paolo Oreni",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_paolo_oreni_b63bfe0266802a10vgnvcm100000891ecb1arcrd_01",
+      "date": "2026-12-05",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Paolo Oreni"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Domenico Zipoli"
+    },
+    {
+      "name": "Oreste Ravanello"
+    },
+    {
+      "name": "Louis Vierne"
+    },
+    {
+      "name": "Charles-Marie Widor"
+    },
+    {
+      "name": "Paolo Oreni"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pastorale en fa mayor, BWV 590",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Pastorale en do mayor",
+      "composerName": "Domenico Zipoli"
+    },
+    {
+      "title": "La marcia dei Re Magi, op. 61",
+      "composerName": "Oreste Ravanello"
+    },
+    {
+      "title": "Pastoral en la menor",
+      "composerName": "Louis Vierne"
+    },
+    {
+      "title": "Pastoral en sol mayor",
+      "composerName": "Charles-Marie Widor"
+    },
+    {
+      "title": "Improvisación sobre temas navideños españoles",
+      "composerName": "Paolo Oreni"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Cultura-ocio-y-deporte/Actividades-y-eventos/Paolo-Oreni?vgnextfmt=default&vgnextoid=b63bfe0266802a10VgnVCM100000891ecb1aRCRD&vgnextchannel=6381f073808fe410VgnVCM2000000c205a0aRCRD",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-23"
+}

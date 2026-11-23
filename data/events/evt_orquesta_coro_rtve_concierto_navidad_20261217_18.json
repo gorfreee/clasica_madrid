@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_concierto_navidad_20261217_18",
+  "slug": "concierto-de-navidad-orquesta-y-coro-rtve-2026",
+  "title": "Concierto de Navidad — Orquesta y Coro RTVE",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_concierto_navidad_20261217_18_01",
+      "date": "2026-12-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_orquesta_coro_rtve_concierto_navidad_20261217_18_02",
+      "date": "2026-12-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica RTVE",
+      "role": "orchestra"
+    },
+    {
+      "name": "Coro RTVE",
+      "role": "choir"
+    },
+    {
+      "name": "Coro de Niños de la Comunidad de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "Alexandre Bloch",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Max Richter"
+    },
+    {
+      "name": "Leroy Anderson"
+    },
+    {
+      "name": "Adolphe Adam"
+    },
+    {
+      "name": "Franz Xaver Gruber"
+    }
+  ],
+  "works": [
+    {
+      "title": "Farandole, de L'Arlésienne, suite n.º 2",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Winter 1",
+      "composerName": "Max Richter"
+    },
+    {
+      "title": "Sleigh Ride",
+      "composerName": "Leroy Anderson"
+    },
+    {
+      "title": "Minuit chrétien",
+      "composerName": "Adolphe Adam"
+    },
+    {
+      "title": "Noche de paz",
+      "composerName": "Franz Xaver Gruber"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/concierto-de-navidad/",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-11-23"
+}

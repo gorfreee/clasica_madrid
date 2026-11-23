@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_gaudete_navidad_20261212",
+  "slug": "gaudete-concierto-de-navidad",
+  "title": "Gaudete! Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1909",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_gaudete_navidad_20261212_01",
+      "date": "2026-12-12",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Agrupación Coral El Madroño",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "early",
+    "renaissance"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Programacion-cultural-de-Ciudad-Lineal/Actividades-infantiles-en-Ciudad-Lineal/Gaudete-Concierto-de-navidad/?vgnextchannel=2924c2aff3766910VgnVCM1000001d4a900aRCRD&vgnextfmt=default&vgnextoid=1712006c392f1a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-23"
+}

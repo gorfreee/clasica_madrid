@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_de_viena_a_hollywood_20261227",
+  "slug": "de-viena-a-hollywood-2026-gala-sinfonica",
+  "title": "De Viena a Hollywood 2026 — Gala sinfónica",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_municipal_paco_de_lucia_alcala_de_henares",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_de_viena_a_hollywood_20261227_01",
+      "date": "2026-12-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joven Orquesta Allegro Vivace",
+      "role": "orchestra"
+    },
+    {
+      "name": "Coque Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/de-viena-a-hollywood-2026-gala-sinfonica/",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-11-23"
+}

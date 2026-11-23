@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_laguiago_com_concierto_ano_nuevo_orquesta_villa_madrid_20270102",
+  "slug": "concierto-ano-nuevo-orquesta-villa-madrid-2027",
+  "title": "Concierto de Año Nuevo — Orquesta Villa de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_teatro_carmen_conde_majadahonda",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_laguiago_com_concierto_ano_nuevo_orquesta_villa_madrid_20270102_01",
+      "date": "2027-01-02",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Villa de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Mercedes Padilla",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_laguiago_com",
+      "url": "https://www.laguiago.com/madrid/navidad-majadahonda-2026-encendido-pista-hielo-cabalgata/",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_laguiago_com",
+  "lastVerifiedAt": "2026-11-23"
+}

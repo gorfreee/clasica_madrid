@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_audicion_viola_0",
+  "slug": "audicion-de-viola-2-de-diciembre",
+  "title": "Audición de viola — 2 de diciembre",
+  "status": "scheduled",
+  "venueId": "ven_real_conservatorio_superior_de_musica_de_madrid_auditorio_tomas_luis_de_victoria",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_audicion_viola_0_01",
+      "date": "2026-12-02",
+      "time": "09:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rebeca Coman"
+    },
+    {
+      "name": "Adriana Sancho"
+    },
+    {
+      "name": "Jorge Gómez de Agüero"
+    },
+    {
+      "name": "Medea Artero"
+    },
+    {
+      "name": "Miguel Martín"
+    },
+    {
+      "name": "Julia Rodríguez"
+    },
+    {
+      "name": "Claudia Monzón"
+    },
+    {
+      "name": "Noelia Alicata"
+    },
+    {
+      "name": "Noel Pronk"
+    },
+    {
+      "name": "Sara Díaz"
+    },
+    {
+      "name": "Alejandra Ruiz"
+    },
+    {
+      "name": "Misaki Pascual"
+    },
+    {
+      "name": "María Moreno"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Cecil Forsyth"
+    },
+    {
+      "name": "Max Reger"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Carl Stamitz"
+    },
+    {
+      "name": "William Walton"
+    },
+    {
+      "name": "Paul Hindemith"
+    },
+    {
+      "name": "Conrado del Campo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suites BWV 1012, 1009 y 1008 (selección)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Concierto para viola (Appassionato–Moderato) y Canción celta",
+      "composerName": "Cecil Forsyth"
+    },
+    {
+      "title": "Suite para viola sola, op. 131d n.º 1 (Molto sostenuto)",
+      "composerName": "Max Reger"
+    },
+    {
+      "title": "Sonatas para viola y piano, op. 120 n.º 1 y 2 (selección)",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata para viola y piano, op. 147 (Allegretto)",
+      "composerName": "Dmitri Shostakóvich"
+    },
+    {
+      "title": "Concierto para viola (Allegro)",
+      "composerName": "Carl Stamitz"
+    },
+    {
+      "title": "Concierto para viola (Andante comodo)",
+      "composerName": "William Walton"
+    },
+    {
+      "title": "Der Schwanendreher (Zwischen Berg und tiefem Tal)",
+      "composerName": "Paul Hindemith"
+    },
+    {
+      "title": "Romanza",
+      "composerName": "Conrado del Campo"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/audicion-viola-0",
+      "checkedAt": "2026-11-23"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-23"
+}
