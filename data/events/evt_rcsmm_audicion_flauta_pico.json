@@ -128,7 +128,10 @@
     "renaissance",
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
